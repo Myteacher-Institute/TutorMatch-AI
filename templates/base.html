@@ -1,0 +1,50 @@
+{% load static %}
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}TutorMatch AI{% endblock %}</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+</head>
+<body class="min-h-screen bg-slate-50 text-slate-950">
+  <header class="border-b border-slate-200 bg-white">
+    <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+      <a href="{% url 'home' %}" class="text-xl font-bold tracking-tight text-emerald-700">TutorMatch AI</a>
+      <div class="hidden items-center gap-6 text-sm font-medium text-slate-700 md:flex">
+        <a href="{% url 'home' %}" class="hover:text-emerald-700">Home</a>
+        <a href="{% url 'find_tutor' %}" class="hover:text-emerald-700">Find Tutor</a>
+        <a href="{% url 'tutor_list' %}" class="hover:text-emerald-700">Tutors</a>
+        <a href="{% url 'about' %}" class="hover:text-emerald-700">About</a>
+        <a href="{% url 'contact' %}" class="hover:text-emerald-700">Contact</a>
+      </div>
+      <div class="flex items-center gap-3">
+        <a href="{% url 'login' %}" class="rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Login</a>
+        <a href="{% url 'register' %}" class="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Register</a>
+      </div>
+    </nav>
+  </header>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="border-t border-slate-200 bg-white">
+    <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm text-slate-600 md:grid-cols-3">
+      <div>
+        <p class="font-bold text-slate-950">TutorMatch AI</p>
+        <p class="mt-2">Find the right verified home tutor in one prompt.</p>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-950">Launch City</p>
+        <p class="mt-2">Port Harcourt, Nigeria</p>
+      </div>
+      <div>
+        <p class="font-semibold text-slate-950">MVP Focus</p>
+        <p class="mt-2">AI discovery, tutor verification, bookings, and secure payment.</p>
+      </div>
+    </div>
+  </footer>
+</body>
+</html>

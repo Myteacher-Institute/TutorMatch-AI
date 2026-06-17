@@ -1,52 +1,89 @@
-# TutorMatch AI Team Task File
+# TutorMatch AI Team Tasks
 
-This file splits the TutorMatch AI MVP into 5 clear roles. Each person owns both backend and frontend work for their module. All HTML templates should be placed in the root `templates/` directory.
+This file divides the project into exactly 5 task packages. Each person should pick one task package and own it from backend to frontend.
 
-## Project Rule
+Important rule: each person is responsible for their own backend logic and their own frontend templates. All templates must be inside the root `templates/` folder.
 
-- Backend: Django apps, models, views, forms, urls, and business logic.
-- Frontend: Django templates inside the root `templates/` folder.
-- Styling: Tailwind CSS.
-- Database: PostgreSQL.
-- Authentication: Django Auth.
-- Payments: Paystack.
-- AI: OpenAI API for natural language tutor search.
+## Project Stack
 
-## Suggested Django Apps
+- Backend: Python, Django 5+
+- Frontend: Django Templates, HTML, Tailwind CSS, JavaScript
+- Database: PostgreSQL
+- Auth: Django Authentication
+- Payment: Paystack
+- AI: OpenAI API
+- File Uploads: Cloudinary or AWS S3 later, local media during development
+
+## Folder Rule
+
+All HTML files must go here:
 
 ```txt
-accounts/
-tutors/
-bookings/
-payments/
-ai_search/
-reviews/
-dashboard/
 templates/
-static/
 ```
 
-## Role 1: Project Lead, Core Setup, Admin Dashboard
+Suggested template structure:
 
-Best for: Team leader.
+```txt
+templates/
+  base.html
+  home.html
+  about.html
+  contact.html
+  accounts/
+  students/
+  tutors/
+  search/
+  bookings/
+  payments/
+  reviews/
+  dashboard/
+```
 
-### Backend Tasks
+## Task 1: Project Setup, Core Layout, Admin Dashboard
 
-- Create and manage the GitHub repository.
-- Set up the Django project.
-- Configure project settings.
-- Create the main app structure.
-- Set up PostgreSQL connection.
-- Configure static files and media files.
-- Create base URL routing.
-- Create shared base templates.
-- Create admin dashboard foundation.
-- Manage project README and environment setup guide.
-- Review and merge team pull requests.
+for the project leader.
 
-### Frontend Tasks
+### Main Responsibility
 
-Templates to create:
+Set up the whole project foundation so everyone else can build their parts without confusion.
+
+### Backend Work
+
+- Create the Django project.
+- Create all main Django apps:
+  - `accounts`
+  - `tutors`
+  - `ai_search`
+  - `bookings`
+  - `payments`
+  - `reviews`
+  - `dashboard`
+- Configure `settings.py`.
+- Add installed apps.
+- Configure `templates/` as the root template folder.
+- Configure `static/` files.
+- Configure `media/` files for uploads.
+- Prepare PostgreSQL settings.
+- Create `.env.example`.
+- Create main `urls.py` routing.
+- Create public page views:
+  - Home
+  - About
+  - Contact
+- Create admin dashboard views.
+- Add basic dashboard metrics placeholders:
+  - Total tutors
+  - Total students
+  - Total bookings
+  - Total revenue
+- Register key models in Django admin when other members create them.
+- Manage GitHub repository and branches.
+- Review pull requests before merge.
+
+### Frontend Work
+
+Create these templates:
 
 ```txt
 templates/base.html
@@ -60,44 +97,98 @@ templates/dashboard/bookings.html
 templates/dashboard/revenue.html
 ```
 
-### Pages Owned
+### Pages To Build
 
-- `/`
-- `/about`
-- `/contact`
-- `/admin-dashboard/`
-- `/admin-dashboard/verifications/`
-- `/admin-dashboard/users/`
-- `/admin-dashboard/bookings/`
-- `/admin-dashboard/revenue/`
+```txt
+/                                  Home page
+/about/                            About page
+/contact/                          Contact page
+/admin-dashboard/                  Admin overview
+/admin-dashboard/verifications/    Tutor verification queue
+/admin-dashboard/users/            User management
+/admin-dashboard/bookings/         Booking management
+/admin-dashboard/revenue/          Revenue management
+```
 
-### Final Deliverables
+### Home Page Must Include
 
-- Working Django project structure.
-- Base layout with navbar and footer.
-- Admin dashboard page.
-- GitHub repo ready for team collaboration.
-- Project setup instructions in `README.md`.
+- Navbar
+- Hero section
+- AI search bar design
+- How it works section
+- Featured tutors placeholder
+- Call to action
+- Footer
 
-## Role 2: Accounts, Authentication, Student Dashboard
+### Admin Dashboard Must Include
 
-Best for: Person who can handle user login and registration.
+- Sidebar or dashboard navigation
+- Metric cards
+- Recent bookings table placeholder
+- Tutor verification queue placeholder
+- Revenue summary placeholder
 
-### Backend Tasks
+### Files This Person Will Mostly Touch
 
-- Implement user registration.
-- Add role selection: Student/Parent or Tutor.
-- Implement login.
-- Implement logout.
-- Implement password reset structure.
-- Implement account verification page.
-- Create student dashboard logic.
-- Redirect users based on role after login.
-- Protect pages with login requirements.
+```txt
+config/settings.py
+config/urls.py
+dashboard/views.py
+dashboard/urls.py
+templates/base.html
+templates/home.html
+templates/about.html
+templates/contact.html
+templates/dashboard/
+static/
+README.md
+.env.example
+```
 
-### Frontend Tasks
+### Done Means
 
-Templates to create:
+- The project runs successfully.
+- The home, about, contact, and admin dashboard pages open.
+- Other team members can plug their apps into the project.
+- The repo has a clear README setup guide.
+
+### Suggested Branch Name
+
+```txt
+leader/project-setup-dashboard
+```
+
+## Task 2: Accounts, Authentication, Student Dashboard
+
+This task owns user registration, login, logout, verification pages, and the student dashboard.
+
+### Main Responsibility
+
+Make it possible for students, parents, and tutors to create accounts and access the correct dashboard.
+
+### Backend Work
+
+- Create registration form.
+- Add role selection during registration:
+  - Student/Parent
+  - Tutor
+- Create login view.
+- Create logout view.
+- Create account verification page.
+- Create password reset page structure.
+- Add dashboard redirect logic:
+  - Student/Parent goes to `/dashboard/`
+  - Tutor goes to `/tutor/dashboard/`
+  - Admin goes to `/admin-dashboard/`
+- Protect dashboard pages so only logged-in users can access them.
+- Create student dashboard view.
+- Show recent bookings placeholder on student dashboard.
+- Show recommended tutors placeholder on student dashboard.
+- Show AI tutor search box placeholder on student dashboard.
+
+### Frontend Work
+
+Create these templates:
 
 ```txt
 templates/accounts/register.html
@@ -107,42 +198,116 @@ templates/accounts/password_reset.html
 templates/students/dashboard.html
 ```
 
-### Pages Owned
+### Pages To Build
 
-- `/register/`
-- `/login/`
-- `/logout/`
-- `/verify/`
-- `/password-reset/`
-- `/dashboard/`
+```txt
+/register/          Register page
+/login/             Login page
+/logout/            Logout action
+/verify/            Account verification page
+/password-reset/    Password reset page
+/dashboard/         Student/parent dashboard
+```
 
-### Final Deliverables
+### Register Page Must Include
 
-- Users can register.
-- Users can choose their role.
-- Users can login and logout.
-- Student dashboard displays basic user information.
+- First name
+- Last name
+- Email
+- Phone number
+- Password
+- Confirm password
+- Role selection
+- Submit button
+- Link to login
 
-## Role 3: Tutor Profiles, Subjects, Verification
+### Login Page Must Include
 
-Best for: Person who can handle forms, uploads, and tutor profile pages.
+- Email or username field
+- Password field
+- Login button
+- Link to register
+- Link to password reset
 
-### Backend Tasks
+### Student Dashboard Must Include
 
-- Create Tutor model.
-- Create Subject model.
-- Create TutorSubject relationship.
-- Create TutorDocument model.
-- Build tutor profile creation and update.
-- Build tutor verification upload flow.
-- Add document upload support.
-- Add tutor verification status.
-- Add tutor dashboard.
-- Add tutor profile public page.
+- Welcome message
+- Search box that links to AI tutor search
+- Recent bookings section
+- Recommended tutors section
+- Saved tutors placeholder
 
-### Frontend Tasks
+### Files This Person Will Mostly Touch
 
-Templates to create:
+```txt
+accounts/models.py
+accounts/forms.py
+accounts/views.py
+accounts/urls.py
+accounts/admin.py
+templates/accounts/
+templates/students/dashboard.html
+```
+
+### Done Means
+
+- A user can register.
+- A user can select a role.
+- A user can login.
+- A user can logout.
+- A logged-in student can see the student dashboard.
+- Users are redirected based on their role.
+
+### Suggested Branch Name
+
+```txt
+feature/accounts-student-dashboard
+```
+
+## Task 3: Tutor Profiles, Subjects, Tutor Verification
+
+This task owns everything related to tutors and tutor profile visibility.
+
+### Main Responsibility
+
+Allow tutors to create profiles, add subjects, upload verification documents, and appear in public tutor listings after verification.
+
+### Backend Work
+
+- Create `Tutor` model.
+- Create `Subject` model.
+- Create `TutorSubject` relationship model if needed.
+- Create `TutorDocument` model.
+- Tutor model should include:
+  - User
+  - Profile photo
+  - Bio
+  - Location
+  - Hourly rate
+  - Years of experience
+  - Verification status
+- Subject model should include:
+  - Subject name
+- Tutor document model should include:
+  - Tutor
+  - Document type
+  - Document file/url
+  - Verification status
+- Create tutor profile form.
+- Create tutor profile create/update view.
+- Create tutor verification upload form.
+- Create tutor dashboard view.
+- Create public tutor list view.
+- Create public tutor detail view.
+- Add basic filters for tutor listing:
+  - Subject
+  - Location
+  - Price
+- Only show verified or approved tutors publicly when admin approval is ready.
+
+### Frontend Work
+
+Create these templates:
 
 ```txt
 templates/tutors/dashboard.html
@@ -152,39 +317,132 @@ templates/tutors/tutor_list.html
 templates/tutors/tutor_detail.html
 ```
 
-### Pages Owned
+### Pages To Build
 
-- `/tutor/dashboard/`
-- `/tutor/profile/`
-- `/tutor/verification/`
-- `/tutors/`
-- `/tutors/<id>/`
+```txt
+/tutor/dashboard/       Tutor dashboard
+/tutor/profile/         Tutor profile setup/edit
+/tutor/verification/    Tutor verification upload
+/tutors/                Public tutor listings
+/tutors/<id>/           Public tutor profile details
+```
 
-### Final Deliverables
+### Tutor Dashboard Must Include
 
-- Tutors can create profiles.
-- Tutors can upload verification documents.
-- Students can view tutor listings.
-- Students can view tutor profile details.
+- Profile completion status
+- Verification status
+- Upcoming lessons placeholder
+- Earnings placeholder
+- Booking requests placeholder
+- Link to edit profile
+- Link to upload verification documents
 
-## Role 4: AI Tutor Search and Recommendations
+### Tutor Profile Form Must Include
 
-Best for: Person who can work with APIs and search/filter logic.
+- Profile photo upload
+- Bio
+- Location
+- Hourly rate
+- Years of experience
+- Subjects taught
+- Qualifications
+- Save button
 
-### Backend Tasks
+### Verification Page Must Include
 
-- Create AI search app.
-- Build prompt input handling.
-- Connect OpenAI API.
-- Extract subject, level, and location from user prompt.
-- Query tutors based on extracted data.
-- Build tutor recommendation logic.
-- Add fallback search if AI is not available.
-- Add subject, location, and price filtering.
+- Government ID upload
+- Selfie upload
+- Certificate upload
+- Current verification status
+- Submit button
 
-### Frontend Tasks
+### Tutor Listing Page Must Include
 
-Templates to create:
+- Tutor cards
+- Profile photo
+- Name
+- Subject
+- Location
+- Rate
+- Verification badge
+- View profile button
+- Filter section
+
+### Tutor Detail Page Must Include
+
+- Profile photo
+- Tutor name
+- Bio
+- Subjects
+- Location
+- Experience
+- Hourly rate
+- Reviews placeholder
+- Verification badge
+- Book tutor button
+
+### Files This Person Will Mostly Touch
+
+```txt
+tutors/models.py
+tutors/forms.py
+tutors/views.py
+tutors/urls.py
+tutors/admin.py
+templates/tutors/
+media/
+```
+
+### Done Means
+
+- A tutor can create or update their profile.
+- A tutor can upload verification documents.
+- Tutor profiles can be listed.
+- A student can view tutor details.
+- Tutor data can later be used by AI search and booking.
+
+### Suggested Branch Name
+
+```txt
+feature/tutor-profiles-verification
+```
+
+## Task 4: AI Search, Tutor Discovery, Filters
+
+This task owns natural language tutor search and normal tutor filtering.
+
+### Main Responsibility
+
+Allow students/parents to search for tutors using plain English and get useful tutor recommendations.
+
+### Backend Work
+
+- Create AI search views.
+- Create search form.
+- Accept natural language prompt from user.
+- Connect to OpenAI API.
+- Extract:
+  - Subject
+  - Level
+  - Location
+  - Preferred schedule if available
+- Return extracted result as structured data.
+- Query tutor profiles using extracted subject/location.
+- Add fallback search if OpenAI API is not available.
+- Add normal search filters:
+  - Subject
+  - Location
+  - Minimum price
+  - Maximum price
+  - Experience
+- Create recommendation logic.
+- Display best tutor matches first.
+- Handle empty results.
+- Handle invalid or unclear search prompts.
+
+### Frontend Work
+
+Create these templates:
 
 ```txt
 templates/search/find_tutor.html
@@ -192,61 +450,136 @@ templates/search/search_results.html
 templates/search/no_results.html
 ```
 
-### Pages Owned
-
-- `/find-tutor/`
-- `/search-results/`
-
-### Example AI Flow
-
-User enters:
+### Pages To Build
 
 ```txt
-I need a Physics tutor for WAEC in GRA Port Harcourt.
+/find-tutor/       AI tutor search page
+/search-results/   Tutor search results page
 ```
 
-System extracts:
+### AI Search Page Must Include
+
+- Large prompt input field
+- Example prompt text
+- Search button
+- Optional filters section
+- Loading state or simple searching message
+
+### Search Results Page Must Include
+
+- Original user prompt
+- Extracted search details:
+  - Subject
+  - Level
+  - Location
+- Tutor result cards
+- Filter sidebar or filter row
+- Sort option placeholder
+- Button to view tutor profile
+- Button to book tutor
+
+### No Results Page Must Include
+
+- Friendly message
+- Search again button
+- Suggested subjects or locations placeholder
+
+### Example Prompt
+
+```txt
+I need a Mathematics tutor for SS2 in Port Harcourt who can teach weekends.
+```
+
+### Expected Extracted Data
 
 ```json
 {
-  "subject": "Physics",
-  "level": "WAEC",
-  "location": "GRA Port Harcourt"
+  "subject": "Mathematics",
+  "level": "SS2",
+  "location": "Port Harcourt",
+  "schedule": "weekends"
 }
 ```
 
-### Final Deliverables
+### Files This Person Will Mostly Touch
 
-- User can search using natural language.
-- System extracts search intent.
-- Matching tutors are displayed.
-- Search filters work.
+```txt
+ai_search/forms.py
+ai_search/views.py
+ai_search/urls.py
+ai_search/services.py
+templates/search/
+tutors/models.py
+```
 
-## Role 5: Bookings, Payments, Reviews
+### Done Means
 
-Best for: Person who can handle business flow and payment integration.
+- A user can enter a natural language prompt.
+- The system extracts search details.
+- The system displays matching tutors.
+- Normal filters work even if AI is not connected yet.
+- Empty results are handled properly.
 
-### Backend Tasks
+### Suggested Branch Name
 
-- Create Booking model.
-- Create Payment model.
-- Create Review model.
-- Build tutor booking flow.
-- Add booking statuses:
+```txt
+feature/ai-search-discovery
+```
+
+## Task 5: Bookings, Payments, Reviews
+
+This task owns the full booking, payment, and review flow.
+
+### Main Responsibility
+
+Allow students to book tutors, pay securely, allow tutors to accept/reject bookings, and allow students to review completed lessons.
+
+### Backend Work
+
+- Create `Booking` model.
+- Create `Payment` model.
+- Create `Review` model.
+- Booking model should include:
+  - Student
+  - Tutor
+  - Booking date
+  - Lesson time
+  - Status
+  - Amount
+- Booking statuses:
   - Pending
   - Accepted
   - Completed
   - Cancelled
-- Build tutor accept/reject booking logic.
+- Payment model should include:
+  - Booking
+  - Amount
+  - Commission
+  - Tutor payout
+  - Payment status
+  - Paystack reference
+- Review model should include:
+  - Student
+  - Tutor
+  - Booking
+  - Rating
+  - Review text
+- Create booking form.
+- Create booking confirmation view.
+- Create student booking history.
+- Create tutor booking request page.
+- Add accept booking logic.
+- Add reject booking logic.
+- Add complete booking logic.
 - Integrate Paystack checkout.
 - Verify Paystack payment.
-- Calculate platform commission.
-- Track tutor payout.
-- Allow students to leave reviews after completed lessons.
+- Calculate 15% platform commission.
+- Calculate 85% tutor payout.
+- Allow review only after completed booking.
 
-### Frontend Tasks
+### Frontend Work
 
-Templates to create:
+Create these templates:
 
 ```txt
 templates/bookings/book_tutor.html
@@ -259,86 +592,133 @@ templates/payments/payment_failed.html
 templates/reviews/review_form.html
 ```
 
-### Pages Owned
+### Pages To Build
 
-- `/book/<tutor_id>/`
-- `/bookings/`
-- `/tutor/bookings/`
-- `/payment/<booking_id>/`
-- `/payment/success/`
-- `/payment/failed/`
-- `/reviews/add/<booking_id>/`
+```txt
+/book/<tutor_id>/              Book tutor page
+/bookings/                     Student booking history
+/tutor/bookings/               Tutor booking requests
+/payment/<booking_id>/         Payment checkout
+/payment/success/              Payment success page
+/payment/failed/               Payment failed page
+/reviews/add/<booking_id>/     Add review page
+```
 
-### Final Deliverables
+### Booking Page Must Include
 
-- Students can book tutors.
-- Tutors can accept or reject bookings.
-- Students can pay through Paystack.
-- Platform commission is calculated.
-- Students can review tutors.
+- Tutor summary
+- Date field
+- Time field
+- Lesson note field
+- Lesson amount
+- Confirm booking button
 
-## First Sprint Goal
+### Student Bookings Page Must Include
 
-The first sprint should produce a working basic flow:
+- Booking list
+- Tutor name
+- Date
+- Time
+- Status
+- Amount
+- Payment status
+- Review button when lesson is completed
+
+### Tutor Bookings Page Must Include
+
+- Booking requests
+- Student name
+- Date
+- Time
+- Amount
+- Accept button
+- Reject button
+- Complete button when lesson is done
+
+### Payment Page Must Include
+
+- Booking summary
+- Total amount
+- Platform payment notice
+- Paystack payment button
+
+### Review Page Must Include
+
+- Rating input
+- Review text field
+- Submit review button
+
+### Files This Person Will Mostly Touch
+
+```txt
+bookings/models.py
+bookings/forms.py
+bookings/views.py
+bookings/urls.py
+payments/models.py
+payments/views.py
+payments/urls.py
+reviews/models.py
+reviews/forms.py
+reviews/views.py
+reviews/urls.py
+templates/bookings/
+templates/payments/
+templates/reviews/
+```
+
+### Done Means
+
+- A student can book a tutor.
+- A tutor can accept or reject a booking.
+- A student can view booking history.
+- A tutor can view booking requests.
+- Payment flow is ready for Paystack.
+- Commission and tutor payout are calculated.
+- A student can review a completed lesson.
+
+### Suggested Branch Name
+
+```txt
+feature/bookings-payments-reviews
+```
+
+## First Sprint Target
+
+By the end of the first sprint, the team should have this basic flow working:
 
 1. User can register and login.
 2. Tutor can create a profile.
-3. Student can search or browse tutors.
-4. Student can book a tutor.
-5. Admin can view tutors and bookings.
+3. Student can browse tutors.
+4. Student can search for tutors.
+5. Student can book a tutor.
+6. Admin can view basic dashboard pages.
 
-Payment and full AI integration can start with mock/demo logic first, then become real after the basic flow works.
+Paystack and OpenAI can start as mock/demo versions first. After the main flow works, connect the real APIs.
 
 ## GitHub Workflow
 
-Each person should work on their own branch:
+Each person must work on their own branch.
 
 ```txt
-leader/project-setup
-feature/accounts-auth
-feature/tutor-profiles
-feature/ai-search
-feature/bookings-payments
+leader/project-setup-dashboard
+feature/accounts-student-dashboard
+feature/tutor-profiles-verification
+feature/ai-search-discovery
+feature/bookings-payments-reviews
 ```
 
-Before merging:
+Before opening a pull request:
 
-- Pull latest changes from main.
+- Pull the latest `main` branch.
+- Run the project locally.
 - Test your own pages.
-- Make sure templates extend `base.html`.
+- Make sure your templates extend `base.html`.
+- Make sure your URLs are connected.
+- Make sure your forms submit correctly.
 - Open a pull request.
-- Project lead reviews before merge.
+- Project leader reviews before merge.
 
-## Template Folder Rule
+## Team Rule
 
-All templates must stay under root `templates/`.
-
-Example:
-
-```txt
-templates/
-  base.html
-  home.html
-  accounts/
-  tutors/
-  students/
-  search/
-  bookings/
-  payments/
-  reviews/
-  dashboard/
-```
-
-## Recommended Role Selection
-
-Let each person choose based on strength:
-
-- Strong organizer: Role 1
-- Good with login and user flows: Role 2
-- Good with forms and profile pages: Role 3
-- Good with APIs and search logic: Role 4
-- Good with payments and workflows: Role 5
-
-## Note To Team
-
-Everyone owns both backend and frontend for their feature. Do not wait for the frontend person or backend person separately. Build your feature from model to view to template so the project grows in complete working pieces.
+Do not build only backend or only frontend. Each person must complete their full feature from database/model to view to template. That way, every task becomes a working part of the product.

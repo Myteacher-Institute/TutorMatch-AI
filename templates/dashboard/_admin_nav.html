@@ -1,0 +1,10 @@
+<aside class="rounded-lg border border-slate-200 bg-white p-4">
+  <p class="text-sm font-bold uppercase tracking-wide text-slate-500">Admin</p>
+  <nav class="mt-4 grid gap-2 text-sm font-semibold text-slate-700">
+    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_dashboard' %}">Overview</a>
+    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_verifications' %}">Verifications</a>
+    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_users' %}">Users</a>
+    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_bookings' %}">Bookings</a>
+    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_revenue' %}">Revenue</a>
+  </nav>
+</aside>
