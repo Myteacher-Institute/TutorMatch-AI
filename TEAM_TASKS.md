@@ -722,3 +722,4 @@ Before opening a pull request:
 ## Team Rule
 
 Do not build only backend or only frontend. Each person must complete their full feature from database/model to view to template. That way, every task becomes a working part of the product.
+
