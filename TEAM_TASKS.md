@@ -571,6 +571,7 @@ Allow students to book tutors, pay securely, allow tutors to accept/reject booki
 - Add accept booking logic.
 - Add reject booking logic.
 - Add complete booking logic.
+
 - Integrate Paystack checkout.
 - Verify Paystack payment.
 - Calculate 15% platform commission.
