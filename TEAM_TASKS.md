@@ -40,6 +40,213 @@ templates/
   dashboard/
 ```
 
+## Must Follow Integration Contract
+
+Everyone must follow these names so all tasks connect when pushed.
+
+### URL Names Already Reserved
+
+Do not rename these URL names:
+
+```txt
+home
+about
+contact
+register
+login
+logout
+verify_account
+password_reset
+student_dashboard
+tutor_dashboard
+tutor_profile
+tutor_verification
+tutor_list
+tutor_detail
+find_tutor
+search_results
+book_tutor
+student_bookings
+tutor_bookings
+payment_checkout
+payment_success
+payment_failed
+add_review
+admin_dashboard
+admin_verifications
+admin_users
+admin_bookings
+admin_revenue
+```
+
+### User Role Names
+
+Use these exact role values:
+
+```txt
+student
+tutor
+admin
+```
+
+If using choices, use labels like `Student/Parent`, `Tutor`, and `Admin`, but keep the stored database values exactly as above.
+
+### Tutor Model Contract
+
+Task 3 must create a model named exactly:
+
+```python
+class Tutor(models.Model):
+```
+
+inside:
+
+```txt
+tutors/models.py
+```
+
+Task 4 AI search expects these exact fields where possible:
+
+```txt
+user
+profile_photo
+bio
+location
+hourly_rate
+years_experience
+verification_status
+subjects
+```
+
+Recommended field types:
+
+```python
+user = models.OneToOneField(User, on_delete=models.CASCADE, related_name="tutor_profile")
+profile_photo = models.ImageField(upload_to="tutor_photos/", blank=True, null=True)
+bio = models.TextField(blank=True)
+location = models.CharField(max_length=120)
+hourly_rate = models.PositiveIntegerField(default=0)
+years_experience = models.PositiveIntegerField(default=0)
+verification_status = models.CharField(max_length=20, choices=VERIFICATION_STATUS_CHOICES, default="pending")
+subjects = models.ManyToManyField("Subject", related_name="tutors", blank=True)
+```
+
+Use these exact verification status values:
+
+```txt
+pending
+approved
+rejected
+```
+
+Only tutors with `verification_status="approved"` should appear publicly.
+
+### Subject Model Contract
+
+Task 3 must create:
+
+```python
+class Subject(models.Model):
+    subject_name = models.CharField(max_length=100, unique=True)
+```
+
+Use `subject_name`, not `name`, so search and listings can read it cleanly.
+
+### Booking Model Contract
+
+Task 5 must create:
+
+```python
+class Booking(models.Model):
+```
+
+with these field names:
+
+```txt
+student
+tutor
+booking_date
+lesson_time
+status
+amount
+```
+
+Use these exact booking status values:
+
+```txt
+pending
+accepted
+completed
+cancelled
+```
+
+### Payment Model Contract
+
+Task 5 must create:
+
+```python
+class Payment(models.Model):
+```
+
+with these field names:
+
+```txt
+booking
+amount
+commission
+tutor_payout
+payment_status
+paystack_reference
+```
+
+Use these exact payment status values:
+
+```txt
+pending
+paid
+failed
+refunded
+```
+
+### Review Model Contract
+
+Task 5 must create:
+
+```python
+class Review(models.Model):
+```
+
+with these field names:
+
+```txt
+student
+tutor
+booking
+rating
+review
+```
+
+### Template Rule
+
+Every page template must extend:
+
+```django
+{% extends "base.html" %}
+```
+
+Do not create a second base layout 
+### Before Pushing To Main
+
+Run:
+
+```bash
+python manage.py check
+python manage.py makemigrations
+python manage.py migrate
+```
+
+Then test your main pages in the browser.
+
 ## Task 1: Project Setup, Core Layout, Admin Dashboard
 
 for the project leader.
@@ -172,6 +379,10 @@ Make it possible for students, parents, and tutors to create accounts and access
 - Add role selection during registration:
   - Student/Parent
   - Tutor
+- Store the selected role using exact values from the integration contract:
+  - `student`
+  - `tutor`
+  - `admin`
 - Create login view.
 - Create logout view.
 - Create account verification page.
@@ -286,8 +497,17 @@ Allow tutors to create profiles, add subjects, upload verification documents, an
   - Hourly rate
   - Years of experience
   - Verification status
+- Use the exact field names from the integration contract:
+  - `user`
+  - `profile_photo`
+  - `bio`
+  - `location`
+  - `hourly_rate`
+  - `years_experience`
+  - `verification_status`
+  - `subjects`
 - Subject model should include:
-  - Subject name
+  - `subject_name`
 - Tutor document model should include:
   - Tutor
   - Document type
@@ -303,7 +523,7 @@ Allow tutors to create profiles, add subjects, upload verification documents, an
   - Subject
   - Location
   - Price
-- Only show verified or approved tutors publicly when admin approval is ready.
+- Only show tutors with `verification_status="approved"` publicly.
 
 ### Frontend Work
 
@@ -428,6 +648,8 @@ Allow students/parents to search for tutors using plain English and get useful t
   - Preferred schedule if available
 - Return extracted result as structured data.
 - Query tutor profiles using extracted subject/location.
+- Use real `tutors.Tutor` records when Task 3 is merged.
+- Keep fallback sample data working until Task 3 is merged.
 - Add fallback search if OpenAI API is not available.
 - Add normal search filters:
   - Subject
@@ -540,30 +762,30 @@ Allow students to book tutors, pay securely, allow tutors to accept/reject booki
 - Create `Payment` model.
 - Create `Review` model.
 - Booking model should include:
-  - Student
-  - Tutor
-  - Booking date
-  - Lesson time
-  - Status
-  - Amount
+  - `student`
+  - `tutor`
+  - `booking_date`
+  - `lesson_time`
+  - `status`
+  - `amount`
 - Booking statuses:
   - Pending
   - Accepted
   - Completed
   - Cancelled
 - Payment model should include:
-  - Booking
-  - Amount
-  - Commission
-  - Tutor payout
-  - Payment status
-  - Paystack reference
+  - `booking`
+  - `amount`
+  - `commission`
+  - `tutor_payout`
+  - `payment_status`
+  - `paystack_reference`
 - Review model should include:
-  - Student
-  - Tutor
-  - Booking
-  - Rating
-  - Review text
+  - `student`
+  - `tutor`
+  - `booking`
+  - `rating`
+  - `review`
 - Create booking form.
 - Create booking confirmation view.
 - Create student booking history.
@@ -723,4 +945,3 @@ Before opening a pull request:
 ## Team Rule
 
 Do not build only backend or only frontend. Each person must complete their full feature from database/model to view to template. That way, every task becomes a working part of the product.
-

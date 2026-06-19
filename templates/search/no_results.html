@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}No Results | TutorMatch AI{% endblock %}
+
+{% block content %}
+<section class="empty-results">
+  <div class="container empty-box">
+    <p class="eyebrow">No tutor found</p>
+    <h1>We could not find a strong match yet.</h1>
+    <p>Try using a broader location, removing price filters, or searching by subject only.</p>
+    {% if query %}
+    <p class="query-pill">"{{ query }}"</p>
+    {% endif %}
+    <a href="{% url 'find_tutor' %}" class="btn btn-primary">Search Again</a>
+  </div>
+</section>
+
+<section class="section-block">
+  <div class="container">
+    <div class="section-heading align-left">
+      <span>Suggested searches</span>
+      <h2>Try one of these instead</h2>
+    </div>
+    <div class="prompt-grid">
+      {% for prompt in suggested_prompts %}
+      <a href="{% url 'search_results' %}?q={{ prompt|urlencode }}" class="prompt-card">{{ prompt }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

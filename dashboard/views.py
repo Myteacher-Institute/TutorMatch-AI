@@ -4,9 +4,33 @@ from django.shortcuts import render
 
 def home(request):
     featured_tutors = [
-        {"name": "Amina Johnson", "subject": "Mathematics", "location": "GRA", "rate": "10000"},
-        {"name": "Chinedu Okoro", "subject": "Physics", "location": "Rumuola", "rate": "12000"},
-        {"name": "Simi Williams", "subject": "English", "location": "Trans Amadi", "rate": "9000"},
+        {
+            "id": 1,
+            "name": "Dr. Samuel Adebayo",
+            "title": "MSc. Applied Mathematics",
+            "rate": "5k",
+            "rating": "4.9",
+            "tags": ["Mathematics", "Physics", "JAMB/WAEC"],
+            "photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=700&q=80",
+        },
+        {
+            "id": 2,
+            "name": "Sarah Johnson",
+            "title": "IELTS/TOEFL Expert",
+            "rate": "4.5k",
+            "rating": "5.0",
+            "tags": ["English", "Literature", "Diction"],
+            "photo": "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=700&q=80",
+        },
+        {
+            "id": 3,
+            "name": "Chidi Okoro",
+            "title": "Senior Software Engineer",
+            "rate": "8k",
+            "rating": "4.8",
+            "tags": ["Python", "Web Dev", "Scratch"],
+            "photo": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=700&q=80",
+        },
     ]
     return render(request, "home.html", {"featured_tutors": featured_tutors})
 

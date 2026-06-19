@@ -1,71 +1,240 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}TutorMatch AI | Find the Right Tutor{% endblock %}
+{% block title %}Myteacherconnect | Find Verified Home Tutors{% endblock %}
 
 {% block content %}
-<section class="bg-white">
-  <div class="mx-auto grid max-w-6xl gap-10 px-4 py-16 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
-    <div>
-      <p class="text-sm font-semibold uppercase tracking-wide text-emerald-700">Port Harcourt MVP</p>
-      <h1 class="mt-4 max-w-3xl text-4xl font-bold tracking-tight text-slate-950 md:text-6xl">Find the right tutor in one prompt.</h1>
-      <p class="mt-5 max-w-2xl text-lg leading-8 text-slate-600">TutorMatch AI connects parents and students with verified home tutors nearby using simple natural language search.</p>
-      <form action="{% url 'find_tutor' %}" class="mt-8 flex max-w-2xl flex-col gap-3 rounded-lg border border-slate-200 bg-slate-50 p-3 sm:flex-row">
-        <input class="min-h-12 flex-1 rounded-md border border-slate-200 px-4 text-sm outline-none focus:border-emerald-600" name="q" placeholder="I need a Mathematics tutor for SS2 in Port Harcourt weekends">
-        <button class="rounded-md bg-emerald-700 px-5 py-3 text-sm font-semibold text-white hover:bg-emerald-800" type="submit">Find Tutor</button>
-      </form>
+<section class="mtc-hero">
+  <div class="mtc-shell mtc-hero-inner">
+    <p class="mtc-pill">#1 Tutoring Platform in Nigeria</p>
+    <h1>Find Verified Home Tutors<br>in Nigeria <span>Anywhere</span></h1>
+    <p class="mtc-hero-copy">Use AI to instantly connect with trusted Mathematics, English, Science, Coding, WAEC and JAMB tutors near you.</p>
+
+    <form action="{% url 'find_tutor' %}" class="mtc-search">
+      <span class="mtc-search-icon" aria-hidden="true">
+        <svg viewBox="0 0 24 24"><path d="m12 3-1.7 5.2L5 10l5.3 1.8L12 17l1.7-5.2L19 10l-5.3-1.8L12 3Z"/><path d="m5 15-.9 2.6L1.5 18.5l2.6.9L5 22l.9-2.6 2.6-.9-2.6-.9L5 15Z"/></svg>
+      </span>
+      <label for="home-search" class="sr-only">Find tutor</label>
+      <input id="home-search" name="q" placeholder='e.g., "I need a Mathematics tutor for SS3 in GRA Port Harcourt."'>
+      <button type="submit">Find Tutor <span aria-hidden="true">→</span></button>
+    </form>
+
+    <div class="mtc-try">
+      <span>Try:</span>
+      <a href="{% url 'search_results' %}?q=JAMB+preparation+in+Ikeja">"JAMB preparation in Ikeja"</a>
+      <a href="{% url 'search_results' %}?q=Coding+for+kids+in+Abuja">"Coding for kids in Abuja"</a>
     </div>
-    <div class="rounded-lg border border-slate-200 bg-slate-50 p-5">
-      <div class="space-y-4">
-        <div class="rounded-md bg-white p-4 shadow-sm">
-          <p class="text-sm font-semibold text-slate-950">AI Search Result</p>
-          <dl class="mt-3 grid grid-cols-2 gap-3 text-sm">
-            <div><dt class="text-slate-500">Subject</dt><dd class="font-semibold">Mathematics</dd></div>
-            <div><dt class="text-slate-500">Level</dt><dd class="font-semibold">SS2</dd></div>
-            <div><dt class="text-slate-500">Location</dt><dd class="font-semibold">Port Harcourt</dd></div>
-            <div><dt class="text-slate-500">Schedule</dt><dd class="font-semibold">Weekends</dd></div>
-          </dl>
+
+    <div class="mtc-hero-actions">
+      <a href="{% url 'register' %}" class="mtc-dark-btn">Become a Tutor</a>
+      <div class="mtc-joined">
+        <div class="mtc-avatars">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" alt="">
+          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=80&q=80" alt="">
+          <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=80&q=80" alt="">
         </div>
-        <div class="rounded-md bg-emerald-700 p-4 text-white">
-          <p class="text-sm opacity-80">Best match</p>
-          <p class="mt-1 text-xl font-bold">Verified tutor nearby</p>
-        </div>
+        <span>Joined by 10k+ parents</span>
       </div>
     </div>
-  </div>
-</section>
 
-<section class="border-y border-slate-200 bg-slate-50">
-  <div class="mx-auto max-w-6xl px-4 py-12">
-    <h2 class="text-2xl font-bold tracking-tight">How It Works</h2>
-    <div class="mt-6 grid gap-4 md:grid-cols-4">
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="font-semibold">1. Describe need</p><p class="mt-2 text-sm text-slate-600">Parents type what they need in plain English.</p></div>
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="font-semibold">2. AI understands</p><p class="mt-2 text-sm text-slate-600">The system extracts subject, level, and location.</p></div>
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="font-semibold">3. Choose tutor</p><p class="mt-2 text-sm text-slate-600">Verified tutors are ranked by fit.</p></div>
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="font-semibold">4. Book and pay</p><p class="mt-2 text-sm text-slate-600">Lessons are booked and paid securely.</p></div>
-    </div>
-  </div>
-</section>
-
-<section class="bg-white">
-  <div class="mx-auto max-w-6xl px-4 py-12">
-    <div class="flex items-end justify-between gap-4">
+    <div class="mtc-stats">
       <div>
-        <h2 class="text-2xl font-bold tracking-tight">Featured Tutors</h2>
-        <p class="mt-2 text-sm text-slate-600">Sample cards for the MVP layout. Real tutors will come from the tutor app.</p>
+        <span class="mtc-stat-icon">
+          <svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"/><path d="M4 21a8 8 0 0 1 13.6-5.7"/><path d="m18 15 1.2 2.5 2.8.5-2 2 .5 2.8-2.5-1.4-2.5 1.4.5-2.8-2-2 2.8-.5L18 15Z"/></svg>
+        </span>
+        <strong>500+</strong>
+        <small>Verified Tutors</small>
       </div>
-      <a href="{% url 'tutor_list' %}" class="text-sm font-semibold text-emerald-700">View all</a>
+      <div>
+        <span class="mtc-stat-icon">
+          <svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="m9 14 2 2 4-5"/></svg>
+        </span>
+        <strong>2,000+</strong>
+        <small>Lessons Completed</small>
+      </div>
+      <div>
+        <span class="mtc-stat-icon">
+          <svg viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11Z"/><path d="M12 10h.01"/><path d="M8 18V9l4-2 4 2v9"/></svg>
+        </span>
+        <strong>10+</strong>
+        <small>Cities Covered</small>
+      </div>
     </div>
-    <div class="mt-6 grid gap-4 md:grid-cols-3">
+  </div>
+</section>
+
+<section class="mtc-how">
+  <div class="mtc-shell">
+    <div class="mtc-section-title">
+      <h2>How It Works</h2>
+      <p>Get connected with a professional tutor in three simple steps.</p>
+    </div>
+    <div class="mtc-steps">
+      <article>
+        <span>
+          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+        </span>
+        <h3>1. Describe Your Need</h3>
+        <p>Tell our AI exactly what subject, level, and location you need help with.</p>
+      </article>
+      <article>
+        <span>
+          <svg viewBox="0 0 24 24"><path d="M9 7h6v4H9z"/><path d="M5 11h14v8H5z"/><path d="M9 15h.01M12 15h.01M15 15h.01M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+        </span>
+        <h3>2. AI Finds Tutors</h3>
+        <p>Our algorithm matches you with the best-rated tutors available near you instantly.</p>
+      </article>
+      <article>
+        <span>
+          <svg viewBox="0 0 24 24"><path d="M12 6 4 10l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/><path d="M12 14v7"/></svg>
+        </span>
+        <h3>3. Book and Learn</h3>
+        <p>Review profiles, chat with tutors, and start your first lesson at your convenience.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="mtc-rated">
+  <div class="mtc-shell">
+    <div class="mtc-rated-head">
+      <div>
+        <h2>Meet Our Top Rated<br>Tutors</h2>
+        <p>Expert professionals vetted for quality and excellence.</p>
+      </div>
+      <a href="{% url 'tutor_list' %}">View all tutors <span aria-hidden="true">→</span></a>
+    </div>
+    <div class="mtc-tutor-grid">
       {% for tutor in featured_tutors %}
-      <article class="rounded-lg border border-slate-200 p-5">
-        <div class="flex items-center justify-between gap-3">
-          <h3 class="font-bold">{{ tutor.name }}</h3>
-          <span class="rounded-full bg-emerald-100 px-3 py-1 text-xs font-semibold text-emerald-800">Verified</span>
+      <article class="mtc-tutor-card">
+        <div class="mtc-tutor-image">
+          <img src="{{ tutor.photo }}" alt="{{ tutor.name }}">
+          <span>⭐ {{ tutor.rating }}</span>
         </div>
-        <p class="mt-3 text-sm text-slate-600">{{ tutor.subject }} tutor in {{ tutor.location }}</p>
-        <p class="mt-4 font-semibold">NGN {{ tutor.rate }} / lesson</p>
+        <div class="mtc-tutor-body">
+          <div class="mtc-tutor-name">
+            <div>
+              <h3>{{ tutor.name }}</h3>
+              <p>{{ tutor.title }}</p>
+            </div>
+            <strong>₦{{ tutor.rate }}<small>/hr</small></strong>
+          </div>
+          <div class="mtc-tags">
+            {% for tag in tutor.tags %}
+            <span>{{ tag }}</span>
+            {% endfor %}
+          </div>
+          <a href="{% url 'tutor_detail' tutor.id %}" class="mtc-profile-btn">View Profile</a>
+        </div>
       </article>
       {% endfor %}
+    </div>
+  </div>
+</section>
+
+<section class="mtc-trust">
+  <div class="mtc-shell mtc-trust-grid">
+    <div class="mtc-trust-photo">
+      <img src="{% static 'images/Tutor reading with children.png' %}" alt="Tutor reading with children">
+      <span class="mtc-trust-blur" aria-hidden="true"></span>
+    </div>
+    <div>
+      <h2>Why Parents Trust <span>Myteacher</span></h2>
+      <div class="mtc-trust-list">
+        <article>
+          <span class="green">
+            <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 2.9 8.6 7 10 4.1-1.4 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-5"/></svg>
+          </span>
+          <div>
+            <h3>Verified Tutors</h3>
+            <p>Every tutor undergoes background checks and rigorous competency testing.</p>
+          </div>
+        </article>
+        <article>
+          <span class="blue">
+            <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+          </span>
+          <div>
+            <h3>Secure Payments</h3>
+            <p>We hold your payments in escrow and only release them after lessons are completed.</p>
+          </div>
+        </article>
+        <article>
+          <span class="purple">
+            <svg viewBox="0 0 24 24"><path d="m13 2-8 12h6l-1 8 8-12h-6l1-8Z"/></svg>
+          </span>
+          <div>
+            <h3>AI Matching</h3>
+            <p>Our smart AI matches students with tutors who fit their specific learning style.</p>
+          </div>
+        </article>
+        <article>
+          <span class="orange">
+            <svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>
+          </span>
+          <div>
+            <h3>Trusted Reviews</h3>
+            <p>Real feedback from thousands of parents and students in Nigeria.</p>
+          </div>
+        </article>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="mtc-community">
+  <div class="mtc-shell">
+    <div class="mtc-community-head">
+      <h2>What Our Community Says</h2>
+      <p>Success stories from across the nation.</p>
+    </div>
+    <div class="mtc-community-grid">
+      <article>
+        <div class="mtc-stars">★★★★★</div>
+        <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching really worked for us!"</p>
+        <div class="mtc-reviewer">
+          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Mrs. Funmi Balogun">
+          <div>
+            <strong>Mrs. Funmi Balogun</strong>
+            <span>Lagos Parent</span>
+          </div>
+        </div>
+      </article>
+      <article>
+        <div class="mtc-stars">★★★★★</div>
+        <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is incredibly transparent."</p>
+        <div class="mtc-reviewer">
+          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80" alt="Mr. Emeka Obi">
+          <div>
+            <strong>Mr. Emeka Obi</strong>
+            <span>Math Tutor, Abuja</span>
+          </div>
+        </div>
+      </article>
+      <article>
+        <div class="mtc-stars">★★★★★</div>
+        <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic websites in months."</p>
+        <div class="mtc-reviewer">
+          <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80" alt="Dr. Amina Yusuf">
+          <div>
+            <strong>Dr. Amina Yusuf</strong>
+            <span>Kano Parent</span>
+          </div>
+        </div>
+      </article>
+    </div>
+  </div>
+</section>
+
+<section class="mtc-final-cta">
+  <div class="mtc-shell">
+    <div class="mtc-final-card">
+      <h2>Ready to start learning?</h2>
+      <p>Join thousands of students across Nigeria who are achieving their academic goals with Myteacher Tutors.</p>
+      <div>
+        <a href="{% url 'find_tutor' %}">Find a Tutor Now</a>
+        <a href="{% url 'contact' %}">Contact Support</a>
+      </div>
     </div>
   </div>
 </section>

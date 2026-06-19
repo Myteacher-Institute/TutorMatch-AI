@@ -39,6 +39,15 @@ http://127.0.0.1:8000/
 
 Development uses SQLite by default when `DATABASE_URL` is empty. For PostgreSQL, configure `DATABASE_URL` or the `DB_*` values in `.env`.
 
+For AI search, add your OpenAI key to `.env`:
+
+```txt
+OPENAI_API_KEY=your_key_here
+OPENAI_MODEL=gpt-4o-mini
+```
+
+If the key is missing or the API call fails, the search page still works with the local fallback parser.
+
 ## Team Workflow
 
 The team is working on `main`. Before starting work:

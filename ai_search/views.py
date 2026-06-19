@@ -1,9 +1,54 @@
-from django.http import HttpResponse
+from urllib.parse import urlencode
+
+from django.shortcuts import redirect, render
+from django.urls import reverse
+
+from .forms import TutorSearchForm
+from .services import extract_search_intent, search_tutors, suggested_prompts
 
 
 def find_tutor(request):
-    return HttpResponse("AI tutor search page will be built by Task 4.")
+    query = request.GET.get("q", "").strip()
+    if query:
+        return redirect(f"{reverse('search_results')}?{urlencode({'q': query})}")
+
+    form = TutorSearchForm()
+    return render(
+        request,
+        "search/find_tutor.html",
+        {
+            "form": form,
+            "suggested_prompts": suggested_prompts(),
+        },
+    )
 
 
 def search_results(request):
-    return HttpResponse("Search results will be built by Task 4.")
+    form = TutorSearchForm(request.GET)
+    query = request.GET.get("q", "").strip()
+    filters = {}
+
+    if form.is_valid():
+        filters = {
+            "subject": form.cleaned_data.get("subject"),
+            "location": form.cleaned_data.get("location"),
+            "min_price": form.cleaned_data.get("min_price"),
+            "max_price": form.cleaned_data.get("max_price"),
+            "min_experience": form.cleaned_data.get("min_experience"),
+        }
+
+    intent = extract_search_intent(query)
+    tutors = search_tutors(intent, filters)
+    template = "search/search_results.html" if tutors else "search/no_results.html"
+
+    return render(
+        request,
+        template,
+        {
+            "form": form,
+            "query": query,
+            "intent": intent,
+            "tutors": tutors,
+            "suggested_prompts": suggested_prompts(),
+        },
+    )

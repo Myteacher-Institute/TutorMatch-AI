@@ -5,23 +5,23 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}TutorMatch AI{% endblock %}</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260619">
 </head>
-<body class="min-h-screen bg-slate-50 text-slate-950">
-  <header class="border-b border-slate-200 bg-white">
-    <nav class="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
-      <a href="{% url 'home' %}" class="text-xl font-bold tracking-tight text-emerald-700">TutorMatch AI</a>
-      <div class="hidden items-center gap-6 text-sm font-medium text-slate-700 md:flex">
-        <a href="{% url 'home' %}" class="hover:text-emerald-700">Home</a>
-        <a href="{% url 'find_tutor' %}" class="hover:text-emerald-700">Find Tutor</a>
-        <a href="{% url 'tutor_list' %}" class="hover:text-emerald-700">Tutors</a>
-        <a href="{% url 'about' %}" class="hover:text-emerald-700">About</a>
-        <a href="{% url 'contact' %}" class="hover:text-emerald-700">Contact</a>
+<body>
+  <header class="site-header">
+    <nav class="site-nav" aria-label="Primary navigation">
+      <a href="{% url 'home' %}" class="brand mtc-brand">
+        <span>Myteacherconnect</span>
+      </a>
+      <div class="nav-links">
+        <a href="{% url 'find_tutor' %}">Find Tutors</a>
+        <a href="{% url 'tutor_list' %}">Subjects</a>
+        <a href="{% url 'about' %}">Pricing</a>
+        <a href="{% url 'register' %}">Become a Tutor</a>
       </div>
-      <div class="flex items-center gap-3">
-        <a href="{% url 'login' %}" class="rounded-md px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100">Login</a>
-        <a href="{% url 'register' %}" class="rounded-md bg-emerald-700 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-800">Register</a>
+      <div class="nav-actions">
+        <a href="{% url 'login' %}" class="btn btn-ghost">Login</a>
+        <a href="{% url 'register' %}" class="btn btn-primary mtc-nav-signup">Sign Up</a>
       </div>
     </nav>
   </header>
@@ -30,19 +30,54 @@
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="border-t border-slate-200 bg-white">
-    <div class="mx-auto grid max-w-6xl gap-6 px-4 py-8 text-sm text-slate-600 md:grid-cols-3">
-      <div>
-        <p class="font-bold text-slate-950">TutorMatch AI</p>
-        <p class="mt-2">Find the right verified home tutor in one prompt.</p>
+  <footer class="mtc-footer">
+    <div class="mtc-shell mtc-footer-grid">
+      <div class="mtc-footer-about">
+        <a href="{% url 'home' %}" class="mtc-footer-brand">Myteacher</a>
+        <p>Nigeria's leading AI-powered platform for connecting students with trusted home tutors.</p>
+        <div class="mtc-socials" aria-label="Social links">
+          <a href="#" aria-label="Facebook">
+            <svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-3.1 0-5 1.9-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.6.4-1 1-1Z"/></svg>
+          </a>
+          <a href="#" aria-label="Twitter">
+            <svg viewBox="0 0 24 24"><path d="M22 5.8c-.7.3-1.5.5-2.3.6.8-.5 1.4-1.2 1.7-2.2-.8.5-1.7.8-2.6 1A4 4 0 0 0 12 8.8v.9A11.4 11.4 0 0 1 3.7 5.5a4 4 0 0 0 1.2 5.4c-.6 0-1.2-.2-1.8-.5v.1a4 4 0 0 0 3.2 3.9c-.6.2-1.2.2-1.8.1a4 4 0 0 0 3.8 2.8A8.1 8.1 0 0 1 2 19.1a11.4 11.4 0 0 0 17.6-9.6v-.5c.8-.6 1.6-1.4 2.1-2.2Z"/></svg>
+          </a>
+          <a href="#" aria-label="Instagram">
+            <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M17.5 6.5h.01"/></svg>
+          </a>
+          <a href="#" aria-label="LinkedIn">
+            <svg viewBox="0 0 24 24"><path d="M6 10v10"/><path d="M6 6v.01"/><path d="M10 20V10"/><path d="M10 14c0-2.2 1.4-4 3.5-4S17 11.5 17 14v6"/></svg>
+          </a>
+        </div>
       </div>
-      <div>
-        <p class="font-semibold text-slate-950">Launch City</p>
-        <p class="mt-2">Port Harcourt, Nigeria</p>
+      <div class="mtc-footer-links">
+        <h2>Explore</h2>
+        <a href="{% url 'find_tutor' %}">Find Tutors</a>
+        <a href="{% url 'tutor_list' %}">Subjects</a>
+        <a href="{% url 'about' %}">Pricing</a>
+        <a href="{% url 'register' %}">Become a Tutor</a>
       </div>
+      <div class="mtc-footer-links">
+        <h2>Support</h2>
+        <a href="{% url 'about' %}">About Us</a>
+        <a href="{% url 'contact' %}">Contact</a>
+        <a href="{% url 'login' %}">Login</a>
+        <a href="{% url 'register' %}">Create Account</a>
+      </div>
+      <div class="mtc-footer-search">
+        <h2>AI Tutor Search</h2>
+        <p>Describe what you need and let our AI find a strong match.</p>
+        <form action="{% url 'find_tutor' %}">
+          <input name="q" placeholder="Need a Physics tutor for WAEC?">
+          <button type="submit">Search</button>
+        </form>
+      </div>
+    </div>
+    <div class="mtc-shell mtc-footer-bottom">
+      <p>© 2026 Myteacherconnect. All rights reserved.</p>
       <div>
-        <p class="font-semibold text-slate-950">MVP Focus</p>
-        <p class="mt-2">AI discovery, tutor verification, bookings, and secure payment.</p>
+        <a href="#">Privacy Policy</a>
+        <a href="#">Terms of Service</a>
       </div>
     </div>
   </footer>

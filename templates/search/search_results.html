@@ -1,0 +1,68 @@
+{% extends "base.html" %}
+
+{% block title %}Search Results | TutorMatch AI{% endblock %}
+
+{% block content %}
+<section class="results-header">
+  <div class="container">
+    <p class="eyebrow">Search results</p>
+    <h1>Recommended tutors for your request</h1>
+    {% if query %}
+    <p class="query-pill">"{{ query }}"</p>
+    {% endif %}
+    <div class="intent-grid">
+      <div><span>Subject</span><strong>{{ intent.subject|default:"Any" }}</strong></div>
+      <div><span>Level</span><strong>{{ intent.level|default:"Any" }}</strong></div>
+      <div><span>Location</span><strong>{{ intent.location|default:"Any" }}</strong></div>
+      <div><span>Schedule</span><strong>{{ intent.schedule|default:"Flexible" }}</strong></div>
+    </div>
+  </div>
+</section>
+
+<section class="section-block section-soft">
+  <div class="container results-layout">
+    <aside class="filter-panel">
+      <h2>Refine Search</h2>
+      <form action="{% url 'search_results' %}" method="get">
+        <input type="hidden" name="q" value="{{ query }}">
+        <label>Subject {{ form.subject }}</label>
+        <label>Location {{ form.location }}</label>
+        <label>Minimum price {{ form.min_price }}</label>
+        <label>Maximum price {{ form.max_price }}</label>
+        <label>Minimum experience {{ form.min_experience }}</label>
+        <button type="submit" class="search-submit">Apply Filters</button>
+      </form>
+    </aside>
+
+    <div class="results-list">
+      <div class="results-count">{{ tutors|length }} tutor match{{ tutors|length|pluralize:"es" }} found</div>
+      {% for tutor in tutors %}
+      <article class="result-card">
+        <img src="{{ tutor.photo }}" alt="{{ tutor.name }}">
+        <div class="result-body">
+          <div class="result-title-row">
+            <div>
+              <h2>{{ tutor.name }}</h2>
+              <p>{{ tutor.subject }} tutor in {{ tutor.location }}</p>
+            </div>
+            {% if tutor.verified %}
+            <span class="verified-badge">Verified</span>
+            {% endif %}
+          </div>
+          <p class="result-bio">{{ tutor.bio }}</p>
+          <div class="result-meta">
+            <span>★★★★★ {{ tutor.rating }}</span>
+            <span>{{ tutor.experience }} years experience</span>
+            <span>NGN {{ tutor.rate }} / lesson</span>
+          </div>
+          <div class="result-actions">
+            <a href="{% url 'tutor_detail' tutor.id %}" class="btn btn-ghost bordered">View Profile</a>
+            <a href="{% url 'book_tutor' tutor.id %}" class="btn btn-primary">Book Tutor</a>
+          </div>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}

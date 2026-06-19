@@ -1,0 +1,38 @@
+{% extends "base.html" %}
+
+{% block title %}Find a Tutor | TutorMatch AI{% endblock %}
+
+{% block content %}
+<section class="search-hero">
+  <div class="container search-hero-grid">
+    <div>
+      <p class="eyebrow">AI tutor discovery</p>
+      <h1>Tell us the kind of tutor you need.</h1>
+      <p>Use one sentence. TutorMatch AI will extract the subject, level, location, and schedule, then recommend the strongest matches.</p>
+    </div>
+    <form action="{% url 'search_results' %}" method="get" class="search-panel">
+      <label for="{{ form.q.id_for_label }}">Tutor request</label>
+      {{ form.q }}
+      <div class="filter-grid compact">
+        <label>Subject {{ form.subject }}</label>
+        <label>Location {{ form.location }}</label>
+      </div>
+      <button type="submit" class="search-submit">Find Matching Tutors</button>
+    </form>
+  </div>
+</section>
+
+<section class="section-block">
+  <div class="container">
+    <div class="section-heading align-left">
+      <span>Try a prompt</span>
+      <h2>Examples you can search with</h2>
+    </div>
+    <div class="prompt-grid">
+      {% for prompt in suggested_prompts %}
+      <a href="{% url 'search_results' %}?q={{ prompt|urlencode }}" class="prompt-card">{{ prompt }}</a>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock %}
