@@ -29,11 +29,10 @@ def login_view(request):
 
 def logout_view(request):
     auth_logout(request)
-<<<<<<< HEAD
+
     return redirect('login')
-=======
-    return redirect('home')
->>>>>>> 4318a157fcb0f9eb64f2efdf010841d54e278890
+
+
 
 
 def verify_account(request):
