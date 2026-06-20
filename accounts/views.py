@@ -2,6 +2,7 @@ from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .forms import Registration,Login
 from django.contrib.auth import login as auth_login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
 
 def register(request):
     form = Registration()
@@ -25,16 +26,16 @@ def login_view(request):
 
 
 def logout_view(request):
-    return HttpResponse("Logout flow will be built by Task 2.")
+    auth_logout
+    return redirect('')
 
 
 def verify_account(request):
     return HttpResponse("Account verification page will be built by Task 2.")
 
 
-def password_reset(request):
-    return HttpResponse("Password reset page will be built by Task 2.")
-
-
+@login_required(login_url='login')
 def student_dashboard(request):
-    return HttpResponse("Student dashboard will be built by Task 2.")
+    
+    return render(request, 'accounts/dashboard.html')
+

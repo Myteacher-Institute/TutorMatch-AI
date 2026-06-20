@@ -14,7 +14,7 @@
   </div>
 
   <div class="relative mx-auto flex min-h-[calc(100vh-4rem)] max-w-6xl items-center justify-center">
-    <div class="grid w-full gap-8 rounded-2xl border border-white/80 bg-white/35 p-4 shadow-[0_24px_80px_rgba(30,64,175,0.12)] backdrop-blur-md lg:grid-cols-[1.05fr_0.95fr] lg:p-6">
+    <div class="grid w-full gap-8 rounded-2xl border border-white/80 bg-white/35 p-4 shadow-[0_24px_80px_rgba(30,64,175,0.12)] backdrop-blur-md md:grid-cols-[0.7fr_1.3fr] md:p-6 lg:grid-cols-[1.05fr_0.95fr]">
       <aside class="hidden min-h-[32rem] overflow-hidden rounded-2xl bg-blue-700 shadow-2xl shadow-blue-900/25 md:block">
         <img
           src="{% static 'images/Register-image.png' %}"
@@ -45,15 +45,39 @@
                   {% if field.name == 'username' %}Email{% else %}{{ field.label }}{% endif %}
                 </label>
 
-                <input
-                  type="{{ field.field.widget.input_type }}"
-                  name="{{ field.name }}"
-                  id="{{ field.id_for_label }}"
-                  value="{% if field.field.widget.input_type != 'password' %}{{ field.value|default_if_none:'' }}{% endif %}"
-                  class="h-11 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
-                  placeholder="{% if field.name == 'username' %}Enter your email{% else %}Enter your password{% endif %}"
-                  {% if field.field.required %}required{% endif %}
-                >
+                {% if field.field.widget.input_type == 'password' %}
+                  <div class="relative">
+                    <input
+                      type="password"
+                      name="{{ field.name }}"
+                      id="{{ field.id_for_label }}"
+                      class="h-11 w-full rounded-lg border border-slate-200 bg-white px-4 pr-12 text-sm text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                      placeholder="Enter your password"
+                      {% if field.field.required %}required{% endif %}
+                    >
+                    <button
+                      type="button"
+                      class="password-toggle absolute inset-y-0 right-0 flex w-11 items-center justify-center text-slate-400 transition hover:text-blue-600 focus:outline-none"
+                      data-target="{{ field.id_for_label }}"
+                      aria-label="Show password"
+                    >
+                      <svg class="h-5 w-5 eye-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                        <path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"></path>
+                        <circle cx="12" cy="12" r="3"></circle>
+                      </svg>
+                    </button>
+                  </div>
+                {% else %}
+                  <input
+                    type="{{ field.field.widget.input_type }}"
+                    name="{{ field.name }}"
+                    id="{{ field.id_for_label }}"
+                    value="{{ field.value|default_if_none:'' }}"
+                    class="h-11 w-full rounded-lg border border-slate-200 bg-white px-4 text-sm text-slate-700 outline-none transition placeholder:text-slate-300 focus:border-blue-500 focus:ring-4 focus:ring-blue-100"
+                    placeholder="Enter your email"
+                    {% if field.field.required %}required{% endif %}
+                  >
+                {% endif %}
 
                 {% if field.errors %}
                   <div class="mt-1 text-xs font-medium text-red-500">{{ field.errors }}</div>
@@ -83,4 +107,15 @@
     </div>
   </div>
 </section>
+<script>
+  document.querySelectorAll('.password-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = document.getElementById(button.dataset.target);
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+      button.classList.toggle('text-blue-600', isHidden);
+    });
+  });
+</script>
 {% endblock %}
