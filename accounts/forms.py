@@ -7,12 +7,17 @@ from django.core.validators import RegexValidator
 class Registration(UserCreationForm):
     email = forms.EmailField(required=True)
     phonenumber = forms.CharField(
+        label='Phone number',
         max_length=15,
         required=True,
+        widget=forms.TextInput(attrs={
+            'inputmode': 'numeric',
+            'pattern': r'\d*',
+        }),
         validators=[
             RegexValidator(
-                regex=r'^\+?\d{7,15}$',
-                message='Enter a valid phone number.',
+                regex=r'^\d{7,15}$',
+                message='Enter numbers only, 7 to 15 digits.',
             )
         ],
     )
