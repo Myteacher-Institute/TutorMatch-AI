@@ -1,7 +1,9 @@
 from django import forms
-from django.contrib.auth.forms import UserCreationForm,AuthenticationForm
+from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
+
+from .models import UserProfile
 
 
 class Registration(UserCreationForm):
@@ -21,7 +23,10 @@ class Registration(UserCreationForm):
             )
         ],
     )
-    role_selection = forms.ChoiceField(choices=[('student', 'Student'), ('parent', 'Parent'), ('tutor', 'Tutor')], required=True)
+    role_selection = forms.ChoiceField(
+        choices=[('student', 'Student/Parent'), ('tutor', 'Tutor')],
+        required=True,
+    )
 
     class Meta:
         model = User
@@ -30,7 +35,7 @@ class Registration(UserCreationForm):
     def clean_email(self):
         email = self.cleaned_data.get('email')
         if User.objects.filter(email=email).exists():
-            raise forms.ValidationError("Email already exists by another user")
+            raise forms.ValidationError('Email already exists by another user')
         return email
 
     def save(self, commit=True):
@@ -41,8 +46,16 @@ class Registration(UserCreationForm):
         user.last_name = self.cleaned_data['last_name']
         if commit:
             user.save()
+            UserProfile.objects.update_or_create(
+                user=user,
+                defaults={
+                    'phone_number': self.cleaned_data['phonenumber'],
+                    'role': self.cleaned_data['role_selection'],
+                },
+            )
         return user
-    
+
+
 class Login(AuthenticationForm):
     model = User
-    field = ('email','password')
+    field = ('email', 'password')
