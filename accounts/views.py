@@ -23,6 +23,9 @@ def login_view(request):
         if forms.is_valid():
             user = forms.get_user()
             auth_login(request, user)
+            role = getattr(getattr(user, 'profile', None), 'role', 'student')
+            if role == 'tutor':
+                return redirect('tutor_dashboard')
             return redirect(_dashboard_for_user(user))
     return render(request, 'accounts/login.html', {'form': forms})
 
