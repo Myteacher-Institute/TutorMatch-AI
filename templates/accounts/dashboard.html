@@ -1,1 +1,41 @@
-<h1>HELLOW WORLD</h1>
+{% extends "base.html" %}
+
+{% block title %}Dashboard | Myteacherconnect{% endblock %}
+
+{% block content %}
+<section class="student-dashboard">
+  <div class="mtc-shell">
+    <div class="student-dashboard-hero">
+      <div>
+        <p class="eyebrow">Student Dashboard</p>
+        <h1>Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}</h1>
+        <p>Search for verified tutors, continue your bookings, and save strong matches for later.</p>
+      </div>
+      <a href="{% url 'find_tutor' %}" class="btn btn-primary">Find a Tutor</a>
+    </div>
+
+    <form action="{% url 'find_tutor' %}" class="student-search-card">
+      <label for="dashboard-search">AI Tutor Search</label>
+      <div>
+        <input id="dashboard-search" name="q" placeholder="I need a Mathematics tutor for SS2 in GRA Port Harcourt">
+        <button type="submit">Search</button>
+      </div>
+    </form>
+
+    <div class="student-dashboard-grid">
+      <article>
+        <h2>Recent Bookings</h2>
+        <p>Your recent tutor bookings will appear here after Task 5 is merged.</p>
+      </article>
+      <article>
+        <h2>Recommended Tutors</h2>
+        <p>AI-powered recommendations will use approved tutor profiles after Task 3 is merged.</p>
+      </article>
+      <article>
+        <h2>Saved Tutors</h2>
+        <p>Keep tutors you like in one place for quick booking later.</p>
+      </article>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1890,3 +1890,120 @@ img {
     grid-template-columns: 1fr;
   }
 }
+
+.student-dashboard {
+  min-height: 70vh;
+  background: #f8fafc;
+  padding: 70px 0;
+}
+
+.student-dashboard-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  border-radius: 22px;
+  background: linear-gradient(135deg, #eaf4ff 0%, #ffffff 100%);
+  padding: 34px;
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.student-dashboard-hero h1 {
+  margin: 8px 0 0;
+  color: #11182b;
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 500;
+  letter-spacing: -0.055em;
+}
+
+.student-dashboard-hero p:last-child {
+  max-width: 620px;
+  margin: 14px 0 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.student-search-card {
+  margin-top: 26px;
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 22px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.student-search-card label {
+  display: block;
+  margin-bottom: 12px;
+  color: #11182b;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.student-search-card div {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+}
+
+.student-search-card input {
+  min-height: 50px;
+  min-width: 0;
+  border: 1px solid #dbeafe;
+  border-radius: 10px;
+  padding: 0 14px;
+  color: #11182b;
+  font: inherit;
+  outline: none;
+}
+
+.student-search-card button {
+  min-height: 50px;
+  border: 0;
+  border-radius: 10px;
+  background: #2f68f2;
+  color: #ffffff;
+  padding: 0 24px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.student-dashboard-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 18px;
+  margin-top: 26px;
+}
+
+.student-dashboard-grid article {
+  border: 1px solid #e2e8f0;
+  border-radius: 18px;
+  background: #ffffff;
+  padding: 24px;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+}
+
+.student-dashboard-grid h2 {
+  margin: 0;
+  color: #11182b;
+  font-size: 18px;
+}
+
+.student-dashboard-grid p {
+  margin: 12px 0 0;
+  color: #64748b;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  .student-dashboard-hero,
+  .student-search-card div {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+    flex-direction: column;
+  }
+
+  .student-dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
