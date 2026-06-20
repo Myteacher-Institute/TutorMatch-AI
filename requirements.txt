@@ -1,6 +1,4 @@
-Django>=5.0
-psycopg[binary]>=3.2
-dj-database-url>=2.2
-python-dotenv>=1.0
-openai>=1.0
-requests>=2.32
+asgiref==3.11.1
+Django==6.0.6
+sqlparse==0.5.5
+tzdata==2026.2
