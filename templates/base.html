@@ -19,10 +19,19 @@
         <a href="{% url 'about' %}">Pricing</a>
         <a href="{% url 'register' %}">Become a Tutor</a>
       </div>
-      <div class="nav-actions">
-        <a href="{% url 'login' %}" class="btn btn-ghost">Login</a>
-        <a href="{% url 'register' %}" class="btn btn-primary mtc-nav-signup">Sign Up</a>
-      </div>
+      {% if request.user.is_authenticated %}
+        <div class="nav-actions">
+          <a href="{% url 'student_dashboard' %}" class="btn btn-primary">Dashboard</a>
+
+        </div>
+
+      {% else %}
+        <div class="nav-actions">
+          <a href="{% url 'login' %}" class="btn btn-ghost">Login</a>
+          <a href="{% url 'register' %}" class="btn btn-primary mtc-nav-signup">Sign Up</a>
+        </div>
+      {% endif %}
+      
     </nav>
   </header>
 

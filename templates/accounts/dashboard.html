@@ -1,1 +1,289 @@
-<h1>HELLOW WORLD</h1>
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Student Dashboard | TutorMatch AI{% endblock %}
+
+{% block content %}
+<script src="https://cdn.tailwindcss.com"></script>
+
+<section class="min-h-screen bg-[#eef3fb] px-4 py-6 text-slate-900 sm:px-6 lg:px-8">
+  <div id="mobile-sidebar-backdrop" class="fixed inset-0 z-40 hidden bg-slate-950/45 md:hidden"></div>
+  <aside id="mobile-sidebar" class="fixed inset-y-0 left-0 z-50 w-72 -translate-x-full border-r border-slate-200/80 bg-white px-5 py-6 shadow-2xl transition-transform duration-300 md:hidden">
+    <div class="flex items-center justify-between">
+      <a href="{% url 'home' %}" class="flex items-center gap-3">
+        <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white">T</span>
+        <span>
+          <span class="block text-sm font-bold text-slate-950">TutorMatch AI</span>
+          <span class="block text-xs text-slate-400">Student portal</span>
+        </span>
+      </a>
+      <button id="close-sidebar" type="button" class="flex h-10 w-10 items-center justify-center rounded-xl border border-slate-200 text-slate-500 transition hover:border-blue-200 hover:text-blue-700" aria-label="Close menu">
+        <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 6 6 18M6 6l12 12"></path></svg>
+      </button>
+    </div>
+
+    <nav class="mt-10 space-y-2 text-sm font-medium">
+      <a href="{% url 'student_dashboard' %}" class="flex items-center gap-3 rounded-2xl bg-blue-600 px-4 py-3 text-white shadow-lg shadow-blue-600/25">
+        <span class="flex h-5 w-5 items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 10v10h14V10"></path></svg>
+        </span>
+        Dashboard
+      </a>
+      <a href="{% url 'find_tutor' %}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
+        <span class="flex h-5 w-5 items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+        </span>
+        AI Tutor Search
+      </a>
+      <a href="#" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
+        <span class="flex h-5 w-5 items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16"></path></svg>
+        </span>
+        Bookings
+      </a>
+      <a href="#" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
+        <span class="flex h-5 w-5 items-center justify-center">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+        </span>
+        Saved Tutors
+      </a>
+    </nav>
+  </aside>
+
+  <div class="mx-auto grid min-h-[calc(100vh-3rem)] max-w-7xl overflow-hidden rounded-3xl border border-white/80 bg-white/45 shadow-[0_28px_90px_rgba(37,99,235,0.16)] backdrop-blur md:grid-cols-[16rem_1fr]">
+    <aside class="hidden border-r border-slate-200/80 bg-white/80 px-5 py-6 md:block">
+      <a href="{% url 'home' %}" class="flex items-center gap-3">
+        <span class="flex h-11 w-11 items-center justify-center rounded-2xl bg-blue-600 text-lg font-bold text-white">T</span>
+        <span>
+          <span class="block text-sm font-bold text-slate-950">TutorMatch AI</span>
+          <span class="block text-xs text-slate-400">Student portal</span>
+        </span>
+      </a>
+
+      <nav class="mt-10 space-y-2 text-sm font-medium">
+        <a href="{% url 'student_dashboard' %}" class="flex items-center gap-3 rounded-2xl bg-blue-600 px-4 py-3 text-white shadow-lg shadow-blue-600/25">
+          <span class="flex h-5 w-5 items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 10.5 12 3l9 7.5"></path><path d="M5 10v10h14V10"></path></svg>
+          </span>
+          Dashboard
+        </a>
+        <a href="{% url 'find_tutor' %}" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
+          <span class="flex h-5 w-5 items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+          </span>
+          AI Tutor Search
+        </a>
+        <a href="#" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
+          <span class="flex h-5 w-5 items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"></rect><path d="M8 3v4M16 3v4M4 10h16"></path></svg>
+          </span>
+          Bookings
+        </a>
+        <a href="#" class="flex items-center gap-3 rounded-2xl px-4 py-3 text-slate-500 transition hover:bg-blue-50 hover:text-blue-700">
+          <span class="flex h-5 w-5 items-center justify-center">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+          </span>
+          Saved Tutors
+        </a>
+      </nav>
+    </aside>
+
+    <main class="overflow-hidden">
+      <div class="flex items-center justify-between border-b border-white/80 bg-white/70 px-5 py-4 sm:px-8">
+        <div class="flex items-center gap-3">
+          <button id="open-sidebar" type="button" class="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-600 shadow-sm transition hover:border-blue-200 hover:text-blue-700 md:hidden" aria-label="Open menu">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"></path></svg>
+          </button>
+          <div>
+          <p class="text-xs font-semibold uppercase tracking-[0.16em] text-blue-600">Student Dashboard</p>
+          <h1 class="mt-1 text-xl font-bold text-slate-950 sm:text-2xl">
+            Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% elif request.user.is_authenticated %}, {{ request.user.username }}{% endif %}
+          </h1>
+          </div>
+        </div>
+        <a href="{% url 'logout' %}" class="rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-600 transition hover:border-blue-200 hover:text-blue-700">Logout</a>
+      </div>
+
+      <div class="space-y-6 overflow-y-auto px-5 py-6 sm:px-8">
+        <section class="rounded-[1.75rem] bg-blue-700 p-5 text-white shadow-2xl shadow-blue-700/25 sm:p-7">
+          <div class="grid gap-6 lg:grid-cols-[1.15fr_0.85fr] lg:items-end">
+            <div>
+              <p class="text-xs font-medium text-blue-100 sm:text-sm">Find your next tutor faster</p>
+              <h2 class="mt-2 max-w-2xl text-2xl font-bold leading-tight tracking-normal sm:text-4xl">
+                <span class="sm:hidden">Search tutors by goal.</span>
+                <span class="hidden sm:inline">Search by subject, learning goal, location, or budget.</span>
+              </h2>
+              <form action="{% url 'find_tutor' %}" method="get" class="mt-5 flex flex-col gap-3 rounded-2xl bg-white/12 p-2 ring-1 ring-white/20 sm:mt-6 sm:flex-row">
+                <label class="sr-only" for="dashboard-search">Search tutors</label>
+                <input
+                  id="dashboard-search"
+                  name="q"
+                  type="search"
+                  class="h-16 min-h-16 min-w-0 flex-1 rounded-xl border border-white/20 bg-white px-5 py-4 text-base text-slate-900 outline-none placeholder:text-slate-400 focus:ring-4 focus:ring-white/25 lg:h-12 lg:min-h-12 lg:py-0 lg:text-sm"
+                  placeholder="Try: maths tutor for WAEC in Lagos"
+                >
+                <button type="submit" class="inline-flex h-16 min-h-16 items-center justify-center gap-2 rounded-xl bg-slate-950 px-5 text-sm font-semibold text-white transition hover:bg-slate-800 lg:h-12 lg:min-h-12">
+                  <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path></svg>
+                  Search
+                </button>
+              </form>
+            </div>
+
+            <div class="grid grid-cols-3 gap-3">
+              <div class="rounded-2xl bg-white/12 p-4 ring-1 ring-white/15">
+                <p class="text-2xl font-bold">3</p>
+                <p class="mt-1 text-xs text-blue-100">Upcoming sessions</p>
+              </div>
+              <div class="rounded-2xl bg-white/12 p-4 ring-1 ring-white/15">
+                <p class="text-2xl font-bold">12</p>
+                <p class="mt-1 text-xs text-blue-100">Tutor matches</p>
+              </div>
+              <div class="rounded-2xl bg-white/12 p-4 ring-1 ring-white/15">
+                <p class="text-2xl font-bold">5</p>
+                <p class="mt-1 text-xs text-blue-100">Saved tutors</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <section class="grid gap-6 xl:grid-cols-[1.1fr_0.9fr]">
+          <div class="rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-bold text-slate-950">Recent Bookings</h2>
+              <a href="#" class="text-sm font-semibold text-blue-600 hover:text-blue-700">View all</a>
+            </div>
+
+            <div class="mt-4 space-y-3">
+              <article class="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-blue-100 font-bold text-blue-700">MA</div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-semibold text-slate-900">Mathematics with Aisha Bello</h3>
+                  <p class="mt-1 text-sm text-slate-500">Today, 4:00 PM - Online</p>
+                </div>
+                <span class="rounded-full bg-emerald-50 px-3 py-1 text-xs font-semibold text-emerald-700">Confirmed</span>
+              </article>
+
+              <article class="flex items-center gap-4 rounded-2xl border border-slate-100 bg-slate-50 p-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-violet-100 font-bold text-violet-700">EN</div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-semibold text-slate-900">English with Daniel Okafor</h3>
+                  <p class="mt-1 text-sm text-slate-500">June 22, 10:30 AM - Lekki</p>
+                </div>
+                <span class="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">Pending</span>
+              </article>
+
+              <article class="flex items-center gap-4 rounded-2xl border border-dashed border-slate-200 bg-white p-4">
+                <div class="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-slate-100 text-slate-500">
+                  <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 5v14M5 12h14"></path></svg>
+                </div>
+                <div class="min-w-0 flex-1">
+                  <h3 class="font-semibold text-slate-900">Book another session</h3>
+                  <p class="mt-1 text-sm text-slate-500">Use AI search to find your next tutor.</p>
+                </div>
+              </article>
+            </div>
+          </div>
+
+          <div class="rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+            <div class="flex items-center justify-between">
+              <h2 class="text-lg font-bold text-slate-950">Saved Tutors</h2>
+              <span class="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-500">Coming soon</span>
+            </div>
+            <div class="mt-5 rounded-2xl border border-dashed border-slate-200 bg-slate-50 px-5 py-8 text-center">
+              <div class="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-white text-blue-600 shadow-sm">
+                <svg class="h-7 w-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
+              </div>
+              <h3 class="mt-4 font-semibold text-slate-950">No saved tutors yet</h3>
+              <p class="mt-2 text-sm text-slate-500">Tutors you save from search results will appear here for quick booking.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="rounded-3xl bg-white p-5 shadow-[0_20px_60px_rgba(15,23,42,0.08)]">
+          <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+            <div>
+              <h2 class="text-lg font-bold text-slate-950">Recommended Tutors</h2>
+              <p class="text-sm text-slate-500">Suggested based on popular student searches.</p>
+            </div>
+            <a href="{% url 'find_tutor' %}" class="text-sm font-semibold text-blue-600 hover:text-blue-700">Explore tutors</a>
+          </div>
+
+          <div class="mt-5 grid gap-4 md:grid-cols-3">
+            <article class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-600 font-bold text-white">AB</div>
+                <div>
+                  <h3 class="font-semibold text-slate-950">Aisha Bello</h3>
+                  <p class="text-sm text-slate-500">Maths tutor</p>
+                </div>
+              </div>
+              <p class="mt-4 text-sm text-slate-600">WAEC, JAMB, and junior secondary maths support.</p>
+              <div class="mt-4 flex items-center justify-between text-sm">
+                <span class="font-semibold text-slate-950">From ₦5,000/hr</span>
+                <span class="text-amber-500">4.9 ★</span>
+              </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-violet-600 font-bold text-white">DO</div>
+                <div>
+                  <h3 class="font-semibold text-slate-950">Daniel Okafor</h3>
+                  <p class="text-sm text-slate-500">English tutor</p>
+                </div>
+              </div>
+              <p class="mt-4 text-sm text-slate-600">Essay writing, grammar, comprehension, and exam prep.</p>
+              <div class="mt-4 flex items-center justify-between text-sm">
+                <span class="font-semibold text-slate-950">From ₦4,500/hr</span>
+                <span class="text-amber-500">4.8 ★</span>
+              </div>
+            </article>
+
+            <article class="rounded-2xl border border-slate-100 bg-slate-50 p-4">
+              <div class="flex items-center gap-3">
+                <div class="flex h-12 w-12 items-center justify-center rounded-2xl bg-emerald-600 font-bold text-white">CN</div>
+                <div>
+                  <h3 class="font-semibold text-slate-950">Chika Nwosu</h3>
+                  <p class="text-sm text-slate-500">Science tutor</p>
+                </div>
+              </div>
+              <p class="mt-4 text-sm text-slate-600">Biology, chemistry basics, and practical study planning.</p>
+              <div class="mt-4 flex items-center justify-between text-sm">
+                <span class="font-semibold text-slate-950">From ₦6,000/hr</span>
+                <span class="text-amber-500">4.7 ★</span>
+              </div>
+            </article>
+          </div>
+        </section>
+      </div>
+    </main>
+  </div>
+</section>
+<script>
+  const openSidebarButton = document.getElementById('open-sidebar');
+  const closeSidebarButton = document.getElementById('close-sidebar');
+  const mobileSidebar = document.getElementById('mobile-sidebar');
+  const mobileSidebarBackdrop = document.getElementById('mobile-sidebar-backdrop');
+
+  function openSidebar() {
+    mobileSidebar.classList.remove('-translate-x-full');
+    mobileSidebarBackdrop.classList.remove('hidden');
+    document.body.classList.add('overflow-hidden');
+  }
+
+  function closeSidebar() {
+    mobileSidebar.classList.add('-translate-x-full');
+    mobileSidebarBackdrop.classList.add('hidden');
+    document.body.classList.remove('overflow-hidden');
+  }
+
+  openSidebarButton?.addEventListener('click', openSidebar);
+  closeSidebarButton?.addEventListener('click', closeSidebar);
+  mobileSidebarBackdrop?.addEventListener('click', closeSidebar);
+  document.addEventListener('keydown', (event) => {
+    if (event.key === 'Escape') {
+      closeSidebar();
+    }
+  });
+</script>
+{% endblock %}

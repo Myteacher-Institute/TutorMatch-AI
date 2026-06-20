@@ -26,8 +26,8 @@ def login_view(request):
 
 
 def logout_view(request):
-    auth_logout
-    return redirect('')
+    auth_logout(request)
+    return redirect('login')
 
 
 def verify_account(request):
