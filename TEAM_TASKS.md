@@ -824,7 +824,7 @@ templates/reviews/review_form.html
 /payment/<booking_id>/         Payment checkout
 /payment/success/              Payment success page
 /payment/failed/               Payment failed page
-/reviews/add/<booking_id>/     Add review page
+payment/<int:booking_id>/review/     Add review page
 ```
 
 ### Booking Page Must Include
