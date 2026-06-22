@@ -24,6 +24,7 @@ class Booking (models.Model):
     tutor = models.ForeignKey("tutors.Tutor", on_delete=models.CASCADE, related_name="tutor_bookings")
     booking_date = models.DateField()
     lesson_time = models.TimeField()
+    lesson_note = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices= Booking_CHOICES, default="pending")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     

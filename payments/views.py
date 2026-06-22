@@ -1,8 +1,18 @@
 from django.http import HttpResponse
-
+from django.shortcuts import render,redirect
+from . forms import BookingForm
 
 def book_tutor(request, tutor_id):
-    return HttpResponse(f"Booking tutor {tutor_id} will be built by Task 5.")
+    forms = BookingForm()
+    if request.method == 'POST':
+        forms = BookingForm(request.POST)
+        if forms.is_valid():
+            forms.save()
+            return redirect('student_bookings')
+    context = {
+        'form':forms
+    }
+    return render(request, 'book_tutor.html', context)
 
 
 def student_bookings(request):
