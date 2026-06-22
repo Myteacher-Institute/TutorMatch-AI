@@ -13,12 +13,19 @@
       <a href="{% url 'home' %}" class="brand mtc-brand">
         <span>Myteacherconnect</span>
       </a>
-      <div class="nav-links">
-        <a href="{% url 'find_tutor' %}">Find Tutors</a>
-        <a href="{% url 'tutor_list' %}">Subjects</a>
-        <a href="{% url 'about' %}">Pricing</a>
-        <a href="{% url 'register' %}">Become a Tutor</a>
-      </div>
+
+      <button class="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false" id="mobile-menu-btn">
+        <svg class="menu-icon-open" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        <svg class="menu-icon-close" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="display: none;"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+
+      <div class="nav-container" id="nav-container">
+        <div class="nav-links">
+          <a href="{% url 'find_tutor' %}">Find Tutors</a>
+          <a href="{% url 'tutor_list' %}">Subjects</a>
+          <a href="{% url 'about' %}">Pricing</a>
+          <a href="{% url 'register' %}">Become a Tutor</a>
+        </div>
       {% if request.user.is_authenticated %}
         <div class="nav-actions">
           <a href="{% url 'student_dashboard' %}" class="btn btn-primary">Dashboard</a>
@@ -31,7 +38,8 @@
           <a href="{% url 'register' %}" class="btn btn-primary mtc-nav-signup">Sign Up</a>
         </div>
       {% endif %}
-      
+      </div>
+      <div class="nav-overlay" id="nav-overlay"></div>
     </nav>
   </header>
 
@@ -90,5 +98,38 @@
       </div>
     </div>
   </footer>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const mobileBtn = document.getElementById('mobile-menu-btn');
+      const navContainer = document.getElementById('nav-container');
+      const navOverlay = document.getElementById('nav-overlay');
+      const iconOpen = mobileBtn.querySelector('.menu-icon-open');
+      const iconClose = mobileBtn.querySelector('.menu-icon-close');
+
+      function toggleMenu() {
+        const isOpen = navContainer.classList.contains('open');
+        if (isOpen) {
+          navContainer.classList.remove('open');
+          if(navOverlay) navOverlay.classList.remove('open');
+          mobileBtn.setAttribute('aria-expanded', 'false');
+          iconOpen.style.display = 'block';
+          iconClose.style.display = 'none';
+        } else {
+          navContainer.classList.add('open');
+          if(navOverlay) navOverlay.classList.add('open');
+          mobileBtn.setAttribute('aria-expanded', 'true');
+          iconOpen.style.display = 'none';
+          iconClose.style.display = 'block';
+        }
+      }
+
+      if(mobileBtn && navContainer) {
+        mobileBtn.addEventListener('click', toggleMenu);
+        if(navOverlay) {
+          navOverlay.addEventListener('click', toggleMenu);
+        }
+      }
+    });
+  </script>
 </body>
 </html>
