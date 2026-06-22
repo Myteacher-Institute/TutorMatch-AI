@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Verify Account | Myteacherconnect{% endblock %}
+
+{% block content %}
+<section class="mtc-auth-section">
+  <div class="mtc-auth-decor-1"></div>
+  <div class="mtc-auth-decor-2"></div>
+
+  <div class="mtc-auth-container" style="grid-template-columns: 0.85fr 1.15fr;">
+    <aside class="mtc-auth-sidebar">
+      <img src="{% static 'images/Register-image.png' %}" alt="Myteacherconnect verification preview">
+    </aside>
+
+    <div class="mtc-auth-form-wrapper">
+      <div class="mtc-auth-form-card">
+        <h1>Verify Account</h1>
+        <p class="subtitle">A mock verification code has been generated. Please enter it below to verify your account.</p>
+
+        {% if error %}
+          <div class="mtc-alert mtc-alert-danger">
+            {{ error }}
+          </div>
+        {% endif %}
+
+        <form action="" method="post" class="mtc-auth-form">
+          {% csrf_token %}
+
+          <div class="form-group">
+            <label for="otp-input">Enter OTP Code (Use '123456')</label>
+            <input
+              type="text"
+              name="otp"
+              id="otp-input"
+              placeholder="e.g. 123456"
+              inputmode="numeric"
+              pattern="\d*"
+              maxlength="6"
+              style="text-align: center; font-size: 20px; letter-spacing: 0.3em; font-weight: 700;"
+              required
+            >
+          </div>
+
+          <button type="submit">Verify & Continue</button>
+        </form>
+
+        <p class="footer-text">
+          Didn't receive the code?
+          <a href="#" onclick="alert('Verification code resent. Enter 123456.'); return false;">Resend Code</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}

@@ -1,5 +1,7 @@
+from accounts.models import UserProfile
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
+from django.apps import apps
 
 
 def home(request):
@@ -50,11 +52,31 @@ def staff_required(user):
 @login_required
 @user_passes_test(staff_required)
 def admin_dashboard(request):
+    total_tutors = UserProfile.objects.filter(role=UserProfile.ROLE_TUTOR).count()
+    total_students = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count()
+
+    total_bookings = 0
+    total_revenue = "0.00"
+
+    try:
+        Booking = apps.get_model("bookings", "Booking")
+        total_bookings = Booking.objects.count()
+    except (LookupError, AttributeError):
+        pass
+
+    try:
+        Payment = apps.get_model("payments", "Payment")
+        from django.db.models import Sum
+        paid_amount = Payment.objects.filter(payment_status="paid").aggregate(Sum("amount"))["amount__sum"] or 0
+        total_revenue = f"{float(paid_amount):,.2f}"
+    except (LookupError, AttributeError, ValueError):
+        pass
+
     metrics = {
-        "total_tutors": 0,
-        "total_students": 0,
-        "total_bookings": 0,
-        "total_revenue": "0",
+        "total_tutors": total_tutors,
+        "total_students": total_students,
+        "total_bookings": total_bookings,
+        "total_revenue": total_revenue,
     }
     return render(request, "dashboard/admin_dashboard.html", {"metrics": metrics})
 
@@ -62,13 +84,61 @@ def admin_dashboard(request):
 @login_required
 @user_passes_test(staff_required)
 def verifications(request):
-    return render(request, "dashboard/verifications.html")
+    action = request.POST.get("action")
+    profile_id = request.POST.get("profile_id")
+    if request.method == "POST" and action and profile_id:
+        try:
+            profile = UserProfile.objects.get(pk=profile_id)
+            if action == "approve":
+                profile.is_verified = True
+                profile.save()
+
+                try:
+                    Tutor = apps.get_model("tutors", "Tutor")
+                    tutor_obj = Tutor.objects.filter(user=profile.user).first()
+                    if tutor_obj:
+                        tutor_obj.verification_status = "approved"
+                        tutor_obj.save()
+                except (LookupError, AttributeError):
+                    pass
+
+            elif action == "reject":
+                profile.is_verified = False
+                profile.save()
+
+                try:
+                    Tutor = apps.get_model("tutors", "Tutor")
+                    tutor_obj = Tutor.objects.filter(user=profile.user).first()
+                    if tutor_obj:
+                        tutor_obj.verification_status = "rejected"
+                        tutor_obj.save()
+                except (LookupError, AttributeError):
+                    pass
+        except UserProfile.DoesNotExist:
+            pass
+
+    pending_tutors = UserProfile.objects.filter(role=UserProfile.ROLE_TUTOR, is_verified=False).order_by("-created_at")
+    return render(request, "dashboard/verifications.html", {"pending_tutors": pending_tutors})
 
 
 @login_required
 @user_passes_test(staff_required)
 def users(request):
-    return render(request, "dashboard/users.html")
+    action = request.POST.get("action")
+    user_id = request.POST.get("user_id")
+    if request.method == "POST" and action and user_id:
+        try:
+            profile = UserProfile.objects.get(pk=user_id)
+            if action == "toggle_verify":
+                profile.is_verified = not profile.is_verified
+                profile.save()
+            elif action == "delete":
+                profile.user.delete()
+        except UserProfile.DoesNotExist:
+            pass
+
+    user_list = UserProfile.objects.all().order_by("-created_at")
+    return render(request, "dashboard/users.html", {"user_list": user_list})
 
 
 @login_required

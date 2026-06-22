@@ -1,13 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Revenue | TutorMatch AI{% endblock %}
+{% block title %}Revenue & Payments | Myteacherconnect{% endblock %}
 
 {% block content %}
-<section class="mx-auto grid max-w-6xl gap-6 px-4 py-10 lg:grid-cols-[240px_1fr]">
-  {% include "dashboard/_admin_nav.html" %}
-  <div class="rounded-lg bg-white p-6 shadow-sm">
-    <h1 class="text-3xl font-bold tracking-tight">Revenue Management</h1>
-    <p class="mt-3 text-sm text-slate-600">Platform commission, tutor payout, and payment status reports will appear here.</p>
-  </div>
-</section>
+<div class="mtc-shell">
+  <section class="mtc-admin-layout">
+    {% include "dashboard/_admin_nav.html" %}
+    <div class="mtc-admin-content">
+      <h1>Revenue & Payments</h1>
+      <p class="lead">Track escrow deposits, commission splits, and payouts to verified tutors.</p>
+      
+      <div class="mtc-admin-card">
+        <h2>Financial Ledger</h2>
+        <p>Escrow bookkeeping and transaction logs. Payment entries, Paystack transaction references, commission percentages, and tutor payouts will be populated here.</p>
+      </div>
+    </div>
+  </section>
+</div>
 {% endblock %}

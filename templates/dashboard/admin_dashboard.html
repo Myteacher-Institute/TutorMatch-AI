@@ -1,22 +1,39 @@
 {% extends "base.html" %}
 
-{% block title %}Admin Dashboard | TutorMatch AI{% endblock %}
+{% block title %}Admin Dashboard | Myteacherconnect{% endblock %}
 
 {% block content %}
-<section class="mx-auto grid max-w-6xl gap-6 px-4 py-10 lg:grid-cols-[240px_1fr]">
-  {% include "dashboard/_admin_nav.html" %}
-  <div>
-    <h1 class="text-3xl font-bold tracking-tight">Admin Dashboard</h1>
-    <div class="mt-6 grid gap-4 md:grid-cols-4">
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Total Tutors</p><p class="mt-2 text-2xl font-bold">{{ metrics.total_tutors }}</p></div>
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Total Students</p><p class="mt-2 text-2xl font-bold">{{ metrics.total_students }}</p></div>
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Total Bookings</p><p class="mt-2 text-2xl font-bold">{{ metrics.total_bookings }}</p></div>
-      <div class="rounded-lg bg-white p-5 shadow-sm"><p class="text-sm text-slate-500">Revenue</p><p class="mt-2 text-2xl font-bold">NGN {{ metrics.total_revenue }}</p></div>
+<div class="mtc-shell">
+  <section class="mtc-admin-layout">
+    {% include "dashboard/_admin_nav.html" %}
+    <div class="mtc-admin-content">
+      <h1>Admin Dashboard</h1>
+      <p class="lead">System-wide metrics and general activity overview.</p>
+      
+      <div class="mtc-admin-metrics-grid">
+        <div class="mtc-admin-metric-card">
+          <span>Total Tutors</span>
+          <strong>{{ metrics.total_tutors }}</strong>
+        </div>
+        <div class="mtc-admin-metric-card">
+          <span>Total Students</span>
+          <strong>{{ metrics.total_students }}</strong>
+        </div>
+        <div class="mtc-admin-metric-card">
+          <span>Total Bookings</span>
+          <strong>{{ metrics.total_bookings }}</strong>
+        </div>
+        <div class="mtc-admin-metric-card">
+          <span>Total Revenue</span>
+          <strong>₦{{ metrics.total_revenue }}</strong>
+        </div>
+      </div>
+      
+      <div class="mtc-admin-card">
+        <h2>Recent Activity</h2>
+        <p>Bookings, tutor approvals, and payment events will appear here once the team connects their models. General system indicators and audit logs will be rendered in this panel.</p>
+      </div>
     </div>
-    <div class="mt-6 rounded-lg bg-white p-5 shadow-sm">
-      <h2 class="font-bold">Recent Activity</h2>
-      <p class="mt-2 text-sm text-slate-600">Bookings, tutor approvals, and payment events will appear here once the team connects their models.</p>
-    </div>
-  </div>
-</section>
+  </section>
+</div>
 {% endblock %}

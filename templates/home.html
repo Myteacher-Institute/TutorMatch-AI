@@ -189,7 +189,45 @@
       <p>Success stories from across the nation.</p>
     </div>
     <div class="mtc-community-slider">
-      <div class="mtc-community-track" id="testimonial-track">
+      <div class="mtc-community-track">
+        <!-- Testimonial 1 -->
+        <article>
+          <div class="mtc-stars">★★★★★</div>
+          <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching really worked for us!"</p>
+          <div class="mtc-reviewer">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Mrs. Funmi Balogun">
+            <div>
+              <strong>Mrs. Funmi Balogun</strong>
+              <span>Lagos Parent</span>
+            </div>
+          </div>
+        </article>
+        <!-- Testimonial 2 -->
+        <article>
+          <div class="mtc-stars">★★★★★</div>
+          <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is incredibly transparent."</p>
+          <div class="mtc-reviewer">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80" alt="Mr. Emeka Obi">
+            <div>
+              <strong>Mr. Emeka Obi</strong>
+              <span>Math Tutor, Abuja</span>
+            </div>
+          </div>
+        </article>
+        <!-- Testimonial 3 -->
+        <article>
+          <div class="mtc-stars">★★★★★</div>
+          <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic websites in months."</p>
+          <div class="mtc-reviewer">
+            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80" alt="Dr. Amina Yusuf">
+            <div>
+              <strong>Dr. Amina Yusuf</strong>
+              <span>Kano Parent</span>
+            </div>
+          </div>
+        </article>
+
+        <!-- Duplicated for Infinite Scroll Loop -->
         <article>
           <div class="mtc-stars">★★★★★</div>
           <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching really worked for us!"</p>
@@ -224,7 +262,6 @@
           </div>
         </article>
       </div>
-      <div class="slider-dots" id="slider-dots"></div>
     </div>
   </div>
 </section>
@@ -241,66 +278,4 @@
     </div>
   </div>
 </section>
-
-<script>
-  document.addEventListener('DOMContentLoaded', () => {
-    const track = document.getElementById('testimonial-track');
-    const dotsContainer = document.getElementById('slider-dots');
-    if (!track || !dotsContainer) return;
-    
-    const articles = track.querySelectorAll('article');
-    const totalSlides = articles.length;
-    let currentIndex = 0;
-    let slideInterval;
-
-    // Create dots
-    dotsContainer.innerHTML = '';
-    for (let i = 0; i < totalSlides; i++) {
-      const dot = document.createElement('span');
-      dot.classList.add('dot');
-      if (i === 0) dot.classList.add('active');
-      dot.addEventListener('click', () => {
-        goToSlide(i);
-        resetInterval();
-      });
-      dotsContainer.appendChild(dot);
-    }
-
-    const dots = dotsContainer.querySelectorAll('.dot');
-
-    function goToSlide(index) {
-      currentIndex = index;
-      track.style.transform = `translateX(-${currentIndex * 100}%)`;
-      
-      dots.forEach((dot, idx) => {
-        if (idx === currentIndex) {
-          dot.classList.add('active');
-        } else {
-          dot.classList.remove('active');
-        }
-      });
-    }
-
-    function startInterval() {
-      slideInterval = setInterval(() => {
-        let nextIndex = (currentIndex + 1) % totalSlides;
-        goToSlide(nextIndex);
-      }, 4000);
-    }
-
-    function resetInterval() {
-      clearInterval(slideInterval);
-      startInterval();
-    }
-
-    startInterval();
-
-    // Pause on hover
-    const slider = document.querySelector('.mtc-community-slider');
-    if (slider) {
-      slider.addEventListener('mouseenter', () => clearInterval(slideInterval));
-      slider.addEventListener('mouseleave', startInterval);
-    }
-  });
-</script>
 {% endblock %}

@@ -10,8 +10,9 @@ def register(request):
     if request.method == 'POST':
         form = Registration(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('login')
+            user = form.save()
+            auth_login(request, user)
+            return redirect(_dashboard_for_user(user))
 
     return render(request, 'accounts/register.html', {'form': form})
 
@@ -23,23 +24,35 @@ def login_view(request):
         if forms.is_valid():
             user = forms.get_user()
             auth_login(request, user)
-            role = getattr(getattr(user, 'profile', None), 'role', 'student')
-            if role == 'tutor':
-                return redirect('tutor_dashboard')
             return redirect(_dashboard_for_user(user))
     return render(request, 'accounts/login.html', {'form': forms})
 
 
 def logout_view(request):
     auth_logout(request)
-
     return redirect('login')
 
 
-
-
+@login_required(login_url='login')
 def verify_account(request):
-    return HttpResponse('Account verification page will be built by Task 2.')
+    profile = getattr(request.user, 'profile', None)
+    if not profile:
+        profile = UserProfile.objects.create(user=request.user)
+
+    if profile.is_verified:
+        return redirect(_dashboard_for_user(request.user))
+
+    error = None
+    if request.method == 'POST':
+        code = request.POST.get('otp', '').strip()
+        if code == '123456' or (code.isdigit() and len(code) == 6):
+            profile.is_verified = True
+            profile.save()
+            return redirect(_dashboard_for_user(request.user))
+        else:
+            error = "Invalid code. Please enter '123456' or any 6-digit number."
+
+    return render(request, 'accounts/verify.html', {'error': error})
 
 
 @login_required(login_url='login')

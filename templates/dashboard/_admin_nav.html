@@ -1,10 +1,13 @@
-<aside class="rounded-lg border border-slate-200 bg-white p-4">
-  <p class="text-sm font-bold uppercase tracking-wide text-slate-500">Admin</p>
-  <nav class="mt-4 grid gap-2 text-sm font-semibold text-slate-700">
-    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_dashboard' %}">Overview</a>
-    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_verifications' %}">Verifications</a>
-    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_users' %}">Users</a>
-    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_bookings' %}">Bookings</a>
-    <a class="rounded-md px-3 py-2 hover:bg-slate-100" href="{% url 'admin_revenue' %}">Revenue</a>
+{% with request.resolver_match.url_name as url_name %}
+<aside class="mtc-admin-sidebar">
+  <h3>Admin Panel</h3>
+  <nav class="mtc-admin-nav">
+    <a href="{% url 'admin_dashboard' %}" class="{% if url_name == 'admin_dashboard' %}active{% endif %}">Overview</a>
+    <a href="{% url 'admin_verifications' %}" class="{% if url_name == 'admin_verifications' %}active{% endif %}">Verifications</a>
+    <a href="{% url 'admin_users' %}" class="{% if url_name == 'admin_users' %}active{% endif %}">Users</a>
+    <a href="{% url 'admin_bookings' %}" class="{% if url_name == 'admin_bookings' %}active{% endif %}">Bookings</a>
+    <a href="{% url 'admin_revenue' %}" class="{% if url_name == 'admin_revenue' %}active{% endif %}">Revenue</a>
+    <a href="{% url 'logout' %}" style="margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 18px; color: #ef4444;">Logout</a>
   </nav>
 </aside>
+{% endwith %}

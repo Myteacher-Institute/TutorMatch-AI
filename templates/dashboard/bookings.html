@@ -1,13 +1,20 @@
 {% extends "base.html" %}
 
-{% block title %}Bookings | TutorMatch AI{% endblock %}
+{% block title %}Booking Management | Myteacherconnect{% endblock %}
 
 {% block content %}
-<section class="mx-auto grid max-w-6xl gap-6 px-4 py-10 lg:grid-cols-[240px_1fr]">
-  {% include "dashboard/_admin_nav.html" %}
-  <div class="rounded-lg bg-white p-6 shadow-sm">
-    <h1 class="text-3xl font-bold tracking-tight">Booking Management</h1>
-    <p class="mt-3 text-sm text-slate-600">Admin booking monitoring will appear here after the bookings app is implemented.</p>
-  </div>
-</section>
+<div class="mtc-shell">
+  <section class="mtc-admin-layout">
+    {% include "dashboard/_admin_nav.html" %}
+    <div class="mtc-admin-content">
+      <h1>Booking Management</h1>
+      <p class="lead">Monitor active bookings, schedules, and lesson logs across the platform.</p>
+      
+      <div class="mtc-admin-card">
+        <h2>Active Bookings</h2>
+        <p>Booking ledger and scheduling system. Logs of completed, pending, and cancelled lessons will appear in this workspace once student bookings are made.</p>
+      </div>
+    </div>
+  </section>
+</div>
 {% endblock %}
