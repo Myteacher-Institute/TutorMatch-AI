@@ -91,11 +91,25 @@ def search_tutors(intent, filters=None):
 
     tutors = _load_database_tutors() or list(SAMPLE_TUTORS)
 
+    query_text = intent.get("query_text", "").strip()
+    has_filters = bool(subject or location or min_price is not None or max_price is not None or min_experience is not None)
+
+    # If the user searched for something, we must verify if there's any match
+    matched_any = False
+
     if subject:
         tutors = [tutor for tutor in tutors if _same_text(tutor["subject"], subject)]
+        matched_any = True
 
     if location and location != "Port Harcourt":
         tutors = [tutor for tutor in tutors if _contains_text(tutor["location"], location)]
+        matched_any = True
+
+    level = intent.get("level")
+    if level:
+        # Match against bio or specialist if tutor level matches
+        tutors = [tutor for tutor in tutors if _contains_text(tutor.get("level", ""), level) or _contains_text(tutor.get("bio", ""), level)]
+        matched_any = True
 
     if min_price is not None:
         tutors = [tutor for tutor in tutors if tutor["rate"] >= min_price]
@@ -105,6 +119,20 @@ def search_tutors(intent, filters=None):
 
     if min_experience is not None:
         tutors = [tutor for tutor in tutors if tutor["experience"] >= min_experience]
+
+    # If query text was provided, but didn't match any subject, location, or level,
+    # check if it matches a tutor's name. Otherwise, it's a completely unmatched query!
+    if query_text and not matched_any:
+        name_matches = [tutor for tutor in tutors if _contains_text(tutor["name"], query_text)]
+        if name_matches:
+            tutors = name_matches
+        else:
+            # No name, subject, location, or level matches found for this query text
+            return []
+
+    # If no query text and no filters are present, we return empty
+    if not query_text and not has_filters:
+        return []
 
     sorted_tutors = sorted(tutors, key=lambda tutor: (tutor["verified"], tutor["rating"], tutor["experience"]), reverse=True)
 
@@ -149,6 +177,7 @@ def suggested_prompts():
 def _fallback_intent(prompt):
     lowered = (prompt or "").lower()
     return {
+        "query_text": prompt,
         "subject": _find_first(SUBJECTS, lowered),
         "level": _find_first(LEVELS, lowered),
         "location": _find_first(LOCATIONS, lowered),
@@ -181,6 +210,7 @@ def _extract_with_openai(prompt, fallback):
     data = json.loads(response.choices[0].message.content or "{}")
 
     return {
+        "query_text": prompt,
         "subject": _clean_choice(data.get("subject"), SUBJECTS) or fallback["subject"],
         "level": _clean_choice(data.get("level"), LEVELS) or fallback["level"],
         "location": _clean_choice(data.get("location"), LOCATIONS) or fallback["location"],

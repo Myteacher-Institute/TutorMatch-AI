@@ -15,11 +15,19 @@
         0% { transform: scale(1); opacity: 0.8; }
         100% { transform: scale(1.25); opacity: 1; }
       }
+      @keyframes formShake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-8px); }
+        40%, 80% { transform: translateX(8px); }
+      }
       .voice-search-btn svg {
         transition: all 0.2s ease;
       }
       .voice-search-btn.listening svg {
         animation: micPulse 0.8s infinite alternate;
+      }
+      .form-shake {
+        animation: formShake 0.4s ease-in-out;
       }
     </style>
 
@@ -313,6 +321,56 @@
     const voiceBtn = document.getElementById('voice-search-btn');
     const searchInput = document.getElementById('home-search');
     const searchForm = searchInput ? searchInput.closest('form') : null;
+
+    if (searchForm && searchInput) {
+      searchForm.addEventListener('submit', (e) => {
+        if (!searchInput.value.trim()) {
+          e.preventDefault();
+          
+          // Style or create error message inline
+          let errorDiv = document.getElementById('home-search-error');
+          if (!errorDiv) {
+            errorDiv = document.createElement('div');
+            errorDiv.id = 'home-search-error';
+            errorDiv.style.color = '#ef4444';
+            errorDiv.style.fontSize = '14px';
+            errorDiv.style.fontWeight = '600';
+            errorDiv.style.marginTop = '16px';
+            errorDiv.style.display = 'flex';
+            errorDiv.style.alignItems = 'center';
+            errorDiv.style.justifyContent = 'center';
+            errorDiv.style.gap = '8px';
+            errorDiv.style.animation = 'fadeIn 0.2s ease-in';
+            errorDiv.innerHTML = `
+              <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+              <span>Please enter what you want to learn or click the mic to use voice search!</span>
+            `;
+            searchForm.parentNode.insertBefore(errorDiv, searchForm.nextSibling);
+          }
+          
+          searchInput.focus();
+          searchInput.style.outline = '2px solid #ef4444';
+          
+          // Shake effect
+          searchForm.classList.add('form-shake');
+          setTimeout(() => {
+            searchForm.classList.remove('form-shake');
+          }, 400);
+        }
+      });
+
+      searchInput.addEventListener('input', () => {
+        const errorDiv = document.getElementById('home-search-error');
+        if (errorDiv) {
+          errorDiv.remove();
+        }
+        searchInput.style.outline = '';
+      });
+    }
 
     if (voiceBtn && searchInput) {
       // Check browser support
