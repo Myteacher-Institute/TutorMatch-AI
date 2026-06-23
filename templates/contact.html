@@ -48,22 +48,30 @@
         </div>
       </div>
 
-      <form class="mtc-contact-form" method="POST">
-        {% csrf_token %}
-        <div class="form-group">
-          <label for="contact-name">Full Name</label>
-          <input type="text" id="contact-name" name="name" placeholder="Enter your full name" required>
+      {% if success %}
+        <div style="background: var(--white); border-radius: 20px; padding: 40px; border: 1px solid rgba(22,163,74,0.12); box-shadow: 0 10px 30px rgba(15, 23, 42, 0.03); text-align: center; width: 100%;">
+          <div style="width: 56px; height: 56px; background: #eafaf1; color: #16a34a; border-radius: 50%; display: grid; place-items: center; margin: 0 auto 20px; font-size: 24px;">✓</div>
+          <h3 style="margin: 0; font-size: 20px; font-weight: 700; color: var(--ink);">Message Sent!</h3>
+          <p style="margin: 10px 0 0; color: var(--muted); font-size: 14px; line-height: 1.6;">Thank you, <strong>{{ name }}</strong>. Your message was successfully received. Our operations team will reach out to you shortly.</p>
         </div>
-        <div class="form-group">
-          <label for="contact-email">Email Address</label>
-          <input type="email" id="contact-email" name="email" placeholder="you@example.com" required>
-        </div>
-        <div class="form-group">
-          <label for="contact-message">Your Message</label>
-          <textarea id="contact-message" name="message" rows="5" placeholder="How can we help you?" required></textarea>
-        </div>
-        <button type="submit">Send Message</button>
-      </form>
+      {% else %}
+        <form class="mtc-contact-form" method="POST">
+          {% csrf_token %}
+          <div class="form-group">
+            <label for="contact-name">Full Name</label>
+            <input type="text" id="contact-name" name="name" placeholder="Enter your full name" required>
+          </div>
+          <div class="form-group">
+            <label for="contact-email">Email Address</label>
+            <input type="email" id="contact-email" name="email" placeholder="you@example.com" required>
+          </div>
+          <div class="form-group">
+            <label for="contact-message">Your Message</label>
+            <textarea id="contact-message" name="message" rows="5" placeholder="How can we help you?" required></textarea>
+          </div>
+          <button type="submit">Send Message</button>
+        </form>
+      {% endif %}
     </div>
   </div>
 </section>

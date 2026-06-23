@@ -24,6 +24,9 @@ def login_view(request):
         if forms.is_valid():
             user = forms.get_user()
             auth_login(request, user)
+            next_url = request.GET.get('next') or request.POST.get('next')
+            if next_url:
+                return redirect(next_url)
             return redirect(_dashboard_for_user(user))
     return render(request, 'accounts/login.html', {'form': forms})
 
@@ -55,16 +58,9 @@ def verify_account(request):
     return render(request, 'accounts/verify.html', {'error': error})
 
 
-@login_required(login_url='login')
+from .decorators import student_required, _dashboard_for_user
+
+
+@student_required
 def student_dashboard(request):
     return render(request, 'accounts/dashboard.html')
-
-
-def _dashboard_for_user(user):
-    if user.is_staff or user.is_superuser:
-        return 'admin_dashboard'
-
-    role = getattr(getattr(user, 'profile', None), 'role', 'student')
-    if role == 'tutor':
-        return 'tutor_dashboard'
-    return 'student_dashboard'

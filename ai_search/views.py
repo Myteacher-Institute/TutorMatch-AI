@@ -11,23 +11,22 @@ def find_tutor(request):
     query = request.GET.get("q", "").strip()
     if query:
         return redirect(f"{reverse('search_results')}?{urlencode({'q': query})}")
+    return redirect('search_results')
 
-    form = TutorSearchForm()
-    return render(
-        request,
-        "search/find_tutor.html",
-        {
-            "form": form,
-            "suggested_prompts": suggested_prompts(),
-        },
-    )
 
 
 def search_results(request):
+    from django.contrib import messages
+    from urllib.parse import quote
+    
     form = TutorSearchForm(request.GET)
     query = request.GET.get("q", "").strip()
-    filters = {}
+    
+    if not query:
+        messages.warning(request, "Please enter a subject, level, or location to find a tutor.")
+        return redirect('home')
 
+    filters = {}
     if form.is_valid():
         filters = {
             "subject": form.cleaned_data.get("subject"),
@@ -39,11 +38,14 @@ def search_results(request):
 
     intent = extract_search_intent(query)
     tutors = search_tutors(intent, filters)
-    template = "search/search_results.html" if tutors else "search/no_results.html"
+
+    if not tutors:
+        messages.error(request, f"No tutors found matching '{query}'. Try searching for a subject like 'Mathematics' or location like 'GRA', or use voice search!")
+        return redirect(f"/?q={quote(query)}")
 
     return render(
         request,
-        template,
+        "search/search_results.html",
         {
             "form": form,
             "query": query,

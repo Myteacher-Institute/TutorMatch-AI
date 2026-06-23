@@ -1,7 +1,7 @@
 from accounts.models import UserProfile
-from django.contrib.auth.decorators import login_required, user_passes_test
 from django.shortcuts import render
 from django.apps import apps
+from accounts.decorators import admin_required
 
 
 def home(request):
@@ -42,15 +42,15 @@ def about(request):
 
 
 def contact(request):
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        message = request.POST.get("message")
+        return render(request, "contact.html", {"success": True, "name": name})
     return render(request, "contact.html")
 
 
-def staff_required(user):
-    return user.is_authenticated and user.is_staff
-
-
-@login_required
-@user_passes_test(staff_required)
+@admin_required
 def admin_dashboard(request):
     total_tutors = UserProfile.objects.filter(role=UserProfile.ROLE_TUTOR).count()
     total_students = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count()
@@ -81,8 +81,7 @@ def admin_dashboard(request):
     return render(request, "dashboard/admin_dashboard.html", {"metrics": metrics})
 
 
-@login_required
-@user_passes_test(staff_required)
+@admin_required
 def verifications(request):
     action = request.POST.get("action")
     profile_id = request.POST.get("profile_id")
@@ -121,8 +120,7 @@ def verifications(request):
     return render(request, "dashboard/verifications.html", {"pending_tutors": pending_tutors})
 
 
-@login_required
-@user_passes_test(staff_required)
+@admin_required
 def users(request):
     action = request.POST.get("action")
     user_id = request.POST.get("user_id")
@@ -141,13 +139,11 @@ def users(request):
     return render(request, "dashboard/users.html", {"user_list": user_list})
 
 
-@login_required
-@user_passes_test(staff_required)
+@admin_required
 def bookings(request):
     return render(request, "dashboard/bookings.html")
 
 
-@login_required
-@user_passes_test(staff_required)
+@admin_required
 def revenue(request):
     return render(request, "dashboard/revenue.html")
