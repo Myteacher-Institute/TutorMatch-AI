@@ -27,9 +27,9 @@
         <a href="{% url 'logout' %}" class="btn btn-ghost" style="border: 1px solid var(--line); border-radius: 8px;">Logout</a>
       </div>
 
-      <!-- Hero card with AI search -->
-      <div style="background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%); border-radius: 16px; padding: 32px; color: var(--white); margin-bottom: 30px; box-shadow: 0 10px 30px rgba(37,99,235,0.15);">
-        <h2 style="margin: 0 0 12px; font-size: 24px; color: var(--white); font-weight: 600;">What subject or tutor needs do you have?</h2>
+<!-- Hero card with AI search -->
+      <div class="mtc-dashboard-hero" style="background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%); border-radius: 16px; padding: 32px; color: var(--white); margin-bottom: 30px;">
+        <h2 style="margin: 0 0 12px; font-size: clamp(20px, 5vw, 30px); color: var(--white); font-weight: 600;">What subject or tutor needs do you have?</h2>
         <p style="margin: 0 0 20px; color: #dbeafe; font-size: 14px; line-height: 1.5;">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
         <form action="{% url 'find_tutor' %}" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
           <input name="q" placeholder="Describe your tutor needs..." style="flex: 1; min-width: 250px; min-height: 48px; border: 0; border-radius: 8px; padding: 0 16px; font-size: 14px; outline: none; color: var(--ink);">
@@ -58,10 +58,9 @@
       </div>
 
       <!-- 2-column details -->
-      <div style="display: grid; grid-template-columns: 1.2fr 0.8fr; gap: 24px; align-items: start;">
-        
+      <div class="mtc-dashboard-grid">
         <!-- Left Side: Recent Bookings & Recommendations -->
-        <div style="display: grid; gap: 24px;">
+        <div class="mtc-dashboard-main">
           <!-- Recent Bookings panel -->
           <div class="mtc-admin-card" style="margin-top: 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
@@ -79,42 +78,44 @@
           <div class="mtc-admin-card" style="margin-top: 0;">
             <h2 style="margin: 0 0 16px;">Recommended Tutors for You</h2>
             
-            <div style="display: grid; gap: 16px;">
+            <div class="mtc-recommended-tutors">
               <!-- Aisha Bello -->
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--line); border-radius: 12px; gap: 16px; flex-wrap: wrap;">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                  <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=120&h=120&q=80" alt="Aisha Bello" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
-                  <div>
-                    <h3 style="margin: 0; font-size: 15px; font-weight: 600;">Aisha Bello</h3>
-                    <p style="margin: 2px 0 0; font-size: 12px; color: var(--muted);">Mathematics & JAMB Prep • GRA</p>
+              <article class="mtc-recommended-tutor-card">
+                <div class="mtc-recommended-tutor-head">
+                  <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=120&h=120&q=80" alt="Aisha Bello">
+                  <div class="mtc-recommended-tutor-copy">
+                    <h3>Aisha Bello</h3>
+                    <p>Mathematics & JAMB Prep</p>
                   </div>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                  <span style="font-size: 13px; font-weight: 700; color: var(--ink);">₦10,000/hr</span>
-                  <a href="{% url 'book_tutor' 1 %}" class="btn btn-primary" style="min-height: 36px; font-size: 12px; padding: 0 14px; border-radius: 6px;">Book</a>
+                <div class="mtc-recommended-tutor-meta">
+                  <span>GRA</span>
+                  <strong>₦10,000/hr</strong>
                 </div>
-              </div>
+                <a href="{% url 'book_tutor' 1 %}" class="btn btn-primary">Book Tutor</a>
+              </article>
 
               <!-- Chinedu Okoro -->
-              <div style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border: 1px solid var(--line); border-radius: 12px; gap: 16px; flex-wrap: wrap;">
-                <div style="display: flex; gap: 12px; align-items: center;">
-                  <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=120&h=120&q=80" alt="Chinedu Okoro" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
-                  <div>
-                    <h3 style="margin: 0; font-size: 15px; font-weight: 600;">Chinedu Okoro</h3>
-                    <p style="margin: 2px 0 0; font-size: 12px; color: var(--muted);">Physics & Chemistry • Rumuola</p>
+              <article class="mtc-recommended-tutor-card">
+                <div class="mtc-recommended-tutor-head">
+                  <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=120&h=120&q=80" alt="Chinedu Okoro">
+                  <div class="mtc-recommended-tutor-copy">
+                    <h3>Chinedu Okoro</h3>
+                    <p>Physics & Chemistry</p>
                   </div>
                 </div>
-                <div style="display: flex; gap: 10px; align-items: center;">
-                  <span style="font-size: 13px; font-weight: 700; color: var(--ink);">₦12,000/hr</span>
-                  <a href="{% url 'book_tutor' 2 %}" class="btn btn-primary" style="min-height: 36px; font-size: 12px; padding: 0 14px; border-radius: 6px;">Book</a>
+                <div class="mtc-recommended-tutor-meta">
+                  <span>Rumuola</span>
+                  <strong>₦12,000/hr</strong>
                 </div>
-              </div>
+                <a href="{% url 'book_tutor' 2 %}" class="btn btn-primary">Book Tutor</a>
+              </article>
             </div>
           </div>
         </div>
 
         <!-- Right Side: Saved Tutors / Info -->
-        <div style="display: grid; gap: 24px; align-content: start;">
+        <div class="mtc-dashboard-side">
           <div class="mtc-admin-card" style="margin-top: 0;">
             <h2 style="margin: 0 0 12px;">Saved Tutors</h2>
             <div style="border: 1px dashed var(--line); border-radius: 12px; padding: 24px; text-align: center; background: var(--soft);">
@@ -129,7 +130,6 @@
             <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5;">Contact our support desk directly at support@myteacherconnect.com or call +234 812 345 6789.</p>
           </div>
         </div>
-        
       </div>
     </div>
   </section>
