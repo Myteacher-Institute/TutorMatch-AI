@@ -11,7 +11,7 @@
       <h3>Student Portal</h3>
       <nav class="mtc-admin-nav">
         <a href="{% url 'student_dashboard' %}" class="active">Dashboard</a>
-        <a href="{% url 'find_tutor' %}">AI Tutor Search</a>
+        <a href="{% url 'home' %}#search-section">AI Tutor Search</a>
         <a href="{% url 'student_bookings' %}">Bookings</a>
         <a href="#">Saved Tutors <span style="font-size: 10px; color: var(--muted); margin-left: 5px;">(Soon)</span></a>
       </nav>
@@ -31,8 +31,8 @@
       <div class="mtc-dashboard-hero" style="background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%); border-radius: 16px; padding: 32px; color: var(--white); margin-bottom: 30px;">
         <h2 style="margin: 0 0 12px; font-size: clamp(20px, 5vw, 30px); color: var(--white); font-weight: 600;">What subject or tutor needs do you have?</h2>
         <p style="margin: 0 0 20px; color: #dbeafe; font-size: 14px; line-height: 1.5;">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
-        <form action="{% url 'find_tutor' %}" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <input name="q" placeholder="Describe your tutor needs..." style="flex: 1; min-width: 250px; min-height: 48px; border: 0; border-radius: 8px; padding: 0 16px; font-size: 14px; outline: none; color: var(--ink);">
+        <form action="{% url 'search_results' %}" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
+          <input name="q" placeholder="Describe your tutor needs..." required style="flex: 1; min-width: 250px; min-height: 48px; border: 0; border-radius: 8px; padding: 0 16px; font-size: 14px; outline: none; color: var(--ink);">
           <button type="submit" class="btn btn-light" style="min-height: 48px; font-weight: 700; border-radius: 8px;">Find Tutor</button>
         </form>
       </div>

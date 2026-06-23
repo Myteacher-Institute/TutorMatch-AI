@@ -1,0 +1,103 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Admin Login | TutorMatch AI{% endblock %}
+
+{% block content %}
+<section class="mtc-auth-section">
+  <div class="mtc-auth-decor-1"></div>
+  <div class="mtc-auth-decor-2"></div>
+
+  <div class="mtc-auth-container">
+    <aside class="mtc-auth-sidebar">
+      <img src="{% static 'images/Register-image.png' %}" alt="TutorMatch AI admin login preview">
+    </aside>
+
+    <div class="mtc-auth-form-wrapper">
+      <div class="mtc-auth-form-card">
+        <h1>Admin Portal</h1>
+        <p class="subtitle">Log in with your administrator credentials to access the console.</p>
+
+        {% if form.non_field_errors %}
+          <div class="mtc-alert mtc-alert-danger">
+            {{ form.non_field_errors }}
+          </div>
+        {% endif %}
+
+        {% if error_message %}
+          <div class="mtc-alert mtc-alert-danger">
+            {{ error_message }}
+          </div>
+        {% endif %}
+
+        <form action="{{ app_path }}" method="post" class="mtc-auth-form" id="login-form">
+          {% csrf_token %}
+          <input type="hidden" name="next" value="{{ next }}">
+
+          {% for field in form %}
+            <div class="form-group">
+              <label for="{{ field.id_for_label }}">
+                {% if field.name == 'username' %}Username or Email{% else %}{{ field.label }}{% endif %}
+              </label>
+
+              {% if field.field.widget.input_type == 'password' %}
+                <div class="password-field-container">
+                  <input
+                    type="password"
+                    name="{{ field.name }}"
+                    id="{{ field.id_for_label }}"
+                    placeholder="Enter password"
+                    {% if field.field.required %}required{% endif %}
+                  >
+                  <button
+                    type="button"
+                    class="password-toggle"
+                    data-target="{{ field.id_for_label }}"
+                    aria-label="Show password"
+                  >
+                    <svg class="eye-icon" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                      <circle cx="12" cy="12" r="3"></circle>
+                    </svg>
+                  </button>
+                </div>
+              {% else %}
+                <input
+                  type="{{ field.field.widget.input_type }}"
+                  name="{{ field.name }}"
+                  id="{{ field.id_for_label }}"
+                  value="{{ field.value|default_if_none:'' }}"
+                  placeholder="Enter email or username"
+                  {% if field.field.required %}required{% endif %}
+                >
+              {% endif %}
+
+              {% if field.errors %}
+                <div class="mtc-alert mtc-alert-danger" style="margin-top: 4px; padding: 6px 12px; font-size: 11px;">
+                  {{ field.errors }}
+                </div>
+              {% endif %}
+            </div>
+          {% endfor %}
+
+          <button type="submit" style="margin-top: 10px;">Log In to Dashboard</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+
+<script>
+  document.querySelectorAll('.password-toggle').forEach((button) => {
+    button.addEventListener('click', () => {
+      const input = document.getElementById(button.dataset.target);
+      const isHidden = input.type === 'password';
+      input.type = isHidden ? 'text' : 'password';
+      button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+      
+      // Update eye icon color
+      button.style.color = isHidden ? 'var(--blue)' : '#94a3b8';
+    });
+  });
+</script>
+{% endblock %}

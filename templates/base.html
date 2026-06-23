@@ -10,8 +10,14 @@
 <body>
   <header class="site-header">
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="{% url 'home' %}" class="brand mtc-brand">
-        <span>Myteacherconnect</span>
+      <a href="{% url 'home' %}" class="brand mtc-brand" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: #111827;">
+        <div class="brand-mark" style="background: #2563eb; border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; color: #ffffff;">
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+            <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+          </svg>
+        </div>
+        <span style="color: #0f172a; font-weight: 800; font-size: 20px;">Myteacher<span style="color: #2563eb;">Connect</span></span>
       </a>
 
       <button class="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false" id="mobile-menu-btn">
@@ -21,25 +27,24 @@
 
       <div class="nav-container" id="nav-container">
         <div class="nav-links">
-          <a href="{% url 'find_tutor' %}">Find Tutors</a>
-          <a href="{% url 'tutor_list' %}">Subjects</a>
-          <a href="{% url 'about' %}">Pricing</a>
-          <a href="{% url 'register' %}">Become a Tutor</a>
+          <a href="{% url 'home' %}#search-section">Find Tutors</a>
+          <a href="{% url 'home' %}#how-it-works">How it Works</a>
+          <a href="{% url 'register' %}">For Tutors</a>
         </div>
       {% if request.user.is_authenticated %}
         <div class="nav-actions">
           {% if request.user.is_staff %}
-            <a href="{% url 'admin_dashboard' %}" class="btn btn-ghost">Admin Dashboard</a>
+            <a href="{% url 'admin_dashboard' %}" class="btn btn-ghost" style="font-weight: 700;">Admin Dashboard</a>
           {% else %}
-            <a href="{% url 'student_dashboard' %}" class="btn btn-ghost">Dashboard</a>
+            <a href="{% url 'student_dashboard' %}" class="btn btn-ghost" style="font-weight: 700;">Dashboard</a>
           {% endif %}
-          <a href="{% url 'logout' %}" class="btn btn-primary">Logout</a>
+          <a href="{% url 'logout' %}" class="btn btn-primary" style="border-radius: 999px; font-weight: 700; padding: 0 20px; background: #2563eb; border-color: #2563eb;">Logout</a>
         </div>
 
       {% else %}
         <div class="nav-actions">
-          <a href="{% url 'login' %}" class="btn btn-ghost">Login</a>
-          <a href="{% url 'register' %}" class="btn btn-primary mtc-nav-signup">Sign Up</a>
+          <a href="{% url 'login' %}" class="btn btn-ghost" style="font-weight: 700; color: #4b5563;">Log In</a>
+          <a href="{% url 'register' %}" class="btn btn-primary" style="border-radius: 999px; font-weight: 700; padding: 0 20px; background: #2563eb; border-color: #2563eb; box-shadow: 0 4px 14px rgba(37,99,235,0.25);">Join Free</a>
         </div>
       {% endif %}
       </div>
@@ -48,54 +53,86 @@
   </header>
 
   <main>
+    {% if messages %}
+      <div class="mtc-shell" style="margin-top: 24px; margin-bottom: 8px;">
+        {% for message in messages %}
+          <div class="alert alert-{{ message.tags }}" style="padding: 16px 20px; border-radius: 12px; font-size: 14px; font-weight: 600; display: flex; align-items: center; gap: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.03);
+            {% if message.tags == 'error' or message.tags == 'danger' %}
+              background: #fef2f2; border: 1px solid #fee2e2; color: #991b1b;
+            {% elif message.tags == 'warning' %}
+              background: #fffbeb; border: 1px solid #fef3c7; color: #92400e;
+            {% else %}
+              background: #f0fdf4; border: 1px solid #dcfce7; color: #166534;
+            {% endif %}">
+            {% if message.tags == 'error' or message.tags == 'danger' or message.tags == 'warning' %}
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+              </svg>
+            {% else %}
+              <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink: 0;">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            {% endif %}
+            <span>{{ message.message }}</span>
+          </div>
+        {% endfor %}
+      </div>
+    {% endif %}
     {% block content %}{% endblock %}
   </main>
 
-  <footer class="mtc-footer">
-    <div class="mtc-shell mtc-footer-grid">
+  <footer class="mtc-footer" style="background: #0b0f19; border-top: 1px solid #1e293b; color: #94a3b8; padding: 60px 0 30px;">
+    <div class="mtc-shell mtc-footer-grid" style="padding: 0 0 40px;">
       <div class="mtc-footer-about">
-        <a href="{% url 'home' %}" class="mtc-footer-brand">Myteacher</a>
-        <p>Nigeria's leading AI-powered platform for connecting students with trusted home tutors.</p>
+        <a href="{% url 'home' %}" class="mtc-footer-brand" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: #ffffff;">
+          <div style="background: #2563eb; border-radius: 6px; width: 28px; height: 28px; display: grid; place-items: center; color: #ffffff;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+            </svg>
+          </div>
+          <span style="color: #ffffff; font-weight: 800;">Myteacher</span>
+        </a>
+        <p style="color: #94a3b8;">Connecting Nigeria's best minds with eager learners through smart AI matching.</p>
         <div class="mtc-socials" aria-label="Social links">
-          <a href="#" aria-label="Facebook">
+          <a href="#" aria-label="Facebook" style="background: #1e293b; border-color: #334155; color: #94a3b8;">
             <svg viewBox="0 0 24 24"><path d="M14 8h3V4h-3c-3.1 0-5 1.9-5 5v3H6v4h3v4h4v-4h3l1-4h-4V9c0-.6.4-1 1-1Z"/></svg>
           </a>
-          <a href="#" aria-label="Twitter">
+          <a href="#" aria-label="Twitter" style="background: #1e293b; border-color: #334155; color: #94a3b8;">
             <svg viewBox="0 0 24 24"><path d="M22 5.8c-.7.3-1.5.5-2.3.6.8-.5 1.4-1.2 1.7-2.2-.8.5-1.7.8-2.6 1A4 4 0 0 0 12 8.8v.9A11.4 11.4 0 0 1 3.7 5.5a4 4 0 0 0 1.2 5.4c-.6 0-1.2-.2-1.8-.5v.1a4 4 0 0 0 3.2 3.9c-.6.2-1.2.2-1.8.1a4 4 0 0 0 3.8 2.8A8.1 8.1 0 0 1 2 19.1a11.4 11.4 0 0 0 17.6-9.6v-.5c.8-.6 1.6-1.4 2.1-2.2Z"/></svg>
           </a>
-          <a href="#" aria-label="Instagram">
+          <a href="#" aria-label="Instagram" style="background: #1e293b; border-color: #334155; color: #94a3b8;">
             <svg viewBox="0 0 24 24"><rect x="4" y="4" width="16" height="16" rx="5"/><path d="M9 12a3 3 0 1 0 6 0 3 3 0 0 0-6 0Z"/><path d="M17.5 6.5h.01"/></svg>
           </a>
-          <a href="#" aria-label="LinkedIn">
+          <a href="#" aria-label="LinkedIn" style="background: #1e293b; border-color: #334155; color: #94a3b8;">
             <svg viewBox="0 0 24 24"><path d="M6 10v10"/><path d="M6 6v.01"/><path d="M10 20V10"/><path d="M10 14c0-2.2 1.4-4 3.5-4S17 11.5 17 14v6"/></svg>
           </a>
         </div>
       </div>
       <div class="mtc-footer-links">
-        <h2>Explore</h2>
-        <a href="{% url 'find_tutor' %}">Find Tutors</a>
-        <a href="{% url 'tutor_list' %}">Subjects</a>
-        <a href="{% url 'about' %}">Pricing</a>
-        <a href="{% url 'register' %}">Become a Tutor</a>
+        <h2 style="color: #ffffff;">For Parents</h2>
+        <a href="{% url 'home' %}#search-section" style="color: #94a3b8;">Find a Tutor</a>
+        <a href="{% url 'home' %}#how-it-works" style="color: #94a3b8;">How it Works</a>
+        <a href="{% url 'about' %}" style="color: #94a3b8;">Pricing</a>
+        <a href="#" style="color: #94a3b8;">Safety First</a>
       </div>
       <div class="mtc-footer-links">
-        <h2>Support</h2>
-        <a href="{% url 'about' %}">About Us</a>
-        <a href="{% url 'contact' %}">Contact</a>
-        <a href="{% url 'login' %}">Login</a>
-        <a href="{% url 'register' %}">Create Account</a>
+        <h2 style="color: #ffffff;">For Tutors</h2>
+        <a href="{% url 'register' %}" style="color: #94a3b8;">Become a Tutor</a>
+        <a href="#" style="color: #94a3b8;">Success Stories</a>
+        <a href="#" style="color: #94a3b8;">Resources</a>
       </div>
-      <div class="mtc-footer-search">
-        <h2>AI Tutor Search</h2>
-        <p>Describe what you need and let our AI find a strong match.</p>
-        <form action="{% url 'find_tutor' %}">
-          <input name="q" placeholder="Need a Physics tutor for WAEC?">
-          <button type="submit">Search</button>
-        </form>
+      <div class="mtc-footer-links">
+        <h2 style="color: #ffffff;">Company</h2>
+        <a href="{% url 'about' %}" style="color: #94a3b8;">About Us</a>
+        <a href="{% url 'contact' %}" style="color: #94a3b8;">Contact</a>
+        <a href="#" style="color: #94a3b8;">Terms of Service</a>
       </div>
     </div>
-    <div class="mtc-shell mtc-footer-bottom">
-      <p>© 2026 Myteacherconnect. All rights reserved.</p>
+    <div class="mtc-shell mtc-footer-bottom" style="border-top: 1px solid #1e293b; padding-top: 20px;">
+      <p style="color: #64748b;">© 2024 Myteacher Tutors Connect. All rights reserved.</p>
       <div>
         <a href="#">Privacy Policy</a>
         <a href="#">Terms of Service</a>
@@ -133,6 +170,39 @@
           navOverlay.addEventListener('click', toggleMenu);
         }
       }
+
+      // Smooth scroll and focus search box when #search-section is clicked or loaded in URL
+      function focusSearchSection() {
+        const searchSection = document.getElementById('search-section');
+        const searchInput = document.getElementById('home-search');
+        if (searchSection) {
+          searchSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+          if (searchInput) {
+            setTimeout(() => {
+              searchInput.focus();
+              searchInput.style.outline = '2px solid var(--blue)';
+              setTimeout(() => {
+                searchInput.style.outline = '';
+              }, 1200);
+            }, 600);
+          }
+        }
+      }
+
+      const urlParams = new URLSearchParams(window.location.search);
+      if (window.location.hash === '#search-section' || urlParams.has('q')) {
+        focusSearchSection();
+      }
+
+      document.querySelectorAll('a[href*="#search-section"]').forEach(anchor => {
+        anchor.addEventListener('click', function(e) {
+          if (window.location.pathname === '/' || window.location.pathname === '/home/') {
+            e.preventDefault();
+            history.pushState(null, null, '#search-section');
+            focusSearchSection();
+          }
+        });
+      });
     });
   </script>
 </body>

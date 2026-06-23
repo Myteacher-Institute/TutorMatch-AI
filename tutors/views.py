@@ -1,6 +1,8 @@
 from django.http import HttpResponse
+from accounts.decorators import tutor_required
 
 
+@tutor_required
 def tutor_dashboard(request):
     return HttpResponse("Tutor dashboard will be built by Task 3.")
 
