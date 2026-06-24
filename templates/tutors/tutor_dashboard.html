@@ -1,0 +1,184 @@
+{% extends "base.html" %}
+{% block title %}Tutor Dashboard — TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="tutor-portal-bg">
+  <div class="mtc-shell">
+    <div class="mtc-admin-layout">
+
+      <!-- SIDEBAR -->
+      <aside class="mtc-admin-sidebar tutor-sidebar">
+        <div class="tutor-sidebar-profile">
+          <div class="tutor-avatar-ring">
+            {% if profile.profile_photo %}
+              <img src="{{ profile.profile_photo.url }}" alt="Profile" class="tutor-avatar-img">
+            {% else %}
+              <div class="tutor-avatar-placeholder">
+                {{ profile.user.user.first_name|first|upper }}{{ profile.user.user.last_name|first|upper }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="tutor-sidebar-info">
+            <strong>{{ profile.user.user.get_full_name }}</strong>
+            <span>Tutor portal</span>
+          </div>
+        </div>
+
+        <div class="tutor-sidebar-status">
+          <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+            <i class="fa-solid {% if profile.verification_status == 'approved' %}fa-circle-check{% elif profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:5px;"></i>
+            {{ profile.get_verification_status_display }}
+          </span>
+        </div>
+
+        <nav class="mtc-admin-nav" style="margin-top:12px;">
+          <a href="{% url 'tutor_dashboard' %}" class="active">
+            <i class="fa-solid fa-gauge-high" style="width:18px;margin-right:8px;"></i>Dashboard
+          </a>
+          <a href="{% url 'tutor_profile' %}">
+            <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
+          </a>
+          <a href="{% url 'tutor_verification' %}">
+            <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
+          </a>
+          <a href="#">
+            <i class="fa-solid fa-calendar-days" style="width:18px;margin-right:8px;"></i>Bookings
+          </a>
+        </nav>
+
+        <div class="tutor-sidebar-rate">
+          <span>Hourly Rate</span>
+          <strong>{% if profile.hourly_rate %}&#8358;{{ profile.hourly_rate }}{% else %}Not set{% endif %}</strong>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="mtc-admin-content">
+
+        <div class="tutor-page-heading">
+          <div>
+            <p class="tutor-eyebrow">Tutor Dashboard</p>
+            <h1>Welcome back, {{ profile.user.user.first_name }} &#128075;</h1>
+            <p class="tutor-subtext">Here's an overview of your profile and activity.</p>
+          </div>
+          <a href="{% url 'tutor_detail' profile.pk %}" class="btn btn-primary tutor-view-btn">
+            <i class="fa-solid fa-eye" style="margin-right:6px;"></i>View Public Profile
+          </a>
+        </div>
+
+        <!-- Hero Banner -->
+        <div class="tutor-hero-banner mtc-dashboard-hero">
+          <div class="tutor-hero-left">
+            <p class="tutor-hero-label">
+              <i class="fa-solid fa-circle-dot" style="margin-right:5px;font-size:9px;"></i>Profile active
+            </p>
+            <h2>Manage your subjects,<br>sessions &amp; verification.</h2>
+            <a href="{% url 'tutor_profile' %}" class="tutor-hero-cta">
+              <i class="fa-solid fa-pen-to-square" style="margin-right:6px;"></i>Complete Your Profile
+            </a>
+          </div>
+          <div class="tutor-hero-stats">
+            <div class="tutor-stat-chip">
+              <strong>{{ profile.subjects.count }}</strong>
+              <span>Subject{% if profile.subjects.count != 1 %}s{% endif %}</span>
+            </div>
+            <div class="tutor-stat-chip">
+              <strong>{{ profile.years_experience }}</strong>
+              <span>Yrs Exp.</span>
+            </div>
+            <div class="tutor-stat-chip">
+              <strong>{% if profile.verification_status == 'approved' %}<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i>{% else %}<i class="fa-solid fa-clock" style="color:#fbbf24;"></i>{% endif %}</strong>
+              <span>Verified</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Metric Cards -->
+        <div class="mtc-admin-metrics-grid" style="margin-top:28px;">
+          <div class="mtc-admin-metric-card tutor-metric-blue">
+            <span><i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Subjects</span>
+            <strong>{{ profile.subjects.count }}</strong>
+            <p class="tutor-metric-sub">Subjects taught</p>
+          </div>
+          <div class="mtc-admin-metric-card tutor-metric-green">
+            <span><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>Experience</span>
+            <strong>{{ profile.years_experience }}yr{% if profile.years_experience != 1 %}s{% endif %}</strong>
+            <p class="tutor-metric-sub">Teaching experience</p>
+          </div>
+          <div class="mtc-admin-metric-card tutor-metric-purple">
+            <span><i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>Bookings</span>
+            <strong>&#8212;</strong>
+            <p class="tutor-metric-sub">Coming soon</p>
+          </div>
+          <div class="mtc-admin-metric-card tutor-metric-yellow">
+            <span><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
+            <strong>&#8212;</strong>
+            <p class="tutor-metric-sub">Payments module</p>
+          </div>
+        </div>
+
+        <!-- Bottom Grid -->
+        <div class="tutor-bottom-grid">
+
+          <!-- Upcoming Lessons -->
+          <div class="mtc-admin-card">
+            <div class="tutor-card-head">
+              <h2><i class="fa-solid fa-calendar-days" style="color:var(--blue);margin-right:8px;"></i>Upcoming Lessons</h2>
+              <span class="tutor-coming-soon-tag">Coming soon</span>
+            </div>
+            <div class="tutor-empty-state">
+              <div class="tutor-empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>
+              <p>No upcoming lessons yet.</p>
+              <small>Once students book you, sessions will appear here.</small>
+            </div>
+          </div>
+
+          <div style="display:grid;gap:20px;">
+
+            <!-- Verification -->
+            <div class="mtc-admin-card">
+              <div class="tutor-card-head">
+                <h2><i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;"></i>Verification</h2>
+                <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+                  {{ profile.get_verification_status_display }}
+                </span>
+              </div>
+              <p class="tutor-card-desc">
+                {% if profile.verification_status == 'approved' %}
+                  <i class="fa-solid fa-circle-check" style="color:#16a34a;margin-right:4px;"></i>Your account is verified. You appear in public listings.
+                {% elif profile.verification_status == 'rejected' %}
+                  <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;margin-right:4px;"></i>Documents rejected. Please re-upload.
+                {% else %}
+                  <i class="fa-solid fa-clock" style="color:#d97706;margin-right:4px;"></i>Upload documents to get verified and appear in search results.
+                {% endif %}
+              </p>
+              <a href="{% url 'tutor_verification' %}" class="tutor-card-link">
+                Manage documents <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>
+              </a>
+            </div>
+
+            <!-- Subjects -->
+            <div class="mtc-admin-card">
+              <div class="tutor-card-head">
+                <h2><i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach</h2>
+                <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Edit</a>
+              </div>
+              {% if profile.subjects.all %}
+                <div class="tutor-subject-tags">
+                  {% for subject in profile.subjects.all %}
+                    <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <p class="tutor-card-desc">No subjects added yet. <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Add some &#8594;</a></p>
+              {% endif %}
+            </div>
+
+          </div>
+        </div>
+
+      </main>
+    </div>
+  </div>
+</div>
+{% endblock %}
