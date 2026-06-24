@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tutor Bookings | TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="mtc-shell">
+  <section class="mtc-admin-layout">
+    <aside class="mtc-admin-sidebar mtc-student-portal-sidebar">
+      <input type="checkbox" id="tutor-portal-toggle" class="mtc-student-portal-toggle">
+      <div class="mtc-student-portal-header">
+        <h3>Tutor Portal</h3>
+        <label for="tutor-portal-toggle" class="mtc-student-portal-button" aria-label="Toggle tutor portal navigation">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+          </svg>
+        </label>
+      </div>
+      <nav class="mtc-admin-nav">
+        <a href="{% url 'tutor_dashboard' %}">
+          <i class="fa-solid fa-chalkboard-user"></i> Dashboard</a>
+        <a href="{% url 'tutor_bookings' %}" class="active">
+          <i class="fa-solid fa-calendar-check"></i> Bookings</a>
+      </nav>
+    </aside>
+
+    <div class="mtc-admin-content">
+      <div class="mtc-student-bookings-head">
+        <div>
+          <p class="mtc-student-bookings-eyebrow">Booking Requests</p>
+          <h1>Tutor Bookings</h1>
+          <p class="lead">Review student booking requests, confirm lessons, reject unavailable times, and complete lessons after they are done.</p>
+        </div>
+      </div>
+
+      <div class="mtc-student-bookings-summary">
+        <article>
+          <span>Total Requests</span>
+          <strong>{{ bookings_count }}</strong>
+        </article>
+        <article>
+          <span>Pending</span>
+          <strong>{{ pending_count }}</strong>
+        </article>
+        <article>
+          <span>Completed</span>
+          <strong>{{ completed_count }}</strong>
+        </article>
+      </div>
+
+      <div class="mtc-student-bookings-card">
+        <div class="mtc-student-bookings-card-head">
+          <div>
+            <h2>Booking Requests</h2>
+            <p>Student name, lesson date, time, amount, and available tutor actions.</p>
+          </div>
+          <span class="mtc-status-pill mtc-status-accepted">{{ accepted_count }} accepted</span>
+        </div>
+
+        {% if bookings %}
+          <div class="mtc-student-bookings-table-wrap">
+            <table class="mtc-student-bookings-table mtc-tutor-bookings-table">
+              <thead>
+                <tr>
+                  <th>Student Name</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for booking in bookings %}
+                  <tr>
+                    <td>
+                      <div class="mtc-student-bookings-tutor">
+                        <span>
+                          {% if booking.student.user.first_name %}{{ booking.student.user.first_name|slice:":1" }}{% else %}S{% endif %}
+                        </span>
+                        <div>
+                          <strong>{{ booking.student.user.get_full_name|default:booking.student.user.username }}</strong>
+                          <small>{{ booking.lesson_note|default:"No lesson note provided"|truncatechars:54 }}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ booking.booking_date|date:"M j, Y" }}</td>
+                    <td>{{ booking.lesson_time|time:"g:i A" }}</td>
+                    <td><strong>₦{{ booking.amount }}</strong></td>
+                    <td>
+                      <span class="mtc-status-pill mtc-status-{{ booking.status }}">
+                        {{ booking.get_status_display }}
+                      </span>
+                    </td>
+                    <td>
+                      <div class="mtc-tutor-bookings-actions">
+                        {% if booking.status == "pending" %}
+                          <form method="post" action="{% url 'update_booking_status' booking.id 'accepted' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-accept">Accept</button>
+                          </form>
+                          <form method="post" action="{% url 'update_booking_status' booking.id 'cancelled' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject">Reject</button>
+                          </form>
+                        {% elif booking.status == "accepted" %}
+                          <form method="post" action="{% url 'update_booking_status' booking.id 'completed' %}">
+                            {% csrf_token %}
+                            <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-complete">Complete</button>
+                          </form>
+                        {% else %}
+                          <span class="mtc-unavailable-action">No action</span>
+                        {% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="mtc-student-bookings-empty">
+            <div class="mtc-student-bookings-empty-icon">
+              <i class="fa-solid fa-calendar-day"></i>
+            </div>
+            <h2>No booking requests yet</h2>
+            <p>Student booking requests will appear here with the requested date, time, amount, and action buttons.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
