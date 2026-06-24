@@ -1,0 +1,146 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}My Bookings | TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="mtc-shell">
+  <section class="mtc-admin-layout">
+    <aside class="mtc-admin-sidebar mtc-student-portal-sidebar">
+      <input type="checkbox" id="student-portal-toggle" class="mtc-student-portal-toggle">
+      <div class="mtc-student-portal-header">
+        <h3>Student Portal</h3>
+        <label for="student-portal-toggle" class="mtc-student-portal-button" aria-label="Toggle student portal navigation">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+          </svg>
+        </label>
+      </div>
+      <nav class="mtc-admin-nav">
+        <a href="{% url 'student_dashboard' %}">
+          <i class="fa-solid fa-house-circle-check"></i> Dashboard</a>
+        <a href="{% url 'home' %}#search-section">
+          <i class="fa-brands fa-searchengin"></i> AI Tutor Search</a>
+        <a href="{% url 'student_bookings' %}" class="active">
+          <i class="fa-solid fa-receipt"></i> Bookings</a>
+        <a href="#"><i class="fa-solid fa-bookmark"></i> Saved Tutors <span style="font-size: 10px; color: var(--muted); margin-left: 5px;">(Soon)</span></a>
+      </nav>
+    </aside>
+
+    <div class="mtc-admin-content">
+      <div class="mtc-student-bookings-head">
+        <div>
+          <p class="mtc-student-bookings-eyebrow">Lesson Schedule</p>
+          <h1>My Bookings</h1>
+          <p class="lead">Track your tutor requests, lesson times, payment status, and completed lessons.</p>
+        </div>
+        <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find Tutor</a>
+      </div>
+
+      <div class="mtc-student-bookings-summary">
+        <article>
+          <span>Total Bookings</span>
+          <strong>{{ bookings_count }}</strong>
+        </article>
+        <article>
+          <span>Pending Review</span>
+          <strong>{{ pending_review_count }}</strong>
+        </article>
+        <article>
+          <span>Next Lesson</span>
+          <strong>{% if next_booking %}{{ next_booking.booking_date|date:"M j" }}{% else %}-{% endif %}</strong>
+        </article>
+      </div>
+
+      <div class="mtc-student-bookings-card">
+        <div class="mtc-student-bookings-card-head">
+          <div>
+            <h2>Booking List</h2>
+            <p>All lessons you have requested are shown here.</p>
+          </div>
+        </div>
+
+        {% if bookings %}
+          <div class="mtc-student-bookings-table-wrap">
+            <table class="mtc-student-bookings-table">
+              <thead>
+                <tr>
+                  <th>Tutor name</th>
+                  <th>Date</th>
+                  <th>Time</th>
+                  <th>Status</th>
+                  <th>Amount</th>
+                  <th>Payment status</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for booking in bookings %}
+                  {% with payment=booking.payments.first %}
+                  <tr>
+                    <td>
+                      <div class="mtc-student-bookings-tutor">
+                        {% if booking.tutor.profile_photo %}
+                          <img src="{{ booking.tutor.profile_photo.url }}" alt="{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}">
+                        {% else %}
+                          <span>
+                            {% if booking.tutor.user.user.first_name %}{{ booking.tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}
+                          </span>
+                        {% endif %}
+                        <div>
+                          <strong>{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</strong>
+                          <small>{{ booking.tutor.location|default:"Location pending" }}</small>
+                        </div>
+                      </div>
+                    </td>
+                    <td>{{ booking.booking_date|date:"M j, Y" }}</td>
+                    <td>{{ booking.lesson_time|time:"g:i A" }}</td>
+                    <td>
+                      <span class="mtc-status-pill mtc-status-{{ booking.status }}">
+                        {{ booking.get_status_display }}
+                      </span>
+                    </td>
+                    <td><strong>₦{{ booking.amount }}</strong></td>
+                    <td>
+                      {% if payment %}
+                        <span class="mtc-payment-pill mtc-payment-{{ payment.payment_status }}">
+                          {{ payment.get_payment_status_display }}
+                        </span>
+                      {% else %}
+                        <span class="mtc-payment-pill mtc-payment-pending">Pending</span>
+                      {% endif %}
+                    </td>
+                    <td>
+                      {% if booking.status == "completed" %}
+                        {% if booking.reviews.exists %}
+                          <span class="mtc-reviewed-label">Reviewed</span>
+                        {% else %}
+                          <a href="{% url 'add_review' booking.id %}" class="mtc-review-button">Review</a>
+                        {% endif %}
+                      {% else %}
+                        <span class="mtc-unavailable-action">Not yet</span>
+                      {% endif %}
+                    </td>
+                  </tr>
+                  {% endwith %}
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <div class="mtc-student-bookings-empty">
+            <div class="mtc-student-bookings-empty-icon">
+              <i class="fa-solid fa-calendar-check"></i>
+            </div>
+            <h2>No bookings yet</h2>
+            <p>Your tutor bookings will appear here after you schedule a lesson.</p>
+            <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find a Tutor</a>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}

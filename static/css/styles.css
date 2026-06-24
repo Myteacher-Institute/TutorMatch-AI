@@ -2,7 +2,7 @@
   --blue: #2563eb;
   --blue-dark: #1d4ed8;
   --ink: #0f172a;
-  --muted: #a2b7d6;
+  --muted: #90a9cf;
   --line: #c9cdd388;
   --soft: #f7faff;
   --white: #ffffff;
@@ -2381,6 +2381,13 @@ img {
   padding: 20px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
+
+.mtc-admin-metric-card:hover{
+  transform: translateY(-4px);
+  border-color: #bfdbfe;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+}
+
 .mtc-admin-metric-card span {
   font-size: 12px;
   font-weight: 700;
@@ -3410,5 +3417,702 @@ img {
   }
   .best-match-stats-grid {
     grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Booking Page */
+.mtc-booking-section {
+  min-height: 100vh;
+  background: #eef3fb;
+  color: #0f172a;
+  padding: 32px 16px;
+}
+
+.mtc-booking-container {
+  width: min(1120px, 100%);
+  margin: 0 auto;
+}
+
+.mtc-booking-header {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  justify-content: space-between;
+  margin-bottom: 24px;
+}
+
+.mtc-booking-eyebrow {
+  margin: 0;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+}
+
+.mtc-booking-header h1 {
+  margin: 8px 0 0;
+  color: #020617;
+  font-size: 32px;
+  font-weight: 800;
+  line-height: 1.15;
+}
+
+.mtc-booking-back-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  width: fit-content;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: var(--white);
+  color: #475569;
+  padding: 0 16px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+  transition: border-color 0.2s ease, color 0.2s ease;
+}
+
+.mtc-booking-back-link:hover {
+  border-color: #bfdbfe;
+  color: #1d4ed8;
+}
+
+.mtc-booking-messages {
+  display: grid;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.mtc-booking-message {
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: var(--white);
+  color: #334155;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08);
+}
+
+.mtc-booking-layout {
+  display: grid;
+  gap: 24px;
+}
+
+.mtc-booking-tutor-card,
+.mtc-booking-form-card {
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: 0 18px 45px rgba(15, 23, 42, 0.08);
+}
+
+.mtc-booking-tutor-head {
+  background: #1d4ed8;
+  color: var(--white);
+  padding: 28px 24px;
+}
+
+.mtc-booking-tutor-profile {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.mtc-booking-avatar,
+.mtc-booking-avatar-placeholder {
+  width: 80px;
+  height: 80px;
+  flex: 0 0 80px;
+  border-radius: 8px;
+  box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.2);
+}
+
+.mtc-booking-avatar {
+  object-fit: cover;
+}
+
+.mtc-booking-avatar-placeholder {
+  display: grid;
+  place-items: center;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--white);
+  font-size: 24px;
+  font-weight: 800;
+}
+
+.mtc-booking-tutor-name {
+  min-width: 0;
+}
+
+.mtc-booking-tutor-name h2 {
+  margin: 0;
+  overflow: hidden;
+  color: var(--white);
+  font-size: 24px;
+  font-weight: 800;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.mtc-booking-tutor-name p {
+  margin: 4px 0 0;
+  color: #dbeafe;
+  font-size: 14px;
+}
+
+.mtc-booking-tutor-body {
+  display: grid;
+  gap: 20px;
+  padding: 24px;
+}
+
+.mtc-booking-tutor-body h3 {
+  margin: 0;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 800;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mtc-booking-summary {
+  margin: 12px 0 0;
+  color: #475569;
+  font-size: 14px;
+  line-height: 1.7;
+}
+
+.mtc-booking-facts {
+  display: grid;
+  gap: 12px;
+}
+
+.mtc-booking-fact,
+.mtc-booking-subjects {
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 12px 16px;
+}
+
+.mtc-booking-fact {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.mtc-booking-fact span,
+.mtc-booking-subjects > span {
+  color: #64748b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mtc-booking-fact strong {
+  color: #020617;
+}
+
+.mtc-booking-subjects div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.mtc-booking-subject-pill {
+  border-radius: 999px;
+  background: #eff6ff;
+  color: #1d4ed8;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mtc-booking-empty-subject {
+  color: #334155;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mtc-booking-note {
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+  padding: 12px 16px;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.mtc-booking-form-card {
+  padding: 24px;
+}
+
+.mtc-booking-form {
+  display: grid;
+  gap: 24px;
+}
+
+.mtc-booking-error-box {
+  border: 1px solid #fee2e2;
+  border-radius: 8px;
+  background: #fef2f2;
+  color: #b91c1c;
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.mtc-booking-field-grid {
+  display: grid;
+  gap: 20px;
+}
+
+.mtc-booking-field {
+  display: grid;
+  gap: 8px;
+  color: #1e293b;
+  font-size: 14px;
+  font-weight: 800;
+}
+
+.mtc-booking-form input,
+.mtc-booking-form select,
+.mtc-booking-form textarea {
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  color: #0f172a;
+  padding: 12px 16px;
+  font: inherit;
+  font-weight: 500;
+  outline: none;
+  transition: border-color 0.2s ease, background 0.2s ease, box-shadow 0.2s ease;
+}
+
+.mtc-booking-form textarea {
+  min-height: 128px;
+  resize: vertical;
+}
+
+.mtc-booking-form input:focus,
+.mtc-booking-form select:focus,
+.mtc-booking-form textarea:focus {
+  border-color: #3b82f6;
+  background: var(--white);
+  box-shadow: 0 0 0 4px #dbeafe;
+}
+
+.mtc-booking-field-error {
+  margin: 0;
+  color: #dc2626;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.mtc-booking-amount-box {
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  padding: 20px;
+}
+
+.mtc-booking-amount-row {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.mtc-booking-amount-row h2 {
+  margin: 0;
+  color: #020617;
+  font-size: 16px;
+  font-weight: 800;
+}
+
+.mtc-booking-amount-row p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.mtc-booking-amount-row strong {
+  color: #1d4ed8;
+  font-size: 24px;
+}
+
+.mtc-booking-hidden-field {
+  display: none;
+}
+
+.mtc-booking-actions {
+  display: flex;
+  flex-direction: column-reverse;
+  gap: 12px;
+  border-top: 1px solid #f1f5f9;
+  padding-top: 24px;
+}
+
+.mtc-booking-actions p {
+  margin: 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.mtc-booking-submit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  border: 0;
+  border-radius: 8px;
+  background: var(--blue);
+  color: var(--white);
+  padding: 0 24px;
+  font-size: 14px;
+  font-weight: 800;
+  box-shadow: 0 10px 20px rgba(37, 99, 235, 0.2);
+  cursor: pointer;
+  transition: background 0.2s ease;
+}
+
+.mtc-booking-submit:hover {
+  background: var(--blue-dark);
+}
+
+@media (min-width: 640px) {
+  .mtc-booking-section {
+    padding: 32px 24px;
+  }
+
+  .mtc-booking-header,
+  .mtc-booking-amount-row,
+  .mtc-booking-actions {
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .mtc-booking-header h1 {
+    font-size: 40px;
+  }
+
+  .mtc-booking-field-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mtc-booking-form-card {
+    padding: 32px;
+  }
+}
+
+@media (min-width: 1024px) {
+  .mtc-booking-section {
+    padding-left: 32px;
+    padding-right: 32px;
+  }
+
+  .mtc-booking-layout {
+    grid-template-columns: 0.85fr 1.15fr;
+  }
+}
+
+/* Student Bookings */
+.mtc-student-bookings-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.mtc-student-bookings-eyebrow {
+  margin: 0 0 6px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+.mtc-student-bookings-head h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 30px;
+}
+
+.mtc-student-bookings-summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.mtc-student-bookings-summary article {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  padding: 18px 20px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.mtc-student-bookings-summary article:hover{
+  transform: translateY(-4px);
+  border-color: #bfdbfe;
+  box-shadow: 0 15px 35px rgba(15, 23, 42, 0.08);
+}
+
+.mtc-student-bookings-summary span {
+  display: block;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mtc-student-bookings-summary strong {
+  display: block;
+  margin-top: 8px;
+  color: var(--ink);
+  font-size: 28px;
+}
+
+.mtc-student-bookings-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--white);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.mtc-student-bookings-card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-bottom: 1px solid var(--line);
+  padding: 22px 24px;
+}
+
+.mtc-student-bookings-card-head h2 {
+  margin: 0;
+  color: var(--ink);
+  font-size: 18px;
+}
+
+.mtc-student-bookings-card-head p {
+  margin: 4px 0 0;
+  color: #64748b;
+  font-size: 13px;
+}
+
+.mtc-student-bookings-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.mtc-student-bookings-table {
+  width: 100%;
+  min-width: 920px;
+  border-collapse: collapse;
+}
+
+.mtc-student-bookings-table th,
+.mtc-student-bookings-table td {
+  padding: 16px 18px;
+  border-bottom: 1px solid #eef2f7;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.mtc-student-bookings-table th {
+  background: #f8fafc;
+  color: #64748b;
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.mtc-student-bookings-table td {
+  color: #334155;
+  font-size: 14px;
+}
+
+.mtc-student-bookings-table tbody tr:hover {
+  background: #f8fbff;
+}
+
+.mtc-student-bookings-tutor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 220px;
+}
+
+.mtc-student-bookings-tutor img,
+.mtc-student-bookings-tutor > span {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 8px;
+}
+
+.mtc-student-bookings-tutor img {
+  object-fit: cover;
+}
+
+.mtc-student-bookings-tutor > span {
+  display: grid;
+  place-items: center;
+  background: #dbeafe;
+  color: var(--blue);
+  font-weight: 800;
+}
+
+.mtc-student-bookings-tutor strong,
+.mtc-student-bookings-tutor small {
+  display: block;
+}
+
+.mtc-student-bookings-tutor strong {
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.mtc-student-bookings-tutor small {
+  margin-top: 3px;
+  color: #64748b;
+  font-size: 12px;
+}
+
+.mtc-status-pill,
+.mtc-payment-pill,
+.mtc-reviewed-label,
+.mtc-unavailable-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.mtc-status-pending {
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.mtc-status-accepted {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.mtc-status-completed {
+  background: #f0fdf4;
+  color: #15803d;
+}
+
+.mtc-status-cancelled {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.mtc-payment-pending {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.mtc-payment-paid {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.mtc-payment-failed {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.mtc-review-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: var(--white);
+  padding: 0 14px;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.mtc-review-button:hover {
+  background: var(--blue-dark);
+}
+
+.mtc-reviewed-label {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.mtc-unavailable-action {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.mtc-student-bookings-empty {
+  display: grid;
+  place-items: center;
+  padding: 54px 24px;
+  text-align: center;
+}
+
+.mtc-student-bookings-empty-icon {
+  display: grid;
+  width: 58px;
+  height: 58px;
+  place-items: center;
+  border-radius: 14px;
+  background: #eff6ff;
+  color: var(--blue);
+  font-size: 24px;
+}
+
+.mtc-student-bookings-empty h2 {
+  margin: 18px 0 8px;
+  color: var(--ink);
+  font-size: 22px;
+}
+
+.mtc-student-bookings-empty p {
+  max-width: 420px;
+  margin: 0 0 22px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+@media (max-width: 820px) {
+  .mtc-student-bookings-head {
+    flex-direction: column;
+  }
+
+  .mtc-student-bookings-summary {
+    grid-template-columns: 1fr;
+  }
+
+  .mtc-student-bookings-card-head {
+    padding: 18px;
   }
 }
