@@ -2,8 +2,8 @@
   --blue: #2563eb;
   --blue-dark: #1d4ed8;
   --ink: #0f172a;
-  --muted: #64748b;
-  --line: #e2e8f0;
+  --muted: #a2b7d6;
+  --line: #c9cdd388;
   --soft: #f7faff;
   --white: #ffffff;
   --navy: #101a33;
@@ -2313,6 +2313,7 @@ img {
 
 .mtc-admin-content {
   min-width: 0;
+  
 }
 
 .mtc-admin-sidebar {
@@ -2330,6 +2331,16 @@ img {
   text-transform: uppercase;
   color: var(--muted);
 }
+
+.mtc-student-portal-toggle,
+.mtc-student-portal-button {
+  display: none;
+}
+
+.mtc-student-portal-header h3 {
+  margin-bottom: 20px;
+}
+
 .mtc-admin-nav {
   display: grid;
   gap: 10px;
@@ -2404,7 +2415,9 @@ img {
 }
 
 .mtc-dashboard-hero {
-  box-shadow: 0 20px 50px rgba(37, 99, 235, 0.25);
+  /* box-shadow: 0 20px 50px rgba(37, 99, 235, 0.25); */
+  box-shadow:  35px 35px 70px #bdcddf,
+             -35px -35px 70px #ffffff;
 }
 
 .mtc-dashboard-grid {
@@ -2565,6 +2578,36 @@ img {
     padding: 14px 16px;
     font-size: 15px;
   }
+  .mtc-student-portal-sidebar {
+    padding: 16px;
+  }
+  .mtc-student-portal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
+  .mtc-student-portal-header h3 {
+    margin: 0;
+  }
+  .mtc-student-portal-button {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    color: var(--blue);
+    background: #eff6ff;
+    cursor: pointer;
+  }
+  .mtc-student-portal-sidebar .mtc-admin-nav {
+    display: none;
+    margin-top: 14px;
+  }
+  .mtc-student-portal-toggle:checked ~ .mtc-admin-nav {
+    display: grid;
+  }
 }
 
 @media (max-width: 768px) {
@@ -2591,6 +2634,13 @@ img {
   }
   .mtc-dashboard-hero {
     padding: 24px !important;
+  }
+  .mtc-dashboard-search-form input {
+    min-width: 0 !important;
+    width: 100%;
+  }
+  .mtc-dashboard-search-button {
+    width: 100%;
   }
 }
 
@@ -2887,28 +2937,57 @@ img {
 }
 
 @media (max-width: 480px) {
-  .mtc-auth-section {
-    padding: 16px 10px;
-  }
-  .mtc-auth-container {
-    padding: 8px;
-    border-radius: 14px;
-  }
-  .mtc-auth-form-wrapper {
-    padding: 0;
-  }
-  .mtc-auth-form-card {
-    border-radius: 12px;
-    padding: 20px 16px;
-  }
-  .mtc-auth-form {
-    gap: 14px;
-  }
-  .mtc-auth-form .form-actions {
-    align-items: flex-start;
-    flex-direction: column;
-  }
-}
+   .mtc-auth-section {
+     padding: 16px 10px;
+   }
+   .mtc-auth-container {
+     padding: 8px;
+     border-radius: 14px;
+   }
+   .mtc-auth-form-wrapper {
+     padding: 0;
+   }
+   .mtc-auth-form-card {
+     border-radius: 12px;
+     padding: 20px 16px;
+   }
+   .mtc-auth-form {
+     gap: 14px;
+   }
+   .mtc-auth-form .form-actions {
+     align-items: flex-start;
+     flex-direction: column;
+   }
+ }
+
+ .role-toggle {
+   display: grid;
+   grid-template-columns: 1fr 1fr;
+   gap: 8px;
+   margin-top: 4px;
+ }
+
+ .role-toggle-btn {
+   min-height: 42px;
+   border: 1px solid var(--line);
+   border-radius: 8px;
+   background: var(--white);
+   font-size: 13px;
+   font-weight: 600;
+   color: #475569;
+   cursor: pointer;
+   transition: all 0.2s ease;
+ }
+
+ .role-toggle-btn:hover {
+   border-color: var(--blue);
+ }
+
+ .role-toggle-btn.active {
+   border-color: var(--blue);
+   background: #eff6ff;
+   color: var(--blue);
+ }
 
 /* AI Search Results Page Redesign Styles */
 .search-assistant-card {

@@ -28,12 +28,18 @@
           {% csrf_token %}
 
           {% for field in form %}
-            <div class="form-group {% if field.name == 'role_selection' or field.name == 'password1' or field.name == 'password2' or field.name == 'role' %}span-2{% endif %}">
-              <label for="{{ field.id_for_label }}">
-                {{ field.label }}
-              </label>
-
-              {% if field.field.choices %}
+            <div class="form-group {% if field.name == 'role_selection' or field.name == 'password1' or field.name == 'password2' %}span-2{% endif %}">
+              {% if field.name == 'role_selection' %}
+                <label>{{ field.label }}</label>
+                <div class="role-toggle" id="role-toggle">
+                  <button type="button" class="role-toggle-btn active" data-value="student">Student/Parent</button>
+                  <button type="button" class="role-toggle-btn" data-value="tutor">Tutor</button>
+                </div>
+                <input type="hidden" name="{{ field.name }}" id="{{ field.id_for_label }}" value="student">
+              {% elif field.field.choices %}
+                <label for="{{ field.id_for_label }}">
+                  {{ field.label }}
+                </label>
                 <select name="{{ field.name }}" id="{{ field.id_for_label }}">
                   {% for value, label in field.field.choices %}
                     <option value="{{ value }}" {% if field.value == value %}selected{% endif %}>{{ label }}</option>
@@ -92,23 +98,35 @@
 </section>
 
 <script>
-  document.querySelectorAll('.password-toggle').forEach((button) => {
-    button.addEventListener('click', () => {
-      const input = document.getElementById(button.dataset.target);
-      const isHidden = input.type === 'password';
-      input.type = isHidden ? 'text' : 'password';
-      button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
-      
-      // Update eye icon color
-      button.style.color = isHidden ? 'var(--blue)' : '#94a3b8';
-    });
-  });
+   document.querySelectorAll('.password-toggle').forEach((button) => {
+     button.addEventListener('click', () => {
+       const input = document.getElementById(button.dataset.target);
+       const isHidden = input.type === 'password';
+       input.type = isHidden ? 'text' : 'password';
+       button.setAttribute('aria-label', isHidden ? 'Hide password' : 'Show password');
+       button.style.color = isHidden ? 'var(--blue)' : '#94a3b8';
+     });
+   });
 
-  const phoneInput = document.getElementById('id_phonenumber');
-  if (phoneInput) {
-    phoneInput.addEventListener('input', () => {
-      phoneInput.value = phoneInput.value.replace(/\D/g, '');
-    });
-  }
-</script>
+   const phoneInput = document.getElementById('id_phonenumber');
+   if (phoneInput) {
+     phoneInput.addEventListener('input', () => {
+       phoneInput.value = phoneInput.value.replace(/\D/g, '');
+     });
+   }
+
+   const roleToggle = document.getElementById('role-toggle');
+   if (roleToggle) {
+     const toggleButtons = roleToggle.querySelectorAll('.role-toggle-btn');
+     const hiddenInput = document.getElementById('id_role_selection');
+     
+     toggleButtons.forEach(btn => {
+       btn.addEventListener('click', () => {
+         toggleButtons.forEach(b => b.classList.remove('active'));
+         btn.classList.add('active');
+         hiddenInput.value = btn.dataset.value;
+       });
+     });
+   }
+ </script>
 {% endblock %}

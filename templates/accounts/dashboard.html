@@ -7,13 +7,26 @@
 <div class="mtc-shell">
   <section class="mtc-admin-layout">
     <!-- Student Sidebar -->
-    <aside class="mtc-admin-sidebar">
-      <h3>Student Portal</h3>
+    <aside class="mtc-admin-sidebar mtc-student-portal-sidebar">
+      <input type="checkbox" id="student-portal-toggle" class="mtc-student-portal-toggle">
+      <div class="mtc-student-portal-header">
+        <h3>Student Portal</h3>
+        <label for="student-portal-toggle" class="mtc-student-portal-button" aria-label="Toggle student portal navigation">
+          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="4" y1="7" x2="20" y2="7"></line>
+            <line x1="4" y1="12" x2="20" y2="12"></line>
+            <line x1="4" y1="17" x2="20" y2="17"></line>
+          </svg>
+        </label>
+      </div>
       <nav class="mtc-admin-nav">
-        <a href="{% url 'student_dashboard' %}" class="active">Dashboard</a>
-        <a href="{% url 'home' %}#search-section">AI Tutor Search</a>
-        <a href="{% url 'student_bookings' %}">Bookings</a>
-        <a href="#">Saved Tutors <span style="font-size: 10px; color: var(--muted); margin-left: 5px;">(Soon)</span></a>
+        <a href="{% url 'student_dashboard' %}" class="active">
+          <i class='fa-solid fa-house-circle-check'></i> Dashboard</a>
+        <a href="{% url 'home' %}#search-section">
+          <i class='fa-brands fa-searchengin'></i> AI Tutor Search</a>
+        <a href="{% url 'student_bookings' %}">
+          <i class='fa-solid fa-receipt'></i> Bookings</a>
+        <a href="#"> <i class='fa-solid fa-bookmark'></i> Saved Tutors <span style="font-size: 10px; color: var(--muted); margin-left: 5px;">(Soon)</span></a>
       </nav>
     </aside>
     
@@ -24,16 +37,16 @@
           <h1 style="margin: 0; font-size: 28px;">Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% else %}, Student{% endif %}!</h1>
           <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">Find your next home tutor and manage your scheduled lessons.</p>
         </div>
-        <a href="{% url 'logout' %}" class="btn btn-ghost" style="border: 1px solid var(--line); border-radius: 8px;">Logout</a>
+       
       </div>
 
 <!-- Hero card with AI search -->
       <div class="mtc-dashboard-hero" style="background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%); border-radius: 16px; padding: 32px; color: var(--white); margin-bottom: 30px;">
         <h2 style="margin: 0 0 12px; font-size: clamp(20px, 5vw, 30px); color: var(--white); font-weight: 600;">What subject or tutor needs do you have?</h2>
         <p style="margin: 0 0 20px; color: #dbeafe; font-size: 14px; line-height: 1.5;">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
-        <form action="{% url 'search_results' %}" method="get" style="display: flex; gap: 10px; flex-wrap: wrap;">
+        <form action="{% url 'search_results' %}" method="get" class="mtc-dashboard-search-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
           <input name="q" placeholder="Describe your tutor needs..." required style="flex: 1; min-width: 250px; min-height: 48px; border: 0; border-radius: 8px; padding: 0 16px; font-size: 14px; outline: none; color: var(--ink);">
-          <button type="submit" class="btn btn-light" style="min-height: 48px; font-weight: 700; border-radius: 8px;">Find Tutor</button>
+          <button type="submit" class="btn btn-light mtc-dashboard-search-button" style="min-height: 48px; font-weight: 700; border-radius: 8px;">Find Tutor</button>
         </form>
       </div>
 
@@ -45,7 +58,7 @@
         </div>
         <div class="mtc-admin-metric-card">
           <span>Recommended Tutors</span>
-          <strong>3</strong>
+          <strong>{{ recommended_tutors|length }}</strong>
         </div>
         <div class="mtc-admin-metric-card">
           <span>Active Bookings</span>
@@ -79,37 +92,34 @@
             <h2 style="margin: 0 0 16px;">Recommended Tutors for You</h2>
             
             <div class="mtc-recommended-tutors">
-              <!-- Aisha Bello -->
+              {% for tutor in recommended_tutors %}
               <article class="mtc-recommended-tutor-card">
                 <div class="mtc-recommended-tutor-head">
-                  <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=120&h=120&q=80" alt="Aisha Bello">
+                  {% if tutor.profile_photo %}
+                    <img src="{{ tutor.profile_photo.url }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+                  {% else %}
+                    <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=120&h=120&q=80" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+                  {% endif %}
                   <div class="mtc-recommended-tutor-copy">
-                    <h3>Aisha Bello</h3>
-                    <p>Mathematics & JAMB Prep</p>
+                    <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
+                    <p>
+                      {% for subject in tutor.subjects.all %}
+                        {{ subject.subject_name }}{% if not forloop.last %} & {% endif %}
+                      {% empty %}
+                        Tutor
+                      {% endfor %}
+                    </p>
                   </div>
                 </div>
                 <div class="mtc-recommended-tutor-meta">
-                  <span>GRA</span>
-                  <strong>₦10,000/hr</strong>
+                  <span>{{ tutor.location }}</span>
+                  <strong>₦{{ tutor.hourly_rate }}/hr</strong>
                 </div>
-                <a href="{% url 'book_tutor' 1 %}" class="btn btn-primary">Book Tutor</a>
+                <a href="{% url 'book_tutor' tutor.pk %}" class="btn btn-primary">Book Tutor</a>
               </article>
-
-              <!-- Chinedu Okoro -->
-              <article class="mtc-recommended-tutor-card">
-                <div class="mtc-recommended-tutor-head">
-                  <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=120&h=120&q=80" alt="Chinedu Okoro">
-                  <div class="mtc-recommended-tutor-copy">
-                    <h3>Chinedu Okoro</h3>
-                    <p>Physics & Chemistry</p>
-                  </div>
-                </div>
-                <div class="mtc-recommended-tutor-meta">
-                  <span>Rumuola</span>
-                  <strong>₦12,000/hr</strong>
-                </div>
-                <a href="{% url 'book_tutor' 2 %}" class="btn btn-primary">Book Tutor</a>
-              </article>
+              {% empty %}
+                <p style="color: var(--muted); font-size: 14px; margin: 0; padding: 12px 0;">No tutors are available yet. Try the AI tutor search or check back soon.</p>
+              {% endfor %}
             </div>
           </div>
         </div>

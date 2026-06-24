@@ -59,8 +59,18 @@ def verify_account(request):
 
 
 from .decorators import student_required, _dashboard_for_user
+from tutors.models import Tutor
 
 
 @student_required
 def student_dashboard(request):
-    return render(request, 'accounts/dashboard.html')
+    recommended_tutors = (
+        Tutor.objects.select_related("user__user")
+        .prefetch_related("subjects")
+        .order_by("-years_experience", "hourly_rate")[:3]
+    )
+    return render(
+        request,
+        'accounts/dashboard.html',
+        {"recommended_tutors": recommended_tutors},
+    )
