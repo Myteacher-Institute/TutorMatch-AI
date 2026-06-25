@@ -67,11 +67,11 @@
         </div>
         <div class="mtc-admin-metric-card">
           <span><i class=" fa-solid fa-calendar-days"></i> Active Bookings</span>
-          <strong>0</strong>
+          <strong>{{ active_bookings_count }}</strong>
         </div>
         <div class="mtc-admin-metric-card">
           <span><i class="fa-solid fa-check-double"></i> Completed Lessons</span>
-          <strong>0</strong>
+          <strong>{{ completed_lessons_count }}</strong>
         </div>
       </div>
 
@@ -86,9 +86,29 @@
               <a href="{% url 'student_bookings' %}" style="color: var(--blue); font-size: 13px; font-weight: 700;">View All</a>
             </div>
             
-            <!-- Bookings List Placeholder -->
-            <div style="display: grid; gap: 12px;">
-              <p style="color: var(--muted); font-size: 14px; margin: 0; padding: 12px 0;">You have no active or historical bookings yet. Start by finding a tutor!</p>
+            <div class="mtc-dashboard-recent-bookings">
+              {% for booking in recent_bookings %}
+                <article class="mtc-dashboard-booking-row">
+                  <div class="mtc-dashboard-booking-tutor">
+                    {% if booking.tutor.profile_photo %}
+                      <img src="{{ booking.tutor.profile_photo.url }}" alt="{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}">
+                    {% else %}
+                      <span>{% if booking.tutor.user.user.first_name %}{{ booking.tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}</span>
+                    {% endif %}
+                    <div>
+                      <strong>{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</strong>
+                      <small>{{ booking.booking_date|date:"M j, Y" }} at {{ booking.lesson_time|time:"g:i A" }}</small>
+                    </div>
+                  </div>
+
+                  <div class="mtc-dashboard-booking-meta">
+                    <span class="mtc-status-pill mtc-status-{{ booking.status }}">{{ booking.get_status_display }}</span>
+                    <strong>₦{{ booking.amount }}</strong>
+                  </div>
+                </article>
+              {% empty %}
+                <p style="color: var(--muted); font-size: 14px; margin: 0; padding: 12px 0;">You have no active or historical bookings yet. Start by finding a tutor!</p>
+              {% endfor %}
             </div>
           </div>
 

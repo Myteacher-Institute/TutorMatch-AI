@@ -2524,6 +2524,79 @@ img {
   overflow-wrap: anywhere;
 }
 
+.mtc-dashboard-recent-bookings {
+  display: grid;
+  gap: 12px;
+}
+
+.mtc-dashboard-booking-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #ffffff;
+  padding: 14px;
+}
+
+.mtc-dashboard-booking-tutor {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.mtc-dashboard-booking-tutor img,
+.mtc-dashboard-booking-tutor > span {
+  width: 44px;
+  height: 44px;
+  flex: 0 0 44px;
+  border-radius: 50%;
+}
+
+.mtc-dashboard-booking-tutor img {
+  object-fit: cover;
+}
+
+.mtc-dashboard-booking-tutor > span {
+  display: grid;
+  place-items: center;
+  background: #dbeafe;
+  color: var(--blue);
+  font-weight: 900;
+}
+
+.mtc-dashboard-booking-tutor strong,
+.mtc-dashboard-booking-tutor small {
+  display: block;
+}
+
+.mtc-dashboard-booking-tutor strong {
+  color: #12182c;
+  font-size: 14px;
+}
+
+.mtc-dashboard-booking-tutor small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.mtc-dashboard-booking-meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 0 0 auto;
+}
+
+.mtc-dashboard-booking-meta strong {
+  color: var(--blue);
+  font-size: 14px;
+  white-space: nowrap;
+}
+
 .mtc-recommended-tutors {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -2815,6 +2888,18 @@ img {
     width: 100%;
   }
   .mtc-tutor-row .btn {
+    width: 100%;
+  }
+  .mtc-dashboard-booking-row,
+  .mtc-dashboard-booking-meta {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .mtc-dashboard-booking-meta {
+    width: 100%;
+    gap: 8px;
+  }
+  .mtc-dashboard-booking-meta .mtc-status-pill {
     width: 100%;
   }
   .mtc-recommended-tutors {

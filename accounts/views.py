@@ -1,6 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from .forms import Registration, Login
+from .models import UserProfile
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 
@@ -61,10 +62,24 @@ def verify_account(request):
 from .decorators import student_required, _dashboard_for_user
 from tutors.models import Tutor
 from django.db.models import Count
+from bookings.models import Booking
 
 
 @student_required
 def student_dashboard(request):
+    student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    recent_bookings = (
+        Booking.objects.filter(student=student_profile)
+        .select_related("tutor__user__user")
+        .order_by("-booking_date", "-lesson_time")[:4]
+    )
+    active_bookings_count = Booking.objects.filter(student=student_profile).exclude(
+        status__in=["completed", "cancelled"]
+    ).count()
+    completed_lessons_count = Booking.objects.filter(
+        student=student_profile,
+        status="completed",
+    ).count()
     recommended_tutors = (
         Tutor.objects.select_related("user__user")
         .prefetch_related("subjects")
@@ -74,5 +89,10 @@ def student_dashboard(request):
     return render(
         request,
         'accounts/dashboard.html',
-        {"recommended_tutors": recommended_tutors},
+        {
+            "recommended_tutors": recommended_tutors,
+            "recent_bookings": recent_bookings,
+            "active_bookings_count": active_bookings_count,
+            "completed_lessons_count": completed_lessons_count,
+        },
     )
