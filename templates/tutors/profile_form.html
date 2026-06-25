@@ -22,18 +22,20 @@
             <strong>{{ request.user.get_full_name }}</strong>
             <span>Tutor portal</span>
           </div>
-        </div>
-
+          
         <div class="tutor-sidebar-status">
           <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
-            <i class="fa-solid {% if profile.verification_status == 'approved' %}fa-circle-check{% elif profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:5px;"></i>
+            <i class="fa-solid {% if profile.verification_status == 'approved' %}fa-circle-check{% elif profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:3px;"></i>
             {{ profile.get_verification_status_display }}
           </span>
         </div>
 
+        </div>
+
+
         <nav class="mtc-admin-nav" style="margin-top:12px;">
           <a href="{% url 'tutor_dashboard' %}">
-            <i class="fa-solid fa-gauge-high" style="width:18px;margin-right:8px;"></i>Dashboard
+            <i class="fa-solid fa-house-circle-check" style="width:18px;margin-right:8px;"></i>Dashboard
           </a>
           <a href="{% url 'tutor_profile' %}" class="active">
             <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
@@ -41,8 +43,8 @@
           <a href="{% url 'tutor_verification' %}">
             <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
           </a>
-          <a href="#">
-            <i class="fa-solid fa-calendar-days" style="width:18px;margin-right:8px;"></i>Bookings
+          <a href="{% url 'tutor_bookings' %}">
+            <i class="fa-solid fa-receipt" style="width:18px;margin-right:8px;"></i>Bookings
           </a>
         </nav>
 
