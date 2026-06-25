@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+{% block title %}Verification — TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="tutor-portal-bg">
+  <div class="mtc-shell">
+    <div class="mtc-admin-layout">
+
+      <!-- SIDEBAR -->
+      <aside class="mtc-admin-sidebar tutor-sidebar">
+        <div class="tutor-sidebar-profile">
+          <div class="tutor-avatar-ring">
+            {% if profile.profile_photo %}
+              <img src="{{ profile.profile_photo.url }}" alt="Profile" class="tutor-avatar-img">
+            {% else %}
+              <div class="tutor-avatar-placeholder">
+                {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="tutor-sidebar-info">
+            <strong>{{ request.user.get_full_name }}</strong>
+            <span>Tutor portal</span>
+          </div>
+        </div>
+
+        <div class="tutor-sidebar-status">
+          <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+            <i class="fa-solid {% if profile.verification_status == 'approved' %}fa-circle-check{% elif profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:5px;"></i>
+            {{ profile.get_verification_status_display }}
+          </span>
+        </div>
+
+        <nav class="mtc-admin-nav" style="margin-top:12px;">
+          <a href="{% url 'tutor_dashboard' %}">
+            <i class="fa-solid fa-gauge-high" style="width:18px;margin-right:8px;"></i>Dashboard
+          </a>
+          <a href="{% url 'tutor_profile' %}">
+            <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
+          </a>
+          <a href="{% url 'tutor_verification' %}" class="active">
+            <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
+          </a>
+          <a href="#">
+            <i class="fa-solid fa-calendar-days" style="width:18px;margin-right:8px;"></i>Bookings
+          </a>
+        </nav>
+
+        <div class="tutor-sidebar-rate">
+          <span>Hourly Rate</span>
+          <strong>{% if profile.hourly_rate %}&#8358;{{ profile.hourly_rate }}{% else %}Not set{% endif %}</strong>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="mtc-admin-content">
+
+        <div class="tutor-page-heading">
+          <div>
+            <p class="tutor-eyebrow">Tutor Dashboard</p>
+            <h1>Verification Documents</h1>
+            <p class="tutor-subtext">Upload your documents to get verified and appear in search results.</p>
+          </div>
+          <a href="{% url 'tutor_dashboard' %}" class="tutor-back-btn">
+            <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Back
+          </a>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="tutor-alert {% if message.tags == 'success' %}tutor-alert-success{% else %}tutor-alert-error{% endif %}">
+              <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}" style="margin-right:8px;"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <!-- Status Banner -->
+        <div class="tutor-verification-banner {% if profile.verification_status == 'approved' %}tutor-vbanner-approved{% elif profile.verification_status == 'rejected' %}tutor-vbanner-rejected{% else %}tutor-vbanner-pending{% endif %}">
+          <div class="tutor-vbanner-icon">
+            {% if profile.verification_status == 'approved' %}
+              <i class="fa-solid fa-circle-check"></i>
+            {% elif profile.verification_status == 'rejected' %}
+              <i class="fa-solid fa-circle-xmark"></i>
+            {% else %}
+              <i class="fa-solid fa-clock"></i>
+            {% endif %}
+          </div>
+          <div>
+            <strong>
+              {% if profile.verification_status == 'approved' %}Your account is verified
+              {% elif profile.verification_status == 'rejected' %}Verification rejected
+              {% else %}Verification pending review{% endif %}
+            </strong>
+            <p>
+              {% if profile.verification_status == 'approved' %}You are visible in public tutor listings.
+              {% elif profile.verification_status == 'rejected' %}Please re-upload your documents below.
+              {% else %}Our team is reviewing your submission. This usually takes 1-2 business days.{% endif %}
+            </p>
+          </div>
+        </div>
+
+        <!-- Upload Form -->
+        <div class="mtc-admin-card tutor-form-card">
+          <div class="tutor-form-section-title">
+            <i class="fa-solid fa-upload" style="color:var(--blue);margin-right:8px;"></i>Upload a Document
+          </div>
+          <p style="color:var(--muted);font-size:14px;margin:0 0 20px;">Accepted formats: JPG, PNG, PDF. Max 5MB per file.</p>
+
+          <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="tutor-form-grid">
+              <div class="tutor-form-field">
+                <label>Document Type</label>
+                {{ form.document_type }}
+                {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div class="tutor-form-field">
+                <label>File</label>
+                <div class="tutor-file-drop">
+                  {{ form.document_file }}
+                  <p><i class="fa-solid fa-cloud-arrow-up" style="font-size:22px;color:#94a3b8;display:block;margin-bottom:6px;"></i>Click to choose a file or drag and drop</p>
+                </div>
+                {% if form.document_file.errors %}<p class="tutor-field-error">{{ form.document_file.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+            <button type="submit" class="btn btn-primary tutor-save-btn" style="margin-top:18px;">
+              <i class="fa-solid fa-cloud-arrow-up" style="margin-right:6px;"></i>Upload Document
+            </button>
+          </form>
+        </div>
+
+        <!-- Uploaded Documents -->
+        <div class="mtc-admin-card" style="margin-top:24px;">
+          <div class="tutor-card-head">
+            <h2><i class="fa-solid fa-folder-open" style="color:var(--blue);margin-right:8px;"></i>Uploaded Documents</h2>
+          </div>
+          {% if documents %}
+            <div class="tutor-docs-list">
+              {% for doc in documents %}
+                <div class="tutor-doc-row">
+                  <div class="tutor-doc-icon">
+                    <i class="fa-solid fa-file-lines"></i>
+                  </div>
+                  <div class="tutor-doc-info">
+                    <strong>{{ doc.get_document_type_display }}</strong>
+                    <span>Uploaded {{ doc.uploaded_at|date:"N j, Y" }}</span>
+                  </div>
+                  <span class="mtc-status-pill {% if doc.verification_status == 'approved' %}mtc-status-accepted{% elif doc.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+                    {{ doc.get_verification_status_display }}
+                  </span>
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="tutor-empty-state">
+              <div class="tutor-empty-icon"><i class="fa-regular fa-folder-open"></i></div>
+              <p>No documents uploaded yet.</p>
+              <small>Upload your ID, selfie, and certificates above.</small>
+            </div>
+          {% endif %}
+        </div>
+
+      </main>
+    </div>
+  </div>
+</div>
+{% endblock %}

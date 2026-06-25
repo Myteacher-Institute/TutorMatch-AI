@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% block title %}Find a Tutor — TutorMatch AI{% endblock %}
+
+{% block content %}
+
+<!-- Page Hero -->
+<div class="mtc-page-hero">
+  <div class="mtc-shell">
+    <p class="eyebrow">Browse Tutors</p>
+    <h1 style="margin:12px 0 0;color:#12182c;font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-0.03em;">Find Your Perfect Tutor</h1>
+    <p class="mtc-lead">Browse verified tutors and book your first session today.</p>
+  </div>
+</div>
+
+<div style="background:#f8fafc;padding:50px 0 70px;">
+  <div class="mtc-shell">
+    <div class="results-layout">
+
+      <!-- Filter Sidebar -->
+      <aside class="filter-panel">
+        <h2><i class="fa-solid fa-sliders" style="color:var(--blue);margin-right:8px;"></i>Filters</h2>
+        <form method="get">
+          <div>
+            <label>Subject</label>
+            <input type="text" name="subject" value="{{ request.GET.subject }}" placeholder="e.g. Mathematics">
+          </div>
+          <div>
+            <label>Location</label>
+            <input type="text" name="location" value="{{ request.GET.location }}" placeholder="e.g. Lagos">
+          </div>
+          <div>
+            <label>Max Rate (&#8358;/hr)</label>
+            <input type="number" name="max_rate" value="{{ request.GET.max_rate }}" placeholder="e.g. 5000">
+          </div>
+          <button type="submit" class="search-submit">
+            <i class="fa-solid fa-magnifying-glass" style="margin-right:6px;"></i>Apply Filters
+          </button>
+          {% if request.GET %}
+            <a href="{% url 'tutor_list' %}" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--muted);">
+              Clear filters
+            </a>
+          {% endif %}
+        </form>
+      </aside>
+
+      <!-- Results -->
+      <div>
+        <p class="results-count" style="margin-bottom:20px;">
+          <i class="fa-solid fa-users" style="color:var(--blue);margin-right:6px;"></i>
+          {{ tutors|length }} tutor{% if tutors|length != 1 %}s{% endif %} found
+        </p>
+
+        {% if tutors %}
+          <div class="tutor-cards-grid">
+            {% for tutor in tutors %}
+              <div class="tutor-public-card">
+
+                <!-- Photo -->
+                <div class="tutor-public-photo">
+                  {% if tutor.profile_photo %}
+                    <img src="{{ tutor.profile_photo.url }}" alt="{{ tutor.user.user.get_full_name }}">
+                  {% else %}
+                    <div class="tutor-public-photo-placeholder">
+                      {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
+                    </div>
+                  {% endif %}
+                  {% if tutor.is_verified %}
+                    <span class="verified-badge tutor-verified-badge">
+                      <i class="fa-solid fa-circle-check" style="margin-right:4px;"></i>Verified
+                    </span>
+                  {% endif %}
+                </div>
+
+                <!-- Info -->
+                <div class="tutor-public-body">
+                  <h3>{{ tutor.user.user.get_full_name }}</h3>
+
+                  <div class="tutor-public-subjects">
+                    {% for subject in tutor.subjects.all|slice:":3" %}
+                      <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                    {% empty %}
+                      <span style="font-size:12px;color:var(--muted);">No subjects listed</span>
+                    {% endfor %}
+                  </div>
+
+                  <div class="tutor-public-meta">
+                    <span><i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:4px;"></i>{{ tutor.location|default:"Remote" }}</span>
+                    <span class="tutor-rate-badge">&#8358;{{ tutor.hourly_rate }}/hr</span>
+                  </div>
+
+                  <a href="{% url 'tutor_detail' tutor.pk %}" class="tutor-public-cta">
+                    View Profile <i class="fa-solid fa-arrow-right" style="margin-left:5px;"></i>
+                  </a>
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+
+        {% else %}
+          <div class="empty-box" style="margin:0 auto;text-align:center;">
+            <div style="width:64px;height:64px;background:#eff6ff;border-radius:16px;display:grid;place-items:center;margin:0 auto 20px;font-size:26px;color:var(--blue);">
+              <i class="fa-solid fa-magnifying-glass"></i>
+            </div>
+            <h1 style="font-size:22px;">No tutors found</h1>
+            <p>Try adjusting your filters to find available tutors.</p>
+            <a href="{% url 'tutor_list' %}" class="btn btn-primary" style="margin-top:16px;">Clear all filters</a>
+          </div>
+        {% endif %}
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
