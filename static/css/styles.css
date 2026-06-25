@@ -16,6 +16,11 @@
   -webkit-tap-highlight-color: transparent;
 }
 
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
 html {
   scroll-behavior: smooth;
 }
@@ -2382,6 +2387,38 @@ img {
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 
+.mtc-admin-metric-card:nth-child(1){
+  border-left: 3px solid var(--blue);
+}
+
+.mtc-admin-metric-card:nth-child(1) span{
+  color:var(--blue);
+}
+
+.mtc-admin-metric-card:nth-child(2){
+  border-left: 3px solid #f59e0b;
+}
+
+.mtc-admin-metric-card:nth-child(2) span{
+  color:#f59e0b;
+}
+
+.mtc-admin-metric-card:nth-child(3){
+  border-left: 3px solid #8b5cf6;
+}
+
+.mtc-admin-metric-card:nth-child(3) span{
+  color:#8b5cf6;
+}
+
+.mtc-admin-metric-card:nth-child(4){
+  border-left: 3px solid #16a34a;
+}
+
+.mtc-admin-metric-card:nth-child(4) span{
+  color:#16a34a;
+}
+
 .mtc-admin-metric-card:hover{
   transform: translateY(-4px);
   border-color: #bfdbfe;
@@ -2391,7 +2428,6 @@ img {
 .mtc-admin-metric-card span {
   font-size: 12px;
   font-weight: 700;
-  color: var(--muted);
   text-transform: uppercase;
   letter-spacing: 0.05em;
 }
@@ -2412,7 +2448,7 @@ img {
 .mtc-admin-card h2 {
   font-size: 18px;
   margin: 0 0 12px;
-  color: #12182c;
+  color: var(--blue);
 }
 .mtc-admin-card p {
   margin: 0;
@@ -4149,6 +4185,30 @@ img {
   background: var(--white);
   padding: 18px 20px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
+}
+
+.mtc-student-bookings-summary article:nth-child(1){
+  border-left: 3px solid var(--blue);
+
+  span{
+    color:var(--blue);
+  }
+}
+
+.mtc-student-bookings-summary article:nth-child(2){
+  border-left: 3px solid red;
+
+  span{
+    color:red;
+  }
+}
+
+.mtc-student-bookings-summary article:nth-child(3){
+  border-left: 3px solid green;
+
+  span{
+    color:green;
+  }
 }
 
 .mtc-student-bookings-summary article:hover{

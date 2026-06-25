@@ -204,6 +204,62 @@
           }
         });
       });
+
+      // Voice search functionality for student dashboard (if present)
+      const dashboardVoiceSearchBtn = document.getElementById('dashboard-voice-search-btn');
+      const dashboardSearchInput = document.getElementById('dashboard-search-input');
+      const dashboardSearchForm = dashboardSearchInput ? dashboardSearchInput.closest('form') : null;
+
+      if (dashboardVoiceSearchBtn && dashboardSearchInput) {
+        let recognition;
+        let isListening = false;
+
+        if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+          const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+          recognition = new SpeechRecognition();
+          recognition.continuous = false;
+          recognition.interimResults = false;
+          recognition.lang = 'en-NG';
+
+          recognition.onstart = () => {
+            isListening = true;
+            dashboardVoiceSearchBtn.style.color = 'var(--blue)';
+            dashboardVoiceSearchBtn.innerHTML = '<i class="fa-solid fa-microphone" style="font-size: 18px; animation: pulse 1s infinite;"></i>';
+          };
+
+          recognition.onend = () => {
+            isListening = false;
+            dashboardVoiceSearchBtn.style.color = 'var(--muted)';
+            dashboardVoiceSearchBtn.innerHTML = '<i class="fa-solid fa-microphone" style="font-size: 18px;"></i>';
+          };
+
+          recognition.onresult = (event) => {
+            const transcript = event.results[0][0].transcript;
+            dashboardSearchInput.value = transcript;
+            // Auto-submit the form after voice input
+            if (transcript.trim() && dashboardSearchForm) {
+              setTimeout(() => dashboardSearchForm.submit(), 500);
+            }
+          };
+
+          recognition.onerror = () => {
+            isListening = false;
+            dashboardVoiceSearchBtn.style.color = 'var(--muted)';
+            dashboardVoiceSearchBtn.innerHTML = '<i class="fa-solid fa-microphone" style="font-size: 18px;"></i>';
+          };
+
+          dashboardVoiceSearchBtn.addEventListener('click', () => {
+            if (isListening) {
+              recognition.stop();
+            } else {
+              recognition.start();
+            }
+          });
+        } else {
+          dashboardVoiceSearchBtn.style.opacity = '0.5';
+          dashboardVoiceSearchBtn.title = 'Voice search not supported in this browser';
+        }
+      }
     });
   </script>
 </body>
