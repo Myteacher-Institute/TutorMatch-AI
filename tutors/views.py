@@ -62,5 +62,5 @@ def tutor_list(request):
 
 
 def tutor_detail(request, tutor_id):
-    tutor = get_object_or_404(Tutor, pk=tutor_id, is_publicly_visible=True)
+    tutor = get_object_or_404(Tutor, user=request.user.profile, id=tutor_id)
     return render(request, 'tutors/tutor_detail.html', {'tutor': tutor})
