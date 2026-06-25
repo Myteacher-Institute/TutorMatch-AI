@@ -1,0 +1,141 @@
+{% extends "base.html" %}
+{% block title %}{{ tutor.user.user.get_full_name }} — TutorMatch AI{% endblock %}
+
+{% block content %}
+
+<!-- Back bar -->
+<div style="background:#fff;border-bottom:1px solid var(--line);padding:14px 0;">
+  <div class="mtc-shell">
+    <a href="{% url 'tutor_list' %}" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#475569;">
+      <i class="fa-solid fa-arrow-left" style="color:var(--blue);"></i>Back to Tutors
+    </a>
+  </div>
+</div>
+
+<div style="background:#f8fafc;padding:50px 0 70px;">
+  <div class="mtc-shell">
+    <div class="tutor-detail-layout">
+
+      <!-- LEFT: Profile -->
+      <div class="tutor-detail-main">
+
+        <!-- Profile Header -->
+        <div class="mtc-admin-card tutor-detail-header-card">
+          <div class="tutor-detail-profile-row">
+
+            <div class="tutor-detail-avatar">
+              {% if tutor.profile_photo %}
+                <img src="{{ tutor.profile_photo.url }}" alt="{{ tutor.user.user.get_full_name }}">
+              {% else %}
+                <div class="tutor-detail-avatar-placeholder">
+                  {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
+                </div>
+              {% endif %}
+            </div>
+
+            <div class="tutor-detail-profile-info">
+              <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
+                <h1 style="margin:0;font-size:clamp(22px,4vw,30px);color:#12182c;font-weight:700;">{{ tutor.user.user.get_full_name }}</h1>
+                {% if tutor.is_verified %}
+                  <span class="verified-badge">
+                    <i class="fa-solid fa-circle-check" style="margin-right:4px;"></i>Verified
+                  </span>
+                {% endif %}
+              </div>
+
+              <div class="tutor-detail-meta-row">
+                {% if tutor.location %}
+                  <span><i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:5px;"></i>{{ tutor.location }}</span>
+                {% endif %}
+                <span><i class="fa-solid fa-briefcase" style="color:var(--blue);margin-right:5px;"></i>{{ tutor.years_experience }} yr{% if tutor.years_experience != 1 %}s{% endif %} experience</span>
+              </div>
+
+              <div class="tutor-public-subjects" style="margin-top:14px;">
+                {% for subject in tutor.subjects.all %}
+                  <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bio -->
+        {% if tutor.bio %}
+          <div class="mtc-admin-card" style="margin-top:20px;">
+            <h2 style="margin:0 0 14px;font-size:18px;color:#12182c;"><i class="fa-solid fa-user" style="color:var(--blue);margin-right:8px;"></i>About</h2>
+            <p style="color:#475569;line-height:1.75;font-size:15px;white-space:pre-line;margin:0;">{{ tutor.bio }}</p>
+          </div>
+        {% endif %}
+
+        <!-- Qualifications -->
+        {% if tutor.qualifications %}
+          <div class="mtc-admin-card" style="margin-top:20px;">
+            <h2 style="margin:0 0 14px;font-size:18px;color:#12182c;"><i class="fa-solid fa-graduation-cap" style="color:var(--blue);margin-right:8px;"></i>Qualifications</h2>
+            <p style="color:#475569;line-height:1.75;font-size:15px;white-space:pre-line;margin:0;">{{ tutor.qualifications }}</p>
+          </div>
+        {% endif %}
+
+        <!-- Reviews Placeholder -->
+        <div class="mtc-admin-card" style="margin-top:20px;">
+          <h2 style="margin:0 0 14px;font-size:18px;color:#12182c;"><i class="fa-solid fa-star" style="color:#fbbf24;margin-right:8px;"></i>Reviews</h2>
+          <div class="tutor-empty-state">
+            <div class="tutor-empty-icon" style="background:#fffbeb;color:#f59e0b;"><i class="fa-regular fa-star"></i></div>
+            <p>No reviews yet.</p>
+            <small>Reviews will appear here after completed sessions.</small>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- RIGHT: Booking Sidebar -->
+      <div class="tutor-detail-sidebar">
+        <div class="mtc-admin-card tutor-booking-card">
+
+          <div class="tutor-booking-rate">
+            <strong>&#8358;{{ tutor.hourly_rate }}</strong>
+            <span>per hour</span>
+          </div>
+
+          <div class="tutor-booking-stats">
+            <div class="tutor-booking-stat">
+              <strong>{{ tutor.years_experience }}</strong>
+              <span>Yrs exp.</span>
+            </div>
+            <div class="tutor-booking-stat">
+              <strong>{{ tutor.subjects.count }}</strong>
+              <span>Subject{% if tutor.subjects.count != 1 %}s{% endif %}</span>
+            </div>
+          </div>
+
+          <!-- Book button — wired by Task 4 -->
+          <button class="btn btn-primary tutor-book-btn">
+            <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i>Book a Session
+          </button>
+          <p class="tutor-booking-note">Booking handled by the sessions module.</p>
+
+          {% if tutor.is_verified %}
+            <div class="tutor-verified-note">
+              <i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;font-size:16px;"></i>
+              <span>Identity &amp; credentials verified by TutorMatch.</span>
+            </div>
+          {% endif %}
+
+          <!-- Subjects list -->
+          {% if tutor.subjects.all %}
+            <div class="tutor-booking-subjects">
+              <p style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 10px;">Teaches</p>
+              <div class="tutor-public-subjects">
+                {% for subject in tutor.subjects.all %}
+                  <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

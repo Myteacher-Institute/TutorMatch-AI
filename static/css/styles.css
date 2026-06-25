@@ -4341,6 +4341,247 @@ img {
   font-weight: 700;
 }
 
+.tutor-verification-banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-radius: 14px;
+  padding: 18px 22px;
+  margin-bottom: 24px;
+}
+
+.tutor-vbanner-approved { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
+.tutor-vbanner-rejected { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+.tutor-vbanner-pending  { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+
+.tutor-vbanner-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.6);
+  display: grid;
+  place-items: center;
+  font-size: 20px;
+  flex-shrink: 0;
+}
+
+.tutor-verification-banner strong {
+  display: block;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.tutor-verification-banner p {
+  margin: 4px 0 0;
+  font-size: 13px;
+  opacity: 0.85;
+}
+
+/* ── Docs List ── */
+.tutor-docs-list {
+  display: grid;
+  gap: 10px;
+}
+
+.tutor-doc-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+
+.tutor-doc-icon {
+  width: 40px;
+  height: 40px;
+  background: #eff6ff;
+  color: var(--blue);
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.tutor-doc-info {
+  flex: 1;
+  min-width: 0;
+}
+
+.tutor-doc-info strong {
+  display: block;
+  font-size: 14px;
+  color: #12182c;
+}
+
+.tutor-doc-info span {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* ── Tutor List Cards ── */
+.tutor-cards-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 22px;
+}
+
+.tutor-public-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 4px 18px rgba(15,23,42,0.05);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.tutor-public-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 14px 32px rgba(15,23,42,0.1);
+}
+
+.tutor-public-photo {
+  position: relative;
+  height: 160px;
+  background: #eff6ff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+}
+
+.tutor-public-photo img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tutor-public-photo-placeholder {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: var(--blue);
+  color: #fff;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.tutor-verified-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #dcfce7;
+  color: #166534;
+}
+
+.tutor-public-body {
+  padding: 18px;
+}
+
+.tutor-public-body h3 {
+  margin: 0 0 10px;
+  font-size: 16px;
+  font-weight: 700;
+  color: #12182c;
+}
+
+.tutor-public-subjects {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.tutor-public-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 14px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tutor-rate-badge {
+  font-weight: 800;
+  color: var(--blue);
+  font-size: 14px;
+}
+
+.tutor-public-cta {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  margin-top: 14px;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+  transition: background 0.2s;
+}
+
+.tutor-public-cta:hover {
+  background: #eff6ff;
+}
+
+/* ── Tutor Detail ── */
+.tutor-detail-layout {
+  display: grid;
+  grid-template-columns: 1fr 300px;
+  gap: 26px;
+  align-items: start;
+}
+
+.tutor-detail-header-card {
+  padding: 28px;
+}
+
+.tutor-detail-profile-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-start;
+}
+
+.tutor-detail-avatar {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  overflow: hidden;
+  flex-shrink: 0;
+  border: 4px solid #dbeafe;
+  background: #eff6ff;
+  display: grid;
+  place-items: center;
+}
+
+.tutor-detail-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tutor-detail-avatar-placeholder {
+  font-size: 28px;
+  font-weight: 800;
+  color: var(--blue);
+}
+
+.tutor-detail-meta-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  font-weight: 600;
+}
+
+
+
 
 @media (min-width: 640px) {
   .mtc-booking-section {
