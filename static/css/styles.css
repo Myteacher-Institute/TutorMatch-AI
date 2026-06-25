@@ -5165,6 +5165,274 @@ img {
   background: var(--blue-dark);
 }
 
+/* Review Form */
+.mtc-review-section {
+  padding: 34px 0 60px;
+  background: #f8fbff;
+}
+
+.mtc-review-container {
+  width: min(1040px, calc(100% - 32px));
+  margin: 0 auto;
+}
+
+.mtc-review-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 18px;
+  margin-bottom: 24px;
+}
+
+.mtc-review-eyebrow {
+  margin: 0 0 6px;
+  color: var(--blue);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.mtc-review-header h1 {
+  margin: 0;
+  color: var(--ink);
+  font-size: clamp(26px, 5vw, 38px);
+}
+
+.mtc-review-header p:not(.mtc-review-eyebrow) {
+  margin: 8px 0 0;
+  color: #64748b;
+  font-size: 14px;
+}
+
+.mtc-review-back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 14px;
+  color: #475569;
+  font-size: 13px;
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.mtc-review-layout {
+  display: grid;
+  grid-template-columns: 340px minmax(0, 1fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.mtc-review-tutor-card,
+.mtc-review-form-card {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 28px rgba(15, 23, 42, 0.06);
+}
+
+.mtc-review-tutor-card {
+  padding: 22px;
+}
+
+.mtc-review-tutor-profile {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.mtc-review-tutor-profile img,
+.mtc-review-tutor-profile > span {
+  width: 58px;
+  height: 58px;
+  flex: 0 0 58px;
+  border-radius: 50%;
+}
+
+.mtc-review-tutor-profile img {
+  object-fit: cover;
+}
+
+.mtc-review-tutor-profile > span {
+  display: grid;
+  place-items: center;
+  background: #dbeafe;
+  color: var(--blue);
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.mtc-review-tutor-profile h2 {
+  margin: 0;
+  color: #12182c;
+  font-size: 18px;
+}
+
+.mtc-review-tutor-profile p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mtc-review-summary {
+  display: grid;
+  gap: 10px;
+  margin-top: 20px;
+}
+
+.mtc-review-summary div {
+  border-radius: 9px;
+  background: #f8fbff;
+  padding: 13px 14px;
+}
+
+.mtc-review-summary span {
+  display: block;
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.mtc-review-summary strong {
+  display: block;
+  margin-top: 5px;
+  color: var(--ink);
+  font-size: 14px;
+}
+
+.mtc-review-form-card {
+  padding: 24px;
+}
+
+.mtc-review-form {
+  display: grid;
+  gap: 20px;
+}
+
+.mtc-review-rating-field {
+  min-width: 0;
+  border: 0;
+  margin: 0;
+  padding: 0;
+}
+
+.mtc-review-rating-field legend,
+.mtc-review-field {
+  color: #334155;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.mtc-review-stars {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 8px;
+}
+
+.mtc-review-stars label {
+  cursor: pointer;
+}
+
+.mtc-review-stars input {
+  position: absolute;
+  opacity: 0;
+}
+
+.mtc-review-stars span {
+  display: grid;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid #dbeafe;
+  border-radius: 8px;
+  background: #f8fbff;
+  color: #f8aa16;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.mtc-review-stars input:checked + span {
+  border-color: var(--blue);
+  background: #eff6ff;
+  color: var(--blue);
+  box-shadow: 0 0 0 3px #dbeafe;
+}
+
+.mtc-review-field {
+  display: grid;
+  gap: 8px;
+}
+
+.mtc-review-field textarea {
+  width: 100%;
+  min-height: 150px;
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  background: #fbfdff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  line-height: 1.6;
+  padding: 14px;
+  resize: vertical;
+  outline: none;
+}
+
+.mtc-review-field textarea:focus {
+  border-color: var(--blue);
+  background: #fff;
+  box-shadow: 0 0 0 4px #eff6ff;
+}
+
+.mtc-review-error,
+.mtc-review-field-error {
+  color: #b91c1c;
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.mtc-review-error {
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fef2f2;
+  padding: 12px 14px;
+}
+
+.mtc-review-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.mtc-review-actions .btn-ghost {
+  border-color: var(--line);
+  background: #fff;
+}
+
+@media (max-width: 820px) {
+  .mtc-review-header,
+  .mtc-review-actions {
+    flex-direction: column;
+  }
+
+  .mtc-review-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .mtc-review-back-link,
+  .mtc-review-actions .btn {
+    width: 100%;
+  }
+
+  .mtc-review-stars {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 820px) {
   .mtc-student-bookings-head {
     flex-direction: column;
