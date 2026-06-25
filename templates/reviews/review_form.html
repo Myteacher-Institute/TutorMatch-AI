@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Review Tutor | TutorMatch AI{% endblock %}
+
+{% block content %}
+<section class="mtc-review-section">
+  <div class="mtc-review-container">
+    <div class="mtc-review-header">
+      <div>
+        <p class="mtc-review-eyebrow">Tutor Review</p>
+        <h1>How was your lesson?</h1>
+        <p>Share honest feedback to help other students choose the right tutor.</p>
+      </div>
+      <a href="{% url 'student_bookings' %}" class="mtc-review-back-link">Back to bookings</a>
+    </div>
+
+    <div class="mtc-review-layout">
+      <aside class="mtc-review-tutor-card">
+        <div class="mtc-review-tutor-profile">
+          {% if tutor.profile_photo %}
+            <img src="{{ tutor.profile_photo.url }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+          {% else %}
+            <span>{% if tutor.user.user.first_name %}{{ tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}</span>
+          {% endif %}
+          <div>
+            <h2>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h2>
+            <p>{{ tutor.location|default:"Location pending" }}</p>
+          </div>
+        </div>
+
+        <div class="mtc-review-summary">
+          <div>
+            <span>Lesson date</span>
+            <strong>{{ booking.booking_date|date:"M j, Y" }}</strong>
+          </div>
+          <div>
+            <span>Lesson time</span>
+            <strong>{{ booking.lesson_time|time:"g:i A" }}</strong>
+          </div>
+          <div>
+            <span>Amount</span>
+            <strong>₦{{ booking.amount }}</strong>
+          </div>
+        </div>
+      </aside>
+
+      <div class="mtc-review-form-card">
+        <form method="post" class="mtc-review-form">
+          {% csrf_token %}
+
+          {% if form.non_field_errors %}
+            <div class="mtc-review-error">{{ form.non_field_errors|striptags }}</div>
+          {% endif %}
+
+          <fieldset class="mtc-review-rating-field">
+            <legend>Rating</legend>
+            <div class="mtc-review-stars">
+              {% for choice in form.rating %}
+                <label>
+                  {{ choice.tag }}
+                  <span>{{ choice.choice_label }} ★</span>
+                </label>
+              {% endfor %}
+            </div>
+            {% if form.rating.errors %}
+              <span class="mtc-review-field-error">{{ form.rating.errors|striptags }}</span>
+            {% endif %}
+          </fieldset>
+
+          <label class="mtc-review-field" for="{{ form.review.id_for_label }}">
+            Review
+            {{ form.review }}
+            {% if form.review.errors %}
+              <span class="mtc-review-field-error">{{ form.review.errors|striptags }}</span>
+            {% endif %}
+          </label>
+
+          <div class="mtc-review-actions">
+            <a href="{% url 'student_bookings' %}" class="btn btn-ghost">Cancel</a>
+            <button type="submit" class="btn btn-primary">Submit Review</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
