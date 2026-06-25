@@ -2321,12 +2321,20 @@ img {
   
 }
 
+.mtc-student-portal-sidebar {
+   position: -webkit-sticky;
+   position: sticky;
+   top: 10px;
+   height: fit-content;
+   z-index: 10;
+}
+
 .mtc-admin-sidebar {
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: var(--white);
-  padding: 24px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+   border: 1px solid var(--line);
+   border-radius: 14px;
+   background: var(--white);
+   padding: 24px;
+   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
 }
 .mtc-admin-sidebar h3 {
   margin: 0 0 20px;
