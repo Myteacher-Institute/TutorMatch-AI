@@ -41,15 +41,15 @@
 
       <div class="mtc-student-bookings-summary">
         <article>
-          <span>Total Bookings</span>
+          <span><i class="fa-solid fa-receipt"></i>Total Bookings</span>
           <strong>{{ bookings_count }}</strong>
         </article>
         <article>
-          <span>Pending Review</span>
+          <span><i class="fa-solid fa-arrow-turn-down"></i>Pending Review</span>
           <strong>{{ pending_review_count }}</strong>
         </article>
         <article>
-          <span>Next Lesson</span>
+          <span><i class="fa-solid fa-arrow-right-to-bracket"></i>Next Lesson</span>
           <strong>{% if next_booking %}{{ next_booking.booking_date|date:"M j" }}{% else %}-{% endif %}</strong>
         </article>
       </div>
@@ -57,7 +57,7 @@
       <div class="mtc-student-bookings-card">
         <div class="mtc-student-bookings-card-head">
           <div>
-            <h2>Booking List</h2>
+            <h2 style="color: #1D4ED8;">Booking List</h2>
             <p>All lessons you have requested are shown here.</p>
           </div>
         </div>

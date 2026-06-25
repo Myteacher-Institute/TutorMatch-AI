@@ -44,28 +44,33 @@
       <div class="mtc-dashboard-hero" style="background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%); border-radius: 16px; padding: 32px; color: var(--white); margin-bottom: 30px;">
         <h2 style="margin: 0 0 12px; font-size: clamp(20px, 5vw, 30px); color: var(--white); font-weight: 600;">What subject or tutor needs do you have?</h2>
         <p style="margin: 0 0 20px; color: #dbeafe; font-size: 14px; line-height: 1.5;">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
-        <form action="{% url 'search_results' %}" method="get" class="mtc-dashboard-search-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
-          <input name="q" placeholder="Describe your tutor needs..." required style="flex: 1; min-width: 250px; min-height: 48px; border: 0; border-radius: 8px; padding: 0 16px; font-size: 14px; outline: none; color: var(--ink);">
-          <button type="submit" class="btn btn-light mtc-dashboard-search-button" style="min-height: 48px; font-weight: 700; border-radius: 8px;">Find Tutor</button>
-        </form>
+<form action="{% url 'search_results' %}" method="get" class="mtc-dashboard-search-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
+           <div style="flex: 1; min-width: 250px; position: relative;">
+             <input name="q" id="dashboard-search-input" placeholder="Describe your tutor needs..." required style="width: 100%; min-height: 48px; border: 0; border-radius: 8px; padding: 0 44px 0 16px; font-size: 14px; outline: none; color: var(--ink);">
+             <button type="button" id="dashboard-voice-search-btn" class="dashboard-voice-search-btn" aria-label="Voice search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: var(--muted); padding: 8px; display: flex; align-items: center; justify-content: center;">
+               <i class="fa-solid fa-microphone" style="font-size: 18px;"></i>
+             </button>
+           </div>
+           <button type="submit" class="btn btn-light mtc-dashboard-search-button" style="min-height: 48px; font-weight: 700; border-radius: 8px;">Find Tutor</button>
+         </form>
       </div>
 
       <!-- Quick Metrics Grid -->
       <div class="mtc-admin-metrics-grid" style="margin-bottom: 30px;">
         <div class="mtc-admin-metric-card">
-          <span>Upcoming Lessons</span>
+          <span><i class="fa-solid fa-arrow-up-right-dots"></i> Upcoming Lessons</span>
           <strong>0</strong>
         </div>
         <div class="mtc-admin-metric-card">
-          <span>Recommended Tutors</span>
+          <span><i class="fa-solid fa-person-shelter"></i> Recommended Tutors</span>
           <strong>{{ recommended_tutors|length }}</strong>
         </div>
         <div class="mtc-admin-metric-card">
-          <span>Active Bookings</span>
+          <span><i class=" fa-solid fa-calendar-days"></i> Active Bookings</span>
           <strong>0</strong>
         </div>
         <div class="mtc-admin-metric-card">
-          <span>Completed Lessons</span>
+          <span><i class="fa-solid fa-check-double"></i> Completed Lessons</span>
           <strong>0</strong>
         </div>
       </div>
@@ -77,7 +82,7 @@
           <!-- Recent Bookings panel -->
           <div class="mtc-admin-card" style="margin-top: 0;">
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-              <h2 style="margin: 0;">Recent Bookings</h2>
+              <h2 style="margin: 0;"><i class="fa-solid fa-receipt"></i>Recent Bookings</h2>
               <a href="{% url 'student_bookings' %}" style="color: var(--blue); font-size: 13px; font-weight: 700;">View All</a>
             </div>
             
@@ -89,7 +94,7 @@
 
           <!-- Recommended Tutors Panel -->
           <div class="mtc-admin-card" style="margin-top: 0;">
-            <h2 style="margin: 0 0 16px;">Recommended Tutors for You</h2>
+            <h2 style="margin: 0 0 16px;"><i class="fa-solid fa-person-shelter"></i> Recommended Tutors for You</h2>
             
             <div class="mtc-recommended-tutors">
               {% for tutor in recommended_tutors %}
@@ -127,7 +132,7 @@
         <!-- Right Side: Saved Tutors / Info -->
         <div class="mtc-dashboard-side">
           <div class="mtc-admin-card" style="margin-top: 0;">
-            <h2 style="margin: 0 0 12px;">Saved Tutors</h2>
+            <h2 style="margin: 0 0 12px;"><i class="fa-solid fa-bookmark"></i> Saved Tutors</h2>
             <div style="border: 1px dashed var(--line); border-radius: 12px; padding: 24px; text-align: center; background: var(--soft);">
               <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 12px;"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
               <h4 style="margin: 0; font-size: 14px; font-weight: 600;">No saved tutors</h4>
@@ -136,7 +141,7 @@
           </div>
 
           <div class="mtc-admin-card" style="margin-top: 0; background: var(--soft);">
-            <h2 style="margin: 0 0 8px; font-size: 16px;">Need Help?</h2>
+            <h2 style="margin: 0 0 8px; font-size: 16px;"><i class="fa-solid fa-question-circle"></i> Need Help?</h2>
             <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5;">Contact our support desk directly at support@myteacherconnect.com or call +234 812 345 6789.</p>
           </div>
         </div>
