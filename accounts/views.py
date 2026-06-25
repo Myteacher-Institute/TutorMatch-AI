@@ -82,6 +82,7 @@ def student_dashboard(request):
     ).count()
     recommended_tutors = (
         Tutor.objects.select_related("user__user")
+        .filter(is_publicly_visible=True)
         .prefetch_related("subjects")
         .annotate(review_count=Count("tutor_reviews"))
         .order_by("-years_experience", "hourly_rate")[:3]

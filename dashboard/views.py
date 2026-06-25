@@ -94,10 +94,11 @@ def verifications(request):
 
                 try:
                     Tutor = apps.get_model("tutors", "Tutor")
-                    tutor_obj = Tutor.objects.filter(user=profile.user).first()
+                    tutor_obj = Tutor.objects.filter(user=profile).first()
                     if tutor_obj:
                         tutor_obj.verification_status = "approved"
-                        tutor_obj.save()
+                        tutor_obj.is_publicly_visible = True
+                        tutor_obj.save(update_fields=["verification_status", "is_publicly_visible"])
                 except (LookupError, AttributeError):
                     pass
 
@@ -107,10 +108,11 @@ def verifications(request):
 
                 try:
                     Tutor = apps.get_model("tutors", "Tutor")
-                    tutor_obj = Tutor.objects.filter(user=profile.user).first()
+                    tutor_obj = Tutor.objects.filter(user=profile).first()
                     if tutor_obj:
                         tutor_obj.verification_status = "rejected"
-                        tutor_obj.save()
+                        tutor_obj.is_publicly_visible = False
+                        tutor_obj.save(update_fields=["verification_status", "is_publicly_visible"])
                 except (LookupError, AttributeError):
                     pass
         except UserProfile.DoesNotExist:
