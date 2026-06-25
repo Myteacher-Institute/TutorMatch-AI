@@ -60,6 +60,7 @@ def verify_account(request):
 
 from .decorators import student_required, _dashboard_for_user
 from tutors.models import Tutor
+from django.db.models import Count
 
 
 @student_required
@@ -67,6 +68,7 @@ def student_dashboard(request):
     recommended_tutors = (
         Tutor.objects.select_related("user__user")
         .prefetch_related("subjects")
+        .annotate(review_count=Count("tutor_reviews"))
         .order_by("-years_experience", "hourly_rate")[:3]
     )
     return render(
