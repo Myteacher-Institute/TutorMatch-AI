@@ -1,0 +1,171 @@
+{% extends "base.html" %}
+{% block title %}Edit Profile — TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="tutor-portal-bg">
+  <div class="mtc-shell">
+    <div class="mtc-admin-layout">
+
+      <!-- SIDEBAR -->
+      <aside class="mtc-admin-sidebar tutor-sidebar">
+        <div class="tutor-sidebar-profile">
+          <div class="tutor-avatar-ring">
+            {% if profile.profile_photo %}
+              <img src="{{ profile.profile_photo.url }}" alt="Profile" class="tutor-avatar-img">
+            {% else %}
+              <div class="tutor-avatar-placeholder">
+                {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
+              </div>
+            {% endif %}
+          </div>
+          <div class="tutor-sidebar-info">
+            <strong>{{ request.user.get_full_name }}</strong>
+            <span>Tutor portal</span>
+          </div>
+        </div>
+
+        <div class="tutor-sidebar-status">
+          <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+            <i class="fa-solid {% if profile.verification_status == 'approved' %}fa-circle-check{% elif profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:5px;"></i>
+            {{ profile.get_verification_status_display }}
+          </span>
+        </div>
+
+        <nav class="mtc-admin-nav" style="margin-top:12px;">
+          <a href="{% url 'tutor_dashboard' %}">
+            <i class="fa-solid fa-gauge-high" style="width:18px;margin-right:8px;"></i>Dashboard
+          </a>
+          <a href="{% url 'tutor_profile' %}" class="active">
+            <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
+          </a>
+          <a href="{% url 'tutor_verification' %}">
+            <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
+          </a>
+          <a href="#">
+            <i class="fa-solid fa-calendar-days" style="width:18px;margin-right:8px;"></i>Bookings
+          </a>
+        </nav>
+
+        <div class="tutor-sidebar-rate">
+          <span>Hourly Rate</span>
+          <strong>{% if profile.hourly_rate %}&#8358;{{ profile.hourly_rate }}{% else %}Not set{% endif %}</strong>
+        </div>
+      </aside>
+
+      <!-- MAIN -->
+      <main class="mtc-admin-content">
+
+        <div class="tutor-page-heading">
+          <div>
+            <p class="tutor-eyebrow">Tutor Dashboard</p>
+            <h1>Edit Profile</h1>
+            <p class="tutor-subtext">Keep your profile up to date so students can find you easily.</p>
+          </div>
+          <a href="{% url 'tutor_dashboard' %}" class="tutor-back-btn">
+            <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Back
+          </a>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="tutor-alert {% if message.tags == 'success' %}tutor-alert-success{% else %}tutor-alert-error{% endif %}">
+              <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}" style="margin-right:8px;"></i>
+              {{ message }}
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        <form method="post" enctype="multipart/form-data">
+          {% csrf_token %}
+
+          <!-- Profile Photo -->
+          <div class="mtc-admin-card tutor-form-card">
+            <div class="tutor-form-section-title">
+              <i class="fa-solid fa-camera" style="color:var(--blue);margin-right:8px;"></i>Profile Photo
+            </div>
+            <div class="tutor-photo-upload-row">
+              <div class="tutor-photo-preview">
+                {% if profile.profile_photo %}
+                  <img src="{{ profile.profile_photo.url }}" alt="Photo">
+                {% else %}
+                  <i class="fa-solid fa-user" style="font-size:28px;color:#94a3b8;"></i>
+                {% endif %}
+              </div>
+              <div class="tutor-photo-upload-info">
+                {{ form.profile_photo }}
+                <p>JPG or PNG. Recommended: 400×400px.</p>
+                {% if form.profile_photo.errors %}
+                  <p class="tutor-field-error">{{ form.profile_photo.errors|join:", " }}</p>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- About You -->
+          <div class="mtc-admin-card tutor-form-card">
+            <div class="tutor-form-section-title">
+              <i class="fa-solid fa-circle-info" style="color:var(--blue);margin-right:8px;"></i>About You
+            </div>
+            <div class="tutor-form-field">
+              <label>Bio <span class="tutor-field-required">*</span></label>
+              {{ form.bio }}
+              <small>Tell students about your teaching style and background.</small>
+              {% if form.bio.errors %}<p class="tutor-field-error">{{ form.bio.errors|join:", " }}</p>{% endif %}
+            </div>
+            <div class="tutor-form-field" style="margin-top:18px;">
+              <label>Qualifications</label>
+              {{ form.qualifications }}
+              <small>Degrees, certifications, or relevant training.</small>
+              {% if form.qualifications.errors %}<p class="tutor-field-error">{{ form.qualifications.errors|join:", " }}</p>{% endif %}
+            </div>
+          </div>
+
+          <!-- Session Details -->
+          <div class="mtc-admin-card tutor-form-card">
+            <div class="tutor-form-section-title">
+              <i class="fa-solid fa-sliders" style="color:var(--blue);margin-right:8px;"></i>Session Details
+            </div>
+            <div class="tutor-form-grid">
+              <div class="tutor-form-field">
+                <label>Location</label>
+                {{ form.location }}
+                {% if form.location.errors %}<p class="tutor-field-error">{{ form.location.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div class="tutor-form-field">
+                <label>Hourly Rate (&#8358;)</label>
+                {{ form.hourly_rate }}
+                {% if form.hourly_rate.errors %}<p class="tutor-field-error">{{ form.hourly_rate.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div class="tutor-form-field">
+                <label>Years of Experience</label>
+                {{ form.years_experience }}
+                {% if form.years_experience.errors %}<p class="tutor-field-error">{{ form.years_experience.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+          </div>
+
+          <!-- Subjects -->
+          <div class="mtc-admin-card tutor-form-card">
+            <div class="tutor-form-section-title">
+              <i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach
+            </div>
+            <div class="tutor-subjects-grid">
+              {{ form.subjects }}
+            </div>
+            {% if form.subjects.errors %}<p class="tutor-field-error">{{ form.subjects.errors|join:", " }}</p>{% endif %}
+          </div>
+
+          <!-- Actions -->
+          <div class="tutor-form-actions">
+            <a href="{% url 'tutor_dashboard' %}" class="tutor-back-btn">Cancel</a>
+            <button type="submit" class="btn btn-primary tutor-save-btn">
+              <i class="fa-solid fa-floppy-disk" style="margin-right:6px;"></i>Save Profile
+            </button>
+          </div>
+
+        </form>
+      </main>
+    </div>
+  </div>
+</div>
+{% endblock %}

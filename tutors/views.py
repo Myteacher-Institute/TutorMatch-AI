@@ -1,30 +1,66 @@
-from django.shortcuts import render, get_object_or_404
-from django.http import HttpResponse
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib import messages
 from accounts.decorators import tutor_required
-from .models import Tutor
+from .models import Tutor, TutorDocument
+from .forms import TutorProfileForm, TutorDocumentForm
+
 
 @tutor_required
 def tutor_dashboard(request):
-    # Retrieve the Tutor instance associated with the logged-in user's UserProfile
-    # If the user doesn't have a tutor profile yet, this will return a 404 error
-    tutor_profile = get_object_or_404(Tutor, user=request.user)
-    
-    context = {
-        'tutor': tutor_profile,
-    }
-    
-    # Points to templates/tutors/tutor_dashboard.html
-    return render(request, 'tutors/tutor_dashboard.html', context)
+    profile, created = Tutor.objects.get_or_create(user=request.user.profile)
+    return render(request, 'tutors/dashboard.html', {'profile': profile})
 
-# Keep your other placeholders as-is for now until you build their templates
+
+@tutor_required
 def tutor_profile(request):
-    return HttpResponse("Tutor profile page will be built by Task 3.")
+    profile, created = Tutor.objects.get_or_create(user=request.user.profile)
+    form = TutorProfileForm(request.POST or None, request.FILES or None, instance=profile)
 
+    if form.is_valid():
+        form.save()
+        messages.success(request, 'Profile updated successfully.')
+        return redirect('tutor_dashboard')
+
+    return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile})
+
+
+@tutor_required
 def tutor_verification(request):
-    return HttpResponse("Tutor verification page will be built by Task 3.")
+    profile, created = Tutor.objects.get_or_create(user=request.user.profile)
+    form = TutorDocumentForm(request.POST or None, request.FILES or None)
+
+    if form.is_valid():
+        doc = form.save(commit=False)
+        doc.tutor = profile
+        doc.save()
+        messages.success(request, 'Document uploaded successfully.')
+        return redirect('tutor_verification')
+
+    documents = profile.documents.all()
+    return render(request, 'tutors/verification.html', {
+        'form': form,
+        'documents': documents,
+        'profile': profile,
+    })
+
 
 def tutor_list(request):
-    return HttpResponse("Tutor listings will be built by Task 3.")
+    tutors = Tutor.objects.filter(is_publicly_visible=True)
+
+    subject_filter = request.GET.get('subject')
+    location_filter = request.GET.get('location')
+    max_rate = request.GET.get('max_rate')
+
+    if subject_filter:
+        tutors = tutors.filter(subjects__subject_name__icontains=subject_filter)
+    if location_filter:
+        tutors = tutors.filter(location__icontains=location_filter)
+    if max_rate:
+        tutors = tutors.filter(hourly_rate__lte=max_rate)
+
+    return render(request, 'tutors/tutor_list.html', {'tutors': tutors})
+
 
 def tutor_detail(request, tutor_id):
-    return HttpResponse(f"Tutor profile {tutor_id} will be built by Task 3.")
+    tutor = get_object_or_404(Tutor, pk=tutor_id, is_publicly_visible=True)
+    return render(request, 'tutors/tutor_detail.html', {'tutor': tutor})

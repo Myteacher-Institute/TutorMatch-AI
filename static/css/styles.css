@@ -4075,6 +4075,237 @@ img {
   border-radius: 999px;
 }
 
+.tutor-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 36px 20px;
+  text-align: center;
+}
+
+.tutor-empty-icon {
+  width: 52px;
+  height: 52px;
+  background: #eff6ff;
+  color: var(--blue);
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  font-size: 22px;
+  margin-bottom: 14px;
+}
+
+.tutor-empty-state p {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.tutor-empty-state small {
+  display: block;
+  margin-top: 6px;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.tutor-alert {
+  display: flex;
+  align-items: center;
+  padding: 14px 18px;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+
+.tutor-alert-success {
+  background: #f0fdf4;
+  border: 1px solid #dcfce7;
+  color: #166534;
+}
+
+.tutor-alert-error {
+  background: #fef2f2;
+  border: 1px solid #fee2e2;
+  color: #991b1b;
+}
+
+.tutor-form-card {
+  margin-bottom: 20px;
+}
+
+.tutor-form-section-title {
+  font-size: 14px;
+  font-weight: 800;
+  color: #12182c;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: 18px;
+  padding-bottom: 12px;
+  border-bottom: 1px solid var(--line);
+}
+
+.tutor-form-field {
+  display: grid;
+  gap: 6px;
+}
+
+.tutor-form-field label {
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.tutor-form-field input,
+.tutor-form-field textarea,
+.tutor-form-field select {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tutor-form-field textarea {
+  min-height: 110px;
+  padding: 12px 14px;
+  resize: vertical;
+}
+
+.tutor-form-field input:focus,
+.tutor-form-field textarea:focus,
+.tutor-form-field select:focus {
+  border-color: var(--blue);
+  background: #fff;
+  box-shadow: 0 0 0 4px #eff6ff;
+}
+
+.tutor-form-field small {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tutor-field-required {
+  color: #dc2626;
+}
+
+.tutor-field-error {
+  margin: 0;
+  font-size: 12px;
+  color: #dc2626;
+  font-weight: 600;
+}
+
+.tutor-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 18px;
+}
+
+.tutor-subjects-grid ul {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tutor-subjects-grid label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  color: #334155;
+  cursor: pointer;
+  padding: 8px 10px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #fbfdff;
+  transition: all 0.15s;
+}
+
+.tutor-subjects-grid label:hover {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: var(--blue);
+}
+
+.tutor-photo-upload-row {
+  display: flex;
+  align-items: center;
+  gap: 20px;
+}
+
+.tutor-photo-preview {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #eff6ff;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 3px solid #dbeafe;
+}
+
+.tutor-photo-preview img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.tutor-photo-upload-info p {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tutor-file-drop {
+  border: 2px dashed var(--line);
+  border-radius: 10px;
+  padding: 20px;
+  text-align: center;
+  background: #fbfdff;
+  transition: border-color 0.2s;
+}
+
+.tutor-file-drop:hover {
+  border-color: var(--blue);
+  background: #eff6ff;
+}
+
+.tutor-file-drop p {
+  margin: 8px 0 0;
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tutor-form-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 8px;
+  padding-bottom: 30px;
+}
+
+.tutor-save-btn {
+  min-height: 44px;
+  border-radius: 9px;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+
 @media (min-width: 640px) {
   .mtc-booking-section {
     padding: 32px 24px;
