@@ -29,7 +29,7 @@ def book_tutor(request, tutor_id):
             booking.amount = amount
             booking.save()
             messages.success(request, "Your booking request has been created.")
-            return redirect("student_bookings")
+            return redirect("payment_checkout", booking_id=booking.id)
     else:
         form = BookingForm(initial={"amount": amount})
 
@@ -51,11 +51,25 @@ def student_bookings(request):
         Booking.objects.filter(student=student_profile)
         .select_related("tutor__user__user")
         .prefetch_related("payments", "reviews")
-        .order_by("-booking_date", "-lesson_time")
+        .order_by("-created_at")
     )
     pending_review_count = sum(
-        1 for booking in bookings if booking.status == "completed" and not booking.reviews.exists()
+        1
+        for booking in bookings
+        if booking.status == "completed" and not booking.reviews.filter(student=student_profile).exists()
     )
+    for booking in bookings:
+        payments = list(booking.payments.all())
+        paid_payment = next(
+            (payment for payment in payments if payment.payment_status == "paid"),
+            None,
+        )
+        latest_payment = payments[0] if payments else None
+        display_payment = paid_payment or latest_payment
+        booking.display_payment_status = display_payment.payment_status if display_payment else "pending"
+        booking.display_payment_status_label = (
+            display_payment.get_payment_status_display() if display_payment else "Pending"
+        )
     next_booking = (
         bookings.filter(booking_date__gte=timezone.localdate())
         .exclude(status__in=["completed", "cancelled"])
@@ -80,7 +94,7 @@ def tutor_bookings(request):
     bookings = (
         Booking.objects.filter(tutor=tutor)
         .select_related("student__user")
-        .order_by("-booking_date", "-lesson_time")
+        .order_by("-created_at")
     )
     pending_count = bookings.filter(status="pending").count()
     accepted_count = bookings.filter(status="accepted").count()

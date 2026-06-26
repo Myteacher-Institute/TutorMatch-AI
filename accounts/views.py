@@ -1,4 +1,5 @@
 from django.http import HttpResponse
+from django.utils import timezone
 from django.shortcuts import render, redirect
 from .forms import Registration, Login
 from .models import UserProfile
@@ -71,11 +72,15 @@ def student_dashboard(request):
     recent_bookings = (
         Booking.objects.filter(student=student_profile)
         .select_related("tutor__user__user")
-        .order_by("-booking_date", "-lesson_time")[:4]
+        .order_by("-created_at")[:4]
     )
     active_bookings_count = Booking.objects.filter(student=student_profile).exclude(
         status__in=["completed", "cancelled"]
     ).count()
+    upcoming_lessons_count = Booking.objects.filter(
+        student=student_profile,
+        booking_date__gte=timezone.localdate(),
+    ).exclude(status__in=["completed", "cancelled"]).count()
     completed_lessons_count = Booking.objects.filter(
         student=student_profile,
         status="completed",
@@ -94,6 +99,7 @@ def student_dashboard(request):
             "recommended_tutors": recommended_tutors,
             "recent_bookings": recent_bookings,
             "active_bookings_count": active_bookings_count,
+            "upcoming_lessons_count": upcoming_lessons_count,
             "completed_lessons_count": completed_lessons_count,
         },
     )

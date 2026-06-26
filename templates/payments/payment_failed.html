@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment Failed | TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="mtc-shell" style="padding: 60px 0; min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+  <div style="max-width: 520px; width: 100%; text-align: center;">
+    <div style="display: inline-grid; place-items: center; width: 80px; height: 80px; border-radius: 50%; background: #fef2f2; color: #dc2626; margin-bottom: 24px;">
+      <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <circle cx="12" cy="12" r="10"></circle>
+        <line x1="12" y1="8" x2="12" y2="12"></line>
+        <line x1="12" y1="16" x2="12.01" y2="16"></line>
+      </svg>
+    </div>
+
+    <h1 style="margin: 0 0 12px; font-size: clamp(28px, 5vw, 36px); color: #111827; letter-spacing: -0.03em;">Payment Failed</h1>
+    <p style="margin: 0 0 32px; color: var(--muted); font-size: 16px; line-height: 1.6;">
+      We could not process your payment. Please check your payment details and try again. Your booking is still pending.
+    </p>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+      <a href="#" onclick="history.back(); return false;" class="btn btn-primary" style="min-height: 48px; padding: 0 28px; font-size: 15px; border-radius: 10px; background: var(--blue); border-color: var(--blue);">
+        Try Again
+      </a>
+      <a href="{% url 'student_bookings' %}" class="btn btn-ghost" style="min-height: 48px; padding: 0 28px; font-size: 15px; border-radius: 10px; color: #475569;">
+        View My Bookings
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

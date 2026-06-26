@@ -1,0 +1,30 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Payment Successful | TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="mtc-shell" style="padding: 60px 0; min-height: 60vh; display: flex; align-items: center; justify-content: center;">
+  <div style="max-width: 520px; width: 100%; text-align: center;">
+    <div style="display: inline-grid; place-items: center; width: 80px; height: 80px; border-radius: 50%; background: #dcfce7; color: #16a34a; margin-bottom: 24px;">
+      <svg viewBox="0 0 24 24" width="40" height="40" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="20 6 9 17 4 12"></polyline>
+      </svg>
+    </div>
+
+    <h1 style="margin: 0 0 12px; font-size: clamp(28px, 5vw, 36px); color: #111827; letter-spacing: -0.03em;">Payment Successful</h1>
+    <p style="margin: 0 0 32px; color: var(--muted); font-size: 16px; line-height: 1.6;">
+      Your payment has been processed successfully. Your booking is now confirmed and the tutor has been notified.
+    </p>
+
+    <div style="display: flex; flex-wrap: wrap; justify-content: center; gap: 12px;">
+      <a href="{% url 'student_bookings' %}" class="btn btn-primary" style="min-height: 48px; padding: 0 28px; font-size: 15px; border-radius: 10px; background: var(--blue); border-color: var(--blue);">
+        View My Bookings
+      </a>
+      <a href="{% url 'student_dashboard' %}" class="btn btn-ghost" style="min-height: 48px; padding: 0 28px; font-size: 15px; border-radius: 10px; color: #475569;">
+        Go to Dashboard
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}

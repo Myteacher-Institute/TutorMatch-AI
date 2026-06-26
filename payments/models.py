@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.db import models
 from accounts.models import UserProfile
 from tutors.models import Tutor
@@ -14,7 +15,6 @@ Payment_CHOICES = [
 ]
 
 
-
     
 # Payment Model
 class Payment(models.Model):
@@ -27,8 +27,8 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def save(self, *args, **kwargs):
-        self.commission = self.amount * 0.15
-        self.tutor_payout = self.amount * 0.85
+        self.commission = self.amount * Decimal('0.15')
+        self.tutor_payout = self.amount * Decimal('0.85')
         super().save(*args, **kwargs)
     
 

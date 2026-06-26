@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Checkout | TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="mtc-shell" style="padding: 40px 0 80px;">
+  <div style="max-width: 780px; margin: 0 auto;">
+    <a href="{% url 'student_bookings' %}" style="display: inline-flex; align-items: center; gap: 6px; color: #475569; font-size: 14px; font-weight: 600; margin-bottom: 24px; text-decoration: none;">
+      <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+      Back to My Bookings
+    </a>
+
+    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 32px;">
+      <div style="display: inline-grid; place-items: center; width: 44px; height: 44px; border-radius: 12px; background: #eff6ff; color: #2563eb;">
+        <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+      </div>
+      <div>
+        <h1 style="margin: 0; font-size: clamp(24px, 4vw, 30px); color: #111827; letter-spacing: -0.02em;">Payment Checkout</h1>
+        <p style="margin: 4px 0 0; color: #64748b; font-size: 14px;">Review your booking details and complete payment securely.</p>
+      </div>
+    </div>
+
+    <div style="display: grid; grid-template-columns: 1fr; gap: 20px;">
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <h2 style="margin: 0 0 20px; font-size: 16px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.04em;">Booking Details</h2>
+
+        <div style="display: flex; align-items: flex-start; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
+          <div style="width: 48px; height: 48px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: grid; place-items: center; flex-shrink: 0;">
+            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+          </div>
+          <div style="flex: 1; min-width: 0;">
+            <div style="font-weight: 700; font-size: 16px; color: #111827;">{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</div>
+            <div style="color: #64748b; font-size: 14px; margin-top: 2px;">Tutor &middot; {{ booking.tutor.subjects.all|join:", "|truncatechars:60 }}</div>
+          </div>
+        </div>
+
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding-top: 20px;">
+          <div>
+            <div style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">Date</div>
+            <div style="font-size: 15px; color: #111827; font-weight: 600;">{{ booking.booking_date|date:"D, M j, Y" }}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">Time</div>
+            <div style="font-size: 15px; color: #111827; font-weight: 600;">{{ booking.lesson_time|time:"h:i A" }}</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">Duration</div>
+            <div style="font-size: 15px; color: #111827; font-weight: 600;">1 Hour</div>
+          </div>
+          <div>
+            <div style="font-size: 12px; font-weight: 600; color: #94a3b8; text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 4px;">Booking ID</div>
+            <div style="font-size: 15px; color: #111827; font-weight: 600;">#{{ booking.id|stringformat:"04d" }}</div>
+          </div>
+        </div>
+      </div>
+
+      <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        <h2 style="margin: 0 0 20px; font-size: 16px; font-weight: 700; color: #111827; text-transform: uppercase; letter-spacing: 0.04em;">Payment Summary</h2>
+
+        <div style="display: flex; flex-direction: column; gap: 12px;">
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #475569; font-size: 15px;">Lesson Fee</span>
+            <span style="font-weight: 700; color: #111827; font-size: 15px;">&#8358;{{ booking.amount|floatformat:"2" }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #475569; font-size: 15px;">Platform Fee (15%)</span>
+            <span style="font-weight: 700; color: #dc2626; font-size: 15px;">-&#8358;{{ commission|floatformat:"2" }}</span>
+          </div>
+          <div style="display: flex; justify-content: space-between; align-items: center;">
+            <span style="color: #475569; font-size: 15px;">Tutor Payout (85%)</span>
+            <span style="font-weight: 700; color: #16a34a; font-size: 15px;">&#8358;{{ booking.amount|add:"-0.15"|floatformat:"2" }}</span>
+          </div>
+        </div>
+
+        <div style="margin-top: 16px; padding-top: 16px; border-top: 2px dashed #e2e8f0; display: flex; justify-content: space-between; align-items: center;">
+          <span style="font-weight: 700; color: #111827; font-size: 16px;">Total to Pay</span>
+          <span style="font-weight: 800; color: #111827; font-size: 22px;">&#8358;{{ booking.amount|floatformat:"2" }}</span>
+        </div>
+      </div>
+
+      <form method="post" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 28px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+        {% csrf_token %}
+        <div style="display: flex; flex-wrap: wrap; gap: 12px; justify-content: flex-end;">
+          <a href="{% url 'student_bookings' %}" class="btn btn-ghost" style="min-height: 48px; padding: 0 24px; font-size: 15px; border-radius: 10px; color: #475569; font-weight: 600; text-decoration: none;">
+            Cancel
+          </a>
+          <button type="submit" class="btn btn-primary" style="min-height: 48px; padding: 0 28px; font-size: 15px; border-radius: 10px; background: var(--blue); border-color: var(--blue); font-weight: 700; box-shadow: 0 4px 14px rgba(37,99,235,0.25);">
+            <span style="display: inline-flex; align-items: center; gap: 8px;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"></rect><line x1="1" y1="10" x2="23" y2="10"></line></svg>
+              Pay &#8358;{{ booking.amount|floatformat:"2" }}
+            </span>
+          </button>
+        </div>
+        <p style="margin: 16px 0 0; font-size: 13px; color: #94a3b8; text-align: right;">
+          Secured by Paystack &middot; Your payment info is encrypted
+        </p>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

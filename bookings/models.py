@@ -1,4 +1,5 @@
 from django.db import models
+from django.utils import timezone
 from accounts.models import UserProfile
 from tutors.models import Tutor
 
@@ -20,6 +21,7 @@ class Booking (models.Model):
     lesson_note = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices= Booking_CHOICES, default="pending")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_at = models.DateTimeField(default=timezone.now)
     
     def __str__(self):
         return f"{self.student} - {self.tutor} - {self.booking_date}"    

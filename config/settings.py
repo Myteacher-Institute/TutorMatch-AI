@@ -1,5 +1,6 @@
 import os
 from pathlib import Path
+# from decouple import config
 
 
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -128,3 +129,12 @@ EMAIL_HOST_USER = os.getenv('EMAIL_HOST_USER', '')
 EMAIL_HOST_PASSWORD = os.getenv('EMAIL_HOST_PASSWORD', '')
 EMAIL_USE_TLS = env_bool('EMAIL_USE_TLS', True)
 DEFAULT_FROM_EMAIL = os.getenv('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER or 'webmaster@localhost')
+
+# PAYSTACK HERE
+
+
+PAYSTACK_SECRET_KEY =os.getenv('PAYSTACK_SECRET_KEY')
+PAYSTACK_PUBLIC_KEY = os.getenv('PAYSTACK_PUBLIC_KEY')
+
+
+PAYSTACK_CALLBACK_URL = 'http://localhost:1000/payments/verify/'
