@@ -27,7 +27,11 @@
 
         <div style="display: flex; align-items: flex-start; gap: 16px; padding-bottom: 20px; border-bottom: 1px solid #f1f5f9;">
           <div style="width: 48px; height: 48px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: grid; place-items: center; flex-shrink: 0;">
-            <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+            {% if booking.tutor.profile_photo %}
+              <img src="{{ booking.tutor.profile_photo.url }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+            {% else %}
+              <i class="fa-regular fa-user"></i>
+            {% endif %}
           </div>
           <div style="flex: 1; min-width: 0;">
             <div style="font-weight: 700; font-size: 16px; color: #111827;">{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</div>

@@ -92,3 +92,7 @@ templates/dashboard/
 /admin-dashboard/bookings/         Booking management
 /admin-dashboard/revenue/          Revenue management
 ```
+
+
+TUTORMATCH AI UML DIAGRAM
+![alt text](UMLDIAGRA.drawio.svg)

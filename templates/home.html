@@ -8,7 +8,7 @@
   <div class="mtc-shell mtc-hero-inner">
     <p class="mtc-pill">#1 Tutoring Platform in Nigeria</p>
     <h1>Find Verified Home Tutors<br>in Nigeria <span>Anywhere</span></h1>
-    <p class="mtc-hero-copy">Use AI to instantly connect with trusted Mathematics, English, Science, Coding, WAEC and JAMB tutors near you.</p>
+    <p class="mtc-hero-copy" id="search-section">Use AI to instantly connect with trusted Mathematics, English, Science, Coding, WAEC and JAMB tutors near you.</p>
 
     <style>
       @keyframes micPulse {
@@ -31,7 +31,7 @@
       }
     </style>
 
-    <form action="{% url 'search_results' %}" class="mtc-search" method="get" id="search-section">
+    <form action="{% url 'search_results' %}" class="mtc-search" method="get" >
       <span class="mtc-search-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="m12 3-1.7 5.2L5 10l5.3 1.8L12 17l1.7-5.2L19 10l-5.3-1.8L12 3Z"/><path d="m5 15-.9 2.6L1.5 18.5l2.6.9L5 22l.9-2.6 2.6-.9-2.6-.9L5 15Z"/></svg>
       </span>
@@ -95,10 +95,10 @@
   </div>
 </section>
 
-<section class="mtc-how">
+<section class="mtc-how" id="how-it-works">
   <div class="mtc-shell">
     <div class="mtc-section-title">
-      <h2>How It Works</h2>
+      <h2 >How It Works</h2>
       <p>Get connected with a professional tutor in three simple steps.</p>
     </div>
     <div class="mtc-steps">
