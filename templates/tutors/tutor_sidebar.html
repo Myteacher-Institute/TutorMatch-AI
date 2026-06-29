@@ -1,0 +1,46 @@
+<aside class="mtc-admin-sidebar tutor-sidebar">
+  <div class="tutor-sidebar-profile">
+    <div class="tutor-avatar-ring">
+      {% if profile.profile_photo %}
+        <img src="{{ profile.profile_photo }}" alt="Profile" class="tutor-avatar-img">
+      {% else %}
+        <div class="tutor-avatar-placeholder">
+          {{ profile.user.user.first_name|first|upper }}{{ profile.user.user.last_name|first|upper }}
+        </div>
+      {% endif %}
+    </div>
+    <div class="tutor-sidebar-info">
+      <strong>{{ profile.user.user.get_full_name }}</strong>
+      <span>Tutor portal</span>
+    </div>
+    <div class="tutor-sidebar-status">
+      <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+        <i class="fa-solid {% if profile.verification_status == 'approved' %}fa-circle-check{% elif profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:5px;"></i>
+        {{ profile.get_verification_status_display }}
+      </span>
+    </div>
+  </div>
+
+  <nav class="mtc-admin-nav" style="margin-top:12px;">
+    <a href="{% url 'tutor_dashboard' %}" {% if active_tab == 'dashboard' %}class="active"{% endif %}>
+      <i class="fa-solid fa-house-circle-check" style="width:18px;margin-right:8px;"></i>Dashboard
+    </a>
+    <a href="{% url 'tutor_profile' %}" {% if active_tab == 'profile' %}class="active"{% endif %}>
+      <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
+    </a>
+    <a href="{% url 'tutor_verification' %}" {% if active_tab == 'verification' %}class="active"{% endif %}>
+      <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
+    </a>
+    <a href="{% url 'tutor_bookings' %}" {% if active_tab == 'bookings' %}class="active"{% endif %}>
+      <i class="fa-solid fa-receipt" style="width:18px;margin-right:8px;"></i>Bookings
+    </a>
+    <a href="{% url 'tutor_chat_list' %}" {% if active_tab == 'chats' %}class="active"{% endif %}>
+      <i class="fa-solid fa-comments" style="width:18px;margin-right:8px;"></i>Chats
+    </a>
+  </nav>
+
+  <div class="tutor-sidebar-rate">
+    <span>Hourly Rate</span>
+    <strong>{% if profile.hourly_rate %}&#8358;{{ profile.hourly_rate }}{% else %}Not set{% endif %}</strong>
+  </div>
+</aside>

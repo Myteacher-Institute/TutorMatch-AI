@@ -9,7 +9,7 @@ from .forms import TutorProfileForm, TutorDocumentForm
 @tutor_required
 def tutor_dashboard(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
-    return render(request, 'tutors/dashboard.html', {'profile': profile})
+    return render(request, 'tutors/dashboard.html', {'profile': profile, 'active_tab': 'dashboard'})
 
 
 @tutor_required
@@ -24,7 +24,7 @@ def tutor_profile(request):
             is_valid_file, error = validate_file(photo)
             if not is_valid_file:
                 form.add_error('profile_photo_upload', error)
-                return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile})
+                return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile, 'active_tab': 'profile'})
             profile.profile_photo = upload_file_in_memory(photo, folder="/tutor_photos")
 
         profile.save()
@@ -32,7 +32,7 @@ def tutor_profile(request):
         messages.success(request, 'Profile updated successfully.')
         return redirect('tutor_dashboard')
 
-    return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile})
+    return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile, 'active_tab': 'profile'})
 
 
 @tutor_required
@@ -49,6 +49,7 @@ def tutor_verification(request):
                 'form': form,
                 'documents': profile.documents.all(),
                 'profile': profile,
+                'active_tab': 'verification',
             })
 
         doc = form.save(commit=False)
@@ -63,6 +64,7 @@ def tutor_verification(request):
         'form': form,
         'documents': documents,
         'profile': profile,
+        'active_tab': 'verification',
     })
 
 

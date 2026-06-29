@@ -105,6 +105,7 @@ def tutor_chat_list(request):
     context = {
         'chat_sessions': chat_sessions,
         'tutor_profile': request.user.profile, # Pass the tutor's profile
+        'active_tab': 'chats',
     }
     return render(request, 'Chat/tutor_chat_list.html', context)
 

@@ -123,6 +123,7 @@ def tutor_bookings(request):
             "pending_count": pending_count,
             "accepted_count": accepted_count,
             "completed_count": completed_count,
+            "active_tab": "bookings",
         },
     )
 
