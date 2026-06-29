@@ -12,6 +12,7 @@ urlpatterns = [
     path("", include("bookings.urls")),
     path("", include("payments.urls")),
     path("", include("reviews.urls")),
+    path("", include("Chat.urls")),
 ]
 
 if settings.DEBUG:

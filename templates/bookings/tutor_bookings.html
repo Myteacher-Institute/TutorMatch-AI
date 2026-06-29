@@ -23,6 +23,8 @@
           <i class="fa-solid fa-chalkboard-user"></i> Dashboard</a>
         <a href="{% url 'tutor_bookings' %}" class="active">
           <i class="fa-solid fa-calendar-check"></i> Bookings</a>
+        <a href="{% url 'tutor_chat_list' %}">
+          <i class="fa-solid fa-comments"></i> Chats</a>
       </nav>
     </aside>
 
@@ -105,11 +107,14 @@
                             {% csrf_token %}
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject">Reject</button>
                           </form>
-                        {% elif booking.status == "accepted" %}
+                        {% elif booking.status == "accepted" or booking.status == "completed" %}
+                          <a href="{% url 'chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat">Chat</a>
+                          {% if booking.status == "accepted" %}
                           <form method="post" action="{% url 'update_booking_status' booking.id 'completed' %}">
                             {% csrf_token %}
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-complete">Complete</button>
                           </form>
+                          {% endif %}
                         {% else %}
                           <span class="mtc-unavailable-action">No action</span>
                         {% endif %}

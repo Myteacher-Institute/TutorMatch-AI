@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     "payments",
     "reviews",
     "dashboard",
+    "Chat",
 ]
 
 MIDDLEWARE = [

@@ -2,7 +2,7 @@ from django.db import models
 from django.utils import timezone
 from accounts.models import UserProfile
 from tutors.models import Tutor
-
+# from Chat.models import ChatSession # Remove this import
 
 # Create your models here.
 
@@ -24,4 +24,4 @@ class Booking (models.Model):
     created_at = models.DateTimeField(default=timezone.now)
     
     def __str__(self):
-        return f"{self.student} - {self.tutor} - {self.booking_date}"    
+        return f"{self.student} - {self.tutor} - {self.booking_date}"

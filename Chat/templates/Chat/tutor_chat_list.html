@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tutor Chat List | Myteacherconnect{% endblock %}
+
+{% block content %}
+<div class="mtc-shell">
+  <section class="mtc-admin-layout">
+    <aside class="mtc-admin-sidebar tutor-sidebar">
+      <div class="tutor-sidebar-profile">
+        <div class="tutor-avatar-ring">
+          {% if tutor_profile.profile_photo %}
+            <img src="{{ tutor_profile.profile_photo.url }}" alt="Profile" class="tutor-avatar-img">
+          {% else %}
+            <div class="tutor-avatar-placeholder">
+              {{ tutor_profile.user.first_name|first|upper }}{{ tutor_profile.user.last_name|first|upper }}
+            </div>
+          {% endif %}
+        </div>
+        <div class="tutor-sidebar-info">
+          <strong>{{ tutor_profile.user.get_full_name }}</strong>
+          <span>Tutor portal</span>
+        </div>
+        <div class="tutor-sidebar-status">
+          <span class="mtc-status-pill {% if tutor_profile.verification_status == 'approved' %}mtc-status-accepted{% elif tutor_profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+            <i class="fa-solid {% if tutor_profile.verification_status == 'approved' %}fa-circle-check{% elif tutor_profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:5px;"></i>
+            {{ tutor_profile.get_verification_status_display }}
+          </span>
+        </div>
+      </div>
+
+      <nav class="mtc-admin-nav" style="margin-top:12px;">
+        <a href="{% url 'tutor_dashboard' %}">
+          <i class="fa-solid fa-house-circle-check" style="width:18px;margin-right:8px;"></i>Dashboard
+        </a>
+        <a href="{% url 'tutor_profile' %}">
+          <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
+        </a>
+        <a href="{% url 'tutor_verification' %}" >
+          <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
+        </a>
+        <a href="{% url 'tutor_bookings' %}">
+          <i class="fa-solid fa-receipt" style="width:18px;margin-right:8px;"></i>Bookings
+        </a>
+        <a href="{% url 'tutor_chat_list' %}" class="active">
+            <i class="fa-solid fa-comments" style="width:18px;margin-right:8px;"></i>Chats
+        </a>
+      </nav>
+
+      <div class="tutor-sidebar-rate">
+        <span>Hourly Rate</span>
+        <strong>{% if tutor_profile.hourly_rate %}&#8358;{{ tutor_profile.hourly_rate }}{% else %}Not set{% endif %}</strong>
+      </div>
+    </aside>
+
+    <div class="mtc-admin-content">
+      <div class="tutor-page-heading">
+        <div>
+          <p class="tutor-eyebrow">Tutor Portal</p>
+          <h1>Your Chats</h1>
+          <p class="tutor-subtext">Communicate with your students regarding bookings and lessons.</p>
+        </div>
+      </div>
+
+      <div class="mtc-admin-card" style="padding: 0;">
+        {% if chat_sessions %}
+          <ul class="chat-session-list" style="list-style: none; padding: 0; margin: 0;">
+            {% for session in chat_sessions %}
+              <li style="border-bottom: 1px solid #f1f5f9; {% if forloop.last %}border-bottom: none;{% endif %}">
+                <a href="{% url 'chat_view' session.booking.id %}" style="display: flex; align-items: center; padding: 16px 24px; text-decoration: none; color: inherit;">
+                  <div style="width: 48px; height: 48px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: grid; place-items: center; font-size: 20px; font-weight: 600; flex-shrink: 0; margin-right: 16px;">
+                    {% if session.student.profile.profile_photo %}
+                      <img src="{{ session.student.profile.profile_photo.url }}" alt="{{ session.student.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+                    {% else %}
+                      {{ session.student.first_name|first|upper }}
+                    {% endif %}
+                  </div>
+                  <div style="flex-grow: 1; min-width: 0;">
+                    <strong style="display: block; font-size: 16px; color: #111827;">{{ session.student.get_full_name|default:session.student.username }}</strong>
+                    <span style="display: block; font-size: 13px; color: #64748b; margin-top: 2px;">Booking ID: #{{ session.booking.id|stringformat:"04d" }}</span>
+                  </div>
+                  <span style="font-size: 12px; color: #94a3b8; flex-shrink: 0;">
+                    {% if session.messages.last %}{{ session.messages.last.timestamp|date:"M j, H:i" }}{% else %}No messages{% endif %}
+                  </span>
+                </a>
+              </li>
+            {% endfor %}
+          </ul>
+        {% else %}
+          <div class="tutor-empty-state" style="padding: 40px 24px;">
+            <div class="tutor-empty-icon"><i class="fa-solid fa-comments"></i></div>
+            <p>No chat sessions yet.</p>
+            <small>Once students book lessons, chat sessions will appear here.</small>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
