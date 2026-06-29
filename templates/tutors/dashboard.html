@@ -64,7 +64,7 @@
         <div class="tutor-page-heading">
           <div>
             <p class="tutor-eyebrow">Tutor Dashboard</p>
-            <h1>Welcome back, {{ profile.user.user.first_name }} &#128075;</h1>
+            <h1>Welcome, {{ profile.user.user.first_name }} </h1>
             <p class="tutor-subtext">Here's an overview of your profile and activity.</p>
           </div>
           <a href="{% url 'tutor_detail' tutor_id=profile.id %}" class="btn btn-primary tutor-view-btn">

@@ -82,6 +82,7 @@ def send_message(request, booking_id):
                 sender=request.user,
                 message=message_content
             )
+            session.save() # Explicitly save the session to update 'updated_at'
             # Render the new message as an HTML fragment
             context = {
                 'chat_messages_list': [new_message],

@@ -5931,3 +5931,4 @@ img {
 .mtc-status-pending {
   color: red;
 }
+.tutor-view-btn:hover { color: var(--white); }
