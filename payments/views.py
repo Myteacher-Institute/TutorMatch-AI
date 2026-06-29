@@ -56,9 +56,11 @@ def checkout(request, booking_id):
         return redirect("payment_failed")
 
     commission = booking.amount * Decimal('0.15')
+    tutor_payout = booking.amount - commission
     template_context = {
         "booking": booking,
         "commission": commission,
+        "tutor_payout": tutor_payout,
         "tutor_subjects": booking.tutor.subjects.all(),
     }
     return render(request, "payments/checkout.html", template_context)
