@@ -149,3 +149,9 @@ def bookings(request):
 @admin_required
 def revenue(request):
     return render(request, "dashboard/revenue.html")
+
+def Termsofservice(request):
+    return render(request, "Terms_of_Service.html")
+
+def privacy_policy(request):
+    return render(request, "privacy_policy.html")

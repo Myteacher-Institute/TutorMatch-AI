@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
@@ -9,9 +10,17 @@ from .models import Booking
 from tutors.models import Tutor
 
 
+BOOKINGS_PER_PAGE = 10
+
+
 def _profile_for_user(user):
     profile, _ = UserProfile.objects.get_or_create(user=user)
     return profile
+
+
+def _paginated_bookings(request, bookings):
+    paginator = Paginator(bookings, BOOKINGS_PER_PAGE)
+    return paginator.get_page(request.GET.get("page"))
 
 
 @login_required
@@ -47,18 +56,20 @@ def book_tutor(request, tutor_id):
 @login_required
 def student_bookings(request):
     student_profile = _profile_for_user(request.user)
-    bookings = (
+    bookings_queryset = (
         Booking.objects.filter(student=student_profile)
         .select_related("tutor__user__user")
         .prefetch_related("payments", "reviews")
         .order_by("-created_at")
     )
-    pending_review_count = sum(
-        1
-        for booking in bookings
-        if booking.status == "completed" and not booking.reviews.filter(student=student_profile).exists()
+    pending_review_count = (
+        bookings_queryset.filter(status="completed")
+        .exclude(reviews__student=student_profile)
+        .distinct()
+        .count()
     )
-    for booking in bookings:
+    page_obj = _paginated_bookings(request, bookings_queryset)
+    for booking in page_obj:
         payments = list(booking.payments.all())
         paid_payment = next(
             (payment for payment in payments if payment.payment_status == "paid"),
@@ -71,7 +82,7 @@ def student_bookings(request):
             display_payment.get_payment_status_display() if display_payment else "Pending"
         )
     next_booking = (
-        bookings.filter(booking_date__gte=timezone.localdate())
+        bookings_queryset.filter(booking_date__gte=timezone.localdate())
         .exclude(status__in=["completed", "cancelled"])
         .order_by("booking_date", "lesson_time")
         .first()
@@ -80,8 +91,9 @@ def student_bookings(request):
         request,
         "bookings/student_bookings.html",
         {
-            "bookings": bookings,
-            "bookings_count": bookings.count(),
+            "bookings": page_obj,
+            "bookings_count": page_obj.paginator.count,
+            "page_obj": page_obj,
             "pending_review_count": pending_review_count,
             "next_booking": next_booking,
         },
@@ -91,21 +103,23 @@ def student_bookings(request):
 @login_required
 def tutor_bookings(request):
     tutor = get_object_or_404(Tutor, user=_profile_for_user(request.user))
-    bookings = (
+    bookings_queryset = (
         Booking.objects.filter(tutor=tutor)
         .select_related("student__user")
         .order_by("-created_at")
     )
-    pending_count = bookings.filter(status="pending").count()
-    accepted_count = bookings.filter(status="accepted").count()
-    completed_count = bookings.filter(status="completed").count()
+    pending_count = bookings_queryset.filter(status="pending").count()
+    accepted_count = bookings_queryset.filter(status="accepted").count()
+    completed_count = bookings_queryset.filter(status="completed").count()
+    page_obj = _paginated_bookings(request, bookings_queryset)
 
     return render(
         request,
         "bookings/tutor_bookings.html",
         {
-            "bookings": bookings,
-            "bookings_count": bookings.count(),
+            "bookings": page_obj,
+            "bookings_count": page_obj.paginator.count,
+            "page_obj": page_obj,
             "pending_count": pending_count,
             "accepted_count": accepted_count,
             "completed_count": completed_count,

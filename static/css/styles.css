@@ -5529,6 +5529,53 @@ img {
   line-height: 1.6;
 }
 
+.mtc-bookings-pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  border-top: 1px solid var(--line);
+  padding: 16px 24px;
+}
+
+.mtc-bookings-pagination-summary {
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.mtc-bookings-pagination-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.mtc-bookings-pagination-controls a,
+.mtc-bookings-pagination-controls span {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 36px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fff;
+  padding: 0 13px;
+  color: #334155;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.mtc-bookings-pagination-controls a:hover {
+  border-color: var(--blue);
+  color: var(--blue);
+}
+
+.mtc-bookings-pagination-controls .is-disabled {
+  background: #f8fafc;
+  color: #94a3b8;
+}
+
 /* Tutor Bookings */
 .mtc-tutor-bookings-table {
   min-width: 980px;
@@ -5838,6 +5885,16 @@ img {
 }
 
 @media (max-width: 820px) {
+  .mtc-bookings-pagination {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .mtc-bookings-pagination-controls a,
+  .mtc-bookings-pagination-controls span {
+    flex: 1 1 120px;
+  }
+
   .mtc-review-header,
   .mtc-review-actions {
     flex-direction: column;

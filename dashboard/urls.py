@@ -11,4 +11,6 @@ urlpatterns = [
     path("admin-dashboard/users/", views.users, name="admin_users"),
     path("admin-dashboard/bookings/", views.bookings, name="admin_bookings"),
     path("admin-dashboard/revenue/", views.revenue, name="admin_revenue"),
+    path("terms-of-service/", views.Termsofservice, name="terms_of_service"),
+    path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
 ]

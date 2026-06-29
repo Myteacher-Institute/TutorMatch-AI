@@ -129,14 +129,14 @@
         <h2 style="color: #ffffff;">Company</h2>
         <a href="{% url 'about' %}" style="color: #94a3b8;">About Us</a>
         <a href="{% url 'contact' %}" style="color: #94a3b8;">Contact</a>
-        <a href="#" style="color: #94a3b8;">Terms of Service</a>
+        <a href="{% url 'terms_of_service' %}" style="color: #94a3b8;">Terms of Service</a>
       </div>
     </div>
     <div class="mtc-shell mtc-footer-bottom" style="border-top: 1px solid #1e293b; padding-top: 20px;">
-      <p style="color: #64748b;">© 2024 Myteacher Tutors Connect. All rights reserved.</p>
+      <p style="color: #64748b;">© 2026 Myteacher Connect. All rights reserved.</p>
       <div>
-        <a href="#">Privacy Policy</a>
-        <a href="#">Terms of Service</a>
+        <a href="{% url 'privacy_policy' %}">Privacy Policy</a>
+        <a href="{% url 'terms_of_service' %}">Terms of Service</a>
       </div>
     </div>
   </footer>
