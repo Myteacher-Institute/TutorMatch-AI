@@ -90,7 +90,7 @@ def student_dashboard(request):
         .filter(is_publicly_visible=True)
         .prefetch_related("subjects")
         .annotate(review_count=Count("tutor_reviews"))
-        .order_by("-years_experience", "hourly_rate")[:3]
+        .order_by("-years_experience", "hourly_rate")[:4]
     )
     return render(
         request,

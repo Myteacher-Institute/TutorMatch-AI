@@ -5870,3 +5870,7 @@ img {
     padding: 18px;
   }
 }
+
+.mtc-status-pending {
+  color: red;
+}
