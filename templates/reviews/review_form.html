@@ -19,7 +19,7 @@
       <aside class="mtc-review-tutor-card">
         <div class="mtc-review-tutor-profile">
           {% if tutor.profile_photo %}
-            <img src="{{ tutor.profile_photo.url }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+            <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
           {% else %}
             <span>{% if tutor.user.user.first_name %}{{ tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}</span>
           {% endif %}

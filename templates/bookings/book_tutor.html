@@ -31,7 +31,7 @@
         <div class="mtc-booking-tutor-head">
           <div class="mtc-booking-tutor-profile">
             {% if tutor.profile_photo %}
-              <img src="{{ tutor.profile_photo.url }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}" class="mtc-booking-avatar">
+              <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}" class="mtc-booking-avatar">
             {% else %}
 <div class="mtc-booking-avatar-placeholder">
                 {% if tutor.user.user.first_name %}{{ tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}

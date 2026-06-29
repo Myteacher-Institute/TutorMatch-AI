@@ -3,10 +3,12 @@ from .models import Tutor, TutorDocument, Subject
 
 
 class TutorProfileForm(forms.ModelForm):
+    profile_photo_upload = forms.ImageField(required=False)
+
     class Meta:
         model = Tutor
         fields = [
-            'profile_photo',
+            'profile_photo_upload',
             'bio',
             'location',
             'hourly_rate',
@@ -22,6 +24,8 @@ class TutorProfileForm(forms.ModelForm):
 
 
 class TutorDocumentForm(forms.ModelForm):
+    document_file = forms.FileField(required=True)
+
     class Meta:
         model = TutorDocument
         fields = ['document_type', 'document_file']

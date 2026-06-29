@@ -11,7 +11,7 @@ class Subject(models.Model):
 
 class Tutor(models.Model):
     user = models.OneToOneField("accounts.UserProfile", on_delete=models.CASCADE, related_name="tutor_profile")
-    profile_photo = models.ImageField(upload_to="tutor_photos/", blank=True, null=True)
+    profile_photo = models.URLField(blank=True, null=True)
     bio = models.TextField(blank=True)
     location = models.CharField(max_length=120, blank=True)
     hourly_rate = models.PositiveIntegerField(default=0)
@@ -51,7 +51,7 @@ class TutorDocument(models.Model):
         related_name='documents'
     )
     document_type = models.CharField(max_length=50, choices=DOCUMENT_TYPES)
-    document_file = models.FileField(upload_to='tutors/documents/')
+    document_url = models.URLField(blank=True)
     verification_status = models.CharField(
         max_length=20,
         choices=VERIFICATION_STATUS,

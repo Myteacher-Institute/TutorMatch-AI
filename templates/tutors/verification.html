@@ -11,7 +11,7 @@
         <div class="tutor-sidebar-profile">
           <div class="tutor-avatar-ring">
             {% if profile.profile_photo %}
-              <img src="{{ profile.profile_photo.url }}" alt="Profile" class="tutor-avatar-img">
+              <img src="{{ profile.profile_photo }}" alt="Profile" class="tutor-avatar-img">
             {% else %}
               <div class="tutor-avatar-placeholder">
                 {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}

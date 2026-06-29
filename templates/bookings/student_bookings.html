@@ -83,7 +83,7 @@
                     <td>
                       <div class="mtc-student-bookings-tutor">
                         {% if booking.tutor.profile_photo %}
-                          <img src="{{ booking.tutor.profile_photo.url }}" alt="{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}">
+                          <img src="{{ booking.tutor.profile_photo }}" alt="{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}">
                         {% else %}
                           <span>
                             {% if booking.tutor.user.user.first_name %}{{ booking.tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}

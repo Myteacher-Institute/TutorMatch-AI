@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
 from accounts.decorators import tutor_required
+from config.imagekit_utils import upload_file_in_memory, validate_file
 from .models import Tutor, TutorDocument
 from .forms import TutorProfileForm, TutorDocumentForm
 
@@ -17,7 +18,17 @@ def tutor_profile(request):
     form = TutorProfileForm(request.POST or None, request.FILES or None, instance=profile)
 
     if form.is_valid():
-        form.save()
+        profile = form.save(commit=False)
+        photo = form.cleaned_data.get('profile_photo_upload')
+        if photo:
+            is_valid_file, error = validate_file(photo)
+            if not is_valid_file:
+                form.add_error('profile_photo_upload', error)
+                return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile})
+            profile.profile_photo = upload_file_in_memory(photo, folder="/tutor_photos")
+
+        profile.save()
+        form.save_m2m()
         messages.success(request, 'Profile updated successfully.')
         return redirect('tutor_dashboard')
 
@@ -30,8 +41,19 @@ def tutor_verification(request):
     form = TutorDocumentForm(request.POST or None, request.FILES or None)
 
     if form.is_valid():
+        document_file = form.cleaned_data.get('document_file')
+        is_valid_file, error = validate_file(document_file)
+        if not is_valid_file:
+            form.add_error('document_file', error)
+            return render(request, 'tutors/verification.html', {
+                'form': form,
+                'documents': profile.documents.all(),
+                'profile': profile,
+            })
+
         doc = form.save(commit=False)
         doc.tutor = profile
+        doc.document_url = upload_file_in_memory(document_file, folder="/tutor_documents")
         doc.save()
         messages.success(request, 'Document uploaded successfully.')
         return redirect('tutor_verification')

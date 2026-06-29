@@ -11,7 +11,7 @@
         <div class="tutor-sidebar-profile">
           <div class="tutor-avatar-ring">
             {% if profile.profile_photo %}
-              <img src="{{ profile.profile_photo.url }}" alt="Profile" class="tutor-avatar-img">
+              <img src="{{ profile.profile_photo }}" alt="Profile" class="tutor-avatar-img">
             {% else %}
               <div class="tutor-avatar-placeholder">
                 {{ request.user.first_name|first|upper }}{{ request.user.last_name|first|upper }}
@@ -88,16 +88,16 @@
             <div class="tutor-photo-upload-row">
               <div class="tutor-photo-preview">
                 {% if profile.profile_photo %}
-                  <img src="{{ profile.profile_photo.url }}" alt="Photo">
+                  <img src="{{ profile.profile_photo }}" alt="Photo">
                 {% else %}
                   <i class="fa-solid fa-user" style="font-size:28px;color:#94a3b8;"></i>
                 {% endif %}
               </div>
               <div class="tutor-photo-upload-info">
-                {{ form.profile_photo }}
+                {{ form.profile_photo_upload }}
                 <p>JPG or PNG. Recommended: 400×400px.</p>
-                {% if form.profile_photo.errors %}
-                  <p class="tutor-field-error">{{ form.profile_photo.errors|join:", " }}</p>
+                {% if form.profile_photo_upload.errors %}
+                  <p class="tutor-field-error">{{ form.profile_photo_upload.errors|join:", " }}</p>
                 {% endif %}
               </div>
             </div>

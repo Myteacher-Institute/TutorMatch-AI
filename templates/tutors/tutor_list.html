@@ -58,7 +58,7 @@
                 <!-- Photo -->
                 <div class="tutor-public-photo">
                   {% if tutor.profile_photo %}
-                    <img src="{{ tutor.profile_photo.url }}" alt="{{ tutor.user.user.get_full_name }}">
+                    <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name }}">
                   {% else %}
                     <div class="tutor-public-photo-placeholder">
                       {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
