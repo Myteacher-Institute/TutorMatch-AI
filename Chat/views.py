@@ -3,10 +3,14 @@ from django.contrib import messages # Import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Q
+from django.core.paginator import Paginator
 
 from .models import ChatSession, ChatMessage
 from bookings.models import Booking
 from accounts.models import UserProfile
+from tutors.models import Tutor
+
+CHAT_LIST_PAGE_SIZE = 15
 
 
 def _user_can_access_booking_chat(user, booking):
@@ -22,6 +26,11 @@ def _user_can_access_booking_chat(user, booking):
 
 def _chat_users_for_booking(booking):
     return booking.student.user, booking.tutor.user.user
+
+
+def _paginate_chat_sessions(request, chat_sessions):
+    paginator = Paginator(chat_sessions, CHAT_LIST_PAGE_SIZE)
+    return paginator.get_page(request.GET.get('page'))
 
 @login_required
 def chat_view(request, booking_id):
@@ -105,11 +114,17 @@ def tutor_chat_list(request):
 
     # Get chat sessions where the current user is the tutor
     # Order by the latest message or session update for active chats
-    chat_sessions = ChatSession.objects.filter(tutor=request.user).order_by('-updated_at')
+    chat_sessions = _paginate_chat_sessions(
+        request,
+        ChatSession.objects.filter(tutor=request.user).order_by('-updated_at'),
+    )
+
+    tutor_obj = get_object_or_404(Tutor, user=request.user.profile)
 
     context = {
         'chat_sessions': chat_sessions,
-        'tutor_profile': request.user.profile, # Pass the tutor's profile
+        'page_obj': chat_sessions,
+        'tutor_profile': tutor_obj, # Pass the tutor's profile
         'active_tab': 'chats',
     }
     return render(request, 'Chat/tutor_chat_list.html', context)
@@ -153,10 +168,14 @@ def admin_chat_list(request):
         messages.error(request, "You are not authorized to view this page.")
         return redirect('home')
 
-    chat_sessions = ChatSession.objects.all().order_by('-updated_at')
+    chat_sessions = _paginate_chat_sessions(
+        request,
+        ChatSession.objects.all().order_by('-updated_at'),
+    )
 
     context = {
         'chat_sessions': chat_sessions,
+        'page_obj': chat_sessions,
         'active_tab': 'chats',
     }
     return render(request, 'Chat/admin_chat_list.html', context)
@@ -170,10 +189,14 @@ def student_chat_list(request):
         return redirect('home')
 
     # Get chat sessions where the current user is the student
-    chat_sessions = ChatSession.objects.filter(student=request.user).order_by('-updated_at')
+    chat_sessions = _paginate_chat_sessions(
+        request,
+        ChatSession.objects.filter(student=request.user).order_by('-updated_at'),
+    )
 
     context = {
         'chat_sessions': chat_sessions,
+        'page_obj': chat_sessions,
         'student_profile': request.user.profile, # Pass the student's profile
         'active_tab': 'chats',
     }

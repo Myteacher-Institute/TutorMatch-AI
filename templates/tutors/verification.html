@@ -40,12 +40,14 @@
           <a href="{% url 'tutor_profile' %}">
             <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
           </a>
-          <a href="{% url 'tutor_verification' %}" class="active">
+          <a href="{% url 'tutor_verification' %}" {% if active_tab == 'verification' %}class="active"{% endif %}>
             <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
           </a>
           <a href="{% url 'tutor_bookings' %}">
             <i class="fa-solid fa-receipt" style="width:18px;margin-right:8px;"></i>Bookings
           </a>
+          <a href="{% url 'chat:tutor_chat_list' %}" {% if active_tab == 'chats' %}class="active"{% endif %}>
+            <i class="fa-solid fa-comments" style="width:18px;margin-right:8px;"></i>Chats
           </a>
         </nav>
 

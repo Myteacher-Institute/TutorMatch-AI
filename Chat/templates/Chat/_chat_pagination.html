@@ -1,0 +1,19 @@
+{% if page_obj.has_other_pages %}
+  <nav class="chat-pagination" aria-label="Chat list pagination" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 16px 24px; border-top: 1px solid #f1f5f9;">
+    {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" style="padding: 8px 14px; border-radius: 999px; border: 1px solid #cbd5e1; color: #2563eb; font-size: 14px; font-weight: 600; text-decoration: none;">Previous</a>
+    {% else %}
+      <span style="padding: 8px 14px; border-radius: 999px; border: 1px solid #e2e8f0; color: #94a3b8; font-size: 14px; font-weight: 600;">Previous</span>
+    {% endif %}
+
+    <span style="color: #64748b; font-size: 14px;">
+      Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+    </span>
+
+    {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" style="padding: 8px 14px; border-radius: 999px; border: 1px solid #cbd5e1; color: #2563eb; font-size: 14px; font-weight: 600; text-decoration: none;">Next</a>
+    {% else %}
+      <span style="padding: 8px 14px; border-radius: 999px; border: 1px solid #e2e8f0; color: #94a3b8; font-size: 14px; font-weight: 600;">Next</span>
+    {% endif %}
+  </nav>
+{% endif %}

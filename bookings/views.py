@@ -125,6 +125,7 @@ def tutor_bookings(request):
             "accepted_count": accepted_count,
             "completed_count": completed_count,
             "active_tab": "bookings",
+            "tutor_profile": tutor,
         },
     )
 
