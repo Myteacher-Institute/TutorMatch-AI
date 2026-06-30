@@ -2330,9 +2330,8 @@ img {
 .mtc-student-portal-sidebar {
    position: -webkit-sticky;
    position: sticky;
-   top: 10px;
+   top: 90px;
    height: fit-content;
-   z-index: 10;
 }
 
 .mtc-admin-sidebar {
@@ -4297,6 +4296,7 @@ img {
   padding: 16px 22px;
   text-align: center;
   min-width: 85px;
+  -webkit-backdrop-filter: blur(4px);
   backdrop-filter: blur(4px);
 }
 
