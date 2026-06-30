@@ -440,6 +440,10 @@ img {
   gap: 22px;
 }
 
+.tutor-view-btn:hover {
+  color: var(--white) !important;
+}
+
 .step-card,
 .tutor-card,
 .testimonial-grid article {
