@@ -81,15 +81,17 @@
       <a href="{% if request.user.is_staff %}{% url 'chat:admin_chat_list' %}{% elif request.user.profile.role == 'tutor' %}{% url 'chat:tutor_chat_list' %}{% else %}{% url 'student_bookings' %}{% endif %}" style="display: inline-flex; align-items: center; color: #475569; text-decoration: none;">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
       </a>
-      <div style="width: 40px; height: 40px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: grid; place-items: center; font-size: 18px; font-weight: 600;">
-        {% if other_party.profile.profile_photo %}
-          <img src="{{ other_party.profile.profile_photo.url }}" alt="{{ other_party.get_full_name|default:other_party.username }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
-        {% else %}
-          {{ other_party.username|first|upper }}
-        {% endif %}
-      </div>
-      <h2 style="margin: 0; font-size: 18px; color: #111827;">{{ other_party.get_full_name|default:other_party.username }}</h2>
-      {% if other_party.profile.role == 'tutor' and other_party.profile.tutor.hourly_rate %}
+      <a href="{% if other_party.profile.role == 'tutor' %}{% url 'tutor_detail' other_party.profile.tutor_profile.id %}{% else %}{% url 'student_dashboard' %}{% endif %}" style="display: flex; align-items: center; gap: 12px; text-decoration: none; color: inherit;">
+        <div style="width: 40px; height: 40px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: grid; place-items: center; font-size: 18px; font-weight: 600;">
+          {% if other_party.profile.role == 'tutor' and other_party.profile.tutor_profile.profile_photo %}
+            <img src="{{ other_party.profile.tutor_profile.profile_photo }}" alt="{{ other_party.get_full_name|default:other_party.username }}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">
+          {% else %}
+            {{ other_party.username|first|upper }}
+          {% endif %}
+        </div>
+        <h2 style="margin: 0; font-size: 18px; color: #111827;">{{ other_party.get_full_name|default:other_party.username }}</h2>
+      </a>
+      {% if other_party.profile.role == 'tutor' and other_party.profile.tutor_profile.hourly_rate %}
         <span style="font-size: 14px; color: #64748b; margin-left: auto;">&#8358;{{ other_party.profile.tutor.hourly_rate }}/hr</span>
       {% endif %}
     </div>
