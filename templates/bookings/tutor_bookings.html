@@ -46,7 +46,7 @@
             <table class="mtc-student-bookings-table mtc-tutor-bookings-table">
               <thead>
                 <tr>
-                  <th>Booking ID</th>
+
                   <th>Student Name</th>
                   <th>Date</th>
                   <th>Time</th>
@@ -58,14 +58,13 @@
               <tbody>
                 {% for booking in bookings %}
                   <tr>
-                    <td><strong>#{{ booking.id|stringformat:"04d" }}</strong></td>
                     <td>
                       <div class="mtc-student-bookings-tutor">
                         <span>
                           {% if booking.student.user.first_name %}{{ booking.student.user.first_name|slice:":1" }}{% else %}S{% endif %}
                         </span>
                         <div>
-                          <strong>{{ booking.student.user.get_full_name|default:booking.student.user.username }}</strong>
+                          <strong>#{{ booking.id|stringformat:"04d" }} {{ booking.student.user.get_full_name|default:booking.student.user.username }}</strong>
                           <small>{{ booking.lesson_note|default:"No lesson note provided"|truncatechars:54 }}</small>
                         </div>
                       </div>
