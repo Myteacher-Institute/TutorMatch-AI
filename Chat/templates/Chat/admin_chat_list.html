@@ -1,19 +1,19 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Tutor Chat List | Myteacherconnect{% endblock %}
+{% block title %}Admin Chat List | Myteacherconnect{% endblock %}
 
 {% block content %}
 <div class="mtc-shell">
   <section class="mtc-admin-layout">
-    {% include "tutors/tutor_sidebar.html" with profile=tutor_profile active_tab="chats" %}
+    {% include "dashboard/_admin_nav.html" %}
 
     <div class="mtc-admin-content">
       <div class="tutor-page-heading">
         <div>
-          <p class="tutor-eyebrow">Tutor Portal</p>
-          <h1>Your Chats</h1>
-          <p class="tutor-subtext">Communicate with your students regarding bookings and lessons.</p>
+          <p class="tutor-eyebrow">Admin Panel</p>
+          <h1>All Chat Sessions</h1>
+          <p class="tutor-subtext">View and monitor all chat sessions between tutors and students.</p>
         </div>
       </div>
 
@@ -31,7 +31,7 @@
                     {% endif %}
                   </div>
                   <div style="flex-grow: 1; min-width: 0;">
-                    <strong style="display: block; font-size: 16px; color: #111827;">{{ session.student.get_full_name|default:session.student.username }}</strong>
+                    <strong style="display: block; font-size: 16px; color: #111827;">{{ session.student.get_full_name|default:session.student.username }} (Student) & {{ session.tutor.get_full_name|default:session.tutor.username }} (Tutor)</strong>
                     <span style="display: block; font-size: 13px; color: #64748b; margin-top: 2px;">Booking ID: #{{ session.booking.id|stringformat:"04d" }}</span>
                   </div>
                   <span style="font-size: 12px; color: #94a3b8; flex-shrink: 0;">
@@ -41,11 +41,11 @@
               </li>
             {% endfor %}
           </ul>
-        {% else %}
+        {% else %}\
           <div class="tutor-empty-state" style="padding: 40px 24px;">
             <div class="tutor-empty-icon"><i class="fa-solid fa-comments"></i></div>
             <p>No chat sessions yet.</p>
-            <small>Once students book lessons, chat sessions will appear here.</small>
+            <small>All chat sessions will appear here.</small>
           </div>
         {% endif %}
       </div>
@@ -53,5 +53,3 @@
   </section>
 </div>
 {% endblock %}
-
-

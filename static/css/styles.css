@@ -57,6 +57,8 @@ img {
   background: rgba(255, 255, 255, 0.94);
   border-bottom: 1px solid var(--line);
   backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
 }
 
 .site-nav {
@@ -3786,6 +3788,12 @@ img {
   margin-bottom: 20px;
 }
 
+@media (min-width: 901px) {
+  .mtc-booking-messages {
+    max-width: 73vw;
+  }
+}
+
 .mtc-booking-message {
   border: 1px solid #dbeafe;
   border-radius: 8px;
@@ -5928,7 +5936,4 @@ img {
   }
 }
 
-.mtc-status-pending {
-  color: red;
-}
-.tutor-view-btn:hover { color: var(--white); }
+.message-item.sent {\n  display: flex;\n  justify-content: flex-end;\n  margin-bottom: 10px;\n}\n\n.message-content.sent {\n  background-color: var(--blue);\n  color: var(--white);\n  border-radius: 18px 18px 4px 18px;\n  padding: 10px 15px;\n  max-width: 70%;\n  word-wrap: break-word;\n}\n\n.mtc-status-pending {\n  color: red;\n}\n.tutor-view-btn:hover { color: var(--white); }

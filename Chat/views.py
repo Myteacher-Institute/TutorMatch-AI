@@ -10,6 +10,10 @@ from accounts.models import UserProfile
 
 
 def _user_can_access_booking_chat(user, booking):
+    # Staff users (admins) can access any chat
+    if user.is_staff:
+        return True
+    
     return (
         hasattr(user, "profile")
         and (user.profile == booking.student or user.profile == booking.tutor.user)
@@ -85,6 +89,7 @@ def send_message(request, booking_id):
             session.save() # Explicitly save the session to update 'updated_at'
             # Render the new message as an HTML fragment
             context = {
+                'chat_session': session,
                 'chat_messages_list': [new_message],
             }
             return render(request, 'Chat/messages_list.html', context)
@@ -136,6 +141,40 @@ def get_new_messages(request, booking_id, last_message_id):
             message.save()
 
     context = {
+        'chat_session': session,
         'chat_messages_list': new_messages,
     }
     return render(request, 'Chat/messages_list.html', context)
+
+
+@login_required
+def admin_chat_list(request):
+    if not request.user.is_superuser:
+        messages.error(request, "You are not authorized to view this page.")
+        return redirect('home')
+
+    chat_sessions = ChatSession.objects.all().order_by('-updated_at')
+
+    context = {
+        'chat_sessions': chat_sessions,
+        'active_tab': 'chats',
+    }
+    return render(request, 'Chat/admin_chat_list.html', context)
+
+
+@login_required
+def student_chat_list(request):
+    # Ensure the logged-in user is a student
+    if not (hasattr(request.user, 'profile') and request.user.profile.role == UserProfile.ROLE_STUDENT):
+        messages.error(request, "You are not authorized to view this page.")
+        return redirect('home')
+
+    # Get chat sessions where the current user is the student
+    chat_sessions = ChatSession.objects.filter(student=request.user).order_by('-updated_at')
+
+    context = {
+        'chat_sessions': chat_sessions,
+        'student_profile': request.user.profile, # Pass the student's profile
+        'active_tab': 'chats',
+    }
+    return render(request, 'Chat/student_chat_list.html', context)

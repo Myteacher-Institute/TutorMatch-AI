@@ -4,12 +4,81 @@
 {% block title %}Chat with {{ other_party.get_full_name|default:other_party.username }} | Myteacherconnect{% endblock %}
 
 {% block content %}
+<style>
+  .messages-display {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+  }
+
+  .message-item {
+    display: flex;
+    width: 100%;
+  }
+
+  .message-item.sent {
+    justify-content: flex-end;
+  }
+
+  .message-item.received {
+    justify-content: flex-start;
+  }
+
+  .message-content {
+    max-width: min(70%, 520px);
+    padding: 12px 18px;
+    border-radius: 18px;
+    word-break: break-word;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  }
+
+  .message-content.sent {
+    background: #2563eb;
+    color: #ffffff;
+    border-bottom-right-radius: 6px;
+  }
+
+  .message-content.received {
+    background: #e2e8f0;
+    color: #0f172a;
+    border-bottom-left-radius: 6px;
+  }
+
+  .message-content p {
+    margin: 0;
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .message-content span {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    line-height: 1;
+  }
+
+  .message-content.sent span {
+    color: rgba(255, 255, 255, 0.78);
+    text-align: right;
+  }
+
+  .message-content.received span {
+    color: #64748b;
+  }
+
+  @media (max-width: 640px) {
+    .message-content {
+      max-width: 82%;
+    }
+  }
+</style>
+
 <div class="mtc-shell" style="padding: 40px 0 80px;">
   <div class="chat-container" style="max-width: 800px; margin: 0 auto; background: #ffffff; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.05); display: flex; flex-direction: column; height: 70vh; overflow: hidden;">
     
     <!-- Chat Header -->
     <div class="chat-header" style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; background: #f8fafc;">
-      <a href="{% url 'student_bookings' %}" style="display: inline-flex; align-items: center; color: #475569; text-decoration: none;">
+      <a href="{% if request.user.is_staff %}{% url 'chat:admin_chat_list' %}{% else %}{% url 'student_bookings' %}{% endif %}" style="display: inline-flex; align-items: center; color: #475569; text-decoration: none;">
         <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
       </a>
       <div style="width: 40px; height: 40px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: grid; place-items: center; font-size: 18px; font-weight: 600;">
@@ -36,7 +105,7 @@
     <!-- Message Input Area -->
     <div class="message-input-area" style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc;">
       <form id="chat-message-form"
-            action="{% url 'send_message' booking.id %}"
+            action="{% url 'chat:send_message' booking.id %}"
             method="post"
             style="display: flex; gap: 10px;">
         {% csrf_token %}
@@ -56,7 +125,7 @@
   const messageForm = document.getElementById('chat-message-form');
   const messageInput = document.getElementById('chat-message-input');
   const messagesLoader = document.getElementById('messages-loader');
-  const pollBaseUrl = "{% url 'get_new_messages' booking.id 0 %}";
+  const pollBaseUrl = "{% url 'chat:get_new_messages' booking.id 0 %}";
 
   function scrollToBottom() {
     messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
@@ -143,3 +212,4 @@
   });
 </script>
 {% endblock %}
+

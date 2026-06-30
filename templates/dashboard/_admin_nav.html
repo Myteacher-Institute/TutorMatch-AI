@@ -6,6 +6,7 @@
     <a href="{% url 'admin_verifications' %}" class="{% if url_name == 'admin_verifications' %}active{% endif %}">Verifications</a>
     <a href="{% url 'admin_users' %}" class="{% if url_name == 'admin_users' %}active{% endif %}">Users</a>
     <a href="{% url 'admin_bookings' %}" class="{% if url_name == 'admin_bookings' %}active{% endif %}">Bookings</a>
+    <a href="{% url 'chat:admin_chat_list' %}" class="{% if url_name == 'admin_chat_list' %}active{% endif %}">Chats</a>
     <a href="{% url 'admin_revenue' %}" class="{% if url_name == 'admin_revenue' %}active{% endif %}">Revenue</a>
     <a href="{% url 'logout' %}" style="margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 18px; color: #ef4444;">Logout</a>
   </nav>

@@ -101,5 +101,6 @@ def student_dashboard(request):
             "active_bookings_count": active_bookings_count,
             "upcoming_lessons_count": upcoming_lessons_count,
             "completed_lessons_count": completed_lessons_count,
+            "active_tab": "dashboard",
         },
     )

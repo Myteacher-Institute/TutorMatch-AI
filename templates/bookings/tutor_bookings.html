@@ -88,7 +88,7 @@
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject">Reject</button>
                           </form>
                         {% elif booking.status == "accepted" or booking.status == "completed" %}
-                          <a href="{% url 'chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat">Chat</a>
+                          <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat">Chat</a>
                           {% if booking.status == "accepted" %}
                           <form method="post" action="{% url 'update_booking_status' booking.id 'completed' %}">
                             {% csrf_token %}
@@ -150,3 +150,4 @@
   </section>
 </div>
 {% endblock %}
+

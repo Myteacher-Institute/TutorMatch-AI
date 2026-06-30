@@ -19,12 +19,14 @@
         </label>
       </div>
       <nav class="mtc-admin-nav">
-        <a href="{% url 'student_dashboard' %}">
+        <a href="{% url 'student_dashboard' %}" {% if active_tab == "dashboard" %}class="active"{% endif %}>
           <i class="fa-solid fa-house-circle-check"></i> Dashboard</a>
         <a href="{% url 'home' %}#search-section">
           <i class="fa-brands fa-searchengin"></i> AI Tutor Search</a>
-        <a href="{% url 'student_bookings' %}" class="active">
+        <a href="{% url 'student_bookings' %}" {% if active_tab == "bookings" %}class="active"{% endif %}>
           <i class="fa-solid fa-receipt"></i> Bookings</a>
+        <a href="{% url 'chat:student_chat_list' %}">
+          <i class='fa-solid fa-comments'></i> Chats</a>
         <a href="#"><i class="fa-solid fa-bookmark"></i> Saved Tutors <span style="font-size: 10px; color: var(--muted); margin-left: 5px;">(Soon)</span></a>
       </nav>
     </aside>
@@ -118,7 +120,7 @@
                         {% else %}
                           <span class="mtc-unavailable-action">Not yet</span>
                         {% endif %}
-                        <a href="{% url 'chat_view' booking.id %}" class="mtc-chat-button" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none;">
+                        <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-chat-button" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none;">
                           <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                           Chat
                         </a>
@@ -175,3 +177,4 @@
   </section>
 </div>
 {% endblock %}
+

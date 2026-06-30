@@ -96,6 +96,7 @@ def student_bookings(request):
             "page_obj": page_obj,
             "pending_review_count": pending_review_count,
             "next_booking": next_booking,
+            "active_tab": "bookings",
         },
     )
 
