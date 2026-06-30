@@ -6,7 +6,11 @@
     <a href="{% url 'admin_verifications' %}" class="{% if url_name == 'admin_verifications' %}active{% endif %}"><i class="fas fa-check-circle"></i> Verifications</a>
     <a href="{% url 'admin_users' %}" class="{% if url_name == 'admin_users' %}active{% endif %}"><i class="fas fa-users"></i> Users</a>
     <a href="{% url 'admin_bookings' %}" class="{% if url_name == 'admin_bookings' %}active{% endif %}"><i class="fas fa-calendar-alt"></i> Bookings</a>
-    <a href="{% url 'chat:admin_chat_list' %}" class="{% if url_name == 'admin_chat_list' %}active{% endif %}"><i class="fas fa-comments"></i> Chats</a>
+    <a href="{% url 'chat:admin_chat_list' %}" class="{% if url_name == 'admin_chat_list' %}active{% endif %}"><i class="fas fa-comments"></i> Chats
+      {% if chat_unread_count %}
+        <span style="margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #2563eb; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">{{ chat_unread_count }}</span>
+      {% endif %}
+    </a>
     <a href="{% url 'admin_revenue' %}" class="{% if url_name == 'admin_revenue' %}active{% endif %}"><i class="fas fa-money-bill-alt"></i> Revenue</a>
     <a href="{% url 'logout' %}" style="margin-top: 18px; border-top: 1px dashed var(--line); padding-top: 18px; color: #ef4444;"><i class="fas fa-sign-out-alt"></i> Logout</a>
   </nav>

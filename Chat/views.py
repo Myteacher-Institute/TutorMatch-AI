@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages # Import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Q
+from django.db.models import Count, Q
 from django.core.paginator import Paginator
 
 from .models import ChatSession, ChatMessage
@@ -32,6 +32,22 @@ def _paginate_chat_sessions(request, chat_sessions):
     paginator = Paginator(chat_sessions, CHAT_LIST_PAGE_SIZE)
     return paginator.get_page(request.GET.get('page'))
 
+
+def _with_unread_counts(user, chat_sessions):
+    unread_filter = Q(messages__is_read=False)
+
+    if not user.is_staff:
+        unread_filter &= ~Q(messages__sender=user)
+
+    return chat_sessions.annotate(unread_count=Count('messages', filter=unread_filter))
+
+
+def _mark_messages_read_for_participant(user, session, messages_queryset):
+    if user not in (session.student, session.tutor):
+        return
+
+    messages_queryset.filter(is_read=False).exclude(sender=user).update(is_read=True)
+
 @login_required
 def chat_view(request, booking_id):
     booking = get_object_or_404(
@@ -53,11 +69,7 @@ def chat_view(request, booking_id):
 
     chat_messages = ChatMessage.objects.filter(session=session).order_by('timestamp')
 
-    # Mark messages as read if the recipient is viewing them
-    for message in chat_messages:
-        if message.sender != request.user and not message.is_read:
-            message.is_read = True
-            message.save()
+    _mark_messages_read_for_participant(request.user, session, chat_messages)
 
     context = {
         'booking': booking,
@@ -122,7 +134,10 @@ def tutor_chat_list(request):
     # Order by the latest message or session update for active chats
     chat_sessions = _paginate_chat_sessions(
         request,
-        ChatSession.objects.filter(tutor=request.user).order_by('-updated_at'),
+        _with_unread_counts(
+            request.user,
+            ChatSession.objects.filter(tutor=request.user).order_by('-updated_at'),
+        ),
     )
 
     tutor_obj = get_object_or_404(Tutor, user=request.user.profile)
@@ -155,11 +170,7 @@ def get_new_messages(request, booking_id, last_message_id):
 
     new_messages = ChatMessage.objects.filter(session=session, id__gt=last_message_id).order_by('timestamp')
 
-    # Mark new messages as read if the recipient is viewing them
-    for message in new_messages:
-        if message.sender != request.user and not message.is_read:
-            message.is_read = True
-            message.save()
+    _mark_messages_read_for_participant(request.user, session, new_messages)
 
     context = {
         'chat_session': session,
@@ -176,7 +187,10 @@ def admin_chat_list(request):
 
     chat_sessions = _paginate_chat_sessions(
         request,
-        ChatSession.objects.all().order_by('-updated_at'),
+        _with_unread_counts(
+            request.user,
+            ChatSession.objects.all().order_by('-updated_at'),
+        ),
     )
 
     context = {
@@ -197,7 +211,10 @@ def student_chat_list(request):
     # Get chat sessions where the current user is the student
     chat_sessions = _paginate_chat_sessions(
         request,
-        ChatSession.objects.filter(student=request.user).order_by('-updated_at'),
+        _with_unread_counts(
+            request.user,
+            ChatSession.objects.filter(student=request.user).order_by('-updated_at'),
+        ),
     )
 
     context = {

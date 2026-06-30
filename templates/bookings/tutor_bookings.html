@@ -46,6 +46,7 @@
             <table class="mtc-student-bookings-table mtc-tutor-bookings-table">
               <thead>
                 <tr>
+                  <th>Booking ID</th>
                   <th>Student Name</th>
                   <th>Date</th>
                   <th>Time</th>
@@ -57,6 +58,7 @@
               <tbody>
                 {% for booking in bookings %}
                   <tr>
+                    <td><strong>#{{ booking.id|stringformat:"04d" }}</strong></td>
                     <td>
                       <div class="mtc-student-bookings-tutor">
                         <span>
