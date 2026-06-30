@@ -6,31 +6,7 @@
 {% block content %}
 <div class="mtc-shell">
   <section class="mtc-admin-layout">
-<!-- Student Sidebar -->
-        <aside class="mtc-admin-sidebar mtc-student-portal-sidebar" style="align-self: start;">
-      <input type="checkbox" id="student-portal-toggle"class="mtc-student-portal-toggle">
-      <div class="mtc-student-portal-header">
-        <h3>Student Portal</h3>
-        <label for="student-portal-toggle" class="mtc-student-portal-button" aria-label="Toggle student portal navigation">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <line x1="4" y1="7" x2="20" y2="7"></line>
-            <line x1="4" y1="12" x2="20" y2="12"></line>
-            <line x1="4" y1="17" x2="20" y2="17"></line>
-          </svg>
-        </label>
-      </div>
-      <nav class="mtc-admin-nav">
-        <a href="{% url 'student_dashboard' %}" class="active">
-          <i class='fa-solid fa-house-circle-check'></i> Dashboard</a>
-        <a href="{% url 'home' %}#search-section">
-          <i class='fa-brands fa-searchengin'></i> AI Tutor Search</a>
-        <a href="{% url 'student_bookings' %}">
-          <i class='fa-solid fa-receipt'></i> Bookings</a>
-        <a href="{% url 'chat:student_chat_list' %}">
-          <i class='fa-solid fa-comments'></i> Chats</a>
-        <a href="#"> <i class='fa-solid fa-bookmark'></i> Saved Tutors <span style="font-size: 10px; color: var(--muted); margin-left: 5px;">(Soon)</span></a>
-      </nav>
-    </aside>
+    {% include "accounts/student_sidebar.html" with active_tab="dashboard" %}
     
     <!-- Main Content -->
     <div class="mtc-admin-content">

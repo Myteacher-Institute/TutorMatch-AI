@@ -440,6 +440,10 @@ img {
   gap: 22px;
 }
 
+.tutor-view-btn:hover {
+  color: var(--white) !important;
+}
+
 .step-card,
 .tutor-card,
 .testimonial-grid article {
@@ -5591,6 +5595,8 @@ img {
 
 .mtc-tutor-bookings-actions {
   display: flex;
+  gap: 8px;
+  display: flex;
   flex-wrap: wrap;
   gap: 8px;
 }
@@ -5936,4 +5942,22 @@ img {
   }
 }
 
-.message-item.sent {\n  display: flex;\n  justify-content: flex-end;\n  margin-bottom: 10px;\n}\n\n.message-content.sent {\n  background-color: var(--blue);\n  color: var(--white);\n  border-radius: 18px 18px 4px 18px;\n  padding: 10px 15px;\n  max-width: 70%;\n  word-wrap: break-word;\n}\n\n.mtc-status-pending {\n  color: red;\n}\n.tutor-view-btn:hover { color: var(--white); }
+.message-item.sent {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+}
+
+.message-content.sent {
+  background-color: var(--blue);
+  color: var(--white);
+  border-radius: 18px 18px 4px 18px;
+  padding: 10px 15px;
+  max-width: 70%;
+  word-wrap: break-word;
+}
+
+.mtc-status-pending {
+  color: red;
+}
+.tutor-view-btn:hover { color: var(--white); }
