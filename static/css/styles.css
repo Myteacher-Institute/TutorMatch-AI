@@ -5596,9 +5596,8 @@ img {
 .mtc-tutor-bookings-actions {
   display: flex;
   gap: 8px;
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
+  align-items: center;
+  flex-wrap: nowrap; /* keep buttons inline */
 }
 
 .mtc-tutor-bookings-actions form {
@@ -5648,6 +5647,35 @@ img {
 
 .mtc-tutor-bookings-complete:hover {
   background: var(--blue-dark);
+}
+
+/* Mobile: allow horizontal scrolling for the bookings table and action buttons */
+@media (max-width: 640px) {
+  .mtc-student-bookings-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mtc-tutor-bookings-table {
+    /* Let the table exceed the viewport so actions are reachable by scrolling */
+    min-width: 900px;
+  }
+
+  .mtc-tutor-bookings-actions {
+    flex-wrap: nowrap;
+    gap: 8px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mtc-tutor-bookings-actions form {
+    display: inline-block;
+    margin: 0 4px 0 0;
+  }
+
+  .mtc-tutor-bookings-btn {
+    white-space: nowrap;
+  }
 }
 
 /* Review Form */

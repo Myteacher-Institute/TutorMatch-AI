@@ -104,9 +104,12 @@ def student_bookings(request):
 @login_required
 def tutor_bookings(request):
     tutor = get_object_or_404(Tutor, user=_profile_for_user(request.user))
+    # Only show bookings where the student has a successful (paid) payment
     bookings_queryset = (
-        Booking.objects.filter(tutor=tutor)
+        Booking.objects.filter(tutor=tutor, payments__payment_status="paid")
         .select_related("student__user")
+        .prefetch_related("payments")
+        .distinct()
         .order_by("-created_at")
     )
     pending_count = bookings_queryset.filter(status="pending").count()
