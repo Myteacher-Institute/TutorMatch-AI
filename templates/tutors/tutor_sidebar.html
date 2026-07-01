@@ -2,7 +2,13 @@
   <div class="tutor-sidebar-profile">
     <div class="tutor-avatar-ring">
       {% if profile.profile_photo %}
-        <img src="{{ profile.profile_photo }}" alt="Profile" class="tutor-avatar-img">
+        {% if profile.profile_photo|slice:":4" == "http" %}
+          <img src="{{ profile.profile_photo }}" alt="Profile" class="tutor-avatar-img">
+        {% else %}
+          <div class="tutor-avatar-placeholder">
+            {{ profile.user.user.first_name|first|upper }}{{ profile.user.user.last_name|first|upper }}
+          </div>
+        {% endif %}
       {% else %}
         <div class="tutor-avatar-placeholder">
           {{ profile.user.user.first_name|first|upper }}{{ profile.user.user.last_name|first|upper }}
@@ -37,7 +43,9 @@
     <a href="{% url 'chat:tutor_chat_list' %}" {% if active_tab == 'chats' %}class="active"{% endif %}>
       <i class="fa-solid fa-comments" style="width:18px;margin-right:8px;"></i>Chats
       {% if chat_unread_count %}
-        <span style="margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #2563eb; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">{{ chat_unread_count }}</span>
+        <span style="margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:#2563eb;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">
+          {{ chat_unread_count }}
+        </span>
       {% endif %}
     </a>
   </nav>
