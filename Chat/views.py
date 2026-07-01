@@ -17,11 +17,22 @@ def _user_can_access_booking_chat(user, booking):
     # Staff users (admins) can access any chat
     if user.is_staff:
         return True
-    
-    return (
-        hasattr(user, "profile")
-        and (user.profile == booking.student or user.profile == booking.tutor.user)
-    )
+
+    if not hasattr(user, "profile"):
+        return False
+
+    is_student = user.profile == booking.student
+    is_tutor = user.profile == booking.tutor.user
+    has_paid = booking.payments.filter(payment_status="paid").exists()
+    tutor_accepted = booking.status in ["accepted", "completed"]
+
+    if is_student:
+        return has_paid
+
+    if is_tutor:
+        return tutor_accepted
+
+    return False
 
 
 def _chat_users_for_booking(booking):

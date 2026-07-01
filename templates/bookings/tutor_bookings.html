@@ -95,12 +95,10 @@
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-complete">Complete</button>
                           </form>
                           {% endif %}
+                          <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat" style="background-color: #1d4ed8;"><i class="fa-regular fa-comment"></i>Chat</a>
                         {% else %}
                           <span class="mtc-unavailable-action">No action</span>
                         {% endif %}
-
-                        <!-- Chat available for tutors on all booking statuses, like student view -->
-                        <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat" style="background-color: #1d4ed8;"><i class="fa-regular fa-comment"></i>Chat</a>
                       </div>
                     </td>
                   </tr>
