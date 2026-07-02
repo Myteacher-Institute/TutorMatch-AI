@@ -88,6 +88,7 @@
                     </td>
                     <td>
                       <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                        {% if booking.status != "cancelled" %}
                         {% if booking.display_payment_status == "paid" %}
                           {% if booking.status == "completed" %}
                             {% if booking.reviews.exists %}
@@ -107,6 +108,7 @@
                               <i class="fa-solid fa-cart-shopping"></i>  Pay Now
                             </button>
                           </form>
+                        {% endif %}
                         {% endif %}
                       </div>
                     </td>
