@@ -6,7 +6,7 @@
 <!-- Back bar -->
 <div style="background:#fff;border-bottom:1px solid var(--line);padding:14px 0;">
   <div class="mtc-shell">
-    <a href="{% url 'tutor_dashboard' %}" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#475569;">
+    <a href="{% url 'tutor_list' %}" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#475569;">
       <i class="fa-solid fa-arrow-left" style="color:var(--blue);"></i>Back to Tutors
     </a>
   </div>
@@ -109,7 +109,7 @@
 
           <!-- Book button — wired by Task 4 -->
           <button class="btn btn-primary tutor-book-btn">
-            <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i>Book a Session
+            <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i><a href="{% url 'book_tutor' tutor_id=tutor.id %}">Book a Session</a>
           </button>
           <p class="tutor-booking-note">Booking handled by the sessions module.</p>
 
