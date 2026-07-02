@@ -72,7 +72,7 @@ def student_dashboard(request):
     recent_bookings = (
         Booking.objects.filter(student=student_profile)
         .select_related("tutor__user__user")
-        .order_by("-created_at")[:4]
+        .order_by("-created_at")[:6]
     )
     active_bookings_count = Booking.objects.filter(student=student_profile).exclude(
         status__in=["completed", "cancelled"]
@@ -84,6 +84,10 @@ def student_dashboard(request):
     completed_lessons_count = Booking.objects.filter(
         student=student_profile,
         status="completed",
+    ).count()
+    cancelled_lessons_count = Booking.objects.filter(
+        student=student_profile,
+        status="cancelled",
     ).count()
     recommended_tutors = (
         Tutor.objects.select_related("user__user")
@@ -101,6 +105,7 @@ def student_dashboard(request):
             "active_bookings_count": active_bookings_count,
             "upcoming_lessons_count": upcoming_lessons_count,
             "completed_lessons_count": completed_lessons_count,
+            "cancelled_lessons_count": cancelled_lessons_count,
             "active_tab": "dashboard",
         },
     )

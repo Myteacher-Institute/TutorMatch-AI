@@ -4,83 +4,28 @@
 {% block title %}Student Dashboard | TutorMatch AI{% endblock %}
 
 {% block content %}
-<!-- Full-width Hero -->
-<div class="mtc-dashboard-hero-fullscreen">
-  <!-- Background decorative elements -->
-  <div class="mtc-dashboard-hero-bg-blob mtc-dashboard-hero-bg-blob-1"></div>
-  <div class="mtc-dashboard-hero-bg-blob mtc-dashboard-hero-bg-blob-2"></div>
-  
-  <div>
-    <!-- Left Content -->
-    <div>
-      <h1 class="mtc-dashboard-hero-welcome">Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% else %}, Student{% endif %}!</h1>
-      <p class="mtc-dashboard-hero-description">Find your next home tutor and manage your scheduled lessons.</p>
-      
-      <h2 class="mtc-dashboard-hero-title">What subject or tutor needs do you have?</h2>
-      <p class="mtc-dashboard-hero-subtitle">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
-      
-      <form action="{% url 'search_results' %}" method="get" class="mtc-dashboard-search-form">
-        <div class="mtc-dashboard-search-input-wrapper">
-          <input name="q" id="dashboard-search-input" class="mtc-dashboard-search-input" placeholder="Describe your tutor needs..." required>
-          <button type="button" id="dashboard-voice-search-btn" class="mtc-dashboard-voice-search-btn" aria-label="Voice search">
-            <i class="fa-solid fa-microphone"></i>
-          </button>
-        </div>
-        <button type="submit" class="btn btn-light mtc-dashboard-search-button">Find Tutor</button>
-      </form>
+<!-- Hero Card -->
+<div class="mtc-hero-card-container">
+  <div class="mtc-hero-card">
+    <!-- Left Side: Info -->
+    <div class="mtc-hero-card-left">
+      <p class="mtc-hero-card-date" id="current-date">Today</p>
+      <h1 class="mtc-hero-card-title">Welcome back{% if request.user.first_name %}, {{ request.user.first_name }}{% endif %}!</h1>
+      <p class="mtc-hero-card-achievement">You've completed <span class="mtc-hero-card-progress-value" id="progress-value">0</span>% of your tutoring sessions this week!</p>
     </div>
-
-    <!-- Right Illustration -->
-    <div>
-      <svg viewBox="0 0 400 400" style="width: 100%; height: auto; max-width: 450px; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));">
-        <!-- Student Figure -->
-        <circle cx="200" cy="80" r="30" fill="#fce7f3" opacity="0.9"/>
-        <g opacity="0.9">
-          <!-- Head -->
-          <circle cx="200" cy="80" r="32" fill="#f4a261" opacity="0.8"/>
-          <!-- Hair -->
-          <path d="M 168 85 Q 200 50 232 85" fill="#8b6f47"/>
-          <!-- Eyes -->
-          <circle cx="190" cy="75" r="3" fill="#2c1810"/>
-          <circle cx="210" cy="75" r="3" fill="#2c1810"/>
-          <!-- Smile -->
-          <path d="M 190 85 Q 200 90 210 85" stroke="#2c1810" stroke-width="2" fill="none"/>
-        </g>
-        <!-- Body -->
-        <rect x="170" y="120" width="60" height="80" fill="#60a5fa" rx="4" opacity="0.85"/>
-        <!-- Arms -->
-        <g opacity="0.85">
-          <rect x="120" y="130" width="50" height="20" fill="#f4a261" rx="10"/>
-          <rect x="230" y="130" width="50" height="20" fill="#f4a261" rx="10"/>
-        </g>
-        <!-- Legs -->
-        <g opacity="0.85">
-          <rect x="175" y="210" width="18" height="60" fill="#334155" rx="4"/>
-          <rect x="207" y="210" width="18" height="60" fill="#334155" rx="4"/>
-          <circle cx="184" cy="275" r="12" fill="#fbbf24" opacity="0.9"/>
-          <circle cx="216" cy="275" r="12" fill="#fbbf24" opacity="0.9"/>
-        </g>
-        <!-- Book/Tablet in hand -->
-        <g opacity="0.9">
-          <rect x="125" y="145" width="45" height="55" fill="#34d399" rx="3"/>
-          <rect x="130" y="150" width="35" height="40" fill="#ecfdf5"/>
-          <line x1="135" y1="160" x2="160" y2="160" stroke="#d1fae5" stroke-width="2"/>
-          <line x1="135" y1="170" x2="160" y2="170" stroke="#d1fae5" stroke-width="2"/>
-          <line x1="135" y1="180" x2="160" y2="180" stroke="#d1fae5" stroke-width="2"/>
-        </g>
-        <!-- Decorative elements - floating items -->
-        <g opacity="0.6">
-          <circle cx="80" cy="60" r="15" fill="#fbbf24"/>
-          <text x="70" y="70" font-size="20" fill="#2c1810">📚</text>
-        </g>
-        <g opacity="0.6">
-          <circle cx="320" cy="100" r="15" fill="#60a5fa"/>
-          <text x="310" y="110" font-size="20" fill="#2c1810">✏️</text>
-        </g>
-        <g opacity="0.6">
-          <circle cx="100" cy="250" r="12" fill="#f472b6"/>
-          <text x="92" y="258" font-size="16" fill="#2c1810">⭐</text>
-        </g>
+    
+    <!-- Right Side: Icon/Illustration -->
+    <div class="mtc-hero-card-right">
+      <svg viewBox="0 0 120 120" class="mtc-hero-card-icon">
+        <!-- Book -->
+        <rect x="30" y="40" width="60" height="45" fill="#a0522d" rx="5" ry="5"/>
+        <rect x="32" y="42" width="56" height="41" fill="#deb887" rx="3" ry="3"/>
+        <path d="M60 42 C50 30, 50 90, 60 83 C70 90, 70 30, 60 42 Z" fill="#a0522d"/>
+        
+        <!-- Graduation Cap -->
+        <path d="M45 40 L75 40 L90 25 L60 10 L30 25 Z" fill="#333"/>
+        <rect x="58" y="10" width="4" height="15" fill="#333"/>
+        <circle cx="60" cy="25" r="5" fill="#f0c040"/>
       </svg>
     </div>
   </div>
@@ -192,7 +137,7 @@
               </div>
               <div style="display: flex; align-items: center; gap: 8px;">
                 <span style="width: 12px; height: 12px;  background-color: #ef4444;"></span>
-                <span>Cancelled: 0</span>
+                <span>Cancelled: {{ cancelled_lessons_count }}</span>
               </div>
             </div>
           </div>
@@ -270,6 +215,29 @@
   document.addEventListener('DOMContentLoaded', function() {
     const ctx = document.getElementById('bookingStatusChart');
     if (ctx) {
+      // Custom Chart.js plugin to display total in the center of the doughnut chart
+      const totalLabelPlugin = {
+        id: 'totalLabel',
+        beforeDraw: function(chart) {
+          const { ctx, chartArea: { width, height } } = chart;
+          ctx.save();
+          ctx.font = 'bold 24px "Inter", sans-serif';
+          ctx.fillStyle = '#333'; // Dark gray color
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+
+          const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+          const centerX = width / 2;
+          const centerY = height / 2;
+
+          ctx.fillText(total, centerX, centerY - 10); // Total number
+          ctx.font = '12px "Inter", sans-serif';
+          ctx.fillStyle = '#666'; // Medium gray color
+          ctx.fillText('Total Bookings', centerX, centerY + 15); // Label
+          ctx.restore();
+        }
+      };
+
       const chart = new Chart(ctx, {
         type: 'doughnut',
         data: {
@@ -279,52 +247,73 @@
               {{ completed_lessons_count }},
               {{ active_bookings_count }},
               {{ upcoming_lessons_count }},
-              0
+              {{ cancelled_lessons_count }}
             ],
             backgroundColor: [
-              '#3b82f6',
-              '#f59e0b',
-              '#8b5cf6',
-              '#ef4444'
-            ],
-            borderColor: [
-              '#1e40af',
+              '#0d9488',
+              '#2563eb',
               '#d97706',
-              '#6d28d9',
-              '#dc2626'
+              '#be123c'
             ],
-            borderWidth: 2,
-            borderRadius: 4
+            borderColor: '#ffffff',
+            borderWidth: 3,
+            hoverOffset: 8,
+            borderRadius: 6,
+            spacing: 4
           }]
         },
         options: {
-          responsive: true,
-          maintainAspectRatio: false,
+          cutout: '72%',
+          layout: {
+            padding: 16
+          },
           plugins: {
             legend: {
               display: false
             },
             tooltip: {
-              backgroundColor: 'rgba(0, 0, 0, 0.8)',
-              padding: 12,
-              cornerRadius: 8,
+              backgroundColor: 'rgba(15, 23, 42, 0.95)',
+              padding: 14,
+              cornerRadius: 10,
+              borderColor: 'rgba(255, 255, 255, 0.08)',
+              borderWidth: 1,
               titleFont: {
                 size: 13,
-                weight: 'bold'
+                weight: '600',
+                family: "'Inter', sans-serif"
               },
               bodyFont: {
-                size: 12
+                size: 12,
+                weight: '500',
+                family: "'Inter', sans-serif"
               },
+              bodySpacing: 6,
+              usePointStyle: true,
+              pointStyleWidth: 10,
+              boxPadding: 4,
               callbacks: {
                 label: function(context) {
+                  const label = context.label || '';
+                  const value = context.parsed;
                   const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                  const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(0) : 0;
-                  return context.label + ': ' + context.parsed.y + ' (' + percentage + '%)';
+                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                  return ' ' + label + ': ' + value + ' (' + percentage + '%)';
                 }
               }
+            },
+            title: {
+                display: false,
+                text: 'Booking Status Overview',
+                font: {
+                    size: 16,
+                    weight: 'bold',
+                    family: "'Inter', sans-serif"
+                },
+                color: '#333'
             }
           }
-        }
+        },
+        plugins: [totalLabelPlugin]
       });
     }
   });
