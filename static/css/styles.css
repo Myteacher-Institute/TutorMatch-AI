@@ -897,11 +897,14 @@ img {
 }
 
 .verified-badge {
+  display: inline-flex;
+  align-items: center;
   align-self: start;
   border-radius: 999px;
-  background: #dcfce7;
+  background: #16a34a;
+  border: 1px solid #22c55e;
   padding: 7px 10px;
-  color: #166534;
+  color: #ffffff;
   font-size: 12px;
   font-weight: 900;
 }
@@ -4104,6 +4107,19 @@ img {
   padding: 40px 0 70px;
 }
 
+.tutor-verified-tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 28px;
+  border-radius: 999px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 800;
+  background: #dcfce7;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
 .tutor-sidebar {
   position: sticky;
   top: 90px;
@@ -4750,8 +4766,9 @@ img {
   position: absolute;
   top: 12px;
   right: 12px;
-  background: #dcfce7;
-  color: #166534;
+  background: #16a34a;
+  color: #ffffff;
+  border: 1px solid #22c55e;
 }
 
 .tutor-public-body {

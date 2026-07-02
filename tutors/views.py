@@ -1,15 +1,24 @@
 from django.shortcuts import render, redirect, get_object_or_404
+from django.db.models import Sum
 from django.contrib import messages
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
 from .models import Tutor, TutorDocument
+from bookings.models import Booking
+from payments.models import Payment
 from .forms import TutorProfileForm, TutorDocumentForm
 
 
 @tutor_required
 def tutor_dashboard(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
-    return render(request, 'tutors/dashboard.html', {'profile': profile, 'active_tab': 'dashboard'})
+    bookings_count = profile.bookings.count()
+    total_earnings = profile.payments.aggregate(total= Sum('amount'))['total'] or 0   
+    return render(request, 'tutors/dashboard.html', 
+                  {'profile': profile, 
+                   'bookings_count': bookings_count,
+                   'total_earnings': total_earnings,
+                   'active_tab': 'dashboard'})
 
 
 @tutor_required
