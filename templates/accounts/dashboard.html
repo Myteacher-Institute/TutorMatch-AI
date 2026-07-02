@@ -89,64 +89,6 @@
               {% endfor %}
             </div>
           </div>
-
-          <!-- Recommended Tutors Panel -->
-          <div class="mtc-admin-card" style="margin-top: 0;">
-            <h2 style="margin: 0 0 16px;"><i class="fa-solid fa-person-shelter"></i> Recommended Tutors for You</h2>
-            
-            <div class="mtc-recommended-tutors">
-              {% for tutor in recommended_tutors %}
-              <article class="mtc-recommended-tutor-card">
-                <div class="mtc-recommended-tutor-head">
-                  <div class="mtc-recommended-tutor-identity">
-                    {% if tutor.profile_photo %}
-                      <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
-                    {% else %}
-                      <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=120&h=120&q=80" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
-                    {% endif %}
-                    <div class="mtc-recommended-tutor-copy">
-                      <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
-                      <p>
-                        {% for subject in tutor.subjects.all %}
-                          {{ subject.subject_name }}{% if not forloop.last %} & {% endif %}
-                        {% empty %}
-                          Tutor
-                        {% endfor %}
-                      </p>
-                      <div class="mtc-recommended-tutor-rating" aria-label="Tutor rating">
-                        <span aria-hidden="true">★ ★ ★ ★ ★</span>
-                        <small>({{ tutor.review_count|default:"0" }})</small>
-                      </div>
-                    </div>
-                  </div>
-                  <span class="mtc-recommended-match-badge">92% Match</span>
-                </div>
-                <div class="mtc-recommended-tutor-meta">
-                  <div>
-                    <span>Experience</span>
-                    <strong>{{ tutor.years_experience }} Year{% if tutor.years_experience != 1 %}s{% endif %}</strong>
-                  </div>
-                  <div>
-                    <span>Location</span>
-                    <strong>{{ tutor.location|default:"Available locally" }}</strong>
-                  </div>
-                </div>
-                <div class="mtc-recommended-tutor-footer">
-                  <div class="mtc-recommended-tutor-rate">
-                    <strong>₦{{ tutor.hourly_rate }}</strong>
-                    <span>/hr</span>
-                  </div>
-                  <div class="mtc-recommended-tutor-actions">
-                    <a href="{% url 'tutor_detail' tutor.pk %}" class="btn btn-ghost">Profile</a>
-                    <a href="{% url 'book_tutor' tutor.pk %}" class="btn btn-primary">Book Now</a>
-                  </div>
-                </div>
-              </article>
-              {% empty %}
-                <p style="color: var(--muted); font-size: 14px; margin: 0; padding: 12px 0;">No tutors are available yet. Try the AI tutor search or check back soon.</p>
-              {% endfor %}
-            </div>
-          </div>
         </div>
 
         <!-- Right Side: Saved Tutors / Info -->
@@ -164,6 +106,64 @@
             <h2 style="margin: 0 0 8px; font-size: 16px;"><i class="fa-solid fa-question-circle"></i> Need Help?</h2>
             <p style="margin: 0; font-size: 13px; color: var(--muted); line-height: 1.5;">Contact our support desk directly at support@myteacherconnect.com or call +234 812 345 6789.</p>
           </div>
+        </div>
+      </div>
+
+      <!-- Recommended Tutors Panel - Full Width -->
+      <div class="mtc-admin-card" style="margin-top: 20px;">
+        <h2 style="margin: 0 0 16px;"><i class="fa-solid fa-person-shelter"></i> Recommended Tutors for You</h2>
+        
+        <div class="mtc-recommended-tutors" >
+          {% for tutor in recommended_tutors %}
+          <article class="mtc-recommended-tutor-card">
+            <div class="mtc-recommended-tutor-head">
+              <div class="mtc-recommended-tutor-identity">
+                {% if tutor.profile_photo %}
+                  <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+                {% else %}
+                  <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=120&h=120&q=80" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+                {% endif %}
+                <div class="mtc-recommended-tutor-copy">
+                  <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
+                  <p>
+                    {% for subject in tutor.subjects.all %}
+                      {{ subject.subject_name }}{% if not forloop.last %} & {% endif %}
+                    {% empty %}
+                      Tutor
+                    {% endfor %}
+                  </p>
+                  <div class="mtc-recommended-tutor-rating" aria-label="Tutor rating">
+                    <span aria-hidden="true">★ ★ ★ ★ ★</span>
+                    <small>({{ tutor.review_count|default:"0" }})</small>
+                  </div>
+                </div>
+              </div>
+              <span class="mtc-recommended-match-badge">92% Match</span>
+            </div>
+            <div class="mtc-recommended-tutor-meta">
+              <div>
+                <span>Experience</span>
+                <strong>{{ tutor.years_experience }} Year{% if tutor.years_experience != 1 %}s{% endif %}</strong>
+              </div>
+              <div>
+                <span>Location</span>
+                <strong>{{ tutor.location|default:"Available locally" }}</strong>
+              </div>
+            </div>
+            <div class="mtc-recommended-tutor-footer">
+              <div class="mtc-recommended-tutor-rate">
+                <strong>₦{{ tutor.hourly_rate }}</strong>
+                <span>/hr</span>
+              </div>
+              <div class="mtc-recommended-tutor-actions">
+                <a href="{% url 'tutor_detail' tutor.pk %}" class="btn btn-ghost">Profile</a>
+                <a href="{% url 'book_tutor' tutor.pk %}" class="btn btn-primary">Book Now</a>
+              </div>
+            </div>
+          </article>
+          {% empty %}
+            <p style="color: var(--muted); font-size: 14px; margin: 0; padding: 12px 0;">No tutors are available yet. Try the AI tutor search or check back soon.</p>
+          {% endfor %}
         </div>
       </div>
     </div>

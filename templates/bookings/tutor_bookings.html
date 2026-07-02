@@ -42,7 +42,7 @@
         </div>
 
         {% if bookings %}
-          <div class="mtc-student-bookings-table-wrap" style="max-height: 520px; overflow-y: auto;">
+          <div class="mtc-student-bookings-table-wrap" style="max-height: 520px; overflow: auto;">
             <table class="mtc-student-bookings-table mtc-tutor-bookings-table">
               <thead>
                 <tr>
@@ -89,13 +89,13 @@
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject">Reject</button>
                           </form>
                         {% elif booking.status == "accepted" or booking.status == "completed" %}
-                          <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat">Chat</a>
                           {% if booking.status == "accepted" %}
                           <form method="post" action="{% url 'update_booking_status' booking.id 'completed' %}">
                             {% csrf_token %}
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-complete">Complete</button>
                           </form>
                           {% endif %}
+                          <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat" style="background-color: #1d4ed8;"><i class="fa-regular fa-comment"></i>Chat</a>
                         {% else %}
                           <span class="mtc-unavailable-action">No action</span>
                         {% endif %}
