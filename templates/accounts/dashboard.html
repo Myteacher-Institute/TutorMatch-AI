@@ -4,52 +4,131 @@
 {% block title %}Student Dashboard | TutorMatch AI{% endblock %}
 
 {% block content %}
+<!-- Full-width Hero -->
+<div class="mtc-dashboard-hero-fullscreen">
+  <!-- Background decorative elements -->
+  <div class="mtc-dashboard-hero-bg-blob mtc-dashboard-hero-bg-blob-1"></div>
+  <div class="mtc-dashboard-hero-bg-blob mtc-dashboard-hero-bg-blob-2"></div>
+  
+  <div>
+    <!-- Left Content -->
+    <div>
+      <h1 class="mtc-dashboard-hero-welcome">Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% else %}, Student{% endif %}!</h1>
+      <p class="mtc-dashboard-hero-description">Find your next home tutor and manage your scheduled lessons.</p>
+      
+      <h2 class="mtc-dashboard-hero-title">What subject or tutor needs do you have?</h2>
+      <p class="mtc-dashboard-hero-subtitle">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
+      
+      <form action="{% url 'search_results' %}" method="get" class="mtc-dashboard-search-form">
+        <div class="mtc-dashboard-search-input-wrapper">
+          <input name="q" id="dashboard-search-input" class="mtc-dashboard-search-input" placeholder="Describe your tutor needs..." required>
+          <button type="button" id="dashboard-voice-search-btn" class="mtc-dashboard-voice-search-btn" aria-label="Voice search">
+            <i class="fa-solid fa-microphone"></i>
+          </button>
+        </div>
+        <button type="submit" class="btn btn-light mtc-dashboard-search-button">Find Tutor</button>
+      </form>
+    </div>
+
+    <!-- Right Illustration -->
+    <div>
+      <svg viewBox="0 0 400 400" style="width: 100%; height: auto; max-width: 450px; filter: drop-shadow(0 20px 40px rgba(0, 0, 0, 0.15));">
+        <!-- Student Figure -->
+        <circle cx="200" cy="80" r="30" fill="#fce7f3" opacity="0.9"/>
+        <g opacity="0.9">
+          <!-- Head -->
+          <circle cx="200" cy="80" r="32" fill="#f4a261" opacity="0.8"/>
+          <!-- Hair -->
+          <path d="M 168 85 Q 200 50 232 85" fill="#8b6f47"/>
+          <!-- Eyes -->
+          <circle cx="190" cy="75" r="3" fill="#2c1810"/>
+          <circle cx="210" cy="75" r="3" fill="#2c1810"/>
+          <!-- Smile -->
+          <path d="M 190 85 Q 200 90 210 85" stroke="#2c1810" stroke-width="2" fill="none"/>
+        </g>
+        <!-- Body -->
+        <rect x="170" y="120" width="60" height="80" fill="#60a5fa" rx="4" opacity="0.85"/>
+        <!-- Arms -->
+        <g opacity="0.85">
+          <rect x="120" y="130" width="50" height="20" fill="#f4a261" rx="10"/>
+          <rect x="230" y="130" width="50" height="20" fill="#f4a261" rx="10"/>
+        </g>
+        <!-- Legs -->
+        <g opacity="0.85">
+          <rect x="175" y="210" width="18" height="60" fill="#334155" rx="4"/>
+          <rect x="207" y="210" width="18" height="60" fill="#334155" rx="4"/>
+          <circle cx="184" cy="275" r="12" fill="#fbbf24" opacity="0.9"/>
+          <circle cx="216" cy="275" r="12" fill="#fbbf24" opacity="0.9"/>
+        </g>
+        <!-- Book/Tablet in hand -->
+        <g opacity="0.9">
+          <rect x="125" y="145" width="45" height="55" fill="#34d399" rx="3"/>
+          <rect x="130" y="150" width="35" height="40" fill="#ecfdf5"/>
+          <line x1="135" y1="160" x2="160" y2="160" stroke="#d1fae5" stroke-width="2"/>
+          <line x1="135" y1="170" x2="160" y2="170" stroke="#d1fae5" stroke-width="2"/>
+          <line x1="135" y1="180" x2="160" y2="180" stroke="#d1fae5" stroke-width="2"/>
+        </g>
+        <!-- Decorative elements - floating items -->
+        <g opacity="0.6">
+          <circle cx="80" cy="60" r="15" fill="#fbbf24"/>
+          <text x="70" y="70" font-size="20" fill="#2c1810">📚</text>
+        </g>
+        <g opacity="0.6">
+          <circle cx="320" cy="100" r="15" fill="#60a5fa"/>
+          <text x="310" y="110" font-size="20" fill="#2c1810">✏️</text>
+        </g>
+        <g opacity="0.6">
+          <circle cx="100" cy="250" r="12" fill="#f472b6"/>
+          <text x="92" y="258" font-size="16" fill="#2c1810">⭐</text>
+        </g>
+      </svg>
+    </div>
+  </div>
+</div>
+
 <div class="mtc-shell">
   <section class="mtc-admin-layout">
     {% include "accounts/student_sidebar.html" with active_tab="dashboard" %}
     
     <!-- Main Content -->
     <div class="mtc-admin-content">
-      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; flex-wrap: wrap; gap: 16px;">
-        <div>
-          <h1 style="margin: 0; font-size: 28px;">Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% else %}, Student{% endif %}!</h1>
-          <p style="margin: 4px 0 0; color: var(--muted); font-size: 14px;">Find your next home tutor and manage your scheduled lessons.</p>
-        </div>
-       
-      </div>
-
-<!-- Hero card with AI search -->
-      <div class="mtc-dashboard-hero" style="background: linear-gradient(135deg, var(--blue) 0%, #1d4ed8 100%); border-radius: 16px; padding: 32px; color: var(--white); margin-bottom: 30px;">
-        <h2 style="margin: 0 0 12px; font-size: clamp(20px, 5vw, 30px); color: var(--white); font-weight: 600;">What subject or tutor needs do you have?</h2>
-        <p style="margin: 0 0 20px; color: #dbeafe; font-size: 14px; line-height: 1.5;">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
-<form action="{% url 'search_results' %}" method="get" class="mtc-dashboard-search-form" style="display: flex; gap: 10px; flex-wrap: wrap;">
-           <div style="flex: 1; min-width: 250px; position: relative;">
-             <input name="q" id="dashboard-search-input" placeholder="Describe your tutor needs..." required style="width: 100%; min-height: 48px; border: 0; border-radius: 8px; padding: 0 44px 0 16px; font-size: 14px; outline: none; color: var(--ink);">
-             <button type="button" id="dashboard-voice-search-btn" class="dashboard-voice-search-btn" aria-label="Voice search" style="position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: transparent; border: none; cursor: pointer; color: var(--muted); padding: 8px; display: flex; align-items: center; justify-content: center;">
-               <i class="fa-solid fa-microphone" style="font-size: 18px;"></i>
-             </button>
-           </div>
-           <button type="submit" class="btn btn-light mtc-dashboard-search-button" style="min-height: 48px; font-weight: 700; border-radius: 8px;">Find Tutor</button>
-         </form>
-      </div>
-
       <!-- Quick Metrics Grid -->
-      <div class="mtc-admin-metrics-grid" style="margin-bottom: 30px;">
-        <div class="mtc-admin-metric-card">
-          <span><i class="fa-solid fa-arrow-up-right-dots"></i> Upcoming Lessons</span>
-          <strong>{{ upcoming_lessons_count }}</strong>
+      <div class="mtc-admin-metrics-grid" style="margin-bottom: 30px; margin-top: 20px;">
+        <div class="mtc-admin-metric-card mtc-metric-upcoming">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-arrow-up-right-dots"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Upcoming Lessons</span>
+            <strong>{{ upcoming_lessons_count }}</strong>
+          </div>
         </div>
-        <div class="mtc-admin-metric-card">
-          <span><i class="fa-solid fa-person-shelter"></i> Recommended Tutors</span>
-          <strong>{{ recommended_tutors|length }}</strong>
+        <div class="mtc-admin-metric-card mtc-metric-recommended">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-person-shelter"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Recommended Tutors</span>
+            <strong>{{ recommended_tutors|length }}</strong>
+          </div>
         </div>
-        <div class="mtc-admin-metric-card">
-          <span><i class=" fa-solid fa-calendar-days"></i> Active Bookings</span>
-          <strong>{{ active_bookings_count }}</strong>
+        <div class="mtc-admin-metric-card mtc-metric-active">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Active Bookings</span>
+            <strong>{{ active_bookings_count }}</strong>
+          </div>
         </div>
-        <div class="mtc-admin-metric-card">
-          <span><i class="fa-solid fa-check-double"></i> Completed Lessons</span>
-          <strong>{{ completed_lessons_count }}</strong>
+        <div class="mtc-admin-metric-card mtc-metric-completed">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-check-double"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Completed Lessons</span>
+            <strong>{{ completed_lessons_count }}</strong>
+          </div>
         </div>
       </div>
 
@@ -93,12 +172,28 @@
 
         <!-- Right Side: Saved Tutors / Info -->
         <div class="mtc-dashboard-side">
-          <div class="mtc-admin-card" style="margin-top: 0;">
-            <h2 style="margin: 0 0 12px;"><i class="fa-solid fa-bookmark"></i> Saved Tutors</h2>
-            <div style="border: 1px dashed var(--line); border-radius: 12px; padding: 24px; text-align: center; background: var(--soft);">
-              <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="var(--muted)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 12px;"><path d="M19 21 12 17 5 21V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-              <h4 style="margin: 0; font-size: 14px; font-weight: 600;">No saved tutors</h4>
-              <p style="margin: 6px 0 0; font-size: 12px; color: var(--muted); line-height: 1.4;">Tutors you save during search will show up here.</p>
+          <div class="mtc-admin-card" style="margin-top: 0; padding: 24px;">
+            <h2 style="margin: 0 0 20px;"><i class="fa-solid fa-chart-pie"></i> Booking Status Overview</h2>
+            <div style="position: relative; height: 240px; width: 100%; margin-bottom: 16px;">
+              <canvas id="bookingStatusChart"></canvas>
+            </div>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; font-size: 12px;">
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 12px; height: 12px; border-radius: 0px; background-color: #3b82f6;"></span>
+                <span>Completed: {{ completed_lessons_count }}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 12px; height: 12px; border-radius: 0px; background-color: #f59e0b;"></span>
+                <span>Active: {{ active_bookings_count }}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 12px; height: 12px; border-radius: 3px; background-color: #8b5cf6;"></span>
+                <span>Pending: {{ upcoming_lessons_count }}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px;">
+                <span style="width: 12px; height: 12px;  background-color: #ef4444;"></span>
+                <span>Cancelled: 0</span>
+              </div>
             </div>
           </div>
 
@@ -169,4 +264,69 @@
     </div>
   </section>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const ctx = document.getElementById('bookingStatusChart');
+    if (ctx) {
+      const chart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: ['Completed', 'Active', 'Pending', 'Cancelled'],
+          datasets: [{
+            data: [
+              {{ completed_lessons_count }},
+              {{ active_bookings_count }},
+              {{ upcoming_lessons_count }},
+              0
+            ],
+            backgroundColor: [
+              '#3b82f6',
+              '#f59e0b',
+              '#8b5cf6',
+              '#ef4444'
+            ],
+            borderColor: [
+              '#1e40af',
+              '#d97706',
+              '#6d28d9',
+              '#dc2626'
+            ],
+            borderWidth: 2,
+            borderRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              display: false
+            },
+            tooltip: {
+              backgroundColor: 'rgba(0, 0, 0, 0.8)',
+              padding: 12,
+              cornerRadius: 8,
+              titleFont: {
+                size: 13,
+                weight: 'bold'
+              },
+              bodyFont: {
+                size: 12
+              },
+              callbacks: {
+                label: function(context) {
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? ((context.parsed.y / total) * 100).toFixed(0) : 0;
+                  return context.label + ': ' + context.parsed.y + ' (' + percentage + '%)';
+                }
+              }
+            }
+          }
+        }
+      });
+    }
+  });
+</script>
 {% endblock %}
