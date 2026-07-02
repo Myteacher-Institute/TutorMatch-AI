@@ -6163,6 +6163,20 @@ img {
   white-space: nowrap;
 }
 
+.mtc-dashboard-hero-welcome {
+  margin: 0 0 16px;
+  font-size: 48px;
+  font-weight: 700;
+  line-height: 1.2;
+}
+
+.mtc-dashboard-hero-description {
+  margin: 0 0 40px;
+  color: #dbeafe;
+  font-size: 17px;
+  line-height: 1.6;
+}
+
 .mtc-dashboard-hero-title {
   margin: 0 0 16px;
   font-size: clamp(28px, 6vw, 38px);
@@ -6191,6 +6205,28 @@ img {
 
 .mtc-dashboard-hero-fullscreen > div:first-child > div:first-child {
   padding-right: 20px;
+}
+
+.mtc-dashboard-hero-bg-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.mtc-dashboard-hero-bg-blob-1 {
+  top: -100px;
+  right: -100px;
+  width: 400px;
+  height: 400px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.mtc-dashboard-hero-bg-blob-2 {
+  bottom: -80px;
+  left: -80px;
+  width: 350px;
+  height: 350px;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 @media (max-width: 1200px) {

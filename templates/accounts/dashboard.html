@@ -7,14 +7,14 @@
 <!-- Full-width Hero -->
 <div class="mtc-dashboard-hero-fullscreen">
   <!-- Background decorative elements -->
-  <div style="position: absolute; top: -100px; right: -100px; width: 400px; height: 400px; background: rgba(255, 255, 255, 0.05); border-radius: 50%; pointer-events: none;"></div>
-  <div style="position: absolute; bottom: -80px; left: -80px; width: 350px; height: 350px; background: rgba(255, 255, 255, 0.03); border-radius: 50%; pointer-events: none;"></div>
+  <div class="mtc-dashboard-hero-bg-blob mtc-dashboard-hero-bg-blob-1"></div>
+  <div class="mtc-dashboard-hero-bg-blob mtc-dashboard-hero-bg-blob-2"></div>
   
   <div>
     <!-- Left Content -->
-    <div style="padding-right: 20px;">
-      <h1 style="margin: 0 0 16px; font-size: 48px; font-weight: 700; line-height: 1.2;">Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% else %}, Student{% endif %}!</h1>
-      <p style="margin: 0 0 40px; color: #dbeafe; font-size: 17px; line-height: 1.6;">Find your next home tutor and manage your scheduled lessons.</p>
+    <div>
+      <h1 class="mtc-dashboard-hero-welcome">Welcome{% if request.user.first_name %}, {{ request.user.first_name }}{% else %}, Student{% endif %}!</h1>
+      <p class="mtc-dashboard-hero-description">Find your next home tutor and manage your scheduled lessons.</p>
       
       <h2 class="mtc-dashboard-hero-title">What subject or tutor needs do you have?</h2>
       <p class="mtc-dashboard-hero-subtitle">Describe your request in simple English (e.g., "I need a Mathematics tutor for SS2 in GRA Port Harcourt weekends") and let our AI match you.</p>
