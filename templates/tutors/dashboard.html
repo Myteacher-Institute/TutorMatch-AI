@@ -43,8 +43,17 @@
               <span>Yrs Exp.</span>
             </div>
             <div class="tutor-stat-chip">
-              <strong>{% if profile.verification_status == 'approved' %}<i class="fa-solid fa-circle-check" style="color:#4ade80;"></i>{% else %}<i class="fa-solid fa-clock" style="color:#fbbf24;"></i>{% endif %}</strong>
-              <span>Verified</span>
+              <strong>{% if profile.verification_status == 'approved' %}<i class="fa-solid fa-circle-check"
+                  style="color:#4ade80;"></i>
+                <span>Verified</span>
+
+                {% elif profile.verification_status == 'rejected' %}<i class="fa-solid fa-circle-xmark"
+                  style="color:#ff0000;"></i>
+                <span>Rejected</span>
+
+                {% else %}<i class="fa-solid fa-clock" style="color:#ff0000;"></i>
+                <span>Pending</span>
+                {% endif %}</strong>
             </div>
           </div>
         </div>
@@ -63,12 +72,12 @@
           </div>
           <div class="mtc-admin-metric-card tutor-metric-purple">
             <span><i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>Bookings</span>
-            <strong>&#8212;</strong>
-            <p class="tutor-metric-sub">Coming soon</p>
+            <strong>{{ bookings_count }}</strong>
+            <p class="tutor-metric-sub">View your bookings</p>
           </div>
           <div class="mtc-admin-metric-card tutor-metric-yellow">
             <span><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
-            <strong>&#8212;</strong>
+            <strong>{{ total_earnings }}</strong>
             <p class="tutor-metric-sub">Payments module</p>
           </div>
         </div>
@@ -79,7 +88,8 @@
           <!-- Upcoming Lessons -->
           <div class="mtc-admin-card">
             <div class="tutor-card-head">
-              <h2><i class="fa-solid fa-calendar-days" style="color:var(--blue);margin-right:8px;"></i>Upcoming Lessons</h2>
+              <h2><i class="fa-solid fa-calendar-days" style="color:var(--blue);margin-right:8px;"></i>Upcoming Lessons
+              </h2>
               <span class="tutor-coming-soon-tag">Coming soon</span>
             </div>
             <div class="tutor-empty-state">
@@ -94,18 +104,23 @@
             <!-- Verification -->
             <div class="mtc-admin-card">
               <div class="tutor-card-head">
-                <h2><i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;"></i>Verification</h2>
-                <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+                <h2><i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;"></i>Verification
+                </h2>
+                <span
+                  class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
                   {{ profile.get_verification_status_display }}
                 </span>
               </div>
               <p class="tutor-card-desc">
                 {% if profile.verification_status == 'approved' %}
-                  <i class="fa-solid fa-circle-check" style="color:#16a34a;margin-right:4px;"></i>Your account is verified. You appear in public listings.
+                <i class="fa-solid fa-circle-check" style="color:#16a34a;margin-right:4px;"></i>Your account is
+                verified. You appear in public listings.
                 {% elif profile.verification_status == 'rejected' %}
-                  <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;margin-right:4px;"></i>Documents rejected. Please re-upload.
+                <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;margin-right:4px;"></i>Documents
+                rejected. Please re-upload.
                 {% else %}
-                  <i class="fa-solid fa-clock" style="color:#d97706;margin-right:4px;"></i>Upload documents to get verified and appear in search results.
+                <i class="fa-solid fa-clock" style="color:#d97706;margin-right:4px;"></i>Upload documents to get
+                verified and appear in search results.
                 {% endif %}
               </p>
               <a href="{% url 'tutor_verification' %}" class="tutor-card-link">
@@ -116,17 +131,19 @@
             <!-- Subjects -->
             <div class="mtc-admin-card">
               <div class="tutor-card-head">
-                <h2><i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach</h2>
+                <h2><i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach
+                </h2>
                 <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Edit</a>
               </div>
               {% if profile.subjects.all %}
-                <div class="tutor-subject-tags">
-                  {% for subject in profile.subjects.all %}
-                    <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
-                  {% endfor %}
-                </div>
+              <div class="tutor-subject-tags">
+                {% for subject in profile.subjects.all %}
+                <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                {% endfor %}
+              </div>
               {% else %}
-                <p class="tutor-card-desc">No subjects added yet. <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Add some &#8594;</a></p>
+              <p class="tutor-card-desc">No subjects added yet. <a href="{% url 'tutor_profile' %}"
+                  class="tutor-card-link">Add some &#8594;</a></p>
               {% endif %}
             </div>
 

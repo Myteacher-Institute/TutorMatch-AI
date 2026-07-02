@@ -20,10 +20,19 @@
       <span>Tutor portal</span>
     </div>
     <div class="tutor-sidebar-status">
-      <span class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
-        <i class="fa-solid {% if profile.verification_status == 'approved' %}fa-circle-check{% elif profile.verification_status == 'rejected' %}fa-circle-xmark{% else %}fa-clock{% endif %}" style="margin-right:5px;"></i>
-        {{ profile.get_verification_status_display }}
-      </span>
+      {% if profile.verification_status == 'approved' %}
+        <span class="tutor-verified-tag">
+          <i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>Verified
+        </span>
+      {% elif profile.verification_status == 'rejected' %}
+        <span class="mtc-status-pill mtc-status-cancelled">
+          <i class="fa-solid fa-circle-xmark" style="margin-right:5px;"></i>Rejected
+        </span>
+      {% else %}
+        <span class="mtc-status-pill mtc-status-pending">
+          <i class="fa-solid fa-clock" style="margin-right:5px;"></i>
+        </span>
+      {% endif %}
     </div>
   </div>
 

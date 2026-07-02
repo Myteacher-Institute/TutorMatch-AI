@@ -6,7 +6,7 @@
 <!-- Back bar -->
 <div style="background:#fff;border-bottom:1px solid var(--line);padding:14px 0;">
   <div class="mtc-shell">
-    <a href="{% url 'tutor_list' %}" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#475569;">
+    <a href="{% url 'tutor_dashboard' %}" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#475569;">
       <i class="fa-solid fa-arrow-left" style="color:var(--blue);"></i>Back to Tutors
     </a>
   </div>
@@ -36,11 +36,11 @@
             <div class="tutor-detail-profile-info">
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <h1 style="margin:0;font-size:clamp(22px,4vw,30px);color:#12182c;font-weight:700;">{{ tutor.user.user.get_full_name }}</h1>
-                {% if tutor.is_verified %}
-                  <span class="verified-badge">
-                    <i class="fa-solid fa-circle-check" style="margin-right:4px;"></i>Verified
-                  </span>
-                {% endif %}
+                  {% if tutor.is_verified %}
+                    <span class="verified-badge tutor-verified-badge">
+                      <i class="fa-solid fa-circle-check" style="margin-right:4px; color: green;"></i>Verified
+                    </span>
+                  {% endif %}
               </div>
 
               <div class="tutor-detail-meta-row">

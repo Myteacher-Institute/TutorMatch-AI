@@ -7,6 +7,29 @@ class Subject(models.Model):
 
     def __str__(self):
         return self.subject_name
+        
+    
+'''
+class Booking(models.Model):
+    tutor = models.ForeignKey('Tutor', on_delete=models.CASCADE, related_name='bookings')
+    student = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='student_bookings')
+    subject = models.ForeignKey(Subject, on_delete=models.CASCADE)
+    booking_date = models.DateTimeField()
+    status = models.CharField(max_length=20, default='pending')  # e.g., pending, confirmed, completed
+
+    def __str__(self):
+        return f"Booking: {self.student} with {self.tutor} for {self.subject} on {self.booking_date}"
+    
+
+class Payment(models.Model):
+    tutor = models.ForeignKey('Tutor', on_delete=models.CASCADE, related_name='payments')
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    payment_date = models.DateTimeField(auto_now_add=True)
+    booking = models.OneToOneField(Booking, on_delete=models.CASCADE, related_name='payment')
+
+    def __str__(self):
+        return f"Payment of {self.amount} to {self.tutor} for booking {self.booking}"
+'''
 
 
 class Tutor(models.Model):
@@ -18,6 +41,9 @@ class Tutor(models.Model):
     years_experience = models.PositiveIntegerField(default=0)
     verification_status = models.CharField(max_length=20, default="pending")
     subjects = models.ManyToManyField("Subject", related_name="tutors", blank=True)
+    bookings = models.ManyToManyField("bookings.Booking", related_name="tutors", blank=True)
+    payments = models.ManyToManyField("payments.Payment", related_name="tutors", blank=True)
+
 
     # Task 3 additions
     qualifications = models.TextField(blank=True)
