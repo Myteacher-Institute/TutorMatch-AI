@@ -6759,3 +6759,179 @@ img {
 .sdh-ring-track {
   transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
 }
+
+@media (max-width: 768px) {
+  .sdh-hero {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: left;
+    padding: 20px 16px;
+    gap: 16px;
+    margin: 16px 0 0;
+    min-height: auto;
+  }
+
+  .sdh-left {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .sdh-date-pill {
+    margin-bottom: 10px;
+  }
+
+  .sdh-title {
+    font-size: 20px;
+    text-align: left;
+    margin: 0 0 6px;
+    letter-spacing: -0.3px;
+  }
+
+  .sdh-subtitle {
+    text-align: left;
+    margin: 0 0 14px;
+    font-size: 12px;
+    line-height: 1.5;
+  }
+
+  .sdh-search-form {
+    max-width: 100%;
+    width: 100%;
+  }
+
+  .sdh-search-wrapper {
+    flex-wrap: nowrap;
+    gap: 6px;
+    padding: 6px;
+    border-radius: 12px;
+  }
+
+  .sdh-search-icon {
+    padding: 0 8px;
+    font-size: 16px;
+  }
+
+  .sdh-search-input {
+    flex: 1 1 auto;
+    padding: 10px 8px;
+    font-size: 13px;
+  }
+
+  .sdh-search-btn {
+    width: auto;
+    padding: 10px 14px;
+    font-size: 12px;
+    margin: 0;
+    border-radius: 10px;
+  }
+
+  .sdh-search-btn i {
+    display: none;
+  }
+
+  .sdh-prompts {
+    gap: 6px;
+    margin-top: 10px;
+  }
+
+  .sdh-prompts-label {
+    font-size: 10px;
+  }
+
+  .sdh-prompt-pill {
+    font-size: 10px;
+    padding: 3px 10px;
+  }
+
+  .sdh-right {
+    width: 100%;
+    align-items: center;
+    justify-content: flex-start;
+    flex-direction: row;
+    gap: 10px;
+  }
+
+  .sdh-ring-wrap {
+    width: 70px;
+    height: 70px;
+    flex-shrink: 0;
+  }
+
+  .sdh-ring-svg {
+    width: 70px;
+    height: 70px;
+  }
+
+  .sdh-ring-center {
+    gap: 1px;
+  }
+
+  .sdh-ring-pct {
+    font-size: 15px;
+  }
+
+  .sdh-ring-week {
+    font-size: 8px;
+  }
+
+  .sdh-ring-label {
+    text-align: left;
+    font-size: 10px;
+  }
+
+  .sdh-blob-1,
+  .sdh-blob-2,
+  .sdh-blob-3 {
+    opacity: 0.25;
+  }
+}
+
+@media (max-width: 400px) {
+  .sdh-hero {
+    padding: 16px 12px;
+    gap: 12px;
+  }
+
+  .sdh-title {
+    font-size: 18px;
+  }
+
+  .sdh-subtitle {
+    font-size: 11px;
+    margin-bottom: 10px;
+  }
+
+  .sdh-search-wrapper {
+    padding: 5px;
+    gap: 4px;
+  }
+
+  .sdh-search-input {
+    padding: 9px 8px;
+    font-size: 12px;
+  }
+
+  .sdh-search-btn {
+    padding: 9px 12px;
+    font-size: 11px;
+  }
+
+  .sdh-ring-wrap {
+    width: 60px;
+    height: 60px;
+  }
+
+  .sdh-ring-svg {
+    width: 60px;
+    height: 60px;
+  }
+
+  .sdh-ring-pct {
+    font-size: 13px;
+  }
+
+  .sdh-ring-week {
+    font-size: 7px;
+  }
+}
