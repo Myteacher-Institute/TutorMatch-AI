@@ -355,10 +355,9 @@
                   alt="{{ tutor.user.user.first_name|default:'Tutor' }}"
                 />
                 {% else %}
-                <img
-                  src="https://images.unsplash.com/photo-1580894732444-8ded7900cd?auto=format&fit=crop&w=120&h=120&q=80"
-                  alt="{{ tutor.user.user.first_name|default:'Tutor' }}"
-                />
+                <span class="mtc-tutor-avatar" aria-hidden="true">
+                  <i class="fa-solid fa-user"></i>
+                </span>
                 {% endif %}
                 <div class="mtc-recommended-tutor-copy">
                   <h3>{{ tutor.user.user.first_name|default:"Tutor" }}</h3>

@@ -2762,6 +2762,18 @@ img {
   object-fit: cover;
 }
 
+.mtc-recommended-tutor-identity .mtc-tutor-avatar {
+  width: 54px;
+  height: 54px;
+  flex: 0 0 54px;
+  border-radius: 50%;
+  display: grid;
+  place-items: center;
+  background: #dbeafe;
+  color: var(--blue);
+  font-size: 20px;
+}
+
 .mtc-recommended-tutor-copy {
   min-width: 0;
 }
@@ -3074,7 +3086,8 @@ img {
     align-items: center;
     gap: 12px;
   }
-  .mtc-recommended-tutor-identity img {
+  .mtc-recommended-tutor-identity img,
+  .mtc-recommended-tutor-identity .mtc-tutor-avatar {
     width: 48px;
     height: 48px;
     flex-basis: 48px;
