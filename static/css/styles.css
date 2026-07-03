@@ -2602,19 +2602,27 @@ img {
 }
 
 .mtc-dashboard-recent-bookings {
-  display: grid;
-  gap: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .mtc-dashboard-booking-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 14px;
+  gap: 16px;
   border: 1px solid var(--line);
-  border-radius: 10px;
-  background: #ffffff;
-  padding: 14px;
+  border-radius: 12px;
+  background: linear-gradient(180deg, #ffffff, var(--soft));
+  padding: 14px 16px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+}
+
+.mtc-dashboard-booking-row:hover {
+  transform: translateY(-1px);
+  border-color: #b6c3e0;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
 }
 
 .mtc-dashboard-booking-tutor {
@@ -2622,6 +2630,7 @@ img {
   align-items: center;
   gap: 12px;
   min-width: 0;
+  flex: 1 1 auto;
 }
 
 .mtc-dashboard-booking-tutor img,
@@ -2630,6 +2639,7 @@ img {
   height: 44px;
   flex: 0 0 44px;
   border-radius: 50%;
+  box-shadow: inset 0 0 0 1px rgba(15, 23, 42, 0.06);
 }
 
 .mtc-dashboard-booking-tutor img {
@@ -2642,6 +2652,8 @@ img {
   background: #dbeafe;
   color: var(--blue);
   font-weight: 900;
+  font-size: 14px;
+  letter-spacing: 0.5px;
 }
 
 .mtc-dashboard-booking-tutor strong,
@@ -2650,8 +2662,9 @@ img {
 }
 
 .mtc-dashboard-booking-tutor strong {
-  color: #12182c;
+  color: var(--ink);
   font-size: 14px;
+  font-weight: 700;
 }
 
 .mtc-dashboard-booking-tutor small {
@@ -2664,14 +2677,47 @@ img {
 .mtc-dashboard-booking-meta {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex: 0 0 auto;
 }
 
 .mtc-dashboard-booking-meta strong {
   color: var(--blue);
   font-size: 14px;
+  font-weight: 800;
   white-space: nowrap;
+}
+
+.mtc-booking-view-all {
+  color: var(--blue);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.mtc-dashboard-bookings-empty {
+  color: var(--muted);
+  font-size: 14px;
+  margin: 0;
+  padding: 12px 0;
+  text-align: center;
+}
+
+@media (max-width: 640px) {
+  .mtc-dashboard-booking-row {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 12px;
+  }
+
+  .mtc-dashboard-booking-meta {
+    width: 100%;
+    justify-content: space-between;
+  }
+
+  .mtc-dashboard-booking-meta .mtc-status-pill {
+    flex: 1 1 auto;
+    justify-content: center;
+  }
 }
 
 .mtc-recommended-tutors {

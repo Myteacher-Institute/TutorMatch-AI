@@ -1,581 +1,529 @@
 {% extends "base.html" %}
 {% load static %}
-
 {% block title %}Student Dashboard | TutorMatch AI{% endblock %}
+{% block content %}
+<div class="sdh-hero">
+  <div class="sdh-blob sdh-blob-1"></div>
+  <div class="sdh-blob sdh-blob-2"></div>
+  <div class="sdh-blob sdh-blob-3"></div>
 
-  {% block content %}
-    <!-- Hero Card -->
-    <div class="sdh-hero">
-      <!-- Decorative blobs -->
-      <div class="sdh-blob sdh-blob-1"></div>
-      <div class="sdh-blob sdh-blob-2"></div>
-      <div class="sdh-blob sdh-blob-3"></div>
-
-      <!-- Left: Text content -->
-      <div class="sdh-left">
-        <!-- Date pill -->
-        <div class="sdh-date-pill">
-          <span class="sdh-date-dot"></span>
-          <span class="sdh-date-text" id="hero-date">Today</span>
-        </div>
-
-        <!-- Headline -->
-        <h1 class="sdh-title">
-          Welcome back{% if request.user.first_name %},
-          <span class="sdh-title-name">{{ request.user.first_name }}</span>
-          {% endif %}!
-        </h1>
-
-        <!-- Sub-text -->
-        <p class="sdh-subtitle">
-          Track your sessions, discover top tutors, and keep your learning journey
-          on track.
-        </p>
-
-        <!-- AI Search bar -->
-        <form
-          action="{% url 'find_tutor' %}"
-          method="GET"
-          id="hero-ai-form"
-          class="sdh-search-form"
-        >
-          <div class="sdh-search-wrapper" id="hero-search-wrapper">
-            <!-- Sparkle / AI icon -->
-            <span class="sdh-search-icon">
-              <i class="fa-solid fa-wand-magic-sparkles"></i>
-            </span>
-
-            <input
-              type="text"
-              name="q"
-              id="hero-ai-input"
-              class="sdh-search-input"
-              autocomplete="off"
-              placeholder="Find me a Maths tutor in GRA for weekends..."
-            />
-
-            <!-- Submit button -->
-            <button type="submit" class="sdh-search-btn">
-              <i class="fa-solid fa-magnifying-glass"></i>
-              Search
-            </button>
-          </div>
-
-          <!-- Suggested prompts (2 only) -->
-          <div class="sdh-prompts">
-            <span class="sdh-prompts-label">Try:</span>
-            <button
-              type="button"
-              class="sdh-prompt-pill"
-              onclick="
-                document.getElementById('hero-ai-input').value =
-                  'Physics tutor near me';
-                document.getElementById('hero-ai-form').submit();
-              "
-            >
-              Physics tutor near me
-            </button>
-            <button
-              type="button"
-              class="sdh-prompt-pill"
-              onclick="
-                document.getElementById('hero-ai-input').value =
-                  'Affordable Maths tutor';
-                document.getElementById('hero-ai-form').submit();
-              "
-            >
-              Affordable Maths tutor
-            </button>
-          </div>
-        </form>
-      </div>
-
-      <!-- Right: Progress ring -->
-      <div class="sdh-right">
-        <div class="sdh-ring-wrap">
-          <svg viewBox="0 0 110 110" class="sdh-ring-svg">
-            <circle
-              cx="55"
-              cy="55"
-              r="46"
-              fill="none"
-              stroke="rgba(255,255,255,0.12)"
-              stroke-width="9"
-            />
-            <circle
-              cx="55"
-              cy="55"
-              r="46"
-              fill="none"
-              stroke="#ffffff"
-              stroke-width="9"
-              stroke-linecap="round"
-              stroke-dasharray="289"
-              stroke-dashoffset="289"
-              id="hero-progress-ring"
-              class="sdh-ring-track"
-            />
-          </svg>
-          <div class="sdh-ring-center">
-            <span class="sdh-ring-pct" id="hero-progress-pct">0%</span>
-            <span class="sdh-ring-week">this week</span>
-          </div>
-        </div>
-        <span class="sdh-ring-label">Session Progress</span>
-      </div>
+  <div class="sdh-left">
+    <div class="sdh-date-pill">
+      <span class="sdh-date-dot"></span>
+      <span class="sdh-date-text" id="hero-date">Today</span>
     </div>
 
-    <script>
-      // Live date
-      (function () {
-        const el = document.getElementById("hero-date");
-        if (el) {
-          const now = new Date();
-          const opts = { weekday: "long", month: "long", day: "numeric" };
-          el.textContent = now.toLocaleDateString("en-US", opts);
-        }
-      })();
+    <h1 class="sdh-title">
+      Welcome back{% if request.user.first_name %},
+      <span class="sdh-title-name">{{ request.user.first_name }}</span>
+      {% endif %}!
+    </h1>
 
-      // Animate progress ring
-      document.addEventListener("DOMContentLoaded", function () {
-        const completed = {{ completed_lessons_count }};
-        const total = completed + {{ upcoming_lessons_count }} + {{ active_bookings_count }};
-        const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
-        const ring = document.getElementById("hero-progress-ring");
-        const label = document.getElementById("hero-progress-pct");
-        const circumference = 289;
-        if (ring) {
-          setTimeout(function () {
-            ring.style.strokeDashoffset =
-              circumference - (circumference * pct) / 100;
-          }, 200);
-        }
-        if (label) label.textContent = pct + "%";
-      });
-    </script>
+    <p class="sdh-subtitle">
+      Track your sessions, discover top tutors, and keep your learning journey
+      on track.
+    </p>
 
-    <div class="mtc-shell">
-      <section class="mtc-admin-layout">
-        {% include "accounts/student_sidebar.html" with active_tab="dashboard" %}
+    <form action="{% url 'find_tutor' %}" method="GET" id="hero-ai-form" class="sdh-search-form">
+      <div class="sdh-search-wrapper" id="hero-search-wrapper">
+        <span class="sdh-search-icon">
+          <i class="fa-solid fa-wand-magic-sparkles"></i>
+        </span>
 
-        <!-- Main Content -->
-        <div class="mtc-admin-content">
-          <!-- Quick Metrics Grid -->
+        <input
+          type="text"
+          name="q"
+          id="hero-ai-input"
+          class="sdh-search-input"
+          autocomplete="off"
+          placeholder="Find me a Maths tutor in GRA for weekends..."
+        />
+
+        <button type="submit" class="sdh-search-btn">
+          <i class="fa-solid fa-magnifying-glass"></i>
+          Search
+        </button>
+      </div>
+
+      <div class="sdh-prompts">
+        <span class="sdh-prompts-label">Try:</span>
+        <button
+          type="button"
+          class="sdh-prompt-pill"
+          onclick="
+            document.getElementById('hero-ai-input').value =
+              'Physics tutor near me';
+            document.getElementById('hero-ai-form').submit();
+          "
+        >
+          Physics tutor near me
+        </button>
+        <button
+          type="button"
+          class="sdh-prompt-pill"
+          onclick="
+            document.getElementById('hero-ai-input').value =
+              'Affordable Maths tutor';
+            document.getElementById('hero-ai-form').submit();
+          "
+        >
+          Affordable Maths tutor
+        </button>
+      </div>
+    </form>
+  </div>
+
+  <div class="sdh-right">
+    <div class="sdh-ring-wrap">
+      <svg viewBox="0 0 110 110" class="sdh-ring-svg">
+        <circle
+          cx="55"
+          cy="55"
+          r="46"
+          fill="none"
+          stroke="rgba(255,255,255,0.12)"
+          stroke-width="9"
+        />
+        <circle
+          cx="55"
+          cy="55"
+          r="46"
+          fill="none"
+          stroke="#ffffff"
+          stroke-width="9"
+          stroke-linecap="round"
+          stroke-dasharray="289"
+          stroke-dashoffset="289"
+          id="hero-progress-ring"
+          class="sdh-ring-track"
+        />
+      </svg>
+      <div class="sdh-ring-center">
+        <span class="sdh-ring-pct" id="hero-progress-pct">0%</span>
+        <span class="sdh-ring-week">this week</span>
+      </div>
+    </div>
+    <span class="sdh-ring-label">Session Progress</span>
+  </div>
+</div>
+
+<script>
+  (function () {
+    const el = document.getElementById("hero-date");
+    if (el) {
+      const now = new Date();
+      const opts = { weekday: "long", month: "long", day: "numeric" };
+      el.textContent = now.toLocaleDateString("en-US", opts);
+    }
+  })();
+
+  document.addEventListener("DOMContentLoaded", function () {
+    const completed = {{ completed_lessons_count }};
+    const total = completed + {{ upcoming_lessons_count }} + {{ active_bookings_count }};
+    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const ring = document.getElementById("hero-progress-ring");
+    const label = document.getElementById("hero-progress-pct");
+    const circumference = 289;
+    if (ring) {
+      setTimeout(function () {
+        ring.style.strokeDashoffset =
+          circumference - (circumference * pct) / 100;
+      }, 200);
+    }
+    if (label) label.textContent = pct + "%";
+  });
+</script>
+
+<div class="mtc-shell">
+  <section class="mtc-admin-layout">
+    {% include "accounts/student_sidebar.html" with active_tab="dashboard" %}
+
+    <div class="mtc-admin-content">
+      <div
+        class="mtc-admin-metrics-grid"
+        style="margin-bottom: 30px; margin-top: 20px"
+      >
+        <div class="mtc-admin-metric-card mtc-metric-upcoming">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-arrow-up-right-dots"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Upcoming Lessons</span>
+            <strong>{{ upcoming_lessons_count }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-recommended">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-person-shelter"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Recommended Tutors</span>
+            <strong>{{ recommended_tutors|length }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-active">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-calendar-days"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Active Bookings</span>
+            <strong>{{ active_bookings_count }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-completed">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-check-double"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Completed Lessons</span>
+            <strong>{{ completed_lessons_count }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="mtc-dashboard-grid">
+        <div class="mtc-dashboard-main">
           <div
-            class="mtc-admin-metrics-grid"
-            style="margin-bottom: 30px; margin-top: 20px"
+            class="mtc-admin-card"
+            style="margin-top: 0;{% if not recent_bookings %} height: 300px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;{% endif %}"
           >
-            <div class="mtc-admin-metric-card mtc-metric-upcoming">
-              <div class="mtc-metric-icon">
-                <i class="fa-solid fa-arrow-up-right-dots"></i>
-              </div>
-              <div class="mtc-metric-content">
-                <span>Upcoming Lessons</span>
-                <strong>{{ upcoming_lessons_count }}</strong>
-              </div>
+            <div
+              style="
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 16px;
+              "
+            >
+              <h2>
+                <i class="fa-solid fa-receipt"></i>
+                Recent Bookings
+              </h2>
+              <a href="{% url 'student_bookings' %}" class="mtc-booking-view-all">
+                View All
+              </a>
             </div>
-            <div class="mtc-admin-metric-card mtc-metric-recommended">
-              <div class="mtc-metric-icon">
-                <i class="fa-solid fa-person-shelter"></i>
-              </div>
-              <div class="mtc-metric-content">
-                <span>Recommended Tutors</span>
-                <strong>{{ recommended_tutors|length }}</strong>
-              </div>
-            </div>
-            <div class="mtc-admin-metric-card mtc-metric-active">
-              <div class="mtc-metric-icon">
-                <i class="fa-solid fa-calendar-days"></i>
-              </div>
-              <div class="mtc-metric-content">
-                <span>Active Bookings</span>
-                <strong>{{ active_bookings_count }}</strong>
-              </div>
-            </div>
-            <div class="mtc-admin-metric-card mtc-metric-completed">
-              <div class="mtc-metric-icon">
-                <i class="fa-solid fa-check-double"></i>
-              </div>
-              <div class="mtc-metric-content">
-                <span>Completed Lessons</span>
-                <strong>{{ completed_lessons_count }}</strong>
-              </div>
-            </div>
-          </div>
 
-          <!-- 2-column details -->
-          <div class="mtc-dashboard-grid">
-            <!-- Left Side: Recent Bookings & Recommendations -->
-            <div class="mtc-dashboard-main">
-              <!-- Recent Bookings panel -->
-              <div
-                class="mtc-admin-card"
-                style="margin-top: 0;{% if not recent_bookings %} height: 300px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;{% endif %}"
-              >
-                <div
-                  style="
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    margin-bottom: 16px;
-                  "
-                >
-                  <h2 style="margin: 0">
-                    <i class="fa-solid fa-receipt"></i>
-                    Recent Bookings
-                  </h2>
-                  <a
-                    href="{% url 'student_bookings' %}"
-                    style="color: var(--blue); font-size: 13px; font-weight: 700"
-                  >
-                    View All
-                  </a>
+            <div class="mtc-dashboard-recent-bookings">
+              {% for booking in recent_bookings %}
+              <article class="mtc-dashboard-booking-row">
+                <div class="mtc-dashboard-booking-tutor">
+                  {% if booking.tutor.profile_photo %}
+                  <img src="{{ booking.tutor.profile_photo }}" alt="{{ booking.tutor.user.user.first_name|default:'Tutor' }}" />
+                  {% else %}
+                  <span>
+                    {{ booking.tutor.user.user.first_name|default:"T"|make_list|first|upper }}
+                  </span>
+                  {% endif %}
+                  <div>
+                    <strong>{{ booking.tutor.user.user.first_name }}</strong>
+                    <small>{{ booking.booking_date|date:"M d, Y" }} at {{ booking.lesson_time|time:"h:i A" }}</small>
+                  </div>
                 </div>
 
-                <div
-                  class="mtc-dashboard-recent-bookings"
-                  {% block title %}0
-                  style="
-                    flex: 1;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    text-align: center;
-                  "
-                  {% block title %}1
-                >
-                  {% for booking in recent_bookings %}
-                    <article class="mtc-dashboard-booking-row">
-                      <div class="mtc-dashboard-booking-tutor">
-                        {% if booking.tutor.profile_photo %}
-                          <img src="{% block title %}4" alt="{% block title %}5" />
-                        {% else %}
-                          <span>
-                            {% block title %}7{% block title %}8{% block title %}9T{% endblock %}0
-                          </span>
-                        {% endif %}
-                        <div>
-                          <strong>{% endblock %}2</strong>
-                          <small>{% endblock %}3 at {% endblock %}4</small>
-                        </div>
-                      </div>
-
-                      <div class="mtc-dashboard-booking-meta">
-                        <span class="mtc-status-pill mtc-status-{% endblock %}5">
-                          {% endblock %}6
-                        </span>
-                        <strong>₦{% endblock %}7</strong>
-                      </div>
-                    </article>
-                  {% empty %}
-                    <p
-                      style="
-                        color: var(--muted);
-                        font-size: 14px;
-                        margin: 0;
-                        padding: 12px 0;
-                      "
-                    >
-                      You have no active or historical bookings yet. Start by finding
-                      a tutor!
-                    </p>
-                  {% endfor %}
+                <div class="mtc-dashboard-booking-meta">
+                  <span class="mtc-status-pill mtc-status-{{ booking.status }}">
+                    {{ booking.get_status_display }}
+                  </span>
+                  <strong>₦{{ booking.amount }}</strong>
                 </div>
-              </div>
-            </div>
-
-            <!-- Right Side: Saved Tutors / Info -->
-            <div class="mtc-dashboard-side">
-              <div
-                class="mtc-admin-card"
-                style="margin-top: 0; padding: 24px;{% if not recent_bookings %} height: 150px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;{% endif %}"
-              >
-                <h2
-                  style="margin: 0;{% if recent_bookings %} margin-bottom: 20px;{% else %} margin-bottom: 8px;{% endif %}"
-                >
-                  <i class="fa-solid fa-chart-pie"></i>
-                  Booking Status Overview
-                </h2>
-                {% if recent_bookings %}
-                  <div
-                    style="
-                      position: relative;
-                      height: 240px;
-                      width: 100%;
-                      margin-bottom: 16px;
-                    "
-                  >
-                    <canvas id="bookingStatusChart"></canvas>
-                  </div>
-                  <div
-                    style="
-                      display: grid;
-                      grid-template-columns: 1fr 1fr;
-                      gap: 12px;
-                      font-size: 12px;
-                    "
-                  >
-                    <div style="display: flex; align-items: center; gap: 8px">
-                      <span
-                        style="
-                          width: 12px;
-                          height: 12px;
-                          border-radius: 0px;
-                          background-color: #3b82f6;
-                        "
-                      ></span>
-                      <span>Completed: {{ completed_lessons_count }}</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px">
-                      <span
-                        style="
-                          width: 12px;
-                          height: 12px;
-                          border-radius: 0px;
-                          background-color: #f59e0b;
-                        "
-                      ></span>
-                      <span>Active: {{ active_bookings_count }}</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px">
-                      <span
-                        style="
-                          width: 12px;
-                          height: 12px;
-                          border-radius: 3px;
-                          background-color: #8b5cf6;
-                        "
-                      ></span>
-                      <span>Pending: {{ upcoming_lessons_count }}</span>
-                    </div>
-                    <div style="display: flex; align-items: center; gap: 8px">
-                      <span
-                        style="width: 12px; height: 12px; background-color: #ef4444"
-                      ></span>
-                      <span>Cancelled: {{ cancelled_lessons_count }}</span>
-                    </div>
-                  </div>
-                {% else %}
-                  <p
-                    style="color: var(--muted); font-size: 13px; margin: 0;{% if request.user.first_name %}1 flex: 1; display: flex; align-items: center;{% if request.user.first_name %}2"
-                  >
-                    No status overview data available.
-                  </p>
-                {% endif %}
-              </div>
-
-              <div
-                class="mtc-admin-card"
-                style="margin-top: 0; background: var(--soft)"
-              >
-                <h2 style="margin: 0 0 8px; font-size: 16px">
-                  <i class="fa-solid fa-question-circle"></i>
-                  Need Help?
-                </h2>
-                <p
-                  style="
-                    margin: 0;
-                    font-size: 13px;
-                    color: var(--muted);
-                    line-height: 1.5;
-                  "
-                >
-                  Contact our support desk directly at support@myteacherconnect.com
-                  or call +234 812 345 6789.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <!-- Recommended Tutors Panel - Full Width -->
-          <div class="mtc-admin-card" style="margin-top: 20px">
-            <h2 style="margin: 0 0 16px">
-              <i class="fa-solid fa-person-shelter"></i>
-              Recommended Tutors for You
-            </h2>
-
-            <div class="mtc-recommended-tutors">
-              {% for tutor in recommended_tutors %}
-                <article class="mtc-recommended-tutor-card">
-                  <div class="mtc-recommended-tutor-head">
-                    <div class="mtc-recommended-tutor-identity">
-                      {% if tutor.profile_photo %}
-                        <img src="{% if request.user.first_name %}6" alt="{% if request.user.first_name %}7" />
-                      {% else %}
-                        <img
-                          src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=120&h=120&q=80"
-                          alt="{% if request.user.first_name %}9"
-                        />
-                      {% endif %}
-                      <div class="mtc-recommended-tutor-copy">
-                        <h3>{{ request.user.first_name }}1</h3>
-                        <p>
-                          {% for subject in tutor.subjects.all %}
-                            {{ request.user.first_name }}3{{ request.user.first_name }}4 & {{ request.user.first_name }}5
-                          {% empty %}
-                            Tutor
-                          {% endfor %}
-                        </p>
-                        <div
-                          class="mtc-recommended-tutor-rating"
-                          aria-label="Tutor rating"
-                        >
-                          <span aria-hidden="true">★ ★ ★ ★ ★</span>
-                          <small>({{ request.user.first_name }}8)</small>
-                        </div>
-                      </div>
-                    </div>
-                    <span class="mtc-recommended-match-badge">92% Match</span>
-                  </div>
-                  <div class="mtc-recommended-tutor-meta">
-                    <div>
-                      <span>Experience</span>
-                      <strong>
-                        {{ request.user.first_name }}9 Year{% endif %}0s{% endif %}1
-                      </strong>
-                    </div>
-                    <div>
-                      <span>Location</span>
-                      <strong>{% endif %}2</strong>
-                    </div>
-                  </div>
-                  <div class="mtc-recommended-tutor-footer">
-                    <div class="mtc-recommended-tutor-rate">
-                      <strong>₦{% endif %}3</strong>
-                      <span>/hr</span>
-                    </div>
-                    <div class="mtc-recommended-tutor-actions">
-                      <a href="{% endif %}4" class="btn btn-ghost">Profile</a>
-                      <a href="{% endif %}5" class="btn btn-primary">Book Now</a>
-                    </div>
-                  </div>
-                </article>
+              </article>
               {% empty %}
-                <p
-                  style="
-                    color: var(--muted);
-                    font-size: 14px;
-                    margin: 0;
-                    padding: 12px 0;
-                  "
-                >
-                  No tutors are available yet. Try the AI tutor search or check back
-                  soon.
-                </p>
+              <p class="mtc-dashboard-bookings-empty">
+                You have no active or historical bookings yet. Start by finding
+                a tutor!
+              </p>
               {% endfor %}
             </div>
           </div>
         </div>
-      </section>
+
+        <div class="mtc-dashboard-side">
+          <div
+            class="mtc-admin-card"
+            style="margin-top: 0; padding: 24px;{% if not recent_bookings %} height: 150px; box-sizing: border-box; display: flex; flex-direction: column; overflow: hidden;{% endif %}"
+          >
+            <h2
+              style="margin: 0;{% if recent_bookings %} margin-bottom: 20px;{% else %} margin-bottom: 8px;{% endif %}"
+            >
+              <i class="fa-solid fa-chart-pie"></i>
+              Booking Status Overview
+            </h2>
+            {% if recent_bookings %}
+            <div
+              style="
+                position: relative;
+                height: 240px;
+                width: 100%;
+                margin-bottom: 16px;
+              "
+            >
+              <canvas id="bookingStatusChart"></canvas>
+            </div>
+            <div
+              style="
+                display: grid;
+                grid-template-columns: 1fr 1fr;
+                gap: 12px;
+                font-size: 12px;
+              "
+            >
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span
+                  style="
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 0px;
+                    background-color: #3b82f6;
+                  "
+                ></span>
+                <span>Completed: {{ completed_lessons_count }}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span
+                  style="
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 0px;
+                    background-color: #f59e0b;
+                  "
+                ></span>
+                <span>Active: {{ active_bookings_count }}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span
+                  style="
+                    width: 12px;
+                    height: 12px;
+                    border-radius: 3px;
+                    background-color: #8b5cf6;
+                  "
+                ></span>
+                <span>Pending: {{ upcoming_lessons_count }}</span>
+              </div>
+              <div style="display: flex; align-items: center; gap: 8px">
+                <span style="width: 12px; height: 12px; background-color: #ef4444"></span>
+                <span>Cancelled: {{ cancelled_lessons_count }}</span>
+              </div>
+            </div>
+            {% else %}
+            <p
+              style="color: var(--muted); font-size: 13px; margin: 0; flex: 1; display: flex; align-items: center;"
+            >
+              No status overview data available.
+            </p>
+            {% endif %}
+          </div>
+
+          <div
+            class="mtc-admin-card"
+            style="margin-top: 0; background: var(--soft)"
+          >
+            <h2 style="margin: 0 0 8px; font-size: 16px">
+              <i class="fa-solid fa-question-circle"></i>
+              Need Help?
+            </h2>
+            <p
+              style="
+                margin: 0;
+                font-size: 13px;
+                color: var(--muted);
+                line-height: 1.5;
+              "
+            >
+              Contact our support desk directly at support@myteacherconnect.com
+              or call +234 812 345 6789.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mtc-admin-card" style="margin-top: 20px">
+        <h2 style="margin: 0 0 16px">
+          <i class="fa-solid fa-person-shelter"></i>
+          Recommended Tutors for You
+        </h2>
+
+        <div class="mtc-recommended-tutors">
+          {% for tutor in recommended_tutors %}
+          <article class="mtc-recommended-tutor-card">
+            <div class="mtc-recommended-tutor-head">
+              <div class="mtc-recommended-tutor-identity">
+                {% if tutor.profile_photo %}
+                <img
+                  src="{{ tutor.profile_photo }}"
+                  alt="{{ tutor.user.user.first_name|default:'Tutor' }}"
+                />
+                {% else %}
+                <img
+                  src="https://images.unsplash.com/photo-1580894732444-8ded7900cd?auto=format&fit=crop&w=120&h=120&q=80"
+                  alt="{{ tutor.user.user.first_name|default:'Tutor' }}"
+                />
+                {% endif %}
+                <div class="mtc-recommended-tutor-copy">
+                  <h3>{{ tutor.user.user.first_name|default:"Tutor" }}</h3>
+                  <p>
+                    {% for subject in tutor.subjects.all %}{{ subject.subject_name }}{% if not forloop.last %}, {% endif %}{% empty %} Tutor{% endfor %}
+                  </p>
+                  <div
+                    class="mtc-recommended-tutor-rating"
+                    aria-label="Tutor rating"
+                  >
+                    <span aria-hidden="true">★ ★ ★ ★ ★</span>
+                    <small>({{ tutor.review_count|default:"0" }})</small>
+                  </div>
+                </div>
+              </div>
+              <span class="mtc-recommended-match-badge">92% Match</span>
+            </div>
+            <div class="mtc-recommended-tutor-meta">
+              <div>
+                <span>Experience</span>
+                <strong>
+                  {{ tutor.years_experience }} Year{% if tutor.years_experience != 1 %}s{% endif %}
+                </strong>
+              </div>
+              <div>
+                <span>Location</span>
+                <strong>{{ tutor.location|default:"N/A" }}</strong>
+              </div>
+            </div>
+            <div class="mtc-recommended-tutor-footer">
+              <div class="mtc-recommended-tutor-rate">
+                <strong>₦{{ tutor.hourly_rate }}</strong>
+                <span>/hr</span>
+              </div>
+              <div class="mtc-recommended-tutor-actions">
+                <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="btn btn-ghost">Profile</a>
+                <a href="{% url 'book_tutor' tutor_id=tutor.id %}" class="btn btn-primary">Book Now</a>
+              </div>
+            </div>
+          </article>
+          {% empty %}
+          <p
+            style="
+              color: var(--muted);
+              font-size: 14px;
+              margin: 0;
+              padding: 12px 0;
+            "
+          >
+            No tutors are available yet. Try the AI tutor search or check back
+            soon.
+          </p>
+          {% endfor %}
+        </div>
+      </div>
     </div>
+  </section>
+</div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-      document.addEventListener("DOMContentLoaded", function () {
-        const ctx = document.getElementById("bookingStatusChart");
-        if (ctx) {
-          // Custom Chart.js plugin to display total in the center of the doughnut chart
-          const totalLabelPlugin = {
-            id: "totalLabel",
-            beforeDraw: function (chart) {
-              const {
-                ctx,
-                chartArea: { width, height },
-              } = chart;
-              ctx.save();
-              ctx.font = 'bold 24px "Inter", sans-serif';
-              ctx.fillStyle = "#333"; // Dark gray color
-              ctx.textAlign = "center";
-              ctx.textBaseline = "middle";
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const ctx = document.getElementById("bookingStatusChart");
+    if (ctx) {
+      const totalLabelPlugin = {
+        id: "totalLabel",
+        beforeDraw: function (chart) {
+          const {
+            ctx,
+            chartArea: { width, height },
+          } = chart;
+          ctx.save();
+          ctx.font = 'bold 24px "Inter", sans-serif';
+          ctx.fillStyle = "#333";
+          ctx.textAlign = "center";
+          ctx.textBaseline = "middle";
 
-              const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-              const centerX = width / 2;
-              const centerY = height / 2;
+          const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+          const centerX = width / 2;
+          const centerY = height / 2;
 
-              ctx.fillText(total, centerX, centerY - 10); // Total number
-              ctx.font = '12px "Inter", sans-serif';
-              ctx.fillStyle = "#666"; // Medium gray color
-              ctx.fillText("Total Bookings", centerX, centerY + 15); // Label
-              ctx.restore();
-            },
-          };
+          ctx.fillText(total, centerX, centerY - 10);
+          ctx.font = '12px "Inter", sans-serif';
+          ctx.fillStyle = "#666";
+          ctx.fillText("Total Bookings", centerX, centerY + 15);
+          ctx.restore();
+        },
+      };
 
-          const chart = new Chart(ctx, {
-            type: "doughnut",
-            data: {
-              labels: ["Completed", "Active", "Pending", "Cancelled"],
-              datasets: [
-                {
-                  data: [
-                    {% endif %}8,
-                    {% endif %}9,
-                    {% url 'find_tutor' %}0,
-                    {{ cancelled_lessons_count }}
-                  ],
-                  backgroundColor: ["#0d9488", "#2563eb", "#d97706", "#be123c"],
-                  borderColor: "#ffffff",
-                  borderWidth: 3,
-                  hoverOffset: 8,
-                  borderRadius: 6,
-                  spacing: 4,
-                },
+      const chart = new Chart(ctx, {
+        type: "doughnut",
+        data: {
+          labels: ["Completed", "Active", "Pending", "Cancelled"],
+          datasets: [
+            {
+              data: [
+                {{ completed_lessons_count }},
+                {{ active_bookings_count }},
+                {{ upcoming_lessons_count }},
+                {{ cancelled_lessons_count }}
               ],
+              backgroundColor: ["#0d9488", "#2563eb", "#d97706", "#be123c"],
+              borderColor: "#ffffff",
+              borderWidth: 3,
+              hoverOffset: 8,
+              borderRadius: 6,
+              spacing: 4,
             },
-            options: {
-              cutout: "72%",
-              layout: {
-                padding: 16,
+          ],
+        },
+        options: {
+          cutout: "72%",
+          layout: {
+            padding: 16,
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              backgroundColor: "rgba(15, 23, 42, 0.95)",
+              padding: 14,
+              cornerRadius: 10,
+              borderColor: "rgba(255, 255, 255, 0.08)",
+              borderWidth: 1,
+              titleFont: {
+                size: 13,
+                weight: "600",
+                family: "'Inter', sans-serif",
               },
-              plugins: {
-                legend: {
-                  display: false,
-                },
-                tooltip: {
-                  backgroundColor: "rgba(15, 23, 42, 0.95)",
-                  padding: 14,
-                  cornerRadius: 10,
-                  borderColor: "rgba(255, 255, 255, 0.08)",
-                  borderWidth: 1,
-                  titleFont: {
-                    size: 13,
-                    weight: "600",
-                    family: "'Inter', sans-serif",
-                  },
-                  bodyFont: {
-                    size: 12,
-                    weight: "500",
-                    family: "'Inter', sans-serif",
-                  },
-                  bodySpacing: 6,
-                  usePointStyle: true,
-                  pointStyleWidth: 10,
-                  boxPadding: 4,
-                  callbacks: {
-                    label: function (context) {
-                      const label = context.label || "";
-                      const value = context.parsed;
-                      const total = context.dataset.data.reduce((a, b) => a + b, 0);
-                      const percentage =
-                        total > 0 ? ((value / total) * 100).toFixed(1) : 0;
-                      return " " + label + ": " + value + " (" + percentage + "%)";
-                    },
-                  },
-                },
-                title: {
-                  display: false,
-                  text: "Booking Status Overview",
-                  font: {
-                    size: 16,
-                    weight: "bold",
-                    family: "'Inter', sans-serif",
-                  },
-                  color: "#333",
+              bodyFont: {
+                size: 12,
+                weight: "500",
+                family: "'Inter', sans-serif",
+              },
+              bodySpacing: 6,
+              usePointStyle: true,
+              pointStyleWidth: 10,
+              boxPadding: 4,
+              callbacks: {
+                label: function (context) {
+                  const label = context.label || "";
+                  const value = context.parsed;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage =
+                    total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                  return " " + label + ": " + value + " (" + percentage + "%)";
                 },
               },
             },
-            plugins: [totalLabelPlugin],
-          });
-        }
+            title: {
+              display: false,
+              text: "Booking Status Overview",
+              font: {
+                size: 16,
+                weight: "bold",
+                family: "'Inter', sans-serif",
+              },
+              color: "#333",
+            },
+          },
+        },
+        plugins: [totalLabelPlugin],
       });
-    </script>
-  {% endblock %}
+    }
+  });
+</script>
+{% endblock %}
