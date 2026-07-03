@@ -1,27 +1,97 @@
-        <aside class="mtc-admin-sidebar mtc-student-portal-sidebar">
-      <input type="checkbox" id="student-portal-toggle" class="mtc-student-portal-toggle" hidden>
-      <div class="mtc-student-portal-header">
-        <h3>Student Portal</h3>
-        <label for="student-portal-toggle" class="mtc-student-portal-button" aria-label="Toggle student portal navigation">
-          <svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
-        </label>
-      </div>
-      <nav class="mtc-admin-nav">
-        <a href="{% url 'student_dashboard' %}" {% if active_tab == "dashboard" %}class="active"{% endif %}>
-          <i class='fa-solid fa-house-circle-check'></i> Dashboard</a>
-        <a href="{% url 'home' %}#search-section">
-          <i class='fa-brands fa-searchengin'></i> AI Tutor Search</a>
-        <a href="{% url 'student_bookings' %}" {% if active_tab == "bookings" %}class="active"{% endif %}>
-          <i class='fa-solid fa-receipt'></i> Bookings</a>
-        <a href="{% url 'chat:student_chat_list' %}" {% if active_tab == "chats" %}class="active"{% endif %}>
-          <i class='fa-solid fa-comments'></i> Chats
-          {% if chat_unread_count %}
-            <span style="margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #2563eb; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">{{ chat_unread_count }}</span>
-          {% endif %}
-        </a>
-        <a href="#"><i class="fa-solid fa-bookmark"></i> Saved Tutors <span style="font-size: 10px; color: var(--muted); margin-left: 5px;">(Soon)</span></a>
-
-      </nav>
-    </aside>
+<aside class="mtc-admin-sidebar mtc-student-portal-sidebar">
+  <input
+    type="checkbox"
+    id="student-portal-toggle"
+    class="mtc-student-portal-toggle"
+    hidden
+  />
+  <div class="mtc-student-portal-header">
+    <h3>Student Portal</h3>
+    <label
+      for="student-portal-toggle"
+      class="mtc-student-portal-button"
+      aria-label="Toggle student portal navigation"
+    >
+      <svg
+        viewBox="0 0 24 24"
+        width="22"
+        height="22"
+        fill="none"
+        stroke="currentColor"
+        stroke-width="2.2"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <polyline points="6 9 12 15 18 9"></polyline>
+      </svg>
+    </label>
+  </div>
+  <nav class="mtc-admin-nav">
+    <a
+      href="{% url 'student_dashboard' %}"
+      {%
+      if
+      active_tab=""
+      ="dashboard"
+      %}class="active"
+      {%
+      endif
+      %}
+    >
+      <i class="fa-solid fa-house-circle-check"></i> Dashboard</a
+    >
+    <a href="{% url 'home' %}#search-section">
+      <i class="fa-brands fa-searchengin"></i> AI Tutor Search</a
+    >
+    <a
+      href="{% url 'student_bookings' %}"
+      {%
+      if
+      active_tab=""
+      ="bookings"
+      %}class="active"
+      {%
+      endif
+      %}
+    >
+      <i class="fa-solid fa-receipt"></i> Bookings</a
+    >
+    <a
+      href="{% url 'chat:student_chat_list' %}"
+      {%
+      if
+      active_tab=""
+      ="chats"
+      %}class="active"
+      {%
+      endif
+      %}
+    >
+      <i class="fa-solid fa-comments"></i> Chats {% if chat_unread_count %}
+      <span
+        style="
+          margin-left: auto;
+          min-width: 22px;
+          height: 22px;
+          padding: 0 7px;
+          border-radius: 999px;
+          background: #2563eb;
+          color: #ffffff;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          font-size: 12px;
+          font-weight: 700;
+        "
+        >{{ chat_unread_count }}</span
+      >
+      {% endif %}
+    </a>
+    <a href="#"
+      ><i class="fa-solid fa-bookmark"></i> Saved Tutors
+      <span style="font-size: 10px; color: var(--muted); margin-left: 5px"
+        >(Soon)</span
+      ></a
+    >
+  </nav>
+</aside>

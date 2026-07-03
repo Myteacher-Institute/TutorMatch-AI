@@ -1,7 +1,5 @@
-{% extends "base.html" %}
-{% load static %}
-{% block title %}Student Dashboard | TutorMatch AI{% endblock %}
-{% block content %}
+{% extends "base.html" %} {% load static %} {% block title %}Student Dashboard |
+TutorMatch AI{% endblock %} {% block content %}
 <div class="sdh-hero">
   <div class="sdh-blob sdh-blob-1"></div>
   <div class="sdh-blob sdh-blob-2"></div>
@@ -24,7 +22,12 @@
       on track.
     </p>
 
-    <form action="{% url 'find_tutor' %}" method="GET" id="hero-ai-form" class="sdh-search-form">
+    <form
+      action="{% url 'find_tutor' %}"
+      method="GET"
+      id="hero-ai-form"
+      class="sdh-search-form"
+    >
       <div class="sdh-search-wrapper" id="hero-search-wrapper">
         <span class="sdh-search-icon">
           <i class="fa-solid fa-wand-magic-sparkles"></i>
@@ -199,7 +202,10 @@
                 <i class="fa-solid fa-receipt"></i>
                 Recent Bookings
               </h2>
-              <a href="{% url 'student_bookings' %}" class="mtc-booking-view-all">
+              <a
+                href="{% url 'student_bookings' %}"
+                class="mtc-booking-view-all"
+              >
                 View All
               </a>
             </div>
@@ -209,15 +215,23 @@
               <article class="mtc-dashboard-booking-row">
                 <div class="mtc-dashboard-booking-tutor">
                   {% if booking.tutor.profile_photo %}
-                  <img src="{{ booking.tutor.profile_photo }}" alt="{{ booking.tutor.user.user.first_name|default:'Tutor' }}" />
+                  <img
+                    src="{{ booking.tutor.profile_photo }}"
+                    alt="{{ booking.tutor.user.user.first_name|default:'Tutor' }}"
+                  />
                   {% else %}
                   <span>
-                    {{ booking.tutor.user.user.first_name|default:"T"|make_list|first|upper }}
+                    {{
+                    booking.tutor.user.user.first_name|default:"T"|make_list|first|upper
+                    }}
                   </span>
                   {% endif %}
                   <div>
                     <strong>{{ booking.tutor.user.user.first_name }}</strong>
-                    <small>{{ booking.booking_date|date:"M d, Y" }} at {{ booking.lesson_time|time:"h:i A" }}</small>
+                    <small
+                      >{{ booking.booking_date|date:"M d, Y" }} at {{
+                      booking.lesson_time|time:"h:i A" }}</small
+                    >
                   </div>
                 </div>
 
@@ -302,13 +316,22 @@
                 <span>Pending: {{ upcoming_lessons_count }}</span>
               </div>
               <div style="display: flex; align-items: center; gap: 8px">
-                <span style="width: 12px; height: 12px; background-color: #ef4444"></span>
+                <span
+                  style="width: 12px; height: 12px; background-color: #ef4444"
+                ></span>
                 <span>Cancelled: {{ cancelled_lessons_count }}</span>
               </div>
             </div>
             {% else %}
             <p
-              style="color: var(--muted); font-size: 13px; margin: 0; flex: 1; display: flex; align-items: center;"
+              style="
+                color: var(--muted);
+                font-size: 13px;
+                margin: 0;
+                flex: 1;
+                display: flex;
+                align-items: center;
+              "
             >
               No status overview data available.
             </p>
@@ -362,7 +385,9 @@
                 <div class="mtc-recommended-tutor-copy">
                   <h3>{{ tutor.user.user.first_name|default:"Tutor" }}</h3>
                   <p>
-                    {% for subject in tutor.subjects.all %}{{ subject.subject_name }}{% if not forloop.last %}, {% endif %}{% empty %} Tutor{% endfor %}
+                    {% for subject in tutor.subjects.all %}
+                    {{ subject.subject_name }}{% if not forloop.last %}, {% endif %}
+                    {% empty %} Tutor{% endfor %}
                   </p>
                   <div
                     class="mtc-recommended-tutor-rating"
@@ -393,8 +418,16 @@
                 <span>/hr</span>
               </div>
               <div class="mtc-recommended-tutor-actions">
-                <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="btn btn-ghost">Profile</a>
-                <a href="{% url 'book_tutor' tutor_id=tutor.id %}" class="btn btn-primary">Book Now</a>
+                <a
+                  href="{% url 'tutor_detail' tutor_id=tutor.id %}"
+                  class="btn btn-ghost"
+                  >Profile</a
+                >
+                <a
+                  href="{% url 'book_tutor' tutor_id=tutor.id %}"
+                  class="btn btn-primary"
+                  >Book Now</a
+                >
               </div>
             </div>
           </article>
