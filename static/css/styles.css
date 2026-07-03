@@ -6478,3 +6478,225 @@ img {
     min-width: 100% !important;
   }
 }
+
+/* ============================================================
+   Student Dashboard Hero
+   ============================================================ */
+.sdh-hero {
+  position: relative;
+  background: linear-gradient(135deg, #1e3a8a 0%, #2563eb 45%, #0ea5e9 100%);
+  border-radius: 24px;
+  margin: 24px 0 0;
+  overflow: hidden;
+  padding: 40px 48px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 32px;
+  box-shadow: 0 20px 60px rgba(37, 99, 235, 0.35), 0 8px 24px rgba(0,0,0,0.12);
+  min-height: 200px;
+}
+
+/* Decorative blobs */
+.sdh-blob {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+}
+.sdh-blob-1 { top: -60px; right: -60px; width: 260px; height: 260px; background: rgba(255,255,255,0.06); }
+.sdh-blob-2 { bottom: -80px; right: 140px; width: 200px; height: 200px; background: rgba(255,255,255,0.04); }
+.sdh-blob-3 { top: 20px; left: 40%; width: 120px; height: 120px; background: rgba(255,255,255,0.03); }
+
+/* Left column */
+.sdh-left {
+  position: relative;
+  z-index: 1;
+  flex: 1;
+  min-width: 0;
+}
+
+/* Date pill */
+.sdh-date-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  padding: 5px 14px;
+  margin-bottom: 16px;
+}
+.sdh-date-dot {
+  width: 7px;
+  height: 7px;
+  background: #4ade80;
+  border-radius: 50%;
+  animation: pulse 2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+.sdh-date-text {
+  color: rgba(255,255,255,0.9);
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+}
+
+/* Headline */
+.sdh-title {
+  margin: 0 0 10px;
+  font-size: clamp(22px, 3vw, 32px);
+  font-weight: 800;
+  color: #ffffff;
+  line-height: 1.2;
+  letter-spacing: -0.5px;
+}
+.sdh-title-name { color: #bfdbfe; }
+
+/* Sub-text */
+.sdh-subtitle {
+  margin: 0 0 24px;
+  color: rgba(255,255,255,0.75);
+  font-size: 14px;
+  font-weight: 400;
+  line-height: 1.6;
+}
+
+/* AI Search form */
+.sdh-search-form {
+  position: relative;
+  max-width: 480px;
+}
+.sdh-search-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+  background: rgba(255,255,255,0.15);
+  backdrop-filter: blur(12px);
+  border: 1.5px solid rgba(255,255,255,0.3);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.sdh-search-wrapper:focus-within {
+  border-color: rgba(255,255,255,0.6);
+  box-shadow: 0 0 0 3px rgba(255,255,255,0.1);
+}
+.sdh-search-icon {
+  padding: 0 14px 0 18px;
+  color: #fde68a;
+  font-size: 18px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  animation: pulse 2.5s ease-in-out infinite;
+}
+.sdh-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  color: #ffffff;
+  font-size: 14px;
+  font-weight: 500;
+  padding: 16px 0;
+  outline: none;
+  min-width: 0;
+}
+.sdh-search-input::placeholder { color: rgba(255,255,255,0.7); }
+.sdh-search-btn {
+  margin: 6px;
+  padding: 10px 20px;
+  background: #ffffff;
+  color: #1e3a8a;
+  font-size: 13px;
+  font-weight: 700;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  white-space: nowrap;
+}
+.sdh-search-btn:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(0,0,0,0.18);
+}
+
+/* Suggested prompt pills */
+.sdh-prompts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+  align-items: center;
+}
+.sdh-prompts-label {
+  color: rgba(255,255,255,0.55);
+  font-size: 11px;
+  font-weight: 500;
+}
+.sdh-prompt-pill {
+  background: rgba(255,255,255,0.1);
+  border: 1px solid rgba(255,255,255,0.2);
+  border-radius: 999px;
+  color: rgba(255,255,255,0.8);
+  font-size: 11px;
+  font-weight: 500;
+  padding: 4px 12px;
+  cursor: pointer;
+  transition: background 0.15s ease;
+}
+.sdh-prompt-pill:hover { background: rgba(255,255,255,0.22); }
+
+/* Right column — progress ring */
+.sdh-right {
+  position: relative;
+  z-index: 1;
+  flex-shrink: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+}
+.sdh-ring-wrap {
+  position: relative;
+  width: 110px;
+  height: 110px;
+}
+.sdh-ring-svg {
+  width: 110px;
+  height: 110px;
+  transform: rotate(-90deg);
+}
+.sdh-ring-center {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.sdh-ring-pct {
+  color: #fff;
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1;
+}
+.sdh-ring-week {
+  color: rgba(255,255,255,0.65);
+  font-size: 10px;
+  font-weight: 500;
+  margin-top: 2px;
+}
+.sdh-ring-label {
+  color: rgba(255,255,255,0.7);
+  font-size: 11px;
+  font-weight: 500;
+  text-align: center;
+}
+.sdh-ring-track {
+  transition: stroke-dashoffset 1.2s cubic-bezier(0.4,0,0.2,1);
+}
