@@ -3,7 +3,7 @@ from django.contrib import messages # Import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
 from django.db.models import Count, Q, Value
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, Coalesce
 from django.core.paginator import Paginator
 
 from .models import ChatSession, ChatMessage
@@ -158,23 +158,18 @@ def tutor_chat_list(request):
             student__username__icontains=query
         ) | Q(
             student__email__icontains=query
-        ) | Q(
-            booking__student__user__first_name__icontains=query
-        ) | Q(
-            booking__student__user__last_name__icontains=query
-        ) | Q(
-            booking__student__user__username__icontains=query
-        ) | Q(
-            booking__student__user__email__icontains=query
-        ) | Q(
-            messages__message__icontains=query
         )
         try:
             booking_id = int(query)
             search_q |= Q(booking__id=booking_id)
         except (ValueError, TypeError):
             pass
-        base_qs = base_qs.filter(search_q).distinct()
+
+        identity_matches = base_qs.filter(search_q).distinct()
+        if identity_matches.exists():
+            base_qs = identity_matches
+        else:
+            base_qs = base_qs.filter(messages__message__icontains=query).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,
@@ -238,8 +233,8 @@ def admin_chat_list(request):
     query = request.GET.get('q', '').strip()
     if query:
         base_qs = base_qs.annotate(
-            student_full_name=Concat('student__first_name', Value(' '), 'student__last_name'),
-            tutor_full_name=Concat('tutor__first_name', Value(' '), 'tutor__last_name'),
+            student_full_name=Coalesce(Concat('student__first_name', Value(' '), 'student__last_name'), Value('')),
+            tutor_full_name=Coalesce(Concat('tutor__first_name', Value(' '), 'tutor__last_name'), Value('')),
         )
         search_q = Q(
             student__first_name__icontains=query
@@ -261,31 +256,18 @@ def admin_chat_list(request):
             tutor__email__icontains=query
         ) | Q(
             tutor_full_name__icontains=query
-        ) | Q(
-            booking__tutor__user__user__first_name__icontains=query
-        ) | Q(
-            booking__tutor__user__user__last_name__icontains=query
-        ) | Q(
-            booking__tutor__user__user__username__icontains=query
-        ) | Q(
-            booking__tutor__user__user__email__icontains=query
-        ) | Q(
-            booking__student__user__first_name__icontains=query
-        ) | Q(
-            booking__student__user__last_name__icontains=query
-        ) | Q(
-            booking__student__user__username__icontains=query
-        ) | Q(
-            booking__student__user__email__icontains=query
-        ) | Q(
-            messages__message__icontains=query
         )
         try:
             booking_id = int(query)
             search_q |= Q(booking__id=booking_id)
         except (ValueError, TypeError):
             pass
-        base_qs = base_qs.filter(search_q).distinct()
+
+        identity_matches = base_qs.filter(search_q).distinct()
+        if identity_matches.exists():
+            base_qs = identity_matches
+        else:
+            base_qs = base_qs.filter(messages__message__icontains=query).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,
@@ -320,7 +302,7 @@ def student_chat_list(request):
     query = request.GET.get('q', '').strip()
     if query:
         base_qs = base_qs.annotate(
-            tutor_full_name=Concat('tutor__first_name', Value(' '), 'tutor__last_name'),
+            tutor_full_name=Coalesce(Concat('tutor__first_name', Value(' '), 'tutor__last_name'), Value('')),
         )
         search_q = Q(
             tutor__first_name__icontains=query
@@ -332,23 +314,18 @@ def student_chat_list(request):
             tutor__email__icontains=query
         ) | Q(
             tutor_full_name__icontains=query
-        ) | Q(
-            booking__tutor__user__user__first_name__icontains=query
-        ) | Q(
-            booking__tutor__user__user__last_name__icontains=query
-        ) | Q(
-            booking__tutor__user__user__username__icontains=query
-        ) | Q(
-            booking__tutor__user__user__email__icontains=query
-        ) | Q(
-            messages__message__icontains=query
         )
         try:
             booking_id = int(query)
             search_q |= Q(booking__id=booking_id)
         except (ValueError, TypeError):
             pass
-        base_qs = base_qs.filter(search_q).distinct()
+
+        identity_matches = base_qs.filter(search_q).distinct()
+        if identity_matches.exists():
+            base_qs = identity_matches
+        else:
+            base_qs = base_qs.filter(messages__message__icontains=query).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,

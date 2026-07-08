@@ -28,15 +28,15 @@
             <button class="mtc-chat-filter" type="button">Unread</button>
           </div>
 
-          {% if chat_sessions %}
+          {% if chat_sessions|length %}
           <div class="mtc-chat-cards">
             {% for session in chat_sessions %}
             {% cycle 'mtc-chat-avatar-blue' 'mtc-chat-avatar-indigo' 'mtc-chat-avatar-cyan' as avatar_class silent %}
             <a href="{% url 'chat:chat_view' session.booking.id %}" class="mtc-chat-card {% if session.unread_count %}is-unread{% endif %}">
               <div class="mtc-chat-avatar-wrap">
                 <div class="mtc-chat-avatar {{ avatar_class }}">
-                  {% if session.tutor.tutor_profile.profile_photo %}
-                  <img src="{{ session.tutor.tutor_profile.profile_photo }}" alt="{{ session.tutor.get_full_name }}">
+                  {% if session.tutor.profile.tutor_profile.profile_photo %}
+                  <img src="{{ session.tutor.profile.tutor_profile.profile_photo }}" alt="{{ session.tutor.get_full_name }}">
                   {% else %}
                   {{ session.tutor.first_name|first|upper }}
                   {% endif %}

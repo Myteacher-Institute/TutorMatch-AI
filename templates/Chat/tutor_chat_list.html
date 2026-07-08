@@ -28,7 +28,7 @@
             <button class="mtc-chat-filter" type="button">Unread</button>
           </div>
 
-          {% if chat_sessions %}
+          {% if chat_sessions|length %}
           <div class="mtc-chat-cards">
             {% for session in chat_sessions %}
             {% cycle 'mtc-chat-avatar-blue' 'mtc-chat-avatar-indigo' 'mtc-chat-avatar-cyan' as avatar_class silent %}
