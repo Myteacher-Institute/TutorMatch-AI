@@ -5852,7 +5852,8 @@ img {
 }
 
 .mtc-chat-container {
-  max-width: 520px;
+  width: 100%;
+  max-width: 720px;
   margin: 0 auto;
 }
 

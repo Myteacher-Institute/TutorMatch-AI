@@ -17,9 +17,10 @@
             <p class="mtc-chat-subtitle">{{ chat_sessions|length }} conversations · {{ total_unread }} unread</p>
           </div>
 
-          <div class="mtc-chat-search">
-            <input type="text" placeholder="Search bookings or people..." aria-label="Search chats">
-          </div>
+          <form class="mtc-chat-search" method="get" action="">
+            <span class="mtc-chat-search-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
+            <input type="text" name="q" placeholder="Search bookings or people..." aria-label="Search chats" value="{{ request.GET.q|default:'' }}">
+          </form>
 
           <div class="mtc-chat-filters">
             <button class="mtc-chat-filter is-active" type="button">All</button>

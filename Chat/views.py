@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages # Import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Count, Q, Sum
+from django.db.models import Count, Q
 from django.core.paginator import Paginator
 
 from .models import ChatSession, ChatMessage
@@ -145,7 +145,16 @@ def tutor_chat_list(request):
     # Order by the latest message or session update for active chats
     base_qs = ChatSession.objects.filter(tutor=request.user).order_by('-updated_at')
     unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
-    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).aggregate(total=Sum('unread_count'))['total'] or 0
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        base_qs = base_qs.filter(
+            Q(student__first_name__icontains=query) |
+            Q(student__last_name__icontains=query) |
+            Q(student__username__icontains=query) |
+            Q(booking__id__icontains=query)
+        ).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,
@@ -203,7 +212,19 @@ def admin_chat_list(request):
 
     base_qs = ChatSession.objects.all().order_by('-updated_at')
     unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
-    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).aggregate(total=Sum('unread_count'))['total'] or 0
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        base_qs = base_qs.filter(
+            Q(student__first_name__icontains=query) |
+            Q(student__last_name__icontains=query) |
+            Q(student__username__icontains=query) |
+            Q(tutor__first_name__icontains=query) |
+            Q(tutor__last_name__icontains=query) |
+            Q(tutor__username__icontains=query) |
+            Q(booking__id__icontains=query)
+        ).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,
@@ -232,7 +253,16 @@ def student_chat_list(request):
     # Get chat sessions where the current user is the student
     base_qs = ChatSession.objects.filter(student=request.user).order_by('-updated_at')
     unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
-    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).aggregate(total=Sum('unread_count'))['total'] or 0
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        base_qs = base_qs.filter(
+            Q(tutor__first_name__icontains=query) |
+            Q(tutor__last_name__icontains=query) |
+            Q(tutor__username__icontains=query) |
+            Q(booking__id__icontains=query)
+        ).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,
