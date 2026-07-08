@@ -2,7 +2,7 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages # Import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Sum
 from django.core.paginator import Paginator
 
 from .models import ChatSession, ChatMessage
@@ -143,11 +143,15 @@ def tutor_chat_list(request):
 
     # Get chat sessions where the current user is the tutor
     # Order by the latest message or session update for active chats
+    base_qs = ChatSession.objects.filter(tutor=request.user).order_by('-updated_at')
+    unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).aggregate(total=Sum('unread_count'))['total'] or 0
+
     chat_sessions = _paginate_chat_sessions(
         request,
         _with_unread_counts(
             request.user,
-            ChatSession.objects.filter(tutor=request.user).order_by('-updated_at'),
+            base_qs,
         ),
     )
 
@@ -158,6 +162,7 @@ def tutor_chat_list(request):
         'page_obj': chat_sessions,
         'tutor_profile': tutor_obj, # Pass the tutor's profile
         'active_tab': 'chats',
+        'total_unread': total_unread,
     }
     return render(request, 'Chat/tutor_chat_list.html', context)
 
@@ -196,11 +201,15 @@ def admin_chat_list(request):
         messages.error(request, "You are not authorized to view this page.")
         return redirect('home')
 
+    base_qs = ChatSession.objects.all().order_by('-updated_at')
+    unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).aggregate(total=Sum('unread_count'))['total'] or 0
+
     chat_sessions = _paginate_chat_sessions(
         request,
         _with_unread_counts(
             request.user,
-            ChatSession.objects.all().order_by('-updated_at'),
+            base_qs,
         ),
     )
 
@@ -208,6 +217,7 @@ def admin_chat_list(request):
         'chat_sessions': chat_sessions,
         'page_obj': chat_sessions,
         'active_tab': 'chats',
+        'total_unread': total_unread,
     }
     return render(request, 'Chat/admin_chat_list.html', context)
 
@@ -220,11 +230,15 @@ def student_chat_list(request):
         return redirect('home')
 
     # Get chat sessions where the current user is the student
+    base_qs = ChatSession.objects.filter(student=request.user).order_by('-updated_at')
+    unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).aggregate(total=Sum('unread_count'))['total'] or 0
+
     chat_sessions = _paginate_chat_sessions(
         request,
         _with_unread_counts(
             request.user,
-            ChatSession.objects.filter(student=request.user).order_by('-updated_at'),
+            base_qs,
         ),
     )
 
@@ -233,5 +247,6 @@ def student_chat_list(request):
         'page_obj': chat_sessions,
         'student_profile': request.user.profile, # Pass the student's profile
         'active_tab': 'chats',
+        'total_unread': total_unread,
     }
     return render(request, 'Chat/student_chat_list.html', context)

@@ -229,8 +229,7 @@ TutorMatch AI{% endblock %} {% block content %}
                   <div>
                     <strong>{{ booking.tutor.user.user.first_name }}</strong>
                     <small
-                      >{{ booking.booking_date|date:"M d, Y" }} at {{
-                      booking.lesson_time|time:"g:i A" }}</small
+                      >{{ booking.booking_date|date:"M d, Y" }} at {{ booking.lesson_time|time:"g:i A" }}</small
                     >
                   </div>
                 </div>
