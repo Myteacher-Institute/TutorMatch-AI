@@ -3,6 +3,14 @@ from urllib.parse import urlencode
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
+from .assistant import (
+    assistant_suggestions,
+    get_or_create_conversation,
+    handle_user_message,
+    recent_conversations,
+    reset_conversation,
+    start_conversation,
+)
 from .forms import TutorSearchForm
 from .services import extract_search_intent, search_tutors, suggested_prompts
 
@@ -10,8 +18,44 @@ from .services import extract_search_intent, search_tutors, suggested_prompts
 def find_tutor(request):
     query = request.GET.get("q", "").strip()
     if query:
-        return redirect(f"{reverse('search_results')}?{urlencode({'q': query})}")
-    return redirect('search_results')
+        return redirect(f"{reverse('ai_assistant')}?{urlencode({'q': query})}")
+    return redirect("ai_assistant")
+
+
+def ai_assistant(request):
+    conversation_id = request.GET.get("conversation")
+    conversation = get_or_create_conversation(request, conversation_id=conversation_id)
+
+    if request.GET.get("reset") == "1":
+        conversation = reset_conversation(request)
+
+    initial_prompt = request.GET.get("q", "").strip()
+    start_conversation(conversation, initial_prompt)
+
+    if request.method == "POST":
+        message = request.POST.get("message", "").strip()
+        if message:
+            handle_user_message(conversation, message)
+        return redirect(f"{reverse('ai_assistant')}?{urlencode({'conversation': conversation.id})}")
+
+    chat_messages = conversation.messages.all()
+    latest_assistant = chat_messages.filter(role="assistant").last()
+    latest_tutors = []
+    if latest_assistant:
+        latest_tutors = latest_assistant.metadata.get("tutors", [])
+
+    return render(
+        request,
+        "search/ai_assistant.html",
+        {
+            "conversation": conversation,
+            "chat_messages": chat_messages,
+            "latest_tutors": latest_tutors,
+            "suggested_prompts": assistant_suggestions(),
+            "recent_conversations": recent_conversations(request, request.GET.get("chat_search", "")),
+            "chat_search": request.GET.get("chat_search", ""),
+        },
+    )
 
 
 
@@ -54,3 +98,19 @@ def search_results(request):
             "suggested_prompts": suggested_prompts(),
         },
     )
+
+
+def delete_conversation(request, conversation_id):
+    from .models import AIConversation
+    from django.shortcuts import get_object_or_404
+
+    if not request.session.session_key:
+        request.session.create()
+
+    if request.user.is_authenticated:
+        conversation = get_object_or_404(AIConversation, id=conversation_id, user=request.user)
+    else:
+        conversation = get_object_or_404(AIConversation, id=conversation_id, session_key=request.session.session_key)
+
+    conversation.delete()
+    return redirect("ai_assistant")

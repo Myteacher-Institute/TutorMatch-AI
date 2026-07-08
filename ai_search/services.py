@@ -1,8 +1,12 @@
 import json
+import logging
 import os
 import re
 
 from django.apps import apps
+from django.conf import settings
+
+logger = logging.getLogger(__name__)
 
 
 SUBJECTS = [
@@ -12,6 +16,9 @@ SUBJECTS = [
     "Chemistry",
     "Biology",
     "Economics",
+    "HTML",
+    "Coding",
+    "Programming",
 ]
 
 LEVELS = ["Primary", "JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3", "WAEC", "NECO", "JAMB"]
@@ -68,17 +75,33 @@ SAMPLE_TUTORS = [
 
 
 def extract_search_intent(prompt):
-    text = prompt or ""
-    fallback = _fallback_intent(text)
+    try:
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
+    except ImportError:
+        pass
 
-    if not text or not os.getenv("OPENAI_API_KEY"):
-        return fallback
+    text = prompt or ""
+    empty_intent = {
+        "query_text": text,
+        "subject": "",
+        "level": "",
+        "location": "",
+        "schedule": "",
+        "source": "openai",
+    }
+    if not text:
+        return empty_intent
+
+    if not os.getenv("OPENAI_API_KEY"):
+        logger.error("OPENAI_API_KEY is missing from environment.")
+        return empty_intent
 
     try:
-        return _extract_with_openai(text, fallback)
+        return _extract_with_openai(text, empty_intent)
     except Exception:
-        fallback["source"] = "fallback-openai-error"
-        return fallback
+        logger.error("Failed to extract intent with OpenAI API.", exc_info=True)
+        return empty_intent
 
 
 def search_tutors(intent, filters=None):
@@ -89,7 +112,9 @@ def search_tutors(intent, filters=None):
     max_price = filters.get("max_price")
     min_experience = filters.get("min_experience")
 
-    tutors = _load_database_tutors() or list(SAMPLE_TUTORS)
+    tutors = _load_database_tutors()
+    if not tutors and _use_sample_tutors():
+        tutors = list(SAMPLE_TUTORS)
 
     query_text = intent.get("query_text", "").strip()
     has_filters = bool(subject or location or min_price is not None or max_price is not None or min_experience is not None)
@@ -140,27 +165,27 @@ def search_tutors(intent, filters=None):
     for idx, tutor in enumerate(sorted_tutors):
         t = dict(tutor)
         if idx == 0:
-            t["ai_score"] = "96% Match"
+            t["ai_score"] = "96%"
             t["best_match"] = True
             t["response_time"] = "1 hr"
             t["reviews_count"] = 128
         elif idx == 1:
-            t["ai_score"] = "92% Match"
+            t["ai_score"] = "92%"
             t["best_match"] = False
             t["response_time"] = "2 hrs"
             t["reviews_count"] = 42
         elif idx == 2:
-            t["ai_score"] = "85% Match"
+            t["ai_score"] = "85%"
             t["best_match"] = False
             t["response_time"] = "1 hr"
             t["reviews_count"] = 29
         else:
-            t["ai_score"] = "80% Match"
+            t["ai_score"] = "80%"
             t["best_match"] = False
             t["response_time"] = "3 hrs"
             t["reviews_count"] = 12
 
-        t["ai_reason"] = f"This tutor specializes in {t.get('specialist', t['subject'])}, has extensive WAEC preparation experience, and is located near {t['location']}."
+        t["ai_reason"] = f"This tutor matches your search for {t.get('specialist', t['subject'])}, has {t['experience']} years of experience, and is located near {t['location']}."
         enriched.append(t)
 
     return enriched
@@ -179,8 +204,8 @@ def _fallback_intent(prompt):
     return {
         "query_text": prompt,
         "subject": _find_first(SUBJECTS, lowered),
-        "level": _find_first(LEVELS, lowered),
-        "location": _find_first(LOCATIONS, lowered),
+        "level": _find_level(lowered),
+        "location": _find_location(lowered),
         "schedule": _find_schedule(lowered),
         "source": "fallback",
     }
@@ -234,6 +259,7 @@ def _load_database_tutors():
                     "id": tutor.pk,
                     "name": _tutor_name(tutor),
                     "subject": _tutor_subject(tutor),
+                    "specialist": _tutor_specialist(tutor),
                     "level": _field_value(tutor, "level", "All levels"),
                     "location": _field_value(tutor, "location", "Port Harcourt"),
                     "rate": int(_field_value(tutor, "hourly_rate", 0) or 0),
@@ -246,6 +272,7 @@ def _load_database_tutors():
             )
         return tutors
     except Exception:
+        logger.warning("Failed to load tutors for AI search.", exc_info=True)
         return []
 
 
@@ -258,6 +285,13 @@ def _filter_verified_tutors(Tutor, queryset):
     return queryset
 
 
+def _use_sample_tutors():
+    value = os.getenv("AI_SEARCH_USE_SAMPLE_TUTORS")
+    if value is None:
+        return settings.configured and settings.DEBUG
+    return value.lower() in {"1", "true", "yes", "on"}
+
+
 def _field_value(obj, field_name, default=""):
     value = getattr(obj, field_name, default)
     if callable(value):
@@ -266,7 +300,8 @@ def _field_value(obj, field_name, default=""):
 
 
 def _tutor_name(tutor):
-    user = getattr(tutor, "user", None)
+    profile = getattr(tutor, "user", None)
+    user = getattr(profile, "user", profile)
     if user:
         full_name = user.get_full_name() if hasattr(user, "get_full_name") else ""
         if full_name:
@@ -295,6 +330,17 @@ def _tutor_subject(tutor):
     return "General"
 
 
+def _tutor_specialist(tutor):
+    subjects = getattr(tutor, "subjects", None)
+    if subjects and hasattr(subjects, "all"):
+        names = [_subject_name(subject) for subject in subjects.all()[:3]]
+        names = [name for name in names if name]
+        if names:
+            return " & ".join(names)
+
+    return _tutor_subject(tutor)
+
+
 def _subject_name(subject):
     if isinstance(subject, str):
         return subject
@@ -312,6 +358,8 @@ def _photo_url(tutor):
     photo = getattr(tutor, "profile_photo", None)
     if photo and hasattr(photo, "url"):
         return photo.url
+    if photo:
+        return str(photo)
     return "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=600&q=80"
 
 
@@ -329,6 +377,31 @@ def _find_first(options, lowered):
     for option in options:
         if option.lower() in lowered:
             return option
+    return ""
+
+
+def _find_location(lowered):
+    if re.search(r"\bph\b", lowered):
+        return "Port Harcourt"
+    return _find_first(LOCATIONS, lowered)
+
+
+def _find_level(lowered):
+    level = _find_first(LEVELS, lowered)
+    if level:
+        return level
+
+    age_match = re.search(r"\b(?:age|aged|is)\s*(\d{1,2})\b|\b(\d{1,2})\s*(?:years old|year old|yrs old)\b", lowered)
+    if age_match:
+        age = int(age_match.group(1) or age_match.group(2))
+        if age <= 10:
+            return "Primary"
+        if age <= 13:
+            return "JSS1"
+        if age <= 15:
+            return "JSS3"
+        return "SS3"
+
     return ""
 
 

@@ -1,0 +1,1835 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Myteacher AI - Chat{% endblock %}
+
+{% block content %}
+<style>
+  /* Remove global headers and footers to establish full-screen app workspace */
+  .site-header,
+  .mtc-footer {
+    display: none !important;
+  }
+  
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+
+  /* Custom Theme Styling System */
+  :root {
+    --bg-main: #ffffff;
+    --bg-sidebar: #f7faff;          /* Brand's soft blue background */
+    --border-color: #c9cdd388;      /* Brand's soft border color */
+    --hover-bg: rgba(37, 99, 235, 0.08); /* Brand's blue hover overlay */
+    --text-primary: #0f172a;        /* Brand's ink color */
+    --text-muted: #5d7290;          /* Brand's mid-blue/gray text */
+    --composer-bg: #f7faff;         /* Brand's soft blue input background */
+    --composer-border: #c9cdd3bb;
+    --composer-shadow: 0 4px 15px rgba(15, 23, 42, 0.04);
+    --user-msg-bg: #dbeafe;         /* Brand's custom soft blue user bubble */
+    --assistant-msg-bg: transparent;
+    --btn-send-bg: #2563eb;         /* Brand's primary royal blue */
+    --btn-send-color: #ffffff;
+    --accent-blue: #2563eb;
+    --accent-blue-soft: #dbeafe;
+    --ai-avatar-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%); /* Brand's gradient */
+    --ai-avatar-color: #ffffff;
+    --tutor-card-bg: #ffffff;
+    --tutor-card-border: #c9cdd388;
+    --tutor-card-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+    --code-header-bg: #e2e8f0;
+    --code-body-bg: #0f172a;        /* Brand's ink navy */
+    --code-body-text: #f8fafc;
+  }
+
+  html.dark {
+    --bg-main: #0b0f19;             /* Website footer deep navy/black */
+    --bg-sidebar: #101a33;          /* Website custom brand navy */
+    --border-color: rgba(144, 169, 207, 0.15);
+    --hover-bg: rgba(37, 99, 235, 0.15); /* Translucent royal blue */
+    --text-primary: #f8fafc;
+    --text-muted: #90a9cf;          /* Brand's muted grey-blue */
+    --composer-bg: #101a33;
+    --composer-border: rgba(144, 169, 207, 0.25);
+    --composer-shadow: 0 0 25px rgba(0, 0, 0, 0.4);
+    --user-msg-bg: rgba(37, 99, 235, 0.25); /* Translucent brand blue bubble */
+    --assistant-msg-bg: transparent;
+    --btn-send-bg: #f8fafc;
+    --btn-send-color: #0b0f19;
+    --accent-blue: #3b82f6;         /* Slightly brighter blue in dark mode */
+    --accent-blue-soft: rgba(59, 130, 246, 0.15);
+    --ai-avatar-bg: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    --ai-avatar-color: #ffffff;
+    --tutor-card-bg: rgba(16, 26, 51, 0.7);
+    --tutor-card-border: rgba(144, 169, 207, 0.1);
+    --tutor-card-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+    --code-header-bg: #101a33;
+    --code-body-bg: #070a13;
+    --code-body-text: #e2e8f0;
+  }
+
+  /* Full Screen Container */
+  .chat-app {
+    height: 100vh;
+    width: 100vw;
+    display: grid;
+    grid-template-columns: 260px minmax(0, 1fr);
+    background: var(--bg-main);
+    color: var(--text-primary);
+    font-family: Söhne, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    transition: grid-template-columns 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  .chat-app.sidebar-collapsed {
+    grid-template-columns: 0px minmax(0, 1fr);
+  }
+
+  /* Left Sidebar Styling */
+  .sidebar-container {
+    height: 100vh;
+    background: var(--bg-sidebar);
+    border-right: 1px solid var(--border-color);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    position: relative;
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), visibility 0.25s;
+    z-index: 50;
+  }
+
+  .chat-app.sidebar-collapsed .sidebar-container {
+    transform: translateX(-100%);
+    visibility: hidden;
+    pointer-events: none;
+  }
+
+  .sidebar-header {
+    padding: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .new-chat-btn {
+    flex: 1;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    padding: 0 12px;
+    gap: 8px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: background 0.2s ease;
+  }
+
+  .new-chat-btn:hover {
+    background: var(--hover-bg);
+  }
+
+  .sidebar-toggle-btn {
+    width: 40px;
+    height: 40px;
+    border: 1px solid var(--border-color);
+    border-radius: 8px;
+    background: transparent;
+    color: var(--text-primary);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .sidebar-toggle-btn:hover {
+    background: var(--hover-bg);
+  }
+
+  /* Sidebar Search */
+  .sidebar-search-box {
+    margin: 4px 10px;
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+
+  .sidebar-search-box input {
+    width: 100%;
+    height: 34px;
+    background: var(--composer-bg);
+    border: 1px solid var(--composer-border);
+    border-radius: 6px;
+    padding: 0 10px 0 32px;
+    font-size: 13px;
+    color: var(--text-primary);
+    outline: none;
+    transition: border-color 0.2s ease;
+  }
+
+  .sidebar-search-box input:focus {
+    border-color: var(--accent-blue);
+  }
+
+  .sidebar-search-box svg {
+    position: absolute;
+    left: 10px;
+    color: var(--text-muted);
+  }
+
+  /* Sidebar Middle Scroll Area */
+  .sidebar-scroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 10px 6px;
+  }
+
+  .sidebar-section-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    padding: 12px 10px 6px;
+    letter-spacing: 0.05em;
+  }
+
+  .sidebar-link-wrapper {
+    position: relative;
+    display: flex;
+    align-items: center;
+    width: 100%;
+    margin-bottom: 2px;
+  }
+
+  .sidebar-link {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 10px;
+    border-radius: 6px;
+    color: var(--text-primary);
+    font-size: 13px;
+    text-decoration: none;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background 0.2s ease;
+    flex: 1;
+    padding-right: 32px; /* make room for delete button */
+  }
+
+  .sidebar-link:hover,
+  .sidebar-link.active {
+    background: var(--hover-bg);
+  }
+
+  .delete-chat-btn {
+    position: absolute;
+    right: 8px;
+    width: 24px;
+    height: 24px;
+    border-radius: 4px;
+    border: 0;
+    background: transparent;
+    color: var(--text-muted);
+    display: none; /* hidden by default */
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+  }
+
+  .sidebar-link-wrapper:hover .delete-chat-btn {
+    display: grid; /* show on hover */
+  }
+
+  .delete-chat-btn:hover {
+    color: #ef4444; /* red on hover */
+    background: var(--hover-bg);
+  }
+
+  .sidebar-link svg {
+    flex-shrink: 0;
+    color: var(--text-muted);
+  }
+
+  .sidebar-link span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Bottom Controls */
+  .sidebar-footer {
+    border-top: 1px solid var(--border-color);
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    background: var(--bg-sidebar);
+  }
+
+  .theme-selector-bar {
+    display: flex;
+    background: var(--composer-bg);
+    border: 1px solid var(--composer-border);
+    border-radius: 8px;
+    padding: 2px;
+    gap: 2px;
+  }
+
+  .theme-btn-option {
+    flex: 1;
+    height: 28px;
+    border: 0;
+    border-radius: 6px;
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    font-size: 11px;
+    transition: all 0.2s ease;
+  }
+
+  .theme-btn-option.active {
+    background: var(--bg-main);
+    color: var(--text-primary);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.06);
+  }
+
+  .user-profile-widget {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px;
+    border-radius: 8px;
+    color: var(--text-primary);
+    transition: background 0.2s ease;
+    cursor: pointer;
+  }
+
+  .user-profile-widget:hover {
+    background: var(--hover-bg);
+  }
+
+  .user-avatar-circle {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--ai-avatar-bg);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    font-weight: 600;
+  }
+
+  .user-info-text {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .user-info-text strong {
+    font-size: 13px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .user-info-text span {
+    font-size: 11px;
+    color: var(--text-muted);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Main App Container */
+  .chat-pane {
+    height: 100vh;
+    display: grid;
+    grid-template-rows: 56px minmax(0, 1fr);
+    background: var(--bg-main);
+    position: relative;
+  }
+
+  /* Top Bar Header */
+  .top-header {
+    height: 56px;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 16px;
+    position: relative;
+    z-index: 40;
+  }
+
+  .header-left {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .floating-sidebar-toggle {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    background: transparent;
+    color: var(--text-primary);
+    cursor: pointer;
+    border-radius: 6px;
+    display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
+  }
+
+  .floating-sidebar-toggle:hover {
+    background: var(--hover-bg);
+  }
+
+  /* Dropdown Selector for Models */
+  .model-select-wrapper {
+    position: relative;
+  }
+
+  .model-dropdown-trigger {
+    background: transparent;
+    border: 0;
+    color: var(--text-primary);
+    font-size: 16px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    padding: 6px 10px;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+  }
+
+  .model-dropdown-trigger:hover {
+    background: var(--hover-bg);
+  }
+
+  .model-menu-panel {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1), 0 8px 10px -6px rgba(0,0,0,0.1);
+    padding: 6px;
+    min-width: 240px;
+    display: none;
+    z-index: 100;
+  }
+
+  .model-menu-panel.show {
+    display: block;
+  }
+
+  .model-option-item {
+    display: flex;
+    flex-direction: column;
+    padding: 8px 12px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s ease;
+  }
+
+  .model-option-item:hover {
+    background: var(--hover-bg);
+  }
+
+  .model-option-item strong {
+    font-size: 13px;
+    color: var(--text-primary);
+  }
+
+  .model-option-item span {
+    font-size: 11px;
+    color: var(--text-muted);
+    margin-top: 2px;
+  }
+
+  /* Empty State Presentation */
+  .chat-view-viewport {
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+    position: relative;
+  }
+
+  .empty-chat-welcome {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 24px;
+    overflow-y: auto;
+  }
+
+  .welcome-inner-content {
+    width: min(720px, 100%);
+    text-align: center;
+    margin-top: -8vh;
+  }
+
+  .welcome-ai-badge {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: var(--ai-avatar-bg);
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    margin: 0 auto 16px;
+    box-shadow: 0 8px 24px rgba(16, 163, 127, 0.2);
+  }
+
+  .welcome-headline {
+    font-size: 28px;
+    font-weight: 600;
+    margin: 0 0 32px;
+    letter-spacing: -0.02em;
+    color: var(--text-primary);
+  }
+
+  /* Suggestion Cards 2x2 Grid */
+  .suggestion-prompts-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    margin-bottom: 24px;
+    text-align: left;
+  }
+
+  .prompt-suggest-card {
+    background: transparent;
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: all 0.2s ease;
+  }
+
+  .prompt-suggest-card:hover {
+    background: var(--hover-bg);
+    border-color: var(--composer-border);
+    transform: translateY(-1px);
+  }
+
+  .suggest-card-body {
+    flex: 1;
+  }
+
+  .suggest-card-category {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-primary);
+    margin-bottom: 4px;
+  }
+
+  .suggest-card-text {
+    font-size: 12px;
+    color: var(--text-muted);
+    line-height: 1.4;
+  }
+
+  .suggest-card-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background: var(--composer-bg);
+    color: var(--text-primary);
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+  }
+
+  /* Chat Log Thread */
+  .message-scroll-thread {
+    flex: 1;
+    overflow-y: auto;
+    padding: 24px 16px;
+  }
+
+  .message-thread-inner {
+    width: min(720px, 100%);
+    margin: 0 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 28px;
+  }
+
+  /* Message Elements */
+  .chat-msg-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .chat-msg-row.user-msg {
+    justify-content: flex-end;
+  }
+
+  .avatar-avatar {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+    font-weight: 700;
+    flex-shrink: 0;
+  }
+
+  .avatar-avatar.ai-icon {
+    background: var(--ai-avatar-bg);
+    color: var(--ai-avatar-color);
+  }
+
+  .avatar-avatar.user-icon {
+    background: #e0f2fe;
+    color: #0369a1;
+  }
+
+  .msg-body-container {
+    flex: 1;
+    min-width: 0;
+  }
+
+  .chat-msg-row.user-msg .msg-body-container {
+    flex: 0 1 auto;
+    max-width: 80%;
+  }
+
+  .msg-text-bubble {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text-primary);
+    word-break: break-word;
+  }
+
+  .chat-msg-row.user-msg .msg-text-bubble {
+    background: var(--user-msg-bg);
+    border-radius: 18px;
+    padding: 10px 16px;
+  }
+
+  /* AI Thinking Indicator bubble */
+  .ai-thinking-indicator {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 10px 4px 6px;
+  }
+  
+  .ai-thinking-indicator span {
+    width: 8px;
+    height: 8px;
+    background-color: var(--text-primary);
+    border-radius: 50%;
+    opacity: 0.4;
+    animation: bounce-dots 1.4s infinite ease-in-out both;
+  }
+  
+  .ai-thinking-indicator span:nth-child(1) {
+    animation-delay: -0.32s;
+  }
+  
+  .ai-thinking-indicator span:nth-child(2) {
+    animation-delay: -0.16s;
+  }
+  
+  @keyframes bounce-dots {
+    0%, 80%, 100% { 
+      transform: scale(0.3);
+      opacity: 0.2;
+    } 
+    40% { 
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Markdown formatted styles inside bubble */
+  .md-para {
+    margin: 0 0 12px;
+  }
+  .md-para:last-child {
+    margin-bottom: 0;
+  }
+
+  .inline-code {
+    background: var(--composer-bg);
+    border: 1px solid var(--border-color);
+    padding: 2px 5px;
+    border-radius: 4px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+  }
+
+  .markdown-list {
+    margin: 0 0 14px;
+    padding-left: 20px;
+  }
+  .markdown-list li {
+    margin-bottom: 4px;
+  }
+
+  /* Code block containers styled like ChatGPT */
+  .code-container {
+    border-radius: 8px;
+    overflow: hidden;
+    margin: 14px 0;
+    border: 1px solid var(--border-color);
+    box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05);
+  }
+
+  .code-header {
+    background: var(--code-header-bg);
+    padding: 8px 14px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .code-lang {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+
+  .copy-code-btn {
+    background: transparent;
+    border: 0;
+    color: var(--text-muted);
+    font-size: 11px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 4px 8px;
+    border-radius: 4px;
+    transition: background 0.2s ease, color 0.2s ease;
+  }
+
+  .copy-code-btn:hover {
+    background: var(--hover-bg);
+    color: var(--text-primary);
+  }
+
+  .code-container pre {
+    margin: 0;
+    padding: 16px;
+    background: var(--code-body-bg);
+    color: var(--code-body-text);
+    overflow-x: auto;
+  }
+
+  .code-container code {
+    font-family: Consolas, Monaco, "Andale Mono", "Ubuntu Mono", monospace;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+
+  /* Tutor Recommendation Cards Panel */
+  .tutor-matches-row {
+    margin-top: 16px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .tutor-match-card {
+    background: var(--tutor-card-bg);
+    border: 1px solid var(--tutor-card-border);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    box-shadow: var(--tutor-card-shadow);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .tutor-match-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.08);
+  }
+
+  .tutor-card-head {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .tutor-photo-wrap {
+    position: relative;
+    width: 46px;
+    height: 46px;
+    flex-shrink: 0;
+  }
+
+  .tutor-photo-wrap img {
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid var(--border-color);
+  }
+
+  .tutor-verified-badge {
+    position: absolute;
+    bottom: -2px;
+    right: -2px;
+    width: 16px;
+    height: 16px;
+    background: #10a37f;
+    border-radius: 50%;
+    color: #ffffff;
+    display: grid;
+    place-items: center;
+    font-size: 9px;
+    border: 2px solid var(--tutor-card-bg);
+  }
+
+  .tutor-headline-meta {
+    min-width: 0;
+  }
+
+  .tutor-headline-meta strong {
+    display: block;
+    font-size: 14px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .tutor-headline-meta span {
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--composer-bg);
+    padding: 2px 6px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-top: 2px;
+  }
+
+  .tutor-stat-badge {
+    font-size: 12px;
+    color: var(--text-muted);
+    margin: 0;
+    line-height: 1.4;
+  }
+
+  .tutor-match-rating-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--accent-blue-soft);
+    color: var(--accent-blue);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 8px;
+    border-radius: 12px;
+    align-self: flex-start;
+  }
+
+  .tutor-card-buttons {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-top: auto;
+  }
+
+  .tutor-btn {
+    height: 32px;
+    font-size: 12px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .tutor-btn-secondary {
+    background: var(--composer-bg);
+    border: 1px solid var(--composer-border);
+    color: var(--text-primary);
+  }
+
+  .tutor-btn-secondary:hover {
+    background: var(--hover-bg);
+  }
+
+  .tutor-btn-primary {
+    background: var(--accent-blue);
+    border: 0;
+    color: #ffffff;
+  }
+
+  .tutor-btn-primary:hover {
+    opacity: 0.9;
+  }
+
+  /* Bottom Input Composer Area */
+  .composer-footer-wrap {
+    padding: 10px 24px 22px;
+    background: linear-gradient(180deg, rgba(255,255,255,0), var(--bg-main) 20%);
+    z-index: 30;
+  }
+
+  .composer-inner-card {
+    width: min(720px, 100%);
+    margin: 0 auto;
+    border: 1px solid var(--composer-border);
+    border-radius: 24px;
+    background: var(--bg-main);
+    box-shadow: var(--composer-shadow);
+    padding: 10px 14px 10px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .composer-input-row {
+    display: flex;
+    align-items: flex-end;
+    gap: 8px;
+  }
+
+  .composer-attach-btn {
+    width: 36px;
+    height: 36px;
+    border: 0;
+    background: transparent;
+    border-radius: 50%;
+    color: var(--text-primary);
+    cursor: pointer;
+    display: grid;
+    place-items: center;
+    transition: background 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .composer-attach-btn:hover {
+    background: var(--hover-bg);
+  }
+
+  .composer-textarea {
+    flex: 1;
+    min-height: 36px;
+    max-height: 200px;
+    border: 0;
+    resize: none;
+    outline: 0;
+    padding: 8px 4px;
+    color: var(--text-primary);
+    font: inherit;
+    font-size: 15px;
+    line-height: 1.5;
+    background: transparent;
+  }
+
+  .composer-textarea::placeholder {
+    color: var(--text-muted);
+  }
+
+  .composer-send-btn {
+    width: 34px;
+    height: 34px;
+    border: 0;
+    border-radius: 50%;
+    background: var(--border-color);
+    color: var(--bg-main);
+    display: grid;
+    place-items: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    flex-shrink: 0;
+  }
+
+  .composer-send-btn.active {
+    background: var(--btn-send-bg);
+    color: var(--btn-send-color);
+  }
+
+  .composer-disclaimer {
+    width: min(720px, 100%);
+    margin: 8px auto 0;
+    text-align: center;
+    font-size: 11px;
+    color: var(--text-muted);
+  }
+
+  /* Mobile overlay styling for sidebar */
+  .sidebar-backdrop {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.4);
+    z-index: 45;
+  }
+
+  /* Responsive Adjustments */
+  @media (max-width: 768px) {
+    .chat-app {
+      grid-template-columns: 1fr;
+    }
+
+    .sidebar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      transform: translateX(-100%);
+      visibility: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    }
+
+    .chat-app.sidebar-open .sidebar-container {
+      transform: translateX(0);
+      visibility: visible;
+    }
+
+    .chat-app.sidebar-open .sidebar-backdrop {
+      display: block;
+    }
+
+    .suggestion-prompts-grid {
+      grid-template-columns: 1fr;
+      gap: 8px;
+    }
+
+    .composer-footer-wrap {
+      padding: 8px 12px 14px;
+    }
+  }
+</style>
+
+<div class="chat-app" id="chat-app-root">
+  <!-- Sidebar Overlay Backing (Mobile) -->
+  <div class="sidebar-backdrop" onclick="toggleSidebarMobile(false)"></div>
+
+  <!-- Left Sidebar Panel -->
+  <aside class="sidebar-container" aria-label="AI assistant navigation">
+    <div class="sidebar-header">
+      <a class="new-chat-btn" href="{% url 'ai_assistant' %}?reset=1">
+        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+        <span>New chat</span>
+      </a>
+      <button class="sidebar-toggle-btn" onclick="toggleSidebarDesktop()" title="Close sidebar" aria-label="Close sidebar">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+      </button>
+    </div>
+
+    <!-- Sidebar Chat Search -->
+    <form class="sidebar-search-box" method="get" action="{% url 'ai_assistant' %}">
+      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+      <input type="text" name="chat_search" value="{{ chat_search }}" placeholder="Search chats..." aria-label="Search chats">
+    </form>
+
+    <!-- Sidebar Scroll list -->
+    <div class="sidebar-scroll">
+      {% if recent_conversations %}
+        <div class="sidebar-section-title">Recent</div>
+        {% for item in recent_conversations %}
+          <div class="sidebar-link-wrapper">
+            <a class="sidebar-link {% if item.id == conversation.id %}active{% endif %}" href="{% url 'ai_assistant' %}?conversation={{ item.id }}" title="{{ item.title }}">
+              <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+              <span>{{ item.title }}</span>
+            </a>
+            <a href="{% url 'delete_conversation' item.id %}" class="delete-chat-btn" title="Delete conversation" aria-label="Delete conversation">
+              <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+            </a>
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="sidebar-section-title">Explore</div>
+      <a class="sidebar-link" href="{% url 'tutor_list' %}">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5"></path><path d="M2 12l10 5 10-5"></path></svg>
+        <span>Courses & paths</span>
+      </a>
+      <a class="sidebar-link" href="{% url 'tutor_list' %}">
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 20H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"></path></svg>
+        <span>Learning Library</span>
+      </a>
+    </div>
+
+    <!-- Sidebar Controls Footer -->
+    <div class="sidebar-footer">
+      <!-- Custom Theme Selector -->
+      <div class="theme-selector-bar">
+        <button class="theme-btn-option" data-theme-val="light" onclick="setAppTheme('light')">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line></svg>
+          Light
+        </button>
+        <button class="theme-btn-option" data-theme-val="dark" onclick="setAppTheme('dark')">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+          Dark
+        </button>
+        <button class="theme-btn-option" data-theme-val="system" onclick="setAppTheme('system')">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2" ry="2"></rect><line x1="8" y1="21" x2="16" y2="21"></line><line x1="12" y1="17" x2="12" y2="21"></line></svg>
+          System
+        </button>
+      </div>
+
+      <!-- Account Profile Section -->
+      <div class="user-profile-widget" onclick="window.location.href='{% url 'student_dashboard' %}'">
+        <div class="user-avatar-circle">
+          {% if request.user.is_authenticated %}{{ request.user.first_name|default:request.user.username|first|upper }}{% else %}G{% endif %}
+        </div>
+        <div class="user-info-text">
+          <strong>{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% else %}Guest Student{% endif %}</strong>
+          <span>{% if request.user.is_authenticated %}Student Workspace{% else %}Free Preview{% endif %}</span>
+        </div>
+        <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><path d="M9 18l6-6-6-6"></path></svg>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Right Pane Work area -->
+  <div class="chat-pane">
+    <header class="top-header">
+      <div class="header-left" style="gap: 16px;">
+        <!-- Sidebar Toggle Icon (Desktop Hidden / Mobile Shown) -->
+        <button class="floating-sidebar-toggle" onclick="toggleSidebarDesktop()" id="desk-toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </button>
+        <button class="floating-sidebar-toggle" style="display: none;" id="mobile-toggle-btn" onclick="toggleSidebarMobile(true)" title="Menu" aria-label="Menu">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <!-- Platform Logo Link -->
+        <a href="{% url 'home' %}" class="topbar-logo-link" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+          <div class="topbar-logo-mark" style="background: #2563eb; border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; color: #ffffff;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+            </svg>
+          </div>
+          <span class="topbar-logo-text" style="font-weight: 800; font-size: 16px; color: var(--text-primary);">Myteacher<span style="color: #2563eb;">Connect</span></span>
+        </a>
+
+        <!-- Back to Website button -->
+        <a href="{% url 'home' %}" class="back-to-site-btn" style="font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); color: var(--text-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s ease;">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Website
+        </a>
+      </div>
+      
+      <!-- Quick link to reset/new chat -->
+      <a href="{% url 'ai_assistant' %}?reset=1" class="floating-sidebar-toggle" title="New chat">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+      </a>
+    </header>
+
+    <!-- Conversation Window -->
+    <div class="chat-view-viewport">
+      {% if not chat_messages %}
+        <!-- Empty State Home welcome screen -->
+        <div class="empty-chat-welcome">
+          <div class="welcome-inner-content">
+            <div class="welcome-ai-badge">
+              <svg viewBox="0 0 24 24" width="28" height="28" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+            </div>
+            <h1 class="welcome-headline">How can I help you learn today?</h1>
+
+            <!-- 2x2 suggested action grid -->
+            <div class="suggestion-prompts-grid">
+              {% for prompt in suggested_prompts|slice:":4" %}
+                <a class="prompt-suggest-card" href="{% url 'ai_assistant' %}?reset=1&q={{ prompt|urlencode }}">
+                  <div class="suggest-card-body">
+                    <div class="suggest-card-category">
+                      {% if forloop.counter == 1 %}Find Home Tutors
+                      {% elif forloop.counter == 2 %}Schedule Lessons
+                      {% elif forloop.counter == 3 %}Learn Coding
+                      {% else %}Homework Help
+                      {% endif %}
+                    </div>
+                    <div class="suggest-card-text">"{{ prompt }}"</div>
+                  </div>
+                  <div class="suggest-card-icon">
+                    {% if forloop.counter == 1 %}
+                      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.2" fill="none"><path d="M22 10v6M2 10l10-5 10 5-10 5z"></path><path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path></svg>
+                    {% elif forloop.counter == 2 %}
+                      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.2" fill="none"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                    {% elif forloop.counter == 3 %}
+                      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.2" fill="none"><polyline points="16 18 22 12 16 6"></polyline><polyline points="8 6 2 12 8 18"></polyline></svg>
+                    {% else %}
+                      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2.2" fill="none"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+                    {% endif %}
+                  </div>
+                </a>
+              {% endfor %}
+            </div>
+
+            <!-- Composer input box -->
+            <form class="composer-inner-card" method="post" id="composer-main-form">
+              {% csrf_token %}
+              <div class="composer-input-row">
+                <button class="composer-attach-btn" type="button" onclick="triggerFileUpload()" title="Attach file">
+                  <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+                </button>
+                <textarea class="composer-textarea" name="message" id="ai-message-input" rows="1" placeholder="Message Myteacher AI..." autocomplete="off" required></textarea>
+                <button class="composer-send-btn" type="submit" id="send-button-main" disabled title="Send message" aria-label="Send message">
+                  <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+                </button>
+              </div>
+            </form>
+            <div class="composer-disclaimer">Myteacher AI can make mistakes. Verify important info.</div>
+          </div>
+        </div>
+
+      {% else %}
+        <!-- Chat message viewport thread -->
+        <div class="message-scroll-thread" id="chat-thread-container">
+          <div class="message-thread-inner">
+            {% for message in chat_messages %}
+              {% if message.role == "user" %}
+                <article class="chat-msg-row user-msg">
+                  <div class="msg-body-container">
+                    <div class="msg-text-bubble">{{ message.content }}</div>
+                  </div>
+                </article>
+              {% else %}
+                <article class="chat-msg-row assistant-msg">
+                  <div class="avatar-avatar ai-icon" aria-hidden="true">
+                    AI
+                  </div>
+                  <div class="msg-body-container">
+                    <div class="msg-text-bubble ai-rendered-msg">{{ message.content }}</div>
+
+                    <!-- Tutors matching section (If last message and matches are present) -->
+                    {% if forloop.last and latest_tutors %}
+                      <div class="tutor-matches-row">
+                        {% for tutor in latest_tutors %}
+                          <div class="tutor-match-card">
+                            <div class="tutor-card-head">
+                              <div class="tutor-photo-wrap">
+                                <img src="{{ tutor.photo }}" alt="{{ tutor.name }}">
+                                <div class="tutor-verified-badge" title="Verified tutor">
+                                  <svg viewBox="0 0 24 24" width="8" height="8" stroke="currentColor" stroke-width="3" fill="none"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                                </div>
+                              </div>
+                              <div class="tutor-headline-meta">
+                                <strong>{{ tutor.name }}</strong>
+                                <span>{{ tutor.specialist|default:tutor.subject }}</span>
+                              </div>
+                            </div>
+
+                            <p class="tutor-stat-badge">
+                              <strong>Location:</strong> {{ tutor.location }}<br>
+                              <strong>Rate:</strong> NGN {{ tutor.rate }}/hr &middot; {{ tutor.experience }} yrs exp.
+                            </p>
+
+                            <div class="tutor-match-rating-badge">
+                              <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2.5" fill="none"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"></path></svg>
+                              <span>{{ tutor.ai_score }} Match</span>
+                            </div>
+
+                            <div class="tutor-card-buttons">
+                              <a href="{% url 'tutor_detail' tutor.id %}" class="tutor-btn tutor-btn-secondary">View Profile</a>
+                              <a href="{% url 'book_tutor' tutor.id %}" class="tutor-btn tutor-btn-primary">Book Lesson</a>
+                            </div>
+                          </div>
+                        {% endfor %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </article>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+
+        <!-- Bottom composer (when chatting) -->
+        <div class="composer-footer-wrap">
+          <form class="composer-inner-card" method="post" id="composer-chat-form">
+            {% csrf_token %}
+            <div class="composer-input-row">
+              <button class="composer-attach-btn" type="button" onclick="triggerFileUpload()" title="Attach file">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+              </button>
+              <textarea class="composer-textarea" name="message" id="ai-message-input-chat" rows="1" placeholder="Message Myteacher AI..." autocomplete="off" required></textarea>
+              <button class="composer-send-btn" type="submit" id="send-button-chat" disabled title="Send message" aria-label="Send message">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              </button>
+            </div>
+          </form>
+          <div class="composer-disclaimer">Myteacher AI can make mistakes. Verify important info.</div>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<!-- Invisible HTML file input for attachment selector -->
+<input type="file" id="composer-file-input" style="display: none;" onchange="handleFileSelected(event)">
+
+<script>
+  // Dynamic Textarea Auto-grow & Send Button Styling
+  function initTextareaEvents(textareaId, sendBtnId) {
+    const textarea = document.getElementById(textareaId);
+    const sendBtn = document.getElementById(sendBtnId);
+    if (!textarea || !sendBtn) return;
+
+    textarea.focus();
+
+    textarea.addEventListener('input', () => {
+      // Adjust textarea height dynamically
+      textarea.style.height = 'auto';
+      textarea.style.height = `${Math.min(textarea.scrollHeight, 200)}px`;
+
+      // Update send button state
+      if (textarea.value.trim().length > 0) {
+        sendBtn.classList.add('active');
+        sendBtn.disabled = false;
+      } else {
+        sendBtn.classList.remove('active');
+        sendBtn.disabled = true;
+      }
+    });
+
+    textarea.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' && !e.shiftKey) {
+        e.preventDefault();
+        if (textarea.value.trim().length > 0) {
+          const form = textarea.closest('form');
+          if (form.requestSubmit) {
+            form.requestSubmit();
+          } else {
+            form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+          }
+        }
+      }
+    });
+  }
+
+  function handleChatSubmit(form) {
+    const textarea = form.querySelector('.composer-textarea');
+    if (!textarea) return;
+    const userMessage = textarea.value.trim();
+    if (!userMessage) return;
+
+    // 1. Disable form inputs to prevent double submissions
+    textarea.disabled = true;
+    const sendBtn = form.querySelector('.composer-send-btn');
+    if (sendBtn) {
+      sendBtn.disabled = true;
+      sendBtn.classList.remove('active');
+    }
+
+    // 2. Prepare chat container
+    let chatContainer = document.getElementById('chat-thread-container');
+    const welcomeScreen = document.querySelector('.empty-chat-welcome');
+    
+    if (welcomeScreen) {
+      welcomeScreen.style.display = 'none';
+      const viewport = document.querySelector('.chat-view-viewport');
+      viewport.innerHTML = `
+        <div class="message-scroll-thread" id="chat-thread-container">
+          <div class="message-thread-inner">
+            <!-- inner elements will be inserted dynamically below -->
+          </div>
+        </div>
+        <div class="composer-footer-wrap">
+          <form class="composer-inner-card" method="post" id="composer-chat-form">
+            <input type="hidden" name="csrfmiddlewaretoken" value="${form.querySelector('[name=csrfmiddlewaretoken]').value}">
+            <div class="composer-input-row">
+              <button class="composer-attach-btn" type="button" onclick="triggerFileUpload()" title="Attach file">
+                <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"></path></svg>
+              </button>
+              <textarea class="composer-textarea" name="message" id="ai-message-input-chat" rows="1" placeholder="Message Myteacher AI..." autocomplete="off" disabled></textarea>
+              <button class="composer-send-btn" type="submit" id="send-button-chat" disabled title="Send message" aria-label="Send message">
+                <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="19" x2="12" y2="5"></line><polyline points="5 12 12 5 19 12"></polyline></svg>
+              </button>
+            </div>
+          </form>
+          <div class="composer-disclaimer">Myteacher AI can make mistakes. Verify important info.</div>
+        </div>
+      `;
+      chatContainer = document.getElementById('chat-thread-container');
+    }
+
+    const threadInner = chatContainer.querySelector('.message-thread-inner');
+    if (!threadInner) return;
+
+    // 3. Append User message bubble
+    const userMsgHTML = `
+      <article class="chat-msg-row user-msg">
+        <div class="msg-body-container">
+          <div class="msg-text-bubble">${escapeHTML(userMessage)}</div>
+        </div>
+      </article>
+    `;
+    threadInner.insertAdjacentHTML('beforeend', userMsgHTML);
+
+    // 4. Append AI Thinking message bubble
+    const aiThinkingHTML = `
+      <article class="chat-msg-row assistant-msg" id="thinking-bubble">
+        <div class="msg-body-container" style="display:flex; gap:16px; align-items:flex-start;">
+          <div class="avatar-avatar ai-icon" style="background:var(--ai-avatar-bg); color:var(--ai-avatar-color); width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-size:13px; font-weight:700; flex-shrink:0;">
+            AI
+          </div>
+          <div class="msg-body-container">
+            <div class="msg-text-bubble">
+              <div class="ai-thinking-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+    threadInner.insertAdjacentHTML('beforeend', aiThinkingHTML);
+
+    // Scroll to bottom
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // 5. Navigate dynamically via AJAX
+    navigateTo(form.action || window.location.href, true, form);
+  }
+
+  function navigateTo(url, isSubmit = false, submitForm = null) {
+    let fetchPromise;
+    
+    if (isSubmit && submitForm) {
+      const formData = new FormData(submitForm);
+      fetchPromise = fetch(url, {
+        method: 'POST',
+        body: formData,
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+    } else {
+      fetchPromise = fetch(url, {
+        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+      });
+    }
+
+    return fetchPromise
+      .then(response => {
+        const finalUrl = response.redirected ? response.url : url;
+        return response.text().then(html => ({ html, finalUrl }));
+      })
+      .then(({ html, finalUrl }) => {
+        const parser = new DOMParser();
+        const doc = parser.parseFromString(html, 'text/html');
+
+        // Update active URL in history
+        history.pushState(null, '', finalUrl);
+
+        // Swap Sidebar listing
+        const currentSidebar = document.querySelector('.sidebar-scroll');
+        const newSidebar = doc.querySelector('.sidebar-scroll');
+        if (currentSidebar && newSidebar) {
+          currentSidebar.innerHTML = newSidebar.innerHTML;
+        }
+
+        // Swap main Viewport content
+        const currentViewport = document.querySelector('.chat-view-viewport');
+        const newViewport = doc.querySelector('.chat-view-viewport');
+        if (currentViewport && newViewport) {
+          currentViewport.innerHTML = newViewport.innerHTML;
+        }
+
+        // Re-initialize event bindings
+        initNewPageElements();
+      })
+      .catch(err => {
+        console.error("AJAX Routing failed:", err);
+        const bubble = document.getElementById('thinking-bubble');
+        if (bubble) {
+          bubble.querySelector('.msg-text-bubble').innerHTML = `<span style="color:#ef4444;">Failed to connect to assistant. Please try again.</span>`;
+        }
+        if (!isSubmit) {
+          window.location.href = url;
+        }
+      });
+  }
+
+  function initNewPageElements() {
+    initTextareaEvents('ai-message-input', 'send-button-main');
+    initTextareaEvents('ai-message-input-chat', 'send-button-chat');
+    
+    // Auto-scroll chat thread to bottom
+    const chatContainer = document.getElementById('chat-thread-container');
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+
+    // Process markdown formatting for assistant replies
+    document.querySelectorAll('.ai-rendered-msg').forEach((container) => {
+      container.innerHTML = parseMarkdownToHTML(container.innerText);
+    });
+
+    // Recheck responsive layout elements
+    handleResponsiveLayout();
+  }
+
+  function escapeHTML(str) {
+    return str
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  // Intercept standard popstate events
+  window.addEventListener('popstate', () => {
+    navigateTo(window.location.href);
+  });
+
+  // Intercept click actions on sidebar links, logo backlinks, and prompt lists
+  document.addEventListener('click', (e) => {
+    const link = e.target.closest('.sidebar-link, .new-chat-btn, .prompt-suggest-card, .delete-chat-btn, .topbar-logo-link, .floating-sidebar-toggle');
+    if (link) {
+      if (e.metaKey || e.ctrlKey) return;
+      
+      const href = link.getAttribute('href');
+      if (href && href !== '#' && !href.startsWith('javascript:')) {
+        // Only run AJAX swap if targeting AI Assistant URLs
+        if (href.includes('ai-assistant') || href.includes('delete-conversation') || href.includes('conversation=')) {
+          e.preventDefault();
+          
+          // Show quick fade transition on main panel during load
+          const viewport = document.querySelector('.chat-view-viewport');
+          if (viewport) {
+            viewport.style.opacity = '0.6';
+          }
+          
+          navigateTo(href);
+        }
+      }
+    }
+  });
+
+  // Initialize event listeners on page load
+  document.addEventListener('DOMContentLoaded', () => {
+    initNewPageElements();
+
+    // Intercept form submits
+    document.addEventListener('submit', (e) => {
+      if (e.target) {
+        if (e.target.id === 'composer-main-form' || e.target.id === 'composer-chat-form') {
+          e.preventDefault();
+          handleChatSubmit(e.target);
+        } else if (e.target.classList.contains('sidebar-search-box')) {
+          e.preventDefault();
+          const query = e.target.querySelector('input[name=chat_search]').value;
+          navigateTo(`${e.target.action}?chat_search=${encodeURIComponent(query)}`);
+        }
+      }
+    });
+
+    // Check saved theme and sidebar collapse status
+    initSavedAppState();
+  });
+
+  // Client-Side Regex Markdown Parser
+  function parseMarkdownToHTML(text) {
+    if (!text) return '';
+
+    // Step 1: Escape HTML entities to prevent rendering issues and XSS
+    let html = text
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;');
+
+    // Step 2: Code blocks ```lang ... ```
+    html = html.replace(/```(\w+)?\n([\s\S]*?)\n```/g, (match, lang, code) => {
+      lang = lang || 'code';
+      return `<div class="code-container">
+        <div class="code-header">
+          <span class="code-lang">${lang}</span>
+          <button class="copy-code-btn" onclick="copyCodeSnippet(this)">
+            <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+            <span>Copy code</span>
+          </button>
+        </div>
+        <pre><code>${code.trim()}</code></pre>
+      </div>`;
+    });
+
+    // Step 3: Inline code blocks `code`
+    html = html.replace(/`([^`]+)`/g, '<code class="inline-code">$1</code>');
+
+    // Step 4: Bold text **text**
+    html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+
+    // Step 5: Italics *text*
+    html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+
+    // Step 6: Bullet Point Lists
+    let lines = html.split('\n');
+    let inList = false;
+    let finalLines = [];
+    
+    lines.forEach((line) => {
+      let trimmed = line.trim();
+      if (trimmed.startsWith('- ') || trimmed.startsWith('* ')) {
+        if (!inList) {
+          finalLines.push('<ul class="markdown-list">');
+          inList = true;
+        }
+        finalLines.push(`<li>${trimmed.substring(2)}</li>`);
+      } else {
+        if (inList) {
+          finalLines.push('</ul>');
+          inList = false;
+        }
+        finalLines.push(line);
+      }
+    });
+    if (inList) finalLines.push('</ul>');
+    html = finalLines.join('\n');
+
+    // Step 7: Numbered Lists
+    lines = html.split('\n');
+    let inNumList = false;
+    finalLines = [];
+    
+    lines.forEach((line) => {
+      let trimmed = line.trim();
+      let match = trimmed.match(/^(\d+)\.\s+(.*)/);
+      if (match) {
+        if (!inNumList) {
+          finalLines.push('<ol class="markdown-list">');
+          inNumList = true;
+        }
+        finalLines.push(`<li>${match[2]}</li>`);
+      } else {
+        if (inNumList) {
+          finalLines.push('</ol>');
+          inNumList = false;
+        }
+        finalLines.push(line);
+      }
+    });
+    if (inNumList) finalLines.push('</ol>');
+    html = finalLines.join('\n');
+
+    // Step 8: Multi-line breaks formatting
+    let paragraphs = html.split('\n\n');
+    let output = paragraphs.map((para) => {
+      let trimmed = para.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('<div class="code-container"') || trimmed.startsWith('<ul') || trimmed.startsWith('<ol')) {
+        return trimmed;
+      }
+      return `<p class="md-para">${trimmed.replace(/\n/g, '<br>')}</p>`;
+    });
+
+    return output.join('');
+  }
+
+  // Copy Code Snippet Action
+  function copyCodeSnippet(button) {
+    const container = button.closest('.code-container');
+    const code = container.querySelector('pre code').innerText;
+    
+    // Fallback unescape text
+    const tempTextArea = document.createElement('textarea');
+    tempTextArea.innerHTML = code;
+    const cleanCode = tempTextArea.value;
+
+    navigator.clipboard.writeText(cleanCode).then(() => {
+      const span = button.querySelector('span');
+      const icon = button.querySelector('svg');
+      
+      span.textContent = 'Copied!';
+      button.style.color = '#10a37f';
+      
+      setTimeout(() => {
+        span.textContent = 'Copy code';
+        button.style.color = '';
+      }, 2000);
+    });
+  }
+
+  // Model select dropdown controls removed (model is static)
+
+  // Collapsible Sidebar Functions
+  function toggleSidebarDesktop() {
+    const root = document.getElementById('chat-app-root');
+    const collapsed = root.classList.toggle('sidebar-collapsed');
+    
+    // Save to localStorage
+    localStorage.setItem('sidebar-collapsed', collapsed ? 'true' : 'false');
+    updateDesktopToggleIcon(collapsed);
+  }
+
+  function updateDesktopToggleIcon(collapsed) {
+    const btn = document.getElementById('desk-toggle-btn');
+    if (!btn) return;
+    
+    if (collapsed) {
+      btn.title = "Open sidebar";
+      // Icon showing panel outline with inside arrow pointing right
+      btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><polyline points="12 8 16 12 12 16"></polyline></svg>`;
+      btn.style.marginRight = '8px';
+      if (window.innerWidth > 768) btn.style.display = 'grid';
+    } else {
+      btn.title = "Close sidebar";
+      btn.innerHTML = `<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>`;
+      btn.style.marginRight = '';
+      if (window.innerWidth > 768) btn.style.display = 'none';
+    }
+  }
+
+  function toggleSidebarMobile(open) {
+    const root = document.getElementById('chat-app-root');
+    if (open) {
+      root.classList.add('sidebar-open');
+    } else {
+      root.classList.remove('sidebar-open');
+    }
+  }
+
+  // Handle responsive layout differences
+  function handleResponsiveLayout() {
+    const deskToggle = document.getElementById('desk-toggle-btn');
+    const mobToggle = document.getElementById('mobile-toggle-btn');
+    const isCollapsed = document.getElementById('chat-app-root').classList.contains('sidebar-collapsed');
+    
+    if (window.innerWidth <= 768) {
+      if (deskToggle) deskToggle.style.display = 'none';
+      if (mobToggle) mobToggle.style.display = 'grid';
+    } else {
+      if (deskToggle) deskToggle.style.display = isCollapsed ? 'grid' : 'none';
+      if (mobToggle) mobToggle.style.display = 'none';
+      // Make sure mobile classes are reset
+      document.getElementById('chat-app-root').classList.remove('sidebar-open');
+    }
+  }
+
+  window.addEventListener('resize', handleResponsiveLayout);
+
+  // Attachment Selector Upload Handler Mocks
+  function triggerFileUpload() {
+    document.getElementById('composer-file-input').click();
+  }
+
+  function handleFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Put name inside composer textarea
+    const textareas = [
+      document.getElementById('ai-message-input'),
+      document.getElementById('ai-message-input-chat')
+    ];
+    
+    textareas.forEach((area) => {
+      if (area) {
+        area.value += ` [Attached: ${file.name}] `;
+        area.dispatchEvent(new Event('input')); // trigger send button activation
+      }
+    });
+  }
+
+  // Theme Swapping Script
+  function setAppTheme(themeVal) {
+    localStorage.setItem('ai-theme', themeVal);
+    applyThemeClass(themeVal);
+    updateThemeSelectorActiveBtn(themeVal);
+  }
+
+  // Handle CSS variable theme applications
+  function applyThemeClass(themeVal) {
+    const root = document.documentElement;
+    if (themeVal === 'dark') {
+      root.classList.add('dark');
+    } else if (themeVal === 'light') {
+      root.classList.remove('dark');
+    } else {
+      // System Theme Check
+      const matchesDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      if (matchesDark) {
+        root.classList.add('dark');
+      } else {
+        root.classList.remove('dark');
+      }
+    }
+  }
+
+  function updateThemeSelectorActiveBtn(themeVal) {
+    document.querySelectorAll('.theme-btn-option').forEach((btn) => {
+      if (btn.getAttribute('data-theme-val') === themeVal) {
+        btn.classList.add('active');
+      } else {
+        btn.classList.remove('active');
+      }
+    });
+  }
+
+  // Setup saved local variables
+  function initSavedAppState() {
+    // 1. Sidebar status
+    const sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true';
+    if (sidebarCollapsed && window.innerWidth > 768) {
+      document.getElementById('chat-app-root').classList.add('sidebar-collapsed');
+      updateDesktopToggleIcon(true);
+    } else {
+      updateDesktopToggleIcon(false);
+    }
+
+    // 2. Active Theme
+    const activeTheme = localStorage.getItem('ai-theme') || 'system';
+    setAppTheme(activeTheme);
+
+    // 3. Model is static
+  }
+
+  // Sync theme switch with system changes if theme choice is 'system'
+  window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+    if (localStorage.getItem('ai-theme') === 'system') {
+      applyThemeClass('system');
+    }
+  });
+</script>
+{% endblock %}
