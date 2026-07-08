@@ -56,6 +56,22 @@ class Tutor(models.Model):
     def is_verified(self):
         return self.verification_status == "approved"
 
+    @property
+    def first_name(self):
+        return self.user.user.first_name if self.user and self.user.user else ""
+
+    @property
+    def last_name(self):
+        return self.user.user.last_name if self.user and self.user.user else ""
+
+    @property
+    def get_full_name(self):
+        return self.user.user.get_full_name() if self.user and self.user.user else ""
+
+    @property
+    def username(self):
+        return self.user.user.username if self.user and self.user.user else ""
+
 
 class TutorDocument(models.Model):
 

@@ -34,7 +34,7 @@
             {% endif %}
           </div>
           <div style="flex: 1; min-width: 0;">
-            <div style="font-weight: 700; font-size: 16px; color: #111827;">{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</div>
+            <div style="font-weight: 700; font-size: 16px; color: #111827;">{{ booking.tutor.get_full_name|default:booking.tutor.username }}</div>
             <div style="color: #64748b; font-size: 14px; margin-top: 2px;">Tutor &middot; {{ booking.tutor.subjects.all|join:", "|truncatechars:60 }}</div>
           </div>
         </div>

@@ -62,13 +62,7 @@ def student_bookings(request):
         .prefetch_related("payments", "reviews")
         .order_by("-created_at")
     )
-    pending_review_count = (
-        bookings_queryset.filter(status="completed")
-        .filter(payments__payment_status="paid")
-        .exclude(reviews__student=student_profile)
-        .distinct()
-        .count()
-    )
+    pending_review_count = bookings_queryset.filter(status="pending").count()
     page_obj = _paginated_bookings(request, bookings_queryset)
     for booking in page_obj:
         payments = list(booking.payments.all())

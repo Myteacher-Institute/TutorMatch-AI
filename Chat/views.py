@@ -36,7 +36,7 @@ def _user_can_access_booking_chat(user, booking):
 
 
 def _chat_users_for_booking(booking):
-    return booking.student.user, booking.tutor.user.user
+    return booking.student.user, booking.tutor.user
 
 
 def _paginate_chat_sessions(request, chat_sessions):
@@ -149,12 +149,23 @@ def tutor_chat_list(request):
 
     query = request.GET.get('q', '').strip()
     if query:
-        base_qs = base_qs.filter(
-            Q(student__first_name__icontains=query) |
-            Q(student__last_name__icontains=query) |
-            Q(student__username__icontains=query) |
-            Q(booking__id__icontains=query)
-        ).distinct()
+        search_q = Q(
+            student__first_name__icontains=query
+        ) | Q(
+            student__last_name__icontains=query
+        ) | Q(
+            student__username__icontains=query
+        ) | Q(
+            booking__student__user__first_name__icontains=query
+        ) | Q(
+            booking__student__user__last_name__icontains=query
+        )
+        try:
+            booking_id = int(query)
+            search_q |= Q(booking__id=booking_id)
+        except (ValueError, TypeError):
+            pass
+        base_qs = base_qs.filter(search_q).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,
@@ -216,15 +227,33 @@ def admin_chat_list(request):
 
     query = request.GET.get('q', '').strip()
     if query:
-        base_qs = base_qs.filter(
-            Q(student__first_name__icontains=query) |
-            Q(student__last_name__icontains=query) |
-            Q(student__username__icontains=query) |
-            Q(tutor__first_name__icontains=query) |
-            Q(tutor__last_name__icontains=query) |
-            Q(tutor__username__icontains=query) |
-            Q(booking__id__icontains=query)
-        ).distinct()
+        search_q = Q(
+            student__first_name__icontains=query
+        ) | Q(
+            student__last_name__icontains=query
+        ) | Q(
+            student__username__icontains=query
+        ) | Q(
+            tutor__first_name__icontains=query
+        ) | Q(
+            tutor__last_name__icontains=query
+        ) | Q(
+            tutor__username__icontains=query
+        ) | Q(
+            booking__tutor__user__user__first_name__icontains=query
+        ) | Q(
+            booking__tutor__user__user__last_name__icontains=query
+        ) | Q(
+            booking__student__user__first_name__icontains=query
+        ) | Q(
+            booking__student__user__last_name__icontains=query
+        )
+        try:
+            booking_id = int(query)
+            search_q |= Q(booking__id=booking_id)
+        except (ValueError, TypeError):
+            pass
+        base_qs = base_qs.filter(search_q).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,
@@ -257,12 +286,25 @@ def student_chat_list(request):
 
     query = request.GET.get('q', '').strip()
     if query:
-        base_qs = base_qs.filter(
-            Q(tutor__first_name__icontains=query) |
-            Q(tutor__last_name__icontains=query) |
-            Q(tutor__username__icontains=query) |
-            Q(booking__id__icontains=query)
-        ).distinct()
+        search_q = Q(
+            tutor__first_name__icontains=query
+        ) | Q(
+            tutor__last_name__icontains=query
+        ) | Q(
+            tutor__username__icontains=query
+        ) | Q(
+            booking__tutor__user__user__first_name__icontains=query
+        ) | Q(
+            booking__tutor__user__user__last_name__icontains=query
+        ) | Q(
+            booking__tutor__user__user__username__icontains=query
+        )
+        try:
+            booking_id = int(query)
+            search_q |= Q(booking__id=booking_id)
+        except (ValueError, TypeError):
+            pass
+        base_qs = base_qs.filter(search_q).distinct()
 
     chat_sessions = _paginate_chat_sessions(
         request,

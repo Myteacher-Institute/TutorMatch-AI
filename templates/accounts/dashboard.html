@@ -217,17 +217,13 @@ TutorMatch AI{% endblock %} {% block content %}
                   {% if booking.tutor.profile_photo %}
                   <img
                     src="{{ booking.tutor.profile_photo }}"
-                    alt="{{ booking.tutor.user.user.first_name|default:'Tutor' }}"
+                    alt="{{ booking.tutor.first_name|default:'Tutor' }}"
                   />
                   {% else %}
-                  <span>
-                    {{
-                    booking.tutor.user.user.first_name|default:"T"|make_list|first|upper
-                    }}
-                  </span>
+                  <i class="fa-regular fa-user"></i>
                   {% endif %}
                   <div>
-                    <strong>{{ booking.tutor.user.user.first_name }}</strong>
+                    <strong>{{ booking.tutor.first_name }}</strong>
                     <small
                       >{{ booking.booking_date|date:"M d, Y" }} at {{ booking.lesson_time|time:"g:i A" }}</small
                     >
