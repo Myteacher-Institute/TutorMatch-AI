@@ -18,19 +18,47 @@
         <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find Tutor</a>
       </div>
 
-      <div class="mtc-student-bookings-summary">
-        <article>
-          <span><i class="fa-solid fa-receipt"></i>Total Bookings</span>
-          <strong>{{ bookings_count }}</strong>
-        </article>
-        <article>
-          <span><i class="fa-solid fa-arrow-turn-down"></i>Pending Review</span>
-          <strong>{{ pending_review_count }}</strong>
-        </article>
-        <article>
-          <span><i class="fa-solid fa-arrow-right-to-bracket"></i>Next Lesson</span>
-          <strong>{% if next_booking %}{{ next_booking.booking_date|date:"M j" }}{% else %}-{% endif %}</strong>
-        </article>
+      <div class="mtc-admin-metrics-grid" style="margin-bottom: 30px; margin-top: 20px">
+        <div class="mtc-admin-metric-card mtc-metric-upcoming">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-receipt"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Total Bookings</span>
+            <strong>{{ bookings_count }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-recommended">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-arrow-turn-down"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Pending Review</span>
+            <strong>{{ pending_review_count }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-active">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-arrow-right-to-bracket"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Next Lesson</span>
+            <strong>
+              {% if next_booking %}{{ next_booking.booking_date|date:"M j" }}
+                {% if next_booking.lesson_time %} at {{ next_booking.lesson_time|time:"g:i A" }}{% endif %}
+              {% else %}-{% endif %}
+            </strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-completed">
+          <div class="mtc-metric-icon">
+            <i class="fa-solid fa-check-double"></i>
+          </div>
+          <div class="mtc-metric-content">
+            <span>Completed</span>
+            <strong>{{ completed_lessons_count }}</strong>
+          </div>
+        </div>
       </div>
 
       <div class="mtc-student-bookings-card">

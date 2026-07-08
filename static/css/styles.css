@@ -5499,6 +5499,28 @@ img {
 .mtc-student-bookings-table-wrap {
   width: 100%;
   overflow-x: auto;
+  scrollbar-width: thin;
+  scrollbar-color: #bfdbfe #f8fafc;
+}
+
+.mtc-student-bookings-table-wrap::-webkit-scrollbar {
+  height: 10px;
+  width: 10px;
+}
+
+.mtc-student-bookings-table-wrap::-webkit-scrollbar-track {
+  background: #f8fafc;
+  border-radius: 999px;
+}
+
+.mtc-student-bookings-table-wrap::-webkit-scrollbar-thumb {
+  background: #bfdbfe;
+  border-radius: 999px;
+  border: 2px solid #f8fafc;
+}
+
+.mtc-student-bookings-table-wrap::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
 }
 
 .mtc-student-bookings-table {

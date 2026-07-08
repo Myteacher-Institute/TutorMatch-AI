@@ -230,7 +230,7 @@ TutorMatch AI{% endblock %} {% block content %}
                     <strong>{{ booking.tutor.user.user.first_name }}</strong>
                     <small
                       >{{ booking.booking_date|date:"M d, Y" }} at {{
-                      booking.lesson_time|time:"h:i A" }}</small
+                      booking.lesson_time|time:"g:i A" }}</small
                     >
                   </div>
                 </div>
@@ -460,7 +460,7 @@ TutorMatch AI{% endblock %} {% block content %}
         beforeDraw: function (chart) {
           const {
             ctx,
-            chartArea: { width, height },
+            chartArea: { left, top, width, height },
           } = chart;
           ctx.save();
           ctx.font = 'bold 24px "Inter", sans-serif';
@@ -469,8 +469,8 @@ TutorMatch AI{% endblock %} {% block content %}
           ctx.textBaseline = "middle";
 
           const total = chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
-          const centerX = width / 2;
-          const centerY = height / 2;
+          const centerX = left + width / 2;
+          const centerY = top + height / 2;
 
           ctx.fillText(total, centerX, centerY - 10);
           ctx.font = '12px "Inter", sans-serif';

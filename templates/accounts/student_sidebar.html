@@ -29,14 +29,8 @@
   <nav class="mtc-admin-nav">
     <a
       href="{% url 'student_dashboard' %}"
-      {%
-      if
-      active_tab=""
-      ="dashboard"
-      %}class="active"
-      {%
-      endif
-      %}
+      {% if active_tab == "dashboard" %}class="active"
+      {% endif %}
     >
       <i class="fa-solid fa-house-circle-check"></i> Dashboard</a
     >
@@ -45,27 +39,15 @@
     >
     <a
       href="{% url 'student_bookings' %}"
-      {%
-      if
-      active_tab=""
-      ="bookings"
-      %}class="active"
-      {%
-      endif
-      %}
+      {% if active_tab == "bookings" %}class="active"
+      {% endif %}
     >
       <i class="fa-solid fa-receipt"></i> Bookings</a
     >
     <a
       href="{% url 'chat:student_chat_list' %}"
-      {%
-      if
-      active_tab=""
-      ="chats"
-      %}class="active"
-      {%
-      endif
-      %}
+      {% if active_tab == "chats" %}class="active"
+      {% endif %}
     >
       <i class="fa-solid fa-comments"></i> Chats {% if chat_unread_count %}
       <span
