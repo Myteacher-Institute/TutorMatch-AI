@@ -19,7 +19,8 @@
 
           <form class="mtc-chat-search" method="get" action="">
             <span class="mtc-chat-search-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
-            <input type="text" name="q" placeholder="Search bookings or people..." aria-label="Search chats" value="{{ request.GET.q|default:'' }}">
+            <input type="text" name="q" placeholder="Search people, bookings, or messages..." aria-label="Search chats" value="{{ request.GET.q|default:'' }}" autofocus>
+            <button type="submit" class="mtc-chat-search-submit" aria-label="Submit search">Search</button>
           </form>
 
           <div class="mtc-chat-filters">
@@ -70,6 +71,14 @@
             {% endfor %}
           </div>
           {% include "Chat/_chat_pagination.html" %}
+          {% elif search_query %}
+          <div class="mtc-chat-card" style="justify-content: center;">
+            <div class="mtc-chat-empty">
+              <div class="mtc-chat-empty-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+              <p>No results for "{{ search_query }}"</p>
+              <small>Try a different name, booking ID, or keyword.</small>
+            </div>
+          </div>
           {% else %}
           <div class="mtc-chat-card" style="justify-content: center;">
             <div class="mtc-chat-empty">

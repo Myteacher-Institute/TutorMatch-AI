@@ -2,7 +2,8 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages # Import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Value
+from django.db.models.functions import Concat
 from django.core.paginator import Paginator
 
 from .models import ChatSession, ChatMessage
@@ -36,7 +37,7 @@ def _user_can_access_booking_chat(user, booking):
 
 
 def _chat_users_for_booking(booking):
-    return booking.student.user, booking.tutor.user
+    return booking.student.user, booking.tutor.user.user
 
 
 def _paginate_chat_sessions(request, chat_sessions):
@@ -156,9 +157,17 @@ def tutor_chat_list(request):
         ) | Q(
             student__username__icontains=query
         ) | Q(
+            student__email__icontains=query
+        ) | Q(
             booking__student__user__first_name__icontains=query
         ) | Q(
             booking__student__user__last_name__icontains=query
+        ) | Q(
+            booking__student__user__username__icontains=query
+        ) | Q(
+            booking__student__user__email__icontains=query
+        ) | Q(
+            messages__message__icontains=query
         )
         try:
             booking_id = int(query)
@@ -183,6 +192,7 @@ def tutor_chat_list(request):
         'tutor_profile': tutor_obj, # Pass the tutor's profile
         'active_tab': 'chats',
         'total_unread': total_unread,
+        'search_query': query,
     }
     return render(request, 'Chat/tutor_chat_list.html', context)
 
@@ -227,6 +237,10 @@ def admin_chat_list(request):
 
     query = request.GET.get('q', '').strip()
     if query:
+        base_qs = base_qs.annotate(
+            student_full_name=Concat('student__first_name', Value(' '), 'student__last_name'),
+            tutor_full_name=Concat('tutor__first_name', Value(' '), 'tutor__last_name'),
+        )
         search_q = Q(
             student__first_name__icontains=query
         ) | Q(
@@ -234,19 +248,37 @@ def admin_chat_list(request):
         ) | Q(
             student__username__icontains=query
         ) | Q(
+            student__email__icontains=query
+        ) | Q(
+            student_full_name__icontains=query
+        ) | Q(
             tutor__first_name__icontains=query
         ) | Q(
             tutor__last_name__icontains=query
         ) | Q(
             tutor__username__icontains=query
         ) | Q(
+            tutor__email__icontains=query
+        ) | Q(
+            tutor_full_name__icontains=query
+        ) | Q(
             booking__tutor__user__user__first_name__icontains=query
         ) | Q(
             booking__tutor__user__user__last_name__icontains=query
         ) | Q(
+            booking__tutor__user__user__username__icontains=query
+        ) | Q(
+            booking__tutor__user__user__email__icontains=query
+        ) | Q(
             booking__student__user__first_name__icontains=query
         ) | Q(
             booking__student__user__last_name__icontains=query
+        ) | Q(
+            booking__student__user__username__icontains=query
+        ) | Q(
+            booking__student__user__email__icontains=query
+        ) | Q(
+            messages__message__icontains=query
         )
         try:
             booking_id = int(query)
@@ -268,6 +300,7 @@ def admin_chat_list(request):
         'page_obj': chat_sessions,
         'active_tab': 'chats',
         'total_unread': total_unread,
+        'search_query': query,
     }
     return render(request, 'Chat/admin_chat_list.html', context)
 
@@ -286,6 +319,9 @@ def student_chat_list(request):
 
     query = request.GET.get('q', '').strip()
     if query:
+        base_qs = base_qs.annotate(
+            tutor_full_name=Concat('tutor__first_name', Value(' '), 'tutor__last_name'),
+        )
         search_q = Q(
             tutor__first_name__icontains=query
         ) | Q(
@@ -293,11 +329,19 @@ def student_chat_list(request):
         ) | Q(
             tutor__username__icontains=query
         ) | Q(
+            tutor__email__icontains=query
+        ) | Q(
+            tutor_full_name__icontains=query
+        ) | Q(
             booking__tutor__user__user__first_name__icontains=query
         ) | Q(
             booking__tutor__user__user__last_name__icontains=query
         ) | Q(
             booking__tutor__user__user__username__icontains=query
+        ) | Q(
+            booking__tutor__user__user__email__icontains=query
+        ) | Q(
+            messages__message__icontains=query
         )
         try:
             booking_id = int(query)
@@ -320,5 +364,6 @@ def student_chat_list(request):
         'student_profile': request.user.profile, # Pass the student's profile
         'active_tab': 'chats',
         'total_unread': total_unread,
+        'search_query': query,
     }
     return render(request, 'Chat/student_chat_list.html', context)

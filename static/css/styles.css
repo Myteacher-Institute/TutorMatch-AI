@@ -5921,7 +5921,7 @@ img {
   border: 0;
   border-radius: 12px;
   background: #ffffff;
-  padding: 14px 18px 14px 44px;
+  padding: 14px 100px 14px 44px;
   color: #111827;
   font: inherit;
   font-size: 14px;
@@ -5941,6 +5941,31 @@ img {
   color: #9CA3AF;
   font-size: 14px;
   pointer-events: none;
+}
+
+.mtc-chat-search-submit {
+  position: absolute;
+  right: 8px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 8px;
+  background: #2563eb;
+  color: #ffffff;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  line-height: 1.4;
+}
+
+.mtc-chat-search-submit:hover {
+  background: #1d4ed8;
+}
+
+.mtc-chat-search-submit:active {
+  transform: translateY(-50%) scale(0.98);
 }
 
 .mtc-chat-filters {
