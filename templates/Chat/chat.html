@@ -75,7 +75,7 @@
 
 <div class="mtc-shell" style="padding: 40px 0 80px;">
   <section class="mtc-admin-layout">
-    {% if request.user.is_superuser %}
+    {% if is_admin %}
       {% include "dashboard/_admin_nav.html" %}
     {% else %}
       {% include "tutors/tutor_sidebar.html" with profile=tutor_profile %}
@@ -86,7 +86,7 @@
 
         <!-- Chat Header -->
         <div class="chat-header" style="padding: 16px 24px; border-bottom: 1px solid #e2e8f0; display: flex; align-items: center; gap: 12px; background: #f8fafc;">
-          <a href="{% if request.user.is_superuser %}{% url 'chat:admin_chat_list' %}{% elif request.user.profile.role == 'tutor' %}{% url 'chat:tutor_chat_list' %}{% else %}{% url 'student_bookings' %}{% endif %}" style="display: inline-flex; align-items: center; color: #475569; text-decoration: none;">
+          <a href="{% if is_admin %}{% url 'chat:admin_chat_list' %}{% elif request.user.profile.role == 'tutor' %}{% url 'chat:tutor_chat_list' %}{% else %}{% url 'student_bookings' %}{% endif %}" style="display: inline-flex; align-items: center; color: #475569; text-decoration: none;">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           </a>
           {% if other_party.profile.role == 'tutor' %}

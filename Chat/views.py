@@ -16,6 +16,14 @@ from tutors.models import Tutor
 CHAT_LIST_PAGE_SIZE = 10
 
 
+def _is_admin_viewer(user):
+    return (
+        user.is_staff
+        or user.is_superuser
+        or getattr(getattr(user, 'profile', None), 'role', None) == 'admin'
+    )
+
+
 def _user_can_access_booking_chat(user, booking):
     # Staff users (admins) can access any chat
     if user.is_staff:
@@ -106,6 +114,7 @@ def chat_view(request, booking_id):
         # Determine the other party's User object for display
         'other_party': tutor_user_obj if request.user == student_user_obj else student_user_obj,
         'tutor_profile': getattr(tutor_user_obj.profile, 'tutor_profile', None),
+        'is_admin': _is_admin_viewer(request.user),
     }
     if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'student':
         template = 'Chat/chat_student.html'
@@ -145,6 +154,7 @@ def send_message(request, booking_id):
             context = {
                 'chat_session': session,
                 'chat_messages_list': [new_message],
+                'is_admin': _is_admin_viewer(request.user),
             }
             return render(request, 'Chat/messages_list.html', context)
     return HttpResponse(status=204) # No content if not a POST or message is empty
@@ -232,6 +242,7 @@ def get_new_messages(request, booking_id, last_message_id):
     context = {
         'chat_session': session,
         'chat_messages_list': new_messages,
+        'is_admin': _is_admin_viewer(request.user),
     }
     return render(request, 'Chat/messages_list.html', context)
 

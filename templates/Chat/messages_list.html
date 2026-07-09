@@ -19,14 +19,14 @@
   {% endfor %}
 {% else %}
   {% for message in chat_messages_list %}
-    {% if request.user.is_staff and chat_session and message.sender == chat_session.tutor %}
+    {% if is_admin and chat_session and message.sender == chat_session.tutor %}
       <div class="message-item sent" data-message-id="{{ message.id }}">
         <div class="message-content sent">
           <p>{{ message.message }}</p>
           <span>{{ message.timestamp|date:"H:i" }}</span>
         </div>
       </div>
-    {% elif request.user.is_staff and chat_session and message.sender == chat_session.student %}
+    {% elif is_admin and chat_session and message.sender == chat_session.student %}
       <div class="message-item received" data-message-id="{{ message.id }}">
         <div class="message-content received">
           <p>{{ message.message }}</p>
