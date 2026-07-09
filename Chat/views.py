@@ -104,6 +104,7 @@ def chat_view(request, booking_id):
         'chat_messages_list': chat_messages,
         # Determine the other party's User object for display
         'other_party': tutor_user_obj if request.user == student_user_obj else student_user_obj,
+        'tutor_profile': getattr(tutor_user_obj.profile, 'tutor_profile', None),
     }
     print(f"DEBUG: other_party: {context['other_party']}")
     if hasattr(context['other_party'], 'profile'):
