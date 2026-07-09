@@ -54,7 +54,7 @@
   /* Full Screen Container */
   .chat-app {
     height: 100vh;
-    width: 100vw;
+    width: 100%;
     display: grid;
     grid-template-columns: 260px minmax(0, 1fr);
     background: var(--bg-main);
@@ -986,7 +986,7 @@
   /* Responsive Adjustments */
   @media (max-width: 768px) {
     .chat-app {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     /* On mobile, hide the desktop close/open sidebar toggle and
@@ -1040,7 +1040,7 @@
      only a hamburger menu that opens the sidebar as an overlay. */
   @media (max-width: 1024px) {
     .chat-app.student-workspace {
-      grid-template-columns: 1fr;
+      grid-template-columns: minmax(0, 1fr);
     }
 
     .chat-app.student-workspace #desk-toggle-btn,
@@ -1077,10 +1077,46 @@
     }
   }
 
+  /* Student workspace on mobile: keep the pane full-width and the
+     content centered. Prevent any horizontal overflow (the viewport is a
+     column flex with overflow-y:auto, which otherwise enables horizontal
+     scrolling and shifts the centered content off-center). */
+  @media (max-width: 768px) {
+    .chat-app.student-workspace {
+      grid-template-columns: minmax(0, 1fr);
+    }
+    .chat-app.student-workspace .chat-pane {
+      width: 100%;
+      min-width: 0;
+    }
+    .chat-app.student-workspace .chat-view-viewport {
+      width: 100%;
+      min-width: 0;
+      overflow-x: hidden;
+      padding-left: 8px;
+      padding-right: 8px;
+      box-sizing: border-box;
+    }
+    .chat-app.student-workspace .mtc-shell {
+      width: 100%;
+      max-width: 100%;
+      min-width: 0;
+      margin: 0 auto;
+      box-sizing: border-box;
+    }
+  }
+
+  @media (max-width: 413px) {
+    .chat-app.student-workspace .chat-view-viewport {
+      padding-left: 4px;
+      padding-right: 4px;
+    }
+  }
+
   /* ============================================================
-     Dark mode: re-skin every white content container used on the
-     student pages (dashboard, bookings, chat) so they become dark.
-     ============================================================ */
+      Dark mode: re-skin every white content container used on the
+      student pages (dashboard, bookings, chat) so they become dark.
+      ============================================================ */
   html.dark {
     --dash-surface: #101a33;       /* Card surface (matches sidebar) */
     --dash-surface-2: #16244a;     /* Alt / hover surface */
