@@ -1225,6 +1225,21 @@
     color: #2563eb;
   }
 
+  /* Tutor bookings: keep scrollbars / disabled controls light */
+  html.dark .admin-dashboard-light .mtc-student-bookings-table-wrap {
+    scrollbar-color: #bfdbfe #f8fafc;
+  }
+  html.dark .admin-dashboard-light .mtc-student-bookings-table-wrap::-webkit-scrollbar-track {
+    background: #f8fafc;
+  }
+  html.dark .admin-dashboard-light .mtc-student-bookings-table-wrap::-webkit-scrollbar-thumb {
+    background: #bfdbfe;
+    border-color: #f8fafc;
+  }
+  html.dark .admin-dashboard-light .mtc-bookings-pagination-controls .is-disabled {
+    color: #94a3b8;
+  }
+
   html.dark .mtc-dashboard-booking-row {
     background: var(--dash-surface-2);
     border-color: var(--dash-border);
