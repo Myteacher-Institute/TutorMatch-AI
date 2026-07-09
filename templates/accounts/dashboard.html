@@ -121,9 +121,8 @@ TutorMatch AI{% endblock %} {% block content %}
   })();
 
   document.addEventListener("DOMContentLoaded", function () {
-    const completed = {{ completed_lessons_count }};
-    const total = completed + {{ upcoming_lessons_count }} + {{ active_bookings_count }};
-    const pct = total > 0 ? Math.round((completed / total) * 100) : 0;
+    const weeklyCount = {{ weekly_booking_count }};
+    const pct = Math.min(5 + (weeklyCount * 5), 100);
     const ring = document.getElementById("hero-progress-ring");
     const label = document.getElementById("hero-progress-pct");
     const circumference = 289;

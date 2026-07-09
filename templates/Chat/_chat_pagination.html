@@ -2,9 +2,9 @@
 {% with q=request.GET.q %}
 <nav class="mtc-chat-pagination" aria-label="Chat list pagination">
   {% if page_obj.has_previous %}
-  <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}">Previous</a>
+  <a href="?page={{ page_obj.previous_page_number }}{% if q %}&q={{ q }}{% endif %}"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Previous</a>
   {% else %}
-  <span class="is-disabled">Previous</span>
+  <span class="is-disabled"><i class="fa-solid fa-chevron-left" aria-hidden="true"></i> Previous</span>
   {% endif %}
 
   <span class="mtc-chat-pagination-summary">
@@ -12,9 +12,9 @@
   </span>
 
   {% if page_obj.has_next %}
-  <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Next</a>
+  <a href="?page={{ page_obj.next_page_number }}{% if q %}&q={{ q }}{% endif %}">Next <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></a>
   {% else %}
-  <span class="is-disabled">Next</span>
+  <span class="is-disabled">Next <i class="fa-solid fa-chevron-right" aria-hidden="true"></i></span>
   {% endif %}
 </nav>
 {% endwith %}

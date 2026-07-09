@@ -1,5 +1,6 @@
 from django.http import HttpResponse
 from django.utils import timezone
+from datetime import timedelta
 from django.shortcuts import render, redirect
 from .forms import Registration, Login
 from .models import UserProfile
@@ -89,6 +90,14 @@ def student_dashboard(request):
         student=student_profile,
         status="cancelled",
     ).count()
+
+    now = timezone.now()
+    start_of_week = now - timedelta(days=now.weekday())
+    start_of_week = start_of_week.replace(hour=0, minute=0, second=0, microsecond=0)
+    weekly_booking_count = Booking.objects.filter(
+        student=student_profile,
+        created_at__gte=start_of_week,
+    ).count()
     recommended_tutors = (
         Tutor.objects.select_related("user__user")
         .filter(is_publicly_visible=True)
@@ -106,6 +115,7 @@ def student_dashboard(request):
             "upcoming_lessons_count": upcoming_lessons_count,
             "completed_lessons_count": completed_lessons_count,
             "cancelled_lessons_count": cancelled_lessons_count,
+            "weekly_booking_count": weekly_booking_count,
             "active_tab": "dashboard",
         },
     )

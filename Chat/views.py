@@ -11,7 +11,7 @@ from bookings.models import Booking
 from accounts.models import UserProfile
 from tutors.models import Tutor
 
-CHAT_LIST_PAGE_SIZE = 15
+CHAT_LIST_PAGE_SIZE = 10
 
 
 def _user_can_access_booking_chat(user, booking):
