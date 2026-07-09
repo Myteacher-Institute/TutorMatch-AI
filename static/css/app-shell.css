@@ -989,6 +989,24 @@
       grid-template-columns: 1fr;
     }
 
+    /* On mobile, hide the desktop close/open sidebar toggle and
+       show only the hamburger icon that opens the menu. */
+    #desk-toggle-btn,
+    .floating-sidebar-toggle#desk-toggle-btn {
+      display: none !important;
+    }
+
+    #mobile-toggle-btn,
+    .floating-sidebar-toggle#mobile-toggle-btn {
+      display: grid !important;
+    }
+
+    /* On mobile the menu closes via the backdrop, so hide the
+       in-sidebar close icon. */
+    .sidebar-header .sidebar-toggle-btn {
+      display: none !important;
+    }
+
     .sidebar-container {
       position: fixed;
       top: 0;

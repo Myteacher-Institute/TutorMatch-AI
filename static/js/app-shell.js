@@ -100,6 +100,8 @@
     let activeTheme = 'system';
     try { activeTheme = localStorage.getItem('ai-theme') || 'system'; } catch (e) {}
     setAppTheme(activeTheme);
+
+    handleResponsiveLayout();
   }
 
   window.toggleSidebarDesktop = toggleSidebarDesktop;
@@ -107,7 +109,10 @@
   window.setAppTheme = setAppTheme;
 
   window.addEventListener('resize', handleResponsiveLayout);
-  window.addEventListener('DOMContentLoaded', initSavedAppState);
+  window.addEventListener('DOMContentLoaded', function () {
+    initSavedAppState();
+    handleResponsiveLayout();
+  });
   window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
     try {
       if (localStorage.getItem('ai-theme') === 'system') {
