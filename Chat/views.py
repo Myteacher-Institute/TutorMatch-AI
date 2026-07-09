@@ -116,7 +116,9 @@ def chat_view(request, booking_id):
         'tutor_profile': getattr(tutor_user_obj.profile, 'tutor_profile', None),
         'is_admin': _is_admin_viewer(request.user),
     }
-    if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'student':
+    if _is_admin_viewer(request.user):
+        template = 'Chat/chat.html'
+    elif request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'student':
         template = 'Chat/chat_student.html'
     else:
         template = 'Chat/chat.html'
