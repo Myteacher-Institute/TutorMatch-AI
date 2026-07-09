@@ -23,23 +23,26 @@
         </div>
 
         {% if messages %}
-          {% for message in messages %}
-            <div class="tutor-alert {% if message.tags == 'success' %}tutor-alert-success{% else %}tutor-alert-error{% endif %}">
-              <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}" style="margin-right:8px;"></i>
-              {{ message }}
-            </div>
-          {% endfor %}
+        {% for message in messages %}
+        <div
+          class="tutor-alert {% if message.tags == 'success' %}tutor-alert-success{% else %}tutor-alert-error{% endif %}">
+          <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"
+            style="margin-right:8px;"></i>
+          {{ message }}
+        </div>
+        {% endfor %}
         {% endif %}
 
         <!-- Status Banner -->
-        <div class="tutor-verification-banner {% if profile.verification_status == 'approved' %}tutor-vbanner-approved{% elif profile.verification_status == 'rejected' %}tutor-vbanner-rejected{% else %}tutor-vbanner-pending{% endif %}">
+        <div
+          class="tutor-verification-banner {% if profile.verification_status == 'approved' %}tutor-vbanner-approved{% elif profile.verification_status == 'rejected' %}tutor-vbanner-rejected{% else %}tutor-vbanner-pending{% endif %}">
           <div class="tutor-vbanner-icon">
             {% if profile.verification_status == 'approved' %}
-              <i class="fa-solid fa-circle-check"></i>
+            <i class="fa-solid fa-circle-check"></i>
             {% elif profile.verification_status == 'rejected' %}
-              <i class="fa-solid fa-circle-xmark"></i>
+            <i class="fa-solid fa-circle-xmark"></i>
             {% else %}
-              <i class="fa-solid fa-clock"></i>
+            <i class="fa-solid fa-clock"></i>
             {% endif %}
           </div>
           <div>
@@ -61,7 +64,8 @@
           <div class="tutor-form-section-title">
             <i class="fa-solid fa-upload" style="color:var(--blue);margin-right:8px;"></i>Upload a Document
           </div>
-          <p style="color:var(--muted);font-size:14px;margin:0 0 20px;">Accepted formats: JPG, PNG, PDF. Max 5MB per file.</p>
+          <p style="color:var(--muted);font-size:14px;margin:0 0 20px;">Accepted formats: JPG, PNG, PDF. Max 5MB per
+            file.</p>
 
           <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
@@ -69,15 +73,21 @@
               <div class="tutor-form-field">
                 <label>Document Type</label>
                 {{ form.document_type }}
-                {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}</p>{% endif %}
+                {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}
+                </p>{% endif %}
               </div>
               <div class="tutor-form-field">
                 <label>File</label>
                 <div class="tutor-file-drop">
                   {{ form.document_file }}
-                  <p><i class="fa-solid fa-cloud-arrow-up" style="font-size:22px;color:#94a3b8;display:block;margin-bottom:6px;"></i>Click to choose a file or drag and drop</p>
+                  <div class="tutor-file-drop-inner">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                    <p>Drag and drop your file here</p>
+                    <span>Browse File</span>
+                  </div>
                 </div>
-                {% if form.document_file.errors %}<p class="tutor-field-error">{{ form.document_file.errors|join:", " }}</p>{% endif %}
+                {% if form.document_file.errors %}<p class="tutor-field-error">{{ form.document_file.errors|join:", " }}
+                </p>{% endif %}
               </div>
             </div>
             <button type="submit" class="btn btn-primary tutor-save-btn" style="margin-top:18px;">
@@ -89,31 +99,33 @@
         <!-- Uploaded Documents -->
         <div class="mtc-admin-card" style="margin-top:24px;">
           <div class="tutor-card-head">
-            <h2><i class="fa-solid fa-folder-open" style="color:var(--blue);margin-right:8px;"></i>Uploaded Documents</h2>
+            <h2><i class="fa-solid fa-folder-open" style="color:var(--blue);margin-right:8px;"></i>Uploaded Documents
+            </h2>
           </div>
           {% if documents %}
-            <div class="tutor-docs-list">
-              {% for doc in documents %}
-                <div class="tutor-doc-row">
-                  <div class="tutor-doc-icon">
-                    <i class="fa-solid fa-file-lines"></i>
-                  </div>
-                  <div class="tutor-doc-info">
-                    <strong>{{ doc.get_document_type_display }}</strong>
-                    <span>Uploaded {{ doc.uploaded_at|date:"N j, Y" }}</span>
-                  </div>
-                  <span class="mtc-status-pill {% if doc.verification_status == 'approved' %}mtc-status-accepted{% elif doc.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
-                    {{ doc.get_verification_status_display }}
-                  </span>
-                </div>
-              {% endfor %}
+          <div class="tutor-docs-list">
+            {% for doc in documents %}
+            <div class="tutor-doc-row">
+              <div class="tutor-doc-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="tutor-doc-info">
+                <strong>{{ doc.get_document_type_display }}</strong>
+                <span>Uploaded {{ doc.uploaded_at|date:"N j, Y" }}</span>
+              </div>
+              <span
+                class="mtc-status-pill {% if doc.verification_status == 'approved' %}mtc-status-accepted{% elif doc.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+                {{ doc.get_verification_status_display }}
+              </span>
             </div>
+            {% endfor %}
+          </div>
           {% else %}
-            <div class="tutor-empty-state">
-              <div class="tutor-empty-icon"><i class="fa-regular fa-folder-open"></i></div>
-              <p>No documents uploaded yet.</p>
-              <small>Upload your ID, selfie, and certificates above.</small>
-            </div>
+          <div class="tutor-empty-state">
+            <div class="tutor-empty-icon"><i class="fa-regular fa-folder-open"></i></div>
+            <p>No documents uploaded yet.</p>
+            <small>Upload your ID, selfie, and certificates above.</small>
+          </div>
           {% endif %}
         </div>
 
