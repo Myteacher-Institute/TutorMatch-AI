@@ -4901,6 +4901,22 @@ img {
   border: 1px solid #22c55e;
 }
 
+.tutor-card-verified-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #16a34a;
+  color: #ffffff;
+  display: grid;
+  place-items: center;
+  font-size: 14px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 8px rgba(22, 163, 74, 0.35);
+}
+
 .tutor-public-body {
   padding: 18px;
 }
