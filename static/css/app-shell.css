@@ -1114,6 +1114,117 @@
     color: var(--dash-text);
   }
 
+  /* Admin dashboard: keep it light even when dark mode is enabled */
+  html.dark .admin-dashboard-light {
+    --dash-surface: #ffffff;
+    --dash-surface-2: #f1f5f9;
+    --dash-border: #e2e8f0;
+    --dash-text: #0f172a;
+    --dash-muted: #64748b;
+    --soft: #eff6ff;
+  }
+  html.dark .admin-dashboard-light .mtc-admin-content h1 {
+    color: #12182c;
+  }
+  html.dark .admin-dashboard-light .mtc-admin-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+  }
+  html.dark .admin-dashboard-light .mtc-admin-card h2 {
+    color: #1d4ed8;
+  }
+  html.dark .admin-dashboard-light .mtc-admin-card p {
+    color: #64748b;
+  }
+  html.dark .admin-dashboard-light .mtc-admin-metric-card {
+    background: #ffffff;
+    border-color: #e2e8f0;
+  }
+  html.dark .admin-dashboard-light .mtc-admin-metric-card strong {
+    color: #0f172a;
+  }
+
+  /* Admin chat list: keep it light even when dark mode is enabled */
+  html.dark .admin-dashboard-light .mtc-chat-eyebrow {
+    color: #4a90d9;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-title {
+    color: #111827;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-subtitle {
+    color: #6b7280;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-search input {
+    background: #ffffff;
+    color: #111827;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  }
+  html.dark .admin-dashboard-light .mtc-chat-search input::placeholder {
+    color: #9ca3af;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-filter {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    color: #4b5563;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-filter:hover {
+    border-color: #4a7cff;
+    color: #4a7cff;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-filter.is-active {
+    background: #4a7cff;
+    border-color: #4a7cff;
+    color: #ffffff;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-card {
+    background: #ffffff;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.06);
+  }
+  html.dark .admin-dashboard-light .mtc-chat-card:hover {
+    box-shadow: 0 8px 24px rgba(15, 23, 42, 0.1);
+  }
+  html.dark .admin-dashboard-light .mtc-chat-card.is-unread {
+    background: #eff6ff;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-card.is-unread:hover {
+    background: #dbeafe;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-name {
+    color: #111827;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-preview {
+    color: #6b7280;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-time {
+    color: #9ca3af;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-booking-pill {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-pagination a {
+    background: #ffffff;
+    border-color: #e5e7eb;
+    color: #4b5563;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-pagination a:hover {
+    border-color: #4a7cff;
+    color: #4a7cff;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-pagination .is-disabled {
+    color: #9ca3af;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-empty p {
+    color: #111827;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-empty small {
+    color: #6b7280;
+  }
+  html.dark .admin-dashboard-light .mtc-chat-empty-icon {
+    background: #eff6ff;
+    color: #2563eb;
+  }
+
   html.dark .mtc-dashboard-booking-row {
     background: var(--dash-surface-2);
     border-color: var(--dash-border);

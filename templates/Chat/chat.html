@@ -73,7 +73,7 @@
   }
 </style>
 
-<div class="mtc-shell" style="padding: 40px 0 80px;">
+<div class="mtc-shell {% if is_admin %}admin-dashboard-light{% endif %}" style="padding: 40px 0 80px;">
   <section class="mtc-admin-layout">
     {% if is_admin %}
       {% include "dashboard/_admin_nav.html" %}
