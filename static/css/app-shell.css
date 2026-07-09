@@ -1036,6 +1036,47 @@
     }
   }
 
+  /* Tablet behaviour for the student workspace: no open/close sidebar,
+     only a hamburger menu that opens the sidebar as an overlay. */
+  @media (max-width: 1024px) {
+    .chat-app.student-workspace {
+      grid-template-columns: 1fr;
+    }
+
+    .chat-app.student-workspace #desk-toggle-btn,
+    .chat-app.student-workspace .floating-sidebar-toggle#desk-toggle-btn {
+      display: none !important;
+    }
+
+    .chat-app.student-workspace #mobile-toggle-btn,
+    .chat-app.student-workspace .floating-sidebar-toggle#mobile-toggle-btn {
+      display: grid !important;
+    }
+
+    .chat-app.student-workspace .sidebar-header .sidebar-toggle-btn {
+      display: none !important;
+    }
+
+    .chat-app.student-workspace .sidebar-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 280px;
+      transform: translateX(-100%);
+      visibility: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.15);
+    }
+
+    .chat-app.student-workspace.sidebar-open .sidebar-container {
+      transform: translateX(0);
+      visibility: visible;
+    }
+
+    .chat-app.student-workspace.sidebar-open .sidebar-backdrop {
+      display: block;
+    }
+  }
+
   /* ============================================================
      Dark mode: re-skin every white content container used on the
      student pages (dashboard, bookings, chat) so they become dark.

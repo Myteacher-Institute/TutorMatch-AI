@@ -9,6 +9,15 @@
     updateDesktopToggleIcon(collapsed);
   }
 
+  function isStudentWorkspace() {
+    const root = document.getElementById('chat-app-root');
+    return !!(root && root.classList.contains('student-workspace'));
+  }
+
+  function tabletBreakpoint() {
+    return isStudentWorkspace() ? 1024 : 768;
+  }
+
   function updateDesktopToggleIcon(collapsed) {
     const btn = document.getElementById('desk-toggle-btn');
     if (!btn) return;
@@ -17,12 +26,12 @@
       btn.title = "Open sidebar";
       btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line><polyline points="12 8 16 12 12 16"></polyline></svg>';
       btn.style.marginRight = '8px';
-      if (window.innerWidth > 768) btn.style.display = 'grid';
+      if (window.innerWidth > tabletBreakpoint()) btn.style.display = 'grid';
     } else {
       btn.title = "Close sidebar";
       btn.innerHTML = '<svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>';
       btn.style.marginRight = '';
-      if (window.innerWidth > 768) btn.style.display = 'none';
+      if (window.innerWidth > tabletBreakpoint()) btn.style.display = 'none';
     }
   }
 
@@ -43,7 +52,7 @@
     const mobToggle = document.getElementById('mobile-toggle-btn');
     const isCollapsed = root.classList.contains('sidebar-collapsed');
 
-    if (window.innerWidth <= 768) {
+    if (window.innerWidth <= tabletBreakpoint()) {
       if (deskToggle) deskToggle.style.display = 'none';
       if (mobToggle) mobToggle.style.display = 'grid';
     } else {
@@ -90,7 +99,7 @@
     if (!root) return;
     let sidebarCollapsed = false;
     try { sidebarCollapsed = localStorage.getItem('sidebar-collapsed') === 'true'; } catch (e) {}
-    if (sidebarCollapsed && window.innerWidth > 768) {
+    if (sidebarCollapsed && window.innerWidth > tabletBreakpoint()) {
       root.classList.add('sidebar-collapsed');
       updateDesktopToggleIcon(true);
     } else {
