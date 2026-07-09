@@ -27,13 +27,14 @@ def _user_can_access_booking_chat(user, booking):
     is_student = user.profile == booking.student
     is_tutor = user.profile == booking.tutor.user
     has_paid = booking.payments.filter(payment_status="paid").exists()
-    tutor_accepted = booking.status in ["accepted", "completed"]
 
     if is_student:
         return has_paid
 
     if is_tutor:
-        return tutor_accepted
+        # Tutors can always access and reply to a booking's chat,
+        # even before the booking has been accepted.
+        return True
 
     return False
 
