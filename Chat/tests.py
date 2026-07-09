@@ -55,7 +55,7 @@ class ChatViewsTests(TestCase):
     def test_chat_view_creates_session_for_booking_participants(self):
         self.client.login(username="student", password="pass12345")
 
-        response = self.client.get(reverse("chat_view", args=[self.booking.id]))
+        response = self.client.get(reverse("chat:chat_view", args=[self.booking.id]))
 
         self.assertEqual(response.status_code, 200)
         self.assertTrue(ChatSession.objects.filter(booking=self.booking).exists())
@@ -64,7 +64,7 @@ class ChatViewsTests(TestCase):
     def test_chat_view_rejects_users_outside_booking(self):
         self.client.login(username="other", password="pass12345")
 
-        response = self.client.get(reverse("chat_view", args=[self.booking.id]))
+        response = self.client.get(reverse("chat:chat_view", args=[self.booking.id]))
 
         self.assertEqual(response.status_code, 302)
         self.assertFalse(ChatSession.objects.filter(booking=self.booking).exists())
@@ -73,7 +73,7 @@ class ChatViewsTests(TestCase):
         self.client.login(username="student", password="pass12345")
 
         response = self.client.post(
-            reverse("send_message", args=[self.booking.id]),
+            reverse("chat:send_message", args=[self.booking.id]),
             {"message": "Hello tutor"},
         )
 
@@ -106,7 +106,7 @@ class ChatViewsTests(TestCase):
 
         self.client.login(username="student", password="pass12345")
         response = self.client.get(
-            reverse("get_new_messages", args=[self.booking.id, old_message.id])
+            reverse("chat:get_new_messages", args=[self.booking.id, old_message.id])
         )
 
         self.assertEqual(response.status_code, 200)
