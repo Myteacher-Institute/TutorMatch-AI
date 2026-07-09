@@ -106,13 +106,11 @@ def chat_view(request, booking_id):
         'other_party': tutor_user_obj if request.user == student_user_obj else student_user_obj,
         'tutor_profile': getattr(tutor_user_obj.profile, 'tutor_profile', None),
     }
-    print(f"DEBUG: other_party: {context['other_party']}")
-    if hasattr(context['other_party'], 'profile'):
-        print(f"DEBUG: other_party.profile: {context['other_party'].profile}")
-        if hasattr(context['other_party'].profile, 'tutor_profile'):
-            print(f"DEBUG: other_party.profile.tutor_profile: {context['other_party'].profile.tutor_profile}")
-            print(f"DEBUG: other_party.profile.tutor_profile.hourly_rate: {context['other_party'].profile.tutor_profile.hourly_rate}")
-    return render(request, 'Chat/chat.html', context)
+    if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'student':
+        template = 'Chat/chat_student.html'
+    else:
+        template = 'Chat/chat.html'
+    return render(request, template, context)
 
 
 @login_required

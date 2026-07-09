@@ -1303,6 +1303,8 @@
   .chat-conversation .chat-msg-row.assistant-msg .msg-text-bubble {
     background: #e2e8f0;
     color: #0f172a;
+    border-radius: 18px;
+    padding: 10px 16px;
   }
   .chat-conversation .chat-msg-row.assistant-msg .msg-body-container {
     flex: 0 1 auto;
