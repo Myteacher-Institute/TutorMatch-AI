@@ -41,7 +41,7 @@
                   {{ session.tutor.first_name|first|upper }}
                   {% endif %}
                 </div>
-                <span class="mtc-chat-online-dot" aria-hidden="true"></span>
+                <span class="mtc-chat-online-dot {% if session.tutor.id in online_user_ids %}is-online{% else %}is-offline{% endif %}" aria-hidden="true"></span>
               </div>
               <div class="mtc-chat-body">
                 <span class="mtc-chat-name">{{ session.tutor.get_full_name|default:session.tutor.username }}</span>

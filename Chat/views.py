@@ -5,6 +5,8 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models import Count, Q, Value
 from django.db.models.functions import Concat, Coalesce
 from django.core.paginator import Paginator
+from django.contrib.sessions.models import Session
+from django.utils import timezone
 
 from .models import ChatSession, ChatMessage
 from bookings.models import Booking
@@ -59,6 +61,19 @@ def _mark_messages_read_for_participant(user, session, messages_queryset):
         return
 
     messages_queryset.filter(is_read=False).exclude(sender=user).update(is_read=True)
+
+
+def _get_online_user_ids():
+    now = timezone.now()
+    active_sessions = Session.objects.filter(expire_date__gt=now)
+    online_ids = set()
+    for session in active_sessions:
+        data = session.get_decoded()
+        user_id = data.get('_auth_user_id')
+        if user_id:
+            online_ids.add(int(user_id))
+    return online_ids
+
 
 @login_required
 def chat_view(request, booking_id):
@@ -188,6 +203,7 @@ def tutor_chat_list(request):
         'active_tab': 'chats',
         'total_unread': total_unread,
         'search_query': query,
+        'online_user_ids': _get_online_user_ids(),
     }
     return render(request, 'Chat/tutor_chat_list.html', context)
 
@@ -283,6 +299,7 @@ def admin_chat_list(request):
         'active_tab': 'chats',
         'total_unread': total_unread,
         'search_query': query,
+        'online_user_ids': _get_online_user_ids(),
     }
     return render(request, 'Chat/admin_chat_list.html', context)
 
@@ -342,5 +359,6 @@ def student_chat_list(request):
         'active_tab': 'chats',
         'total_unread': total_unread,
         'search_query': query,
+        'online_user_ids': _get_online_user_ids(),
     }
     return render(request, 'Chat/student_chat_list.html', context)
