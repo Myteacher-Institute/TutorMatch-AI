@@ -2,15 +2,18 @@ from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages # Import messages
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, JsonResponse
-from django.db.models import Count, Q
+from django.db.models import Count, Q, Value
+from django.db.models.functions import Concat, Coalesce
 from django.core.paginator import Paginator
+from django.contrib.sessions.models import Session
+from django.utils import timezone
 
 from .models import ChatSession, ChatMessage
 from bookings.models import Booking
 from accounts.models import UserProfile
 from tutors.models import Tutor
 
-CHAT_LIST_PAGE_SIZE = 15
+CHAT_LIST_PAGE_SIZE = 10
 
 
 def _user_can_access_booking_chat(user, booking):
@@ -59,6 +62,19 @@ def _mark_messages_read_for_participant(user, session, messages_queryset):
 
     messages_queryset.filter(is_read=False).exclude(sender=user).update(is_read=True)
 
+
+def _get_online_user_ids():
+    now = timezone.now()
+    active_sessions = Session.objects.filter(expire_date__gt=now)
+    online_ids = set()
+    for session in active_sessions:
+        data = session.get_decoded()
+        user_id = data.get('_auth_user_id')
+        if user_id:
+            online_ids.add(int(user_id))
+    return online_ids
+
+
 @login_required
 def chat_view(request, booking_id):
     booking = get_object_or_404(
@@ -88,14 +104,13 @@ def chat_view(request, booking_id):
         'chat_messages_list': chat_messages,
         # Determine the other party's User object for display
         'other_party': tutor_user_obj if request.user == student_user_obj else student_user_obj,
+        'tutor_profile': getattr(tutor_user_obj.profile, 'tutor_profile', None),
     }
-    print(f"DEBUG: other_party: {context['other_party']}")
-    if hasattr(context['other_party'], 'profile'):
-        print(f"DEBUG: other_party.profile: {context['other_party'].profile}")
-        if hasattr(context['other_party'].profile, 'tutor_profile'):
-            print(f"DEBUG: other_party.profile.tutor_profile: {context['other_party'].profile.tutor_profile}")
-            print(f"DEBUG: other_party.profile.tutor_profile.hourly_rate: {context['other_party'].profile.tutor_profile.hourly_rate}")
-    return render(request, 'Chat/chat.html', context)
+    if request.user.is_authenticated and hasattr(request.user, 'profile') and request.user.profile.role == 'student':
+        template = 'Chat/chat_student.html'
+    else:
+        template = 'Chat/chat.html'
+    return render(request, template, context)
 
 
 @login_required
@@ -143,11 +158,38 @@ def tutor_chat_list(request):
 
     # Get chat sessions where the current user is the tutor
     # Order by the latest message or session update for active chats
+    base_qs = ChatSession.objects.filter(tutor=request.user).order_by('-updated_at')
+    unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        search_q = Q(
+            student__first_name__icontains=query
+        ) | Q(
+            student__last_name__icontains=query
+        ) | Q(
+            student__username__icontains=query
+        ) | Q(
+            student__email__icontains=query
+        )
+        try:
+            booking_id = int(query)
+            search_q |= Q(booking__id=booking_id)
+        except (ValueError, TypeError):
+            pass
+
+        identity_matches = base_qs.filter(search_q).distinct()
+        if identity_matches.exists():
+            base_qs = identity_matches
+        else:
+            base_qs = base_qs.filter(messages__message__icontains=query).distinct()
+
     chat_sessions = _paginate_chat_sessions(
         request,
         _with_unread_counts(
             request.user,
-            ChatSession.objects.filter(tutor=request.user).order_by('-updated_at'),
+            base_qs,
         ),
     )
 
@@ -158,6 +200,9 @@ def tutor_chat_list(request):
         'page_obj': chat_sessions,
         'tutor_profile': tutor_obj, # Pass the tutor's profile
         'active_tab': 'chats',
+        'total_unread': total_unread,
+        'search_query': query,
+        'online_user_ids': _get_online_user_ids(),
     }
     return render(request, 'Chat/tutor_chat_list.html', context)
 
@@ -196,11 +241,54 @@ def admin_chat_list(request):
         messages.error(request, "You are not authorized to view this page.")
         return redirect('home')
 
+    base_qs = ChatSession.objects.all().order_by('-updated_at')
+    unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        base_qs = base_qs.annotate(
+            student_full_name=Coalesce(Concat('student__first_name', Value(' '), 'student__last_name'), Value('')),
+            tutor_full_name=Coalesce(Concat('tutor__first_name', Value(' '), 'tutor__last_name'), Value('')),
+        )
+        search_q = Q(
+            student__first_name__icontains=query
+        ) | Q(
+            student__last_name__icontains=query
+        ) | Q(
+            student__username__icontains=query
+        ) | Q(
+            student__email__icontains=query
+        ) | Q(
+            student_full_name__icontains=query
+        ) | Q(
+            tutor__first_name__icontains=query
+        ) | Q(
+            tutor__last_name__icontains=query
+        ) | Q(
+            tutor__username__icontains=query
+        ) | Q(
+            tutor__email__icontains=query
+        ) | Q(
+            tutor_full_name__icontains=query
+        )
+        try:
+            booking_id = int(query)
+            search_q |= Q(booking__id=booking_id)
+        except (ValueError, TypeError):
+            pass
+
+        identity_matches = base_qs.filter(search_q).distinct()
+        if identity_matches.exists():
+            base_qs = identity_matches
+        else:
+            base_qs = base_qs.filter(messages__message__icontains=query).distinct()
+
     chat_sessions = _paginate_chat_sessions(
         request,
         _with_unread_counts(
             request.user,
-            ChatSession.objects.all().order_by('-updated_at'),
+            base_qs,
         ),
     )
 
@@ -208,6 +296,9 @@ def admin_chat_list(request):
         'chat_sessions': chat_sessions,
         'page_obj': chat_sessions,
         'active_tab': 'chats',
+        'total_unread': total_unread,
+        'search_query': query,
+        'online_user_ids': _get_online_user_ids(),
     }
     return render(request, 'Chat/admin_chat_list.html', context)
 
@@ -220,11 +311,43 @@ def student_chat_list(request):
         return redirect('home')
 
     # Get chat sessions where the current user is the student
+    base_qs = ChatSession.objects.filter(student=request.user).order_by('-updated_at')
+    unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
+    total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
+
+    query = request.GET.get('q', '').strip()
+    if query:
+        base_qs = base_qs.annotate(
+            tutor_full_name=Coalesce(Concat('tutor__first_name', Value(' '), 'tutor__last_name'), Value('')),
+        )
+        search_q = Q(
+            tutor__first_name__icontains=query
+        ) | Q(
+            tutor__last_name__icontains=query
+        ) | Q(
+            tutor__username__icontains=query
+        ) | Q(
+            tutor__email__icontains=query
+        ) | Q(
+            tutor_full_name__icontains=query
+        )
+        try:
+            booking_id = int(query)
+            search_q |= Q(booking__id=booking_id)
+        except (ValueError, TypeError):
+            pass
+
+        identity_matches = base_qs.filter(search_q).distinct()
+        if identity_matches.exists():
+            base_qs = identity_matches
+        else:
+            base_qs = base_qs.filter(messages__message__icontains=query).distinct()
+
     chat_sessions = _paginate_chat_sessions(
         request,
         _with_unread_counts(
             request.user,
-            ChatSession.objects.filter(student=request.user).order_by('-updated_at'),
+            base_qs,
         ),
     )
 
@@ -233,5 +356,8 @@ def student_chat_list(request):
         'page_obj': chat_sessions,
         'student_profile': request.user.profile, # Pass the student's profile
         'active_tab': 'chats',
+        'total_unread': total_unread,
+        'search_query': query,
+        'online_user_ids': _get_online_user_ids(),
     }
     return render(request, 'Chat/student_chat_list.html', context)

@@ -1,33 +1,52 @@
 {% load static %}
 
-{% for message in chat_messages_list %}
-  {% if request.user.is_staff and chat_session and message.sender == chat_session.tutor %}
-    <div class="message-item sent" data-message-id="{{ message.id }}">
-      <div class="message-content sent">
-        <p>{{ message.message }}</p>
-        <span>{{ message.timestamp|date:"H:i" }}</span>
+{% if request.user.is_authenticated and request.user.profile.role == 'student' %}
+  {% for message in chat_messages_list %}
+    {% if message.sender == request.user %}
+      <article class="chat-msg-row user-msg" data-message-id="{{ message.id }}">
+        <div class="msg-body-container">
+          <div class="msg-text-bubble">{{ message.message }}<span class="msg-time">{{ message.timestamp|date:"H:i" }}</span></div>
+        </div>
+      </article>
+    {% else %}
+      <article class="chat-msg-row assistant-msg" data-message-id="{{ message.id }}">
+        <div class="avatar-avatar ai-icon">{{ message.sender.first_name|first|upper }}</div>
+        <div class="msg-body-container">
+          <div class="msg-text-bubble">{{ message.message }}<span class="msg-time">{{ message.timestamp|date:"H:i" }}</span></div>
+        </div>
+      </article>
+    {% endif %}
+  {% endfor %}
+{% else %}
+  {% for message in chat_messages_list %}
+    {% if request.user.is_staff and chat_session and message.sender == chat_session.tutor %}
+      <div class="message-item sent" data-message-id="{{ message.id }}">
+        <div class="message-content sent">
+          <p>{{ message.message }}</p>
+          <span>{{ message.timestamp|date:"H:i" }}</span>
+        </div>
       </div>
-    </div>
-  {% elif request.user.is_staff and chat_session and message.sender == chat_session.student %}
-    <div class="message-item received" data-message-id="{{ message.id }}">
-      <div class="message-content received">
-        <p>{{ message.message }}</p>
-        <span>{{ message.timestamp|date:"H:i" }}</span>
+    {% elif request.user.is_staff and chat_session and message.sender == chat_session.student %}
+      <div class="message-item received" data-message-id="{{ message.id }}">
+        <div class="message-content received">
+          <p>{{ message.message }}</p>
+          <span>{{ message.timestamp|date:"H:i" }}</span>
+        </div>
       </div>
-    </div>
-  {% elif message.sender == request.user %}
-    <div class="message-item sent" data-message-id="{{ message.id }}">
-      <div class="message-content sent">
-        <p>{{ message.message }}</p>
-        <span>{{ message.timestamp|date:"H:i" }}</span>
+    {% elif message.sender == request.user %}
+      <div class="message-item sent" data-message-id="{{ message.id }}">
+        <div class="message-content sent">
+          <p>{{ message.message }}</p>
+          <span>{{ message.timestamp|date:"H:i" }}</span>
+        </div>
       </div>
-    </div>
-  {% else %}
-    <div class="message-item received" data-message-id="{{ message.id }}">
-      <div class="message-content received">
-        <p>{{ message.message }}</p>
-        <span>{{ message.timestamp|date:"H:i" }}</span>
+    {% else %}
+      <div class="message-item received" data-message-id="{{ message.id }}">
+        <div class="message-content received">
+          <p>{{ message.message }}</p>
+          <span>{{ message.timestamp|date:"H:i" }}</span>
+        </div>
       </div>
-    </div>
-  {% endif %}
-{% endfor %}
+    {% endif %}
+  {% endfor %}
+{% endif %}

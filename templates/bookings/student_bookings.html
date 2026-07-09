@@ -4,162 +4,254 @@
 {% block title %}My Bookings | TutorMatch AI{% endblock %}
 
 {% block content %}
-<div class="mtc-shell">
-  <section class="mtc-admin-layout">
-    {% include "accounts/student_sidebar.html" with active_tab="bookings" %}
+<style>
+  /* Remove global headers and footers to establish full-screen app workspace */
+  .site-header,
+  .mtc-footer {
+    display: none !important;
+  }
 
-    <div class="mtc-admin-content">
-      <div class="mtc-student-bookings-head">
-        <div>
-          <p class="mtc-student-bookings-eyebrow">Lesson Schedule</p>
-          <h1>My Bookings</h1>
-          <p class="lead">Track your tutor requests, lesson times, payment status, and completed lessons.</p>
-        </div>
-        <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find Tutor</a>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+</style>
+
+<div class="chat-app" id="chat-app-root">
+  <!-- Sidebar Overlay Backing (Mobile) -->
+  <div class="sidebar-backdrop" onclick="toggleSidebarMobile(false)"></div>
+
+  {% include "accounts/student_sidebar.html" with active_tab="bookings" %}
+
+  <!-- Right Pane Work area -->
+  <div class="chat-pane">
+    <header class="top-header">
+      <div class="header-left" style="gap: 16px;">
+        <!-- Sidebar Toggle Icon (Desktop Hidden / Mobile Shown) -->
+        <button class="floating-sidebar-toggle" onclick="toggleSidebarDesktop()" id="desk-toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </button>
+        <button class="floating-sidebar-toggle" style="display: none;" id="mobile-toggle-btn" onclick="toggleSidebarMobile(true)" title="Menu" aria-label="Menu">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+
+        <!-- Platform Logo Link -->
+        <a href="{% url 'home' %}" class="topbar-logo-link" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+          <div class="topbar-logo-mark" style="background: #2563eb; border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; color: #ffffff;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+            </svg>
+          </div>
+          <span class="topbar-logo-text" style="font-weight: 800; font-size: 16px; color: var(--text-primary);">Myteacher<span style="color: #2563eb;">Connect</span></span>
+        </a>
+
+        <!-- Back to Website button -->
+        <a href="{% url 'home' %}" class="back-to-site-btn" style="font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); color: var(--text-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s ease;">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Website
+        </a>
       </div>
 
-      <div class="mtc-student-bookings-summary">
-        <article>
-          <span><i class="fa-solid fa-receipt"></i>Total Bookings</span>
-          <strong>{{ bookings_count }}</strong>
-        </article>
-        <article>
-          <span><i class="fa-solid fa-arrow-turn-down"></i>Pending Review</span>
-          <strong>{{ pending_review_count }}</strong>
-        </article>
-        <article>
-          <span><i class="fa-solid fa-arrow-right-to-bracket"></i>Next Lesson</span>
-          <strong>{% if next_booking %}{{ next_booking.booking_date|date:"M j" }}{% else %}-{% endif %}</strong>
-        </article>
-      </div>
+      <!-- Quick link to AI Assistant -->
+      <a href="{% url 'ai_assistant' %}" class="floating-sidebar-toggle" title="Ask AI Assistant" style="text-decoration: none;">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+      </a>
+    </header>
 
-      <div class="mtc-student-bookings-card">
-        <div class="mtc-student-bookings-card-head">
-          <div>
-            <h2 style="color: #1D4ED8;">Booking List</h2>
-            <p>All lessons you have requested are shown here.</p>
-          </div>
-        </div>
-
-        {% if bookings %}
-          <div class="mtc-student-bookings-table-wrap" style="max-height: 520px; overflow: auto;">
-            <table class="mtc-student-bookings-table">
-              <thead>
-                <tr>
-                  <th>Tutor name</th>
-                  <th>Date</th>
-                  <th>Time</th>
-                  <th>Status</th>
-                  <th>Amount</th>
-                  <th>Payment status</th>
-                  <th>Action</th>
-                </tr>
-              </thead>
-              <tbody>
-                {% for booking in bookings %}
-                  <tr>
-                    <td>
-                      <div class="mtc-student-bookings-tutor">
-                        {% if booking.tutor.profile_photo %}
-                          <img src="{{ booking.tutor.profile_photo }}" alt="{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}">
-                        {% else %}
-                          <span>
-                            {% if booking.tutor.user.user.first_name %}{{ booking.tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}
-                          </span>
-                        {% endif %}
-                        <div>
-                          <strong>{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</strong>
-                          <small>{{ booking.tutor.location|default:"Location pending" }}</small>
-                        </div>
-                      </div>
-                    </td>
-                    <td>{{ booking.booking_date|date:"M j, Y" }}</td>
-                    <td>{{ booking.lesson_time|time:"g:i A" }}</td>
-                    <td>
-                      <span class="mtc-status-pill mtc-status-{{ booking.status }}">
-                        {{ booking.get_status_display }}
-                      </span>
-                    </td>
-                    <td><strong>₦{{ booking.amount }}</strong></td>
-                    <td>
-                      <span class="mtc-payment-pill mtc-payment-{{ booking.display_payment_status }}">
-                        {{ booking.display_payment_status_label }}
-                      </span>
-                    </td>
-                    <td>
-                      <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                        {% if booking.status != "cancelled" %}
-                        {% if booking.display_payment_status == "paid" %}
-                          {% if booking.status == "completed" %}
-                            {% if booking.reviews.exists %}
-                              <span class="mtc-reviewed-label">Reviewed</span>
-                            {% else %}
-                              <a href="{% url 'add_review' booking.id %}" class="mtc-review-button">Review</a>
-                            {% endif %}
-                          {% endif %}
-                          <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-chat-button" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none;">
-                            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                            Chat
-                          </a>
-                        {% else %}
-                          <form method="post" action="{% url 'payment_checkout' booking.id %}" style="display: inline;">
-                            {% csrf_token %}
-                            <button type="submit" class="btn btn-primary" style="padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
-                              <i class="fa-solid fa-cart-shopping"></i>  Pay Now
-                            </button>
-                          </form>
-                        {% endif %}
-                        {% endif %}
-                      </div>
-                    </td>
-                  </tr>
-                {% endfor %}
-              </tbody>
-            </table>
-          </div>
-          {% if page_obj.has_other_pages %}
-            <nav class="mtc-bookings-pagination" aria-label="Booking list pagination">
-              <div class="mtc-bookings-pagination-summary">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-              </div>
-              <div class="mtc-bookings-pagination-controls">
-                {% if page_obj.has_previous %}
-                  <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">
-                    <i class="fa-solid fa-chevron-left"></i>
-                    Previous
-                  </a>
-                {% else %}
-                  <span class="is-disabled">
-                    <i class="fa-solid fa-chevron-left"></i>
-                    Previous
-                  </span>
-                {% endif %}
-                {% if page_obj.has_next %}
-                  <a href="?page={{ page_obj.next_page_number }}" aria-label="Next page">
-                    Next
-                    <i class="fa-solid fa-chevron-right"></i>
-                  </a>
-                {% else %}
-                  <span class="is-disabled">
-                    Next
-                    <i class="fa-solid fa-chevron-right"></i>
-                  </span>
-                {% endif %}
-              </div>
-            </nav>
-          {% endif %}
-        {% else %}
-          <div class="mtc-student-bookings-empty">
-            <div class="mtc-student-bookings-empty-icon">
-              <i class="fa-solid fa-calendar-check"></i>
+    <!-- Scrollable Content Viewport -->
+    <div class="chat-view-viewport" style="overflow-y: auto; display: block;">
+      <div class="mtc-shell" style="padding: 24px 14px 40px; margin-top: 0;">
+        <div class="mtc-admin-content">
+          <div class="mtc-student-bookings-head">
+            <div>
+              <p class="mtc-student-bookings-eyebrow">Lesson Schedule</p>
+              <h1>My Bookings</h1>
+              <p class="lead">Track your tutor requests, lesson times, payment status, and completed lessons.</p>
             </div>
-            <h2>No bookings yet</h2>
-            <p>Your tutor bookings will appear here after you schedule a lesson.</p>
-            <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find a Tutor</a>
+            <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find Tutor</a>
           </div>
-        {% endif %}
+
+          <div class="mtc-admin-metrics-grid" style="margin-bottom: 30px; margin-top: 20px">
+            <div class="mtc-admin-metric-card mtc-metric-upcoming">
+              <div class="mtc-metric-icon">
+                <i class="fa-solid fa-receipt"></i>
+              </div>
+              <div class="mtc-metric-content">
+                <span>Total Bookings</span>
+                <strong>{{ bookings_count }}</strong>
+              </div>
+            </div>
+            <div class="mtc-admin-metric-card mtc-metric-recommended">
+              <div class="mtc-metric-icon">
+                <i class="fa-solid fa-arrow-turn-down"></i>
+              </div>
+              <div class="mtc-metric-content">
+                <span>Pending Review</span>
+                <strong>{{ pending_review_count }}</strong>
+              </div>
+            </div>
+            <div class="mtc-admin-metric-card mtc-metric-active">
+              <div class="mtc-metric-icon">
+                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+              </div>
+              <div class="mtc-metric-content">
+                <span>Next Lesson</span>
+                <strong>
+                  {% if next_booking %}{{ next_booking.booking_date|date:"M j" }}
+                    {% if next_booking.lesson_time %} at {{ next_booking.lesson_time|time:"g:i A" }}{% endif %}
+                  {% else %}-{% endif %}
+                </strong>
+              </div>
+            </div>
+            <div class="mtc-admin-metric-card mtc-metric-completed">
+              <div class="mtc-metric-icon">
+                <i class="fa-solid fa-check-double"></i>
+              </div>
+              <div class="mtc-metric-content">
+                <span>Completed</span>
+                <strong>{{ completed_lessons_count }}</strong>
+              </div>
+            </div>
+          </div>
+
+          <div class="mtc-student-bookings-card">
+            <div class="mtc-student-bookings-card-head">
+              <div>
+                <h2 style="color: #1D4ED8;">Booking List</h2>
+                <p>All lessons you have requested are shown here.</p>
+              </div>
+            </div>
+
+            {% if bookings %}
+              <div class="mtc-student-bookings-table-wrap" style="max-height: 520px; overflow: auto;">
+                <table class="mtc-student-bookings-table">
+                  <thead>
+                    <tr>
+                      <th>Tutor name</th>
+                      <th>Date</th>
+                      <th>Time</th>
+                      <th>Status</th>
+                      <th>Amount</th>
+                      <th>Payment status</th>
+                      <th>Action</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for booking in bookings %}
+                      <tr>
+                        <td>
+                          <div class="mtc-student-bookings-tutor">
+                            {% if booking.tutor.profile_photo %}
+                              <img src="{{ booking.tutor.profile_photo }}" alt="{{ booking.tutor.get_full_name|default:booking.tutor.username }}">
+                            {% else %}
+                              <i class="fa-regular fa-user"></i>
+                            {% endif %}
+                            <div>
+                              <strong>{{ booking.tutor.get_full_name|default:booking.tutor.username }}</strong>
+                              <small>{{ booking.tutor.location|default:"Location pending" }}</small>
+                            </div>
+                          </div>
+                        </td>
+                        <td>{{ booking.booking_date|date:"M j, Y" }}</td>
+                        <td>{{ booking.lesson_time|time:"g:i A" }}</td>
+                        <td>
+                          <span class="mtc-status-pill mtc-status-{{ booking.status }}">
+                            {{ booking.get_status_display }}
+                          </span>
+                        </td>
+                        <td><strong>₦{{ booking.amount }}</strong></td>
+                        <td>
+                          <span class="mtc-payment-pill mtc-payment-{{ booking.display_payment_status }}">
+                            {{ booking.display_payment_status_label }}
+                          </span>
+                        </td>
+                        <td>
+                          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                            {% if booking.status != "cancelled" %}
+                            {% if booking.display_payment_status == "paid" %}
+                              {% if booking.status == "completed" %}
+                                {% if booking.reviews.exists %}
+                                  <span class="mtc-reviewed-label">Reviewed</span>
+                                {% else %}
+                                  <a href="{% url 'add_review' booking.id %}" class="mtc-review-button">Review</a>
+                                {% endif %}
+                              {% endif %}
+                              <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-chat-button" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none;">
+                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                                Chat
+                              </a>
+                            {% else %}
+                              <form method="post" action="{% url 'payment_checkout' booking.id %}" style="display: inline;">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary" style="padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
+                                  <i class="fa-solid fa-cart-shopping"></i>  Pay Now
+                                </button>
+                              </form>
+                            {% endif %}
+                            {% endif %}
+                          </div>
+                        </td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              </div>
+              {% if page_obj.has_other_pages %}
+                <nav class="mtc-bookings-pagination" aria-label="Booking list pagination">
+                  <div class="mtc-bookings-pagination-summary">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                  </div>
+                  <div class="mtc-bookings-pagination-controls">
+                    {% if page_obj.has_previous %}
+                      <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        Previous
+                      </a>
+                    {% else %}
+                      <span class="is-disabled">
+                        <i class="fa-solid fa-chevron-left"></i>
+                        Previous
+                      </span>
+                    {% endif %}
+                    {% if page_obj.has_next %}
+                      <a href="?page={{ page_obj.next_page_number }}" aria-label="Next page">
+                        Next
+                        <i class="fa-solid fa-chevron-right"></i>
+                      </a>
+                    {% else %}
+                      <span class="is-disabled">
+                        Next
+                        <i class="fa-solid fa-chevron-right"></i>
+                      </span>
+                    {% endif %}
+                  </div>
+                </nav>
+              {% endif %}
+            {% else %}
+              <div class="mtc-student-bookings-empty">
+                <div class="mtc-student-bookings-empty-icon">
+                  <i class="fa-solid fa-calendar-check"></i>
+                </div>
+                <h2>No bookings yet</h2>
+                <p>Your tutor bookings will appear here after you schedule a lesson.</p>
+                <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find a Tutor</a>
+              </div>
+            {% endif %}
+          </div>
+        </div>
       </div>
     </div>
-  </section>
+  </div>
 </div>
 {% endblock %}

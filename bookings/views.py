@@ -62,12 +62,7 @@ def student_bookings(request):
         .prefetch_related("payments", "reviews")
         .order_by("-created_at")
     )
-    pending_review_count = (
-        bookings_queryset.filter(status="completed")
-        .exclude(reviews__student=student_profile)
-        .distinct()
-        .count()
-    )
+    pending_review_count = bookings_queryset.filter(status="pending").count()
     page_obj = _paginated_bookings(request, bookings_queryset)
     for booking in page_obj:
         payments = list(booking.payments.all())
@@ -81,6 +76,10 @@ def student_bookings(request):
         booking.display_payment_status_label = (
             display_payment.get_payment_status_display() if display_payment else "Pending"
         )
+    completed_lessons_count = Booking.objects.filter(
+        student=student_profile,
+        status="completed",
+    ).count()
     next_booking = (
         bookings_queryset.filter(booking_date__gte=timezone.localdate())
         .exclude(status__in=["completed", "cancelled"])
@@ -96,6 +95,7 @@ def student_bookings(request):
             "page_obj": page_obj,
             "pending_review_count": pending_review_count,
             "next_booking": next_booking,
+            "completed_lessons_count": completed_lessons_count,
             "active_tab": "bookings",
         },
     )
