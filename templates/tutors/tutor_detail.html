@@ -75,14 +75,74 @@
           </div>
         {% endif %}
 
-        <!-- Reviews Placeholder -->
+        <!-- Reviews -->
         <div class="mtc-admin-card" style="margin-top:20px;">
           <h2 style="margin:0 0 14px;font-size:18px;color:#12182c;"><i class="fa-solid fa-star" style="color:#fbbf24;margin-right:8px;"></i>Reviews</h2>
-          <div class="tutor-empty-state">
-            <div class="tutor-empty-icon" style="background:#fffbeb;color:#f59e0b;"><i class="fa-regular fa-star"></i></div>
-            <p>No reviews yet.</p>
-            <small>Reviews will appear here after completed sessions.</small>
-          </div>
+          {% if reviews %}
+            <div class="tutor-reviews-list">
+              {% for review in reviews %}
+              <div class="tutor-review-card">
+                <div class="tutor-review-header">
+                  <div class="tutor-review-avatar">
+                    {% if review.student.user.first_name %}
+                      {{ review.student.user.first_name|first|upper }}{{ review.student.user.last_name|first|upper }}
+                    {% else %}
+                      {{ review.student.user.username|first|upper }}
+                    {% endif %}
+                  </div>
+                  <div class="tutor-review-meta">
+                    <strong>{{ review.student.user.get_full_name|default:review.student.user.username }}</strong>
+                    <div class="tutor-review-stars">
+                      {% for i in "12345" %}
+                        {% if i|add:0 <= review.rating %}
+                          <i class="fa-solid fa-star"></i>
+                        {% else %}
+                          <i class="fa-regular fa-star"></i>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    <span class="tutor-review-date">{{ review.created_at|date:"M j, Y" }}</span>
+                  </div>
+                </div>
+                {% if review.review %}
+                <p class="tutor-review-text">{{ review.review }}</p>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+
+            {% if reviews.has_other_pages %}
+            <div class="tutor-reviews-pagination">
+              {% if reviews.has_previous %}
+              <a href="?page={{ reviews.previous_page_number }}" class="tutor-reviews-page-btn">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+              </a>
+              {% else %}
+              <span class="tutor-reviews-page-btn is-disabled">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+              </span>
+              {% endif %}
+
+              <span class="tutor-reviews-page-info">Page {{ reviews.number }} of {{ reviews.paginator.num_pages }}</span>
+
+              {% if reviews.has_next %}
+              <a href="?page={{ reviews.next_page_number }}" class="tutor-reviews-page-btn">
+                Next <i class="fa-solid fa-chevron-right"></i>
+              </a>
+              {% else %}
+              <span class="tutor-reviews-page-btn is-disabled">
+                Next <i class="fa-solid fa-chevron-right"></i>
+              </span>
+              {% endif %}
+            </div>
+            {% endif %}
+          {% else %}
+            <div class="tutor-empty-state">
+              <div class="tutor-empty-icon" style="background:#fffbeb;color:#f59e0b;"><i class="fa-regular fa-star"></i></div>
+              <p>No reviews yet.</p>
+              <small>Reviews will appear here after completed sessions.</small>
+            </div>
+          {% endif %}
         </div>
 
       </div>

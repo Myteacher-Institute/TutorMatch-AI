@@ -1,12 +1,14 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.contrib import messages
+from django.core.paginator import Paginator
 from django.utils import timezone
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
-from .models import Tutor, TutorDocument
+from .models import Tutor, TutorDocument, Subject
 from bookings.models import Booking
 from payments.models import Payment
+from reviews.models import Review
 from .forms import TutorProfileForm, TutorDocumentForm
 
 
@@ -121,4 +123,8 @@ def tutor_list(request):
 
 def tutor_detail(request, tutor_id):
     tutor = get_object_or_404(Tutor.objects.select_related("user__user").prefetch_related("subjects"), id=tutor_id)
-    return render(request, 'tutors/tutor_detail.html', {'tutor': tutor})
+    reviews_list = Review.objects.filter(tutor=tutor).select_related("student__user").order_by("-created_at")
+    paginator = Paginator(reviews_list, 5)
+    page_number = request.GET.get("page")
+    reviews = paginator.get_page(page_number)
+    return render(request, 'tutors/tutor_detail.html', {'tutor': tutor, 'reviews': reviews})

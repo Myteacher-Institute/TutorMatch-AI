@@ -5275,6 +5275,220 @@ img {
   word-break: break-all;
 }
 
+/* ── Verification form layout ── */
+.verification-form-layout {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.verification-left-col {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.verification-right-col {
+  min-width: 0;
+}
+
+.verification-requirements {
+  background: #fbfdff;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 16px;
+}
+
+.verification-req-title {
+  font-size: 12px;
+  font-weight: 800;
+  color: #334155;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin-bottom: 12px;
+}
+
+.verification-req-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.verification-req-item {
+  display: flex;
+  align-items: center;
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+}
+
+.verification-drop-zone {
+  position: relative;
+  border: 2px dashed var(--line);
+  border-radius: 12px;
+  padding: 32px 24px;
+  text-align: center;
+  background: #fbfdff;
+  transition: border-color 0.2s, background 0.2s, box-shadow 0.2s;
+  cursor: pointer;
+  min-height: 280px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.verification-drop-zone:hover {
+  border-color: var(--blue);
+  background: #eff6ff;
+}
+
+.verification-drop-zone.drag-over {
+  border-color: var(--blue);
+  background: #eff6ff;
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.12);
+}
+
+.verification-drop-zone input[type="file"] {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.verification-drop-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  pointer-events: none;
+}
+
+.verification-drop-content i {
+  font-size: 36px;
+  color: #94a3b8;
+  margin-bottom: 4px;
+}
+
+.verification-drop-main {
+  margin: 0;
+  font-size: 15px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.verification-drop-sub {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.verification-drop-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 18px;
+  border-radius: 8px;
+  background: var(--blue);
+  color: #fff;
+  font-size: 13px;
+  font-weight: 700;
+  pointer-events: none;
+}
+
+.verification-file-preview {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  width: 100%;
+  max-width: 360px;
+  padding: 14px 18px;
+  border-radius: 10px;
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+}
+
+.verification-file-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.verification-file-info i {
+  font-size: 20px;
+  color: #16a34a;
+  flex-shrink: 0;
+}
+
+.verification-file-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #166534;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.verification-remove-file {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 1px solid #bbf7d0;
+  background: #fff;
+  color: #166534;
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: background 0.2s, border-color 0.2s;
+}
+
+.verification-remove-file:hover {
+  background: #fef2f2;
+  border-color: #fecaca;
+  color: #991b1b;
+}
+
+.verification-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 20px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.verification-disclaimer {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted);
+  max-width: 400px;
+}
+
+.verification-footer-actions {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.upload-btn-disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  pointer-events: none;
+}
+
 .tutor-form-field select {
   appearance: none;
   -webkit-appearance: none;
@@ -7624,5 +7838,22 @@ img {
 
   .sdh-ring-week {
     font-size: 7px;
+  }
+}
+
+@media (max-width: 900px) {
+  .verification-form-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .verification-footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 14px;
+  }
+
+  .verification-footer-actions {
+    width: 100%;
+    justify-content: flex-end;
   }
 }
