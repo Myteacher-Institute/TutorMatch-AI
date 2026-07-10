@@ -95,13 +95,36 @@
           <div class="mtc-admin-card">
             <div class="tutor-card-head">
               <h2><i class="fa-solid fa-calendar-days" style="color:var(--blue);margin-right:8px;"></i>Upcoming Lessons</h2>
-              <span class="tutor-coming-soon-tag">Coming soon</span>
             </div>
-            <div class="tutor-empty-state">
-              <div class="tutor-empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>
-              <p>No upcoming lessons yet.</p>
-              <small>Once students book you, sessions will appear here.</small>
-            </div>
+            {% if upcoming_bookings %}
+              <div class="mtc-dashboard-recent-bookings">
+                {% for booking in upcoming_bookings %}
+                <div class="mtc-dashboard-booking-row">
+                  <div class="mtc-student-bookings-tutor">
+                    <span>
+                      {% if booking.student.user.first_name %}{{ booking.student.user.first_name|slice:":1" }}{% else %}S{% endif %}
+                    </span>
+                    <div>
+                      <strong>{{ booking.student.user.get_full_name|default:booking.student.user.username }}</strong>
+                      <small>₦{{ booking.amount }} — {{ booking.lesson_time|time:"g:i A" }}</small>
+                    </div>
+                  </div>
+                  <div class="mtc-dashboard-booking-meta">
+                    <span class="mtc-status-pill mtc-status-{{ booking.status }}">
+                      {{ booking.get_status_display }}
+                    </span>
+                    <small>{{ booking.booking_date|date:"M j, Y" }}</small>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="tutor-empty-state">
+                <div class="tutor-empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>
+                <p>No upcoming lessons yet.</p>
+                <small>Once students book you, sessions will appear here.</small>
+              </div>
+            {% endif %}
           </div>
 
           <div style="display:grid;gap:20px;">

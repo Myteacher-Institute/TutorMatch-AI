@@ -71,19 +71,21 @@
             {% csrf_token %}
             <div class="tutor-form-grid">
               <div class="tutor-form-field">
-                <label>Document Type</label>
+                <label>Document Type <span class="tutor-field-required">*</span></label>
                 {{ form.document_type }}
+                <small>Select the type of document you are uploading</small>
                 {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}
                 </p>{% endif %}
               </div>
               <div class="tutor-form-field">
                 <label>File</label>
-                <div class="tutor-file-drop">
+                <div class="tutor-file-drop" id="fileDrop">
                   {{ form.document_file }}
-                  <div class="tutor-file-drop-inner">
-                    <i class="fa-solid fa-cloud-arrow-up"></i>
-                    <p>Drag and drop your file here</p>
-                    <span>Browse File</span>
+                  <div class="tutor-file-drop-inner" id="fileDropInner">
+                    <i class="fa-solid fa-cloud-arrow-up" id="dropIcon"></i>
+                    <p id="dropText">Drag and drop your file here</p>
+                    <span id="dropBtn">Browse File</span>
+                    <p class="tutor-file-name" id="fileName" style="display:none;"></p>
                   </div>
                 </div>
                 {% if form.document_file.errors %}<p class="tutor-field-error">{{ form.document_file.errors|join:", " }}
@@ -128,6 +130,36 @@
           </div>
           {% endif %}
         </div>
+
+        <script>
+          (function() {
+            const fileInput = document.querySelector('#fileDrop input[type="file"]');
+            const fileDrop = document.getElementById('fileDrop');
+            const fileName = document.getElementById('fileName');
+            const dropText = document.getElementById('dropText');
+            const dropIcon = document.getElementById('dropIcon');
+            const dropBtn = document.getElementById('dropBtn');
+
+            if (fileInput && fileDrop) {
+              fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                  fileDrop.classList.add('has-file');
+                  fileName.textContent = this.files[0].name;
+                  fileName.style.display = 'block';
+                  dropText.style.display = 'none';
+                  dropBtn.style.display = 'none';
+                  dropIcon.className = 'fa-solid fa-circle-check';
+                } else {
+                  fileDrop.classList.remove('has-file');
+                  fileName.style.display = 'none';
+                  dropText.style.display = 'block';
+                  dropBtn.style.display = 'inline-block';
+                  dropIcon.className = 'fa-solid fa-cloud-arrow-up';
+                }
+              });
+            }
+          })();
+        </script>
 
       </main>
     </div>

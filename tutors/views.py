@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.contrib import messages
+from django.utils import timezone
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
 from .models import Tutor, TutorDocument
@@ -12,12 +13,24 @@ from .forms import TutorProfileForm, TutorDocumentForm
 @tutor_required
 def tutor_dashboard(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
-    bookings_count = profile.bookings.count()
+    bookings_count = Booking.objects.filter(tutor=profile, payments__payment_status="paid").distinct().count()
     total_earnings = profile.payments.aggregate(total= Sum('amount'))['total'] or 0   
+    upcoming_bookings = (
+        Booking.objects.filter(
+            tutor=profile,
+            status="accepted",
+            booking_date__gte=timezone.localdate(),
+            payments__payment_status="paid",
+        )
+        .select_related("student__user")
+        .distinct()
+        .order_by("booking_date", "lesson_time")
+    )
     return render(request, 'tutors/dashboard.html', 
                   {'profile': profile, 
                    'bookings_count': bookings_count,
                    'total_earnings': total_earnings,
+                   'upcoming_bookings': upcoming_bookings,
                    'active_tab': 'dashboard'})
 
 
