@@ -99,6 +99,7 @@ def verifications(request):
                         tutor_obj.verification_status = "approved"
                         tutor_obj.is_publicly_visible = True
                         tutor_obj.save(update_fields=["verification_status", "is_publicly_visible"])
+                        tutor_obj.documents.update(verification_status="approved")
                 except (LookupError, AttributeError):
                     pass
 
@@ -112,6 +113,7 @@ def verifications(request):
                         tutor_obj.verification_status = "rejected"
                         tutor_obj.is_publicly_visible = False
                         tutor_obj.save(update_fields=["verification_status", "is_publicly_visible"])
+                        tutor_obj.documents.update(verification_status="rejected")
                 except (LookupError, AttributeError):
                     pass
         except UserProfile.DoesNotExist:
