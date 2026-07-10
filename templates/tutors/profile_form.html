@@ -110,10 +110,17 @@
             <div class="tutor-form-section-title">
               <i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach
             </div>
-            <div class="tutor-subjects-grid">
-              {{ form.subjects }}
+            <div class="tutor-subject-tags" id="subjectTags">
+              {% for subject in profile.subjects.all %}
+                <span class="tutor-subject-pill" data-name="{{ subject.subject_name }}">{{ subject.subject_name }} <i class="fa-solid fa-xmark" style="cursor:pointer;margin-left:4px;"></i></span>
+              {% endfor %}
             </div>
-            {% if form.subjects.errors %}<p class="tutor-field-error">{{ form.subjects.errors|join:", " }}</p>{% endif %}
+            <div class="tutor-form-field" style="margin-top:14px;">
+              <label>Add Subject</label>
+              {{ form.subjects_input }}
+              <small>Type a subject and press Enter or comma to add it.</small>
+              {% if form.subjects_input.errors %}<p class="tutor-field-error">{{ form.subjects_input.errors|join:", " }}</p>{% endif %}
+            </div>
           </div>
 
           <!-- Actions -->
@@ -142,6 +149,55 @@
                 }
               });
             }
+          })();
+
+          (function() {
+            var input = document.querySelector('input[name="subjects_input"]');
+            var container = document.getElementById('subjectTags');
+            if (!input || !container) return;
+
+            function syncInput() {
+              var names = [];
+              container.querySelectorAll('.tutor-subject-pill').forEach(function(el) {
+                names.push(el.getAttribute('data-name'));
+              });
+              input.value = names.join(', ');
+            }
+
+            container.addEventListener('click', function(e) {
+              var pill = e.target.closest('.tutor-subject-pill');
+              if (!pill) return;
+              var x = e.target.closest('i');
+              if (!x) return;
+              pill.remove();
+              syncInput();
+            });
+
+            input.addEventListener('keydown', function(e) {
+              if (e.key === 'Enter' || e.key === ',') {
+                e.preventDefault();
+                var val = input.value.replace(',', '').trim();
+                if (!val) return;
+                var existing = container.querySelectorAll('.tutor-subject-pill');
+                var found = false;
+                existing.forEach(function(el) {
+                  if (el.getAttribute('data-name').toLowerCase() === val.toLowerCase()) {
+                    found = true;
+                  }
+                });
+                if (found) {
+                  input.value = '';
+                  return;
+                }
+                var span = document.createElement('span');
+                span.className = 'tutor-subject-pill';
+                span.setAttribute('data-name', val);
+                span.innerHTML = val + ' <i class="fa-solid fa-xmark" style="cursor:pointer;margin-left:4px;"></i>';
+                container.appendChild(span);
+                input.value = '';
+                syncInput();
+              }
+            });
           })();
         </script>
 

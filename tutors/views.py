@@ -37,7 +37,13 @@ def tutor_dashboard(request):
 @tutor_required
 def tutor_profile(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
-    form = TutorProfileForm(request.POST or None, request.FILES or None, instance=profile)
+    
+    if request.method == 'POST':
+        form = TutorProfileForm(request.POST, request.FILES, instance=profile)
+    else:
+        form = TutorProfileForm(instance=profile)
+        existing_subjects = profile.subjects.values_list('subject_name', flat=True)
+        form.fields['subjects_input'].initial = ', '.join(existing_subjects)
 
     if form.is_valid():
         profile = form.save(commit=False)
@@ -50,7 +56,13 @@ def tutor_profile(request):
             profile.profile_photo = upload_file_in_memory(photo, folder="/tutor_photos")
 
         profile.save()
-        form.save_m2m()
+        subjects_input = form.cleaned_data.get('subjects_input', '')
+        subject_names = [s.strip() for s in subjects_input.split(',') if s.strip()]
+        subject_objs = []
+        for name in subject_names:
+            subject, _ = Subject.objects.get_or_create(subject_name=name)
+            subject_objs.append(subject)
+        profile.subjects.set(subject_objs)
         messages.success(request, 'Profile updated successfully.')
         return redirect('tutor_dashboard')
 

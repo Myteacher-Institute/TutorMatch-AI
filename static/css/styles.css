@@ -4521,16 +4521,53 @@ img {
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  min-height: 36px;
+  padding: 8px;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background: #fbfdff;
 }
 
 .tutor-subject-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   background: #eff6ff;
   border: 1px solid #dbeafe;
   color: #1d4ed8;
   font-size: 12px;
   font-weight: 700;
-  padding: 5px 12px;
+  padding: 5px 10px;
   border-radius: 999px;
+}
+
+.tutor-subject-pill i {
+  font-size: 10px;
+  opacity: 0.7;
+}
+
+.tutor-subject-pill:hover i {
+  opacity: 1;
+}
+
+.tutor-subject-tag-input {
+  width: 100%;
+  min-height: 44px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: #fbfdff;
+  color: var(--ink);
+  font: inherit;
+  font-size: 14px;
+  padding: 0 14px;
+  outline: none;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.tutor-subject-tag-input:focus {
+  border-color: var(--blue);
+  background: #fff;
+  box-shadow: 0 0 0 4px #eff6ff;
 }
 
 .tutor-empty-state {
