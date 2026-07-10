@@ -2,6 +2,7 @@ from accounts.models import UserProfile
 from django.shortcuts import render
 from django.apps import apps
 from accounts.decorators import admin_required
+from tutors.models import Tutor
 
 
 def home(request):
@@ -93,7 +94,6 @@ def verifications(request):
                 profile.save()
 
                 try:
-                    Tutor = apps.get_model("tutors", "Tutor")
                     tutor_obj = Tutor.objects.filter(user=profile).first()
                     if tutor_obj:
                         tutor_obj.verification_status = "approved"
@@ -107,7 +107,6 @@ def verifications(request):
                 profile.save()
 
                 try:
-                    Tutor = apps.get_model("tutors", "Tutor")
                     tutor_obj = Tutor.objects.filter(user=profile).first()
                     if tutor_obj:
                         tutor_obj.verification_status = "rejected"
@@ -118,8 +117,47 @@ def verifications(request):
         except UserProfile.DoesNotExist:
             pass
 
-    pending_tutors = UserProfile.objects.filter(role=UserProfile.ROLE_TUTOR, is_verified=False).order_by("-created_at")
+    pending_tutors = Tutor.objects.filter(
+        verification_status__in=["pending", "rejected"]
+    ).select_related("user__user").prefetch_related("documents").order_by("-user__created_at")
     return render(request, "dashboard/verifications.html", {"pending_tutors": pending_tutors})
+
+
+@admin_required
+def users(request):
+    action = request.POST.get("action")
+    user_id = request.POST.get("user_id")
+    if request.method == "POST" and action and user_id:
+        try:
+            profile = UserProfile.objects.get(pk=user_id)
+            if action == "toggle_verify":
+                profile.is_verified = not profile.is_verified
+                profile.save()
+            elif action == "delete":
+                profile.user.delete()
+        except UserProfile.DoesNotExist:
+            pass
+
+    user_list = UserProfile.objects.all().order_by("-created_at")
+    return render(request, "dashboard/users.html", {"user_list": user_list})
+
+
+@admin_required
+def bookings(request):
+    return render(request, "dashboard/bookings.html")
+
+
+@admin_required
+def revenue(request):
+    return render(request, "dashboard/revenue.html")
+
+
+def Termsofservice(request):
+    return render(request, "Terms_of_Service.html")
+
+
+def privacy_policy(request):
+    return render(request, "privacy_policy.html")
 
 
 @admin_required

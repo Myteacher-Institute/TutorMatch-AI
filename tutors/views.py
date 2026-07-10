@@ -88,10 +88,16 @@ def tutor_verification(request):
                 'active_tab': 'verification',
             })
 
+        profile.documents.all().delete()
+        profile.verification_status = "pending"
+        profile.user.is_verified = False
+        profile.user.save(update_fields=["is_verified"])
+
         doc = form.save(commit=False)
         doc.tutor = profile
         doc.document_url = upload_file_in_memory(document_file, folder="/tutor_documents")
         doc.save()
+        profile.save(update_fields=["verification_status"])
         messages.success(request, 'Document uploaded successfully.')
         return redirect('tutor_verification')
 

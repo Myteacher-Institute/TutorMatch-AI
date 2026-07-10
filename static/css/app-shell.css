@@ -1471,8 +1471,8 @@ html.dark .mtc-dashboard-booking-row {
   border-color: var(--dash-border);
 }
 html.dark .mtc-dashboard-booking-row:hover {
-  border-color: #2b3c63;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+  border-color: #60a5fa;
+  box-shadow: 0 0 0 3px rgba(96, 165, 250, 0.25), 0 10px 24px rgba(0, 0, 0, 0.25);
 }
 html.dark .mtc-dashboard-booking-tutor strong {
   color: var(--dash-text);

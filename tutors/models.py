@@ -77,7 +77,7 @@ class TutorDocument(models.Model):
 
     DOCUMENT_TYPES = [
         ('government_id', 'Government ID'),
-        ('selfie', 'Selfie'),
+        ('nin', 'NIN Document'),
         ('certificate', 'Certificate'),
     ]
 
