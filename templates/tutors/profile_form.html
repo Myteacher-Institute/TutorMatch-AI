@@ -48,7 +48,12 @@
                 {% endif %}
               </div>
               <div class="tutor-photo-upload-info">
-                {{ form.profile_photo_upload }}
+                <div class="tutor-photo-upload-btn" id="photoUploadBtn">
+                  {{ form.profile_photo_upload }}
+                  <i class="fa-solid fa-cloud-arrow-up"></i>
+                  <span>Choose Photo</span>
+                  <p class="tutor-photo-file-name" id="photoFileName">No file chosen</p>
+                </div>
                 <p>JPG or PNG. Recommended: 400×400px.</p>
                 {% if form.profile_photo_upload.errors %}
                   <p class="tutor-field-error">{{ form.profile_photo_upload.errors|join:", " }}</p>
@@ -120,6 +125,26 @@
           </div>
 
         </form>
+
+        <script>
+          (function() {
+            var fileInput = document.querySelector('#photoUploadBtn input[type="file"]');
+            var btn = document.getElementById('photoUploadBtn');
+            var fileName = document.getElementById('photoFileName');
+            if (fileInput && btn) {
+              fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                  btn.classList.add('has-file');
+                  fileName.textContent = this.files[0].name;
+                } else {
+                  btn.classList.remove('has-file');
+                  fileName.textContent = 'No file chosen';
+                }
+              });
+            }
+          })();
+        </script>
+
       </main>
     </div>
   </div>
