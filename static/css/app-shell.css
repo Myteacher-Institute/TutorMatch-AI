@@ -1077,6 +1077,20 @@
     }
   }
 
+   /* Desktop (sidebar can be closed): when the sidebar is collapsed, the
+      content fills the full width, so add horizontal breathing room so it
+      doesn't sit flush against the screen edges. */
+   @media (min-width: 1025px) {
+     .chat-app.student-workspace.sidebar-collapsed .chat-view-viewport {
+       padding-left: 40px;
+       padding-right: 40px;
+     }
+     .chat-app.student-workspace.sidebar-collapsed .chat-pane .top-header {
+       padding-left: 40px;
+       padding-right: 40px;
+     }
+   }
+
    /* Student workspace on mobile: keep the pane full-width and the
       content centered. Prevent any horizontal overflow (the viewport is a
       column flex with overflow-y:auto, which otherwise enables horizontal
