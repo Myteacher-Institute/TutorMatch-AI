@@ -2,6 +2,7 @@
 {% block title %}Tutor Dashboard — TutorMatch AI{% endblock %}
 
 {% block content %}
+{% load humanize %}
 <div class="tutor-portal-bg admin-dashboard-light">
   <div class="mtc-shell">
 
@@ -80,7 +81,7 @@
           </div>
           <div class="mtc-admin-metric-card tutor-metric-yellow" style="border-left:4px solid var(--yellow); display:flex;align-items:center;justify-content:space-between; flex-direction:column;">  
             <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
-            <strong>{% if total_earnings %}&#8358;{{ total_earnings }}{% else %}&#8358;0{% endif %}</strong>
+            <strong>{% if total_earnings %}&#8358;{{ total_earnings|intcomma }}{% else %}&#8358;0{% endif %}</strong>
           
           </div>
         </div>

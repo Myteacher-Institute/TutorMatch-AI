@@ -21,7 +21,11 @@
         <span style="margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #2563eb; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">{{ chat_unread_count }}</span>
       {% endif %}
     </a>
-    <a href="{% url 'admin_revenue' %}" class="{% if url_name == 'admin_revenue' %}active{% endif %}"><i class="fas fa-wallet"></i> Revenue</a>
+    <a href="{% url 'admin_revenue' %}" class="{% if url_name == 'admin_revenue' %}active{% endif %}"><i class="fas fa-wallet"></i> Revenue
+      {% if pending_payout_count %}
+        <span style="margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #d97706; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">{{ pending_payout_count }}</span>
+      {% endif %}
+    </a>
   </nav>
 </aside>
 {% endwith %}

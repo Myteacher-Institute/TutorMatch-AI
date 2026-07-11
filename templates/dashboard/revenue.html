@@ -60,6 +60,9 @@
             <tr style="border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 700;">
               <th style="padding: 12px 8px;">Reference</th>
               <th style="padding: 12px 8px;">Tutor</th>
+              <th style="padding: 12px 8px; font-weight: 800;">Bank</th>
+              <th style="padding: 12px 8px; font-weight: 800;">Account Name</th>
+              <th style="padding: 12px 8px; font-weight: 800;">Account No.</th>
               <th style="padding: 12px 8px;">Student</th>
               <th style="padding: 12px 8px; text-align: right;">Amount</th>
               <th style="padding: 12px 8px; text-align: right;">Payout</th>
@@ -73,6 +76,9 @@
             <tr style="border-bottom: 1px solid var(--line); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
               <td style="padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;">{{ p.reference }}</td>
               <td style="padding: 14px 8px; font-weight: 700;">{{ p.tutor }}</td>
+              <td style="padding: 14px 8px; font-weight: 700;">{{ p.bank_name|default:"none" }}</td>
+              <td style="padding: 14px 8px; font-weight: 700;">{{ p.account_name|default:"none" }}</td>
+              <td style="padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 700;">{{ p.account_number|default:"none" }}</td>
               <td style="padding: 14px 8px;">{{ p.student }}</td>
               <td style="padding: 14px 8px; text-align: right;">₦{{ p.amount|floatformat:2 }}</td>
               <td style="padding: 14px 8px; text-align: right; font-weight: 800; color: #16a34a;">₦{{ p.payout|floatformat:2 }}</td>
@@ -114,7 +120,7 @@
             </tr>
             {% empty %}
             <tr>
-              <td colspan="8" style="padding: 28px; text-align: center; color: var(--muted);">No transactions recorded yet.</td>
+              <td colspan="11" style="padding: 28px; text-align: center; color: var(--muted);">No transactions recorded yet.</td>
             </tr>
             {% endfor %}
           </tbody>
@@ -196,8 +202,6 @@
           </tbody>
         </table>
       </div>
-
-
     </div>
   </section>
 </div>

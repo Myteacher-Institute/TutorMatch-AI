@@ -679,6 +679,9 @@ def revenue(request):
                     "payout": float(p.tutor_payout),
                     "status": p.payment_status,
                     "created_at": p.created_at,
+                    "account_name": tutor.account_name if tutor else "",
+                    "bank_name": tutor.bank_name if tutor else "",
+                    "account_number": tutor.account_number if tutor else "",
                 })
 
             ledger_paginator = Paginator(recent_payments, 10)

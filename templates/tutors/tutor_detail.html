@@ -169,11 +169,14 @@
             </div>
           </div>
 
-          <!-- Book button — wired by Task 4 -->
+          <!-- Book button — hidden when the viewer is a tutor -->
+          {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
           <button class="btn btn-primary tutor-book-btn">
             <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i><a href="{% url 'book_tutor' tutor_id=tutor.id %}">Book a Session</a>
           </button>
+          {% endif %}
 
+          {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
           <button
             type="button"
             class="btn btn-ghost save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}"
@@ -184,6 +187,7 @@
             <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
             <span class="save-tutor-label">{% if tutor.id in saved_tutor_ids %}Saved{% else %}Save Tutor{% endif %}</span>
           </button>
+          {% endif %}
 
           <p class="tutor-booking-note">Booking handled by the sessions module.</p>
 
