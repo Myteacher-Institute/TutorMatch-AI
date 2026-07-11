@@ -125,6 +125,31 @@
             </div>
           </div>
 
+          <!-- Account Details -->
+          <div class="mtc-admin-card tutor-form-card">
+            <div class="tutor-form-section-title">
+              <i class="fa-solid fa-building-columns" style="color:var(--blue);margin-right:8px;"></i>Account Details
+            </div>
+            <p class="tutor-field-required" style="margin:0 0 14px;font-size:12px;">These details are private and used only for your payouts. They are not shown on your public tutor profile.</p>
+            <div class="tutor-form-grid">
+              <div class="tutor-form-field">
+                <label>Account Name</label>
+                {{ form.account_name }}
+                {% if form.account_name.errors %}<p class="tutor-field-error">{{ form.account_name.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div class="tutor-form-field">
+                <label>Bank Name</label>
+                {{ form.bank_name }}
+                {% if form.bank_name.errors %}<p class="tutor-field-error">{{ form.bank_name.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div class="tutor-form-field">
+                <label>Account Number</label>
+                {{ form.account_number }}
+                {% if form.account_number.errors %}<p class="tutor-field-error">{{ form.account_number.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+          </div>
+
           <!-- Actions -->
           <div class="tutor-form-actions">
             <a href="{% url 'tutor_dashboard' %}" class="tutor-back-btn">Cancel</a>

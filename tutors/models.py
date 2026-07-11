@@ -70,6 +70,11 @@ class Tutor(models.Model):
     qualifications = models.TextField(blank=True)
     is_publicly_visible = models.BooleanField(default=False)
 
+    # Payout account details (private — used for tutor payouts, never shown on public profile)
+    account_name = models.CharField(max_length=200, blank=True)
+    bank_name = models.CharField(max_length=100, blank=True)
+    account_number = models.CharField(max_length=10, blank=True)
+
     def save(self, *args, **kwargs):
         self.is_publicly_visible = self.verification_status == "approved"
         if kwargs.get("update_fields") is not None and "verification_status" in kwargs["update_fields"]:

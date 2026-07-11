@@ -22,10 +22,16 @@ class TutorProfileForm(forms.ModelForm):
             'hourly_rate',
             'years_experience',
             'qualifications',
+            'account_name',
+            'bank_name',
+            'account_number',
         ]
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
             'qualifications': forms.Textarea(attrs={'rows': 4}),
+            'account_name': forms.TextInput(attrs={'placeholder': 'e.g. Samuel Godnews'}),
+            'bank_name': forms.TextInput(attrs={'placeholder': 'e.g. Access Bank'}),
+            'account_number': forms.TextInput(attrs={'placeholder': 'e.g. 0123456789'}),
         }
 
 
