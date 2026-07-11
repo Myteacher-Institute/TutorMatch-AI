@@ -1,4 +1,5 @@
 from accounts.models import UserProfile
+from django.core.paginator import Paginator
 from django.shortcuts import render
 from django.apps import apps
 from accounts.decorators import admin_required
@@ -145,8 +146,35 @@ def users(request):
         except UserProfile.DoesNotExist:
             pass
 
-    user_list = UserProfile.objects.all().order_by("-created_at")
-    return render(request, "dashboard/users.html", {"user_list": user_list})
+    query = request.GET.get("q", "").strip()
+    user_qs = UserProfile.objects.all().order_by("-created_at")
+    if query:
+        user_qs = user_qs.filter(
+            user__username__icontains=query
+        ) | user_qs.filter(
+            user__email__icontains=query
+        ) | user_qs.filter(
+            user__first_name__icontains=query
+        ) | user_qs.filter(
+            user__last_name__icontains=query
+        ) | user_qs.filter(
+            phone_number__icontains=query
+        )
+
+    paginator = Paginator(user_qs, 15)
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    return render(
+        request,
+        "dashboard/users.html",
+        {
+            "user_list": page_obj.object_list,
+            "page_obj": page_obj,
+            "paginator": paginator,
+            "query": query,
+        },
+    )
 
 
 @admin_required
