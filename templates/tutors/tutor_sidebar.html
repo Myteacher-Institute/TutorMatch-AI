@@ -1,4 +1,7 @@
 <aside class="mtc-admin-sidebar tutor-sidebar">
+  <button class="tutor-hamburger" id="tutor-sidebar-toggle" aria-label="Toggle sidebar">
+    <i class="fa-solid fa-bars"></i>
+  </button>
   <div class="tutor-sidebar-profile">
     <div class="tutor-avatar-ring">
       {% if profile.profile_photo %}
@@ -64,3 +67,18 @@
     <strong>{% if profile.hourly_rate %}&#8358;{{ profile.hourly_rate }}{% else %}Not set{% endif %}</strong>
   </div>
 </aside>
+<script>
+  const toggle = document.getElementById('tutor-sidebar-toggle');
+  const overlay = document.getElementById('tutor-sidebar-overlay');
+  const sidebar = document.querySelector('.tutor-sidebar');
+
+  toggle.addEventListener('click', function () {
+    sidebar.classList.toggle('tutor-sidebar-open');
+    overlay.classList.toggle('tutor-sidebar-overlay-open');
+  });
+
+  overlay.addEventListener('click', function () {
+    sidebar.classList.remove('tutor-sidebar-open');
+    overlay.classList.remove('tutor-sidebar-overlay-open');
+  });
+</script>
