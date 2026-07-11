@@ -67,6 +67,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "Chat.context_processors.chat_badges",
+                "tutors.context_processors.saved_tutor_ids",
             ],
         },
     },

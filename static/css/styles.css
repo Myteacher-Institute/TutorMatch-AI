@@ -2973,6 +2973,24 @@ img {
   .mtc-student-portal-toggle:checked ~ .mtc-admin-nav {
     display: grid;
   }
+  .mtc-recommended-tutors {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .mtc-recommended-tutor-actions {
+    display: flex;
+    flex-wrap: wrap;
+    width: 100%;
+    gap: 8px;
+  }
+  .mtc-recommended-tutor-actions .btn {
+    flex: 1 1 calc(50% - 4px);
+    width: auto;
+    min-height: 40px;
+    padding: 0 10px;
+  }
+  .mtc-recommended-tutor-actions .btn-primary {
+    flex-basis: 100%;
+  }
 }
 
 @media (max-width: 768px) {
@@ -3063,15 +3081,19 @@ img {
     font-size: 10px;
   }
   .mtc-recommended-tutor-actions {
-    display: grid;
-    grid-template-columns: repeat(2, minmax(0, 1fr));
+    display: flex;
+    flex-wrap: wrap;
     width: 100%;
     gap: 8px;
   }
   .mtc-recommended-tutor-actions .btn {
-    width: 100%;
+    flex: 1 1 calc(50% - 4px);
+    width: auto;
     min-height: 40px;
     padding: 0 10px;
+  }
+  .mtc-recommended-tutor-actions .btn-primary {
+    flex-basis: 100%;
   }
   .mtc-recommended-tutor-meta {
     grid-template-columns: repeat(2, minmax(0, 1fr));
@@ -4950,17 +4972,17 @@ img {
 }
 
 .tutor-public-card {
-  background: #fff;
-  border: 1px solid var(--line);
+  background: var(--tutor-card-bg, #fff);
+  border: 1px solid var(--tutor-card-border, var(--line));
   border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 18px rgba(15,23,42,0.05);
+  box-shadow: var(--tutor-card-shadow, 0 4px 18px rgba(15,23,42,0.05));
   transition: transform 0.2s, box-shadow 0.2s;
 }
 
 .tutor-public-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 14px 32px rgba(15,23,42,0.1);
+  box-shadow: var(--tutor-card-shadow, 0 14px 32px rgba(15,23,42,0.1));
 }
 
 .tutor-public-photo {
@@ -5024,7 +5046,7 @@ img {
   margin: 0 0 10px;
   font-size: 16px;
   font-weight: 700;
-  color: #12182c;
+  color: var(--text-primary, #12182c);
 }
 
 .tutor-public-subjects {
@@ -5054,7 +5076,7 @@ img {
   justify-content: center;
   min-height: 40px;
   margin-top: 14px;
-  border: 1px solid #dbeafe;
+  border: 1px solid var(--tutor-card-border, #dbeafe);
   border-radius: 8px;
   color: var(--blue);
   font-size: 13px;
@@ -5063,7 +5085,7 @@ img {
 }
 
 .tutor-public-cta:hover {
-  background: #eff6ff;
+  background: var(--hover-bg, #eff6ff);
 }
 
 /* ── Tutor Detail ── */

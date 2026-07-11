@@ -1,0 +1,133 @@
+{% extends "base.html" %} {% load static %} {% block title %}Saved Tutors |
+TutorMatch AI{% endblock %} {% block content %}
+<style>
+  .site-header,
+  .mtc-footer {
+    display: none !important;
+  }
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100vh;
+    overflow: hidden;
+  }
+  main {
+    padding: 0 !important;
+    margin: 0 !important;
+    max-width: 100% !important;
+    height: 100vh !important;
+    overflow: hidden !important;
+  }
+</style>
+
+<div class="chat-app student-workspace" id="chat-app-root">
+  <div class="sidebar-backdrop" onclick="toggleSidebarMobile(false)"></div>
+
+  {% include "accounts/student_sidebar.html" with active_tab="saved_tutors" %}
+
+  <div class="chat-pane">
+    <header class="top-header">
+      <div class="header-left" style="gap: 16px;">
+        <button class="floating-sidebar-toggle" onclick="toggleSidebarDesktop()" id="desk-toggle-btn" title="Toggle Sidebar" aria-label="Toggle Sidebar">
+          <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="9" y1="3" x2="9" y2="21"></line></svg>
+        </button>
+        <button class="floating-sidebar-toggle" style="display: none;" id="mobile-toggle-btn" onclick="toggleSidebarMobile(true)" title="Menu" aria-label="Menu">
+          <svg viewBox="0 0 24 24" width="20" height="20" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+        </button>
+        <a href="{% url 'home' %}" class="topbar-logo-link" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; color: inherit;">
+          <div class="topbar-logo-mark" style="background: #2563eb; border-radius: 50%; width: 28px; height: 28px; display: grid; place-items: center; color: #ffffff;">
+            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
+              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
+            </svg>
+          </div>
+          <span class="topbar-logo-text" style="font-weight: 800; font-size: 16px; color: var(--text-primary);">Myteacher<span style="color: #2563eb;">Connect</span></span>
+        </a>
+        <a href="{% url 'home' %}" class="back-to-site-btn" style="font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 20px; border: 1px solid var(--border-color); color: var(--text-primary); text-decoration: none; display: inline-flex; align-items: center; gap: 6px; transition: background 0.2s ease;">
+          <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          Back to Website
+        </a>
+      </div>
+
+      <a href="{% url 'ai_assistant' %}" class="floating-sidebar-toggle" title="Ask AI Assistant" style="text-decoration: none;">
+        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+      </a>
+    </header>
+
+    <div class="chat-view-viewport" style="overflow-y: auto; display: block;">
+      <div class="mtc-shell" style="padding: 28px 12px 40px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 8px;">
+          <div>
+            <h1 style="margin: 0; font-size: 26px; font-weight: 800; color: var(--text-primary);">
+              <i class="fa-solid fa-bookmark" style="color: #2563eb; margin-right: 8px;"></i>Saved Tutors
+            </h1>
+            <p style="margin: 6px 0 0; color: var(--muted); font-size: 14px;">
+              Keep your favourite tutors here for quick access. You have {{ tutors|length }} saved.
+            </p>
+          </div>
+          <a href="{% url 'tutor_list' %}" class="btn btn-primary" style="text-decoration: none;">
+            <i class="fa-solid fa-magnifying-glass" style="margin-right: 6px;"></i>Browse Tutors
+          </a>
+        </div>
+
+        <div class="tutor-cards-grid" id="saved-tutors-grid" style="margin-top: 24px;">
+          {% for tutor in tutors %}
+            <div class="tutor-public-card" data-tutor-card>
+              <div class="tutor-public-photo">
+                {% if tutor.profile_photo %}
+                  <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name }}">
+                {% else %}
+                  <div class="tutor-public-photo-placeholder">
+                    {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
+                  </div>
+                {% endif %}
+                <button
+                  type="button"
+                  class="save-tutor-btn is-saved"
+                  data-tutor-id="{{ tutor.id }}"
+                  data-remove-on-unsave
+                  onclick="toggleSaveTutor(this)"
+                  title="Remove from saved"
+                  style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.92);border:none;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;color:#2563eb;box-shadow:0 2px 8px rgba(15,23,42,0.12);"
+                >
+                  <i class="fa-solid fa-bookmark"></i>
+                </button>
+              </div>
+
+              <div class="tutor-public-body">
+                <h3>{{ tutor.user.user.get_full_name }}</h3>
+
+                <div class="tutor-public-subjects">
+                  {% for subject in tutor.subjects.all|slice:":3" %}
+                    <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                  {% empty %}
+                    <span style="font-size:12px;color:var(--muted);">No subjects listed</span>
+                  {% endfor %}
+                </div>
+
+                <div class="tutor-public-meta">
+                  <span><i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:4px;"></i>{{ tutor.location|default:"Remote" }}</span>
+                  <span class="tutor-rate-badge">&#8358;{{ tutor.hourly_rate }}/hr</span>
+                </div>
+
+                <a href="{% url 'tutor_detail' tutor.pk %}" class="tutor-public-cta">
+                  View Profile <i class="fa-solid fa-arrow-right" style="margin-left:5px;"></i>
+                </a>
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+
+        <div id="saved-tutors-empty" class="empty-box" style="display: {% if tutors %}none{% else %}block{% endif %}; margin: 20px auto; text-align: center;">
+          <div style="width:64px;height:64px;background:#eff6ff;border-radius:16px;display:grid;place-items:center;margin:0 auto 20px;font-size:26px;color:var(--blue);">
+            <i class="fa-regular fa-bookmark"></i>
+          </div>
+          <h1 style="font-size:22px;">No saved tutors yet</h1>
+          <p>Browse tutors and tap the bookmark icon to save them for later.</p>
+          <a href="{% url 'tutor_list' %}" class="btn btn-primary" style="margin-top:16px;">Find a Tutor</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

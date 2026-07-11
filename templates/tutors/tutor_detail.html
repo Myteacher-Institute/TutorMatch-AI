@@ -171,6 +171,18 @@
           <button class="btn btn-primary tutor-book-btn">
             <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i><a href="{% url 'book_tutor' tutor_id=tutor.id %}">Book a Session</a>
           </button>
+
+          <button
+            type="button"
+            class="btn btn-ghost save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}"
+            data-tutor-id="{{ tutor.id }}"
+            onclick="toggleSaveTutor(this)"
+            style="width:100%;border:1px solid var(--line);border-radius:10px;margin-top:10px;font-weight:700;background:#fff;color:#475569;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;"
+          >
+            <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+            <span class="save-tutor-label">{% if tutor.id in saved_tutor_ids %}Saved{% else %}Save Tutor{% endif %}</span>
+          </button>
+
           <p class="tutor-booking-note">Booking handled by the sessions module.</p>
 
           {% if tutor.is_verified %}

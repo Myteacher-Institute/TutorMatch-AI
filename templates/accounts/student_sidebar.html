@@ -24,9 +24,9 @@
       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
       <span>Chats{% if chat_unread_count %} ({{ chat_unread_count }}){% endif %}</span>
     </a>
-    <a class="sidebar-link" href="#">
+    <a class="sidebar-link {% if active_tab == 'saved_tutors' %}active{% endif %}" href="{% url 'saved_tutors' %}">
       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>
-      <span>Saved Tutors (Soon)</span>
+      <span>Saved Tutors</span>
     </a>
 
     <div class="sidebar-section-title">Discover</div>

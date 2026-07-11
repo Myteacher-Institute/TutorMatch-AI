@@ -117,6 +117,66 @@
   window.toggleSidebarMobile = toggleSidebarMobile;
   window.setAppTheme = setAppTheme;
 
+  window.toggleSaveTutor = function (button) {
+    const tutorId = button.getAttribute('data-tutor-id');
+    if (!tutorId) return;
+    const url = '/toggle-save-tutor/' + tutorId + '/';
+    const icon = button.querySelector('i');
+    const label = button.querySelector('.save-tutor-label');
+    button.disabled = true;
+
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'X-CSRFToken': getCookie('csrftoken'),
+        'X-Requested-With': 'XMLHttpRequest',
+      },
+    })
+      .then(function (res) { return res.json(); })
+      .then(function (data) {
+        const saved = !!data.saved;
+        button.classList.toggle('is-saved', saved);
+        if (icon) {
+          icon.className = saved
+            ? 'fa-solid fa-bookmark'
+            : 'fa-regular fa-bookmark';
+        }
+        if (label) {
+          label.textContent = saved ? 'Saved' : 'Save';
+        }
+        if (saved === false && button.hasAttribute('data-remove-on-unsave')) {
+          const card = button.closest('[data-tutor-card]');
+          if (card) card.remove();
+          const grid = document.getElementById('saved-tutors-grid');
+          if (grid && !grid.querySelector('[data-tutor-card]')) {
+            const empty = document.getElementById('saved-tutors-empty');
+            if (empty) empty.style.display = '';
+          }
+        }
+      })
+      .catch(function () {
+        button.classList.remove('is-saved');
+        if (icon) icon.className = 'fa-regular fa-bookmark';
+        if (label) label.textContent = 'Save';
+      })
+      .finally(function () { button.disabled = false; });
+  };
+
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const c = cookies[i].trim();
+        if (c.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(c.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
   window.addEventListener('resize', handleResponsiveLayout);
   window.addEventListener('DOMContentLoaded', function () {
     initSavedAppState();

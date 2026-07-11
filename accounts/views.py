@@ -1,7 +1,7 @@
 from django.http import HttpResponse
 from django.utils import timezone
 from datetime import timedelta
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from .forms import Registration, Login
 from .models import UserProfile
 from django.contrib.auth import login as auth_login, logout as auth_logout
@@ -15,6 +15,8 @@ def register(request):
         if form.is_valid():
             user = form.save()
             auth_login(request, user)
+            if _role_for_user(user) == UserProfile.ROLE_TUTOR:
+                return redirect('tutor_profile')
             return redirect(_dashboard_for_user(user))
 
     return render(request, 'accounts/register.html', {'form': form})
@@ -61,13 +63,17 @@ def verify_account(request):
     return render(request, 'accounts/verify.html', {'error': error})
 
 
-from .decorators import student_required, _dashboard_for_user
-from tutors.models import Tutor
+from .decorators import student_required, _dashboard_for_user, _role_for_user
+from tutors.models import Tutor, SavedTutor
 from django.db.models import Count
 from bookings.models import Booking
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 @student_required
+@ensure_csrf_cookie
 def student_dashboard(request):
     student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     recent_bookings = (
@@ -119,3 +125,38 @@ def student_dashboard(request):
             "active_tab": "dashboard",
         },
     )
+
+
+@student_required
+@ensure_csrf_cookie
+def saved_tutors(request):
+    student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    saved = (
+        SavedTutor.objects.filter(student=student_profile)
+        .select_related("tutor__user__user")
+        .prefetch_related("tutor__subjects")
+        .order_by("-created_at")
+    )
+    tutors = [item.tutor for item in saved]
+    return render(
+        request,
+        "accounts/saved_tutors.html",
+        {"tutors": tutors, "active_tab": "saved_tutors"},
+    )
+
+
+@student_required
+@require_POST
+def toggle_save_tutor(request, tutor_id):
+    student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    tutor = get_object_or_404(Tutor, id=tutor_id)
+    saved, created = SavedTutor.objects.get_or_create(
+        student=student_profile, tutor=tutor
+    )
+    if not created:
+        saved.delete()
+        return JsonResponse(
+            {"saved": False, "message": "Tutor removed from saved list."}
+        )
+    return JsonResponse({"saved": True, "message": "Tutor saved."})
+

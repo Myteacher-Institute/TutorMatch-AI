@@ -8,6 +8,12 @@ urlpatterns = [
     path("logout/", views.logout_view, name="logout"),
     path("verify/", views.verify_account, name="verify_account"),
     path("dashboard/", views.student_dashboard, name="student_dashboard"),
+    path("saved-tutors/", views.saved_tutors, name="saved_tutors"),
+    path(
+        "toggle-save-tutor/<int:tutor_id>/",
+        views.toggle_save_tutor,
+        name="toggle_save_tutor",
+    ),
     path(
         "password-reset/",
         auth_views.PasswordResetView.as_view(

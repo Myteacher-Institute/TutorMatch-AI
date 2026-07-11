@@ -10,6 +10,7 @@ from bookings.models import Booking
 from payments.models import Payment
 from reviews.models import Review
 from .forms import TutorProfileForm, TutorDocumentForm
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 @tutor_required
@@ -115,6 +116,7 @@ def tutor_verification(request):
     })
 
 
+@ensure_csrf_cookie
 def tutor_list(request):
     tutors = Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
 
@@ -132,6 +134,7 @@ def tutor_list(request):
     return render(request, 'tutors/tutor_list.html', {'tutors': tutors})
 
 
+@ensure_csrf_cookie
 def tutor_detail(request, tutor_id):
     tutor = get_object_or_404(Tutor.objects.select_related("user__user").prefetch_related("subjects"), id=tutor_id)
     reviews_list = Review.objects.filter(tutor=tutor).select_related("student__user").order_by("-created_at")

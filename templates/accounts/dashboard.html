@@ -455,6 +455,16 @@ TutorMatch AI{% endblock %} {% block content %}
                     <span>/hr</span>
                   </div>
                   <div class="mtc-recommended-tutor-actions">
+                    <button
+                      type="button"
+                      class="btn btn-ghost save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}"
+                      data-tutor-id="{{ tutor.id }}"
+                      onclick="toggleSaveTutor(this)"
+                      style="display:inline-flex;align-items:center;gap:6px;cursor:pointer;"
+                    >
+                      <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+                      <span class="save-tutor-label">{% if tutor.id in saved_tutor_ids %}Saved{% else %}Save{% endif %}</span>
+                    </button>
                     <a
                       href="{% url 'tutor_detail' tutor_id=tutor.id %}"
                       class="btn btn-ghost"

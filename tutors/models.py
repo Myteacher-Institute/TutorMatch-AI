@@ -2,6 +2,27 @@ from django.db import models
 from accounts.models import UserProfile
 
 
+class SavedTutor(models.Model):
+    student = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="saved_tutors",
+    )
+    tutor = models.ForeignKey(
+        "Tutor",
+        on_delete=models.CASCADE,
+        related_name="saved_by",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "tutor")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.student} saved {self.tutor}"
+
+
 class Subject(models.Model):
     subject_name = models.CharField(max_length=100, unique=True)
 
