@@ -279,9 +279,11 @@ def _load_database_tutors():
 def _filter_verified_tutors(Tutor, queryset):
     fields = {field.name for field in Tutor._meta.get_fields()}
     if "verification_status" in fields:
-        return queryset.filter(verification_status__in=["approved", "verified", "Approved", "Verified"])
+        queryset = queryset.filter(verification_status__in=["approved", "verified", "Approved", "Verified"])
     if "is_verified" in fields:
-        return queryset.filter(is_verified=True)
+        queryset = queryset.filter(is_verified=True)
+    if "is_publicly_visible" in fields:
+        queryset = queryset.filter(is_publicly_visible=True)
     return queryset
 
 

@@ -4254,7 +4254,7 @@ img {
 }
 
 .tutor-portal-bg {
-  background: #f8fafc;
+  background: #ffffff;
   min-height: calc(100vh - 70px);
   padding: 40px 0 70px;
 }
@@ -4972,7 +4972,7 @@ img {
 }
 
 .tutor-public-card {
-  background: var(--tutor-card-bg, #fff);
+  background: #ffffff;
   border: 1px solid var(--tutor-card-border, var(--line));
   border-radius: 16px;
   overflow: hidden;
@@ -5039,29 +5039,56 @@ img {
 }
 
 .tutor-public-body {
-  padding: 18px;
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  min-height: 140px;
 }
 
 .tutor-public-body h3 {
-  margin: 0 0 10px;
+  margin: 0;
   font-size: 16px;
   font-weight: 700;
-  color: var(--text-primary, #12182c);
+  color: --var(--ink);
+  line-height: 1.3;
 }
 
 .tutor-public-subjects {
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-items: center;
+  min-height: 26px;
+}
+
+.tutor-public-subjects .tutor-subject-pill {
+  font-size: 11px;
+  padding: 4px 10px;
+}
+
+.tutor-public-subjects:empty::before {
+  content: "No subjects listed";
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.tutor-public-subjects > span:only-child,
+.tutor-subjects-empty {
+  font-size: 12px;
+  color: var(--muted);
 }
 
 .tutor-public-meta {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 14px;
+  gap: 10px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
   font-size: 13px;
   color: var(--muted);
+  margin-top: auto;
 }
 
 .tutor-rate-badge {
@@ -5075,17 +5102,24 @@ img {
   align-items: center;
   justify-content: center;
   min-height: 40px;
-  margin-top: 14px;
-  border: 1px solid var(--tutor-card-border, #dbeafe);
+  border: 1px solid var(--line);
   border-radius: 8px;
   color: var(--blue);
   font-size: 13px;
   font-weight: 700;
-  transition: background 0.2s;
+  transition: background 0.2s, border-color 0.2s;
+  text-decoration: none;
+  width: 100%;
 }
 
 .tutor-public-cta:hover {
   background: var(--hover-bg, #eff6ff);
+  border-color: #bfdbfe;
+}
+
+.tutor-public-cta i {
+  margin-left: 6px;
+  font-size: 11px;
 }
 
 /* ── Tutor Detail ── */

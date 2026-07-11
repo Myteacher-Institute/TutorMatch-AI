@@ -47,7 +47,7 @@
       <div>
         <p class="results-count" style="margin-bottom:20px;">
           <i class="fa-solid fa-users" style="color:var(--blue);margin-right:6px;"></i>
-          {{ tutors|length }} tutor{% if tutors|length != 1 %}s{% endif %} found
+          {{ tutors.paginator.count }} tutor{% if tutors.paginator.count != 1 %}s{% endif %} found
         </p>
 
         {% if tutors %}
@@ -84,7 +84,7 @@
                     {% for subject in tutor.subjects.all|slice:":3" %}
                       <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
                     {% empty %}
-                      <span style="font-size:12px;color:var(--muted);">No subjects listed</span>
+                      <span class="tutor-subjects-empty">No subjects listed</span>
                     {% endfor %}
                   </div>
 
@@ -100,6 +100,34 @@
               </div>
             {% endfor %}
           </div>
+
+          {% if tutors.has_other_pages %}
+            <nav class="mtc-bookings-pagination" aria-label="Tutor list pagination" style="margin-top:24px;">
+              <div class="mtc-bookings-pagination-summary">
+                Page {{ tutors.number }} of {{ tutors.paginator.num_pages }}
+              </div>
+              <div class="mtc-bookings-pagination-controls">
+                {% if tutors.has_previous %}
+                  <a href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ tutors.previous_page_number }}">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                  </a>
+                {% else %}
+                  <span class="is-disabled">
+                    <i class="fa-solid fa-chevron-left"></i> Previous
+                  </span>
+                {% endif %}
+                {% if tutors.has_next %}
+                  <a href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ tutors.next_page_number }}">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                  </a>
+                {% else %}
+                  <span class="is-disabled">
+                    Next <i class="fa-solid fa-chevron-right"></i>
+                  </span>
+                {% endif %}
+              </div>
+            </nav>
+          {% endif %}
 
         {% else %}
           <div class="empty-box" style="margin:0 auto;text-align:center;">

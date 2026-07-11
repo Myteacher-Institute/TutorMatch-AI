@@ -25,7 +25,12 @@ def _paginated_bookings(request, bookings):
 
 @login_required
 def book_tutor(request, tutor_id):
-    tutor = get_object_or_404(Tutor, pk=tutor_id)
+    tutor = get_object_or_404(
+        Tutor,
+        pk=tutor_id,
+        is_publicly_visible=True,
+        verification_status="approved",
+    )
     amount = tutor.hourly_rate or 0
     student_profile = _profile_for_user(request.user)
 

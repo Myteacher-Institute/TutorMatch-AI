@@ -97,8 +97,7 @@ def verifications(request):
                     tutor_obj = Tutor.objects.filter(user=profile).first()
                     if tutor_obj:
                         tutor_obj.verification_status = "approved"
-                        tutor_obj.is_publicly_visible = True
-                        tutor_obj.save(update_fields=["verification_status", "is_publicly_visible"])
+                        tutor_obj.save(update_fields=["verification_status"])
                         tutor_obj.documents.update(verification_status="approved")
                 except (LookupError, AttributeError):
                     pass
@@ -111,8 +110,7 @@ def verifications(request):
                     tutor_obj = Tutor.objects.filter(user=profile).first()
                     if tutor_obj:
                         tutor_obj.verification_status = "rejected"
-                        tutor_obj.is_publicly_visible = False
-                        tutor_obj.save(update_fields=["verification_status", "is_publicly_visible"])
+                        tutor_obj.save(update_fields=["verification_status"])
                         tutor_obj.documents.update(verification_status="rejected")
                 except (LookupError, AttributeError):
                     pass
@@ -135,6 +133,13 @@ def users(request):
             if action == "toggle_verify":
                 profile.is_verified = not profile.is_verified
                 profile.save()
+                if not profile.is_verified:
+                    Tutor = apps.get_model("tutors", "Tutor")
+                    tutor_obj = Tutor.objects.filter(user=profile).first()
+                    if tutor_obj:
+                        tutor_obj.verification_status = "rejected"
+                        tutor_obj.save(update_fields=["verification_status"])
+                        tutor_obj.documents.update(verification_status="rejected")
             elif action == "delete":
                 profile.user.delete()
         except UserProfile.DoesNotExist:
@@ -157,41 +162,6 @@ def revenue(request):
 def Termsofservice(request):
     return render(request, "Terms_of_Service.html")
 
-
-def privacy_policy(request):
-    return render(request, "privacy_policy.html")
-
-
-@admin_required
-def users(request):
-    action = request.POST.get("action")
-    user_id = request.POST.get("user_id")
-    if request.method == "POST" and action and user_id:
-        try:
-            profile = UserProfile.objects.get(pk=user_id)
-            if action == "toggle_verify":
-                profile.is_verified = not profile.is_verified
-                profile.save()
-            elif action == "delete":
-                profile.user.delete()
-        except UserProfile.DoesNotExist:
-            pass
-
-    user_list = UserProfile.objects.all().order_by("-created_at")
-    return render(request, "dashboard/users.html", {"user_list": user_list})
-
-
-@admin_required
-def bookings(request):
-    return render(request, "dashboard/bookings.html")
-
-
-@admin_required
-def revenue(request):
-    return render(request, "dashboard/revenue.html")
-
-def Termsofservice(request):
-    return render(request, "Terms_of_Service.html")
 
 def privacy_policy(request):
     return render(request, "privacy_policy.html")

@@ -53,6 +53,8 @@
               <div class="tutor-public-subjects" style="margin-top:14px;">
                 {% for subject in tutor.subjects.all %}
                   <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                {% empty %}
+                  <span class="tutor-subjects-empty">No subjects listed</span>
                 {% endfor %}
               </div>
             </div>

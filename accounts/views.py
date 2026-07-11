@@ -106,7 +106,7 @@ def student_dashboard(request):
     ).count()
     recommended_tutors = (
         Tutor.objects.select_related("user__user")
-        .filter(is_publicly_visible=True)
+        .filter(is_publicly_visible=True, verification_status="approved")
         .prefetch_related("subjects")
         .annotate(review_count=Count("tutor_reviews"))
         .order_by("-years_experience", "hourly_rate")[:4]
@@ -132,7 +132,11 @@ def student_dashboard(request):
 def saved_tutors(request):
     student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     saved = (
-        SavedTutor.objects.filter(student=student_profile)
+        SavedTutor.objects.filter(
+            student=student_profile,
+            tutor__is_publicly_visible=True,
+            tutor__verification_status="approved",
+        )
         .select_related("tutor__user__user")
         .prefetch_related("tutor__subjects")
         .order_by("-created_at")
@@ -149,7 +153,12 @@ def saved_tutors(request):
 @require_POST
 def toggle_save_tutor(request, tutor_id):
     student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
-    tutor = get_object_or_404(Tutor, id=tutor_id)
+    tutor = get_object_or_404(
+        Tutor,
+        id=tutor_id,
+        is_publicly_visible=True,
+        verification_status="approved",
+    )
     saved, created = SavedTutor.objects.get_or_create(
         student=student_profile, tutor=tutor
     )

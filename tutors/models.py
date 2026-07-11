@@ -70,6 +70,12 @@ class Tutor(models.Model):
     qualifications = models.TextField(blank=True)
     is_publicly_visible = models.BooleanField(default=False)
 
+    def save(self, *args, **kwargs):
+        self.is_publicly_visible = self.verification_status == "approved"
+        if kwargs.get("update_fields") is not None and "verification_status" in kwargs["update_fields"]:
+            kwargs["update_fields"] = list(kwargs["update_fields"]) + ["is_publicly_visible"]
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.user} - {self.location}"
 

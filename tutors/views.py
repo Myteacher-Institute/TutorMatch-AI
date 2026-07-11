@@ -118,25 +118,39 @@ def tutor_verification(request):
 
 @ensure_csrf_cookie
 def tutor_list(request):
-    tutors = Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
+    tutors_qs = Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
 
     subject_filter = request.GET.get('subject')
     location_filter = request.GET.get('location')
     max_rate = request.GET.get('max_rate')
 
     if subject_filter:
-        tutors = tutors.filter(subjects__subject_name__icontains=subject_filter)
+        tutors_qs = tutors_qs.filter(subjects__subject_name__icontains=subject_filter)
     if location_filter:
-        tutors = tutors.filter(location__icontains=location_filter)
+        tutors_qs = tutors_qs.filter(location__icontains=location_filter)
     if max_rate:
-        tutors = tutors.filter(hourly_rate__lte=max_rate)
+        tutors_qs = tutors_qs.filter(hourly_rate__lte=max_rate)
 
-    return render(request, 'tutors/tutor_list.html', {'tutors': tutors})
+    tutors_qs = tutors_qs.distinct()
+
+    paginator = Paginator(tutors_qs, 10)
+    page_number = request.GET.get("page")
+    tutors = paginator.get_page(page_number)
+
+    return render(request, 'tutors/tutor_list.html', {
+        'tutors': tutors,
+        'page_obj': tutors,
+    })
 
 
 @ensure_csrf_cookie
 def tutor_detail(request, tutor_id):
-    tutor = get_object_or_404(Tutor.objects.select_related("user__user").prefetch_related("subjects"), id=tutor_id)
+    tutor = get_object_or_404(
+        Tutor.objects.select_related("user__user").prefetch_related("subjects"),
+        id=tutor_id,
+        is_publicly_visible=True,
+        verification_status="approved",
+    )
     reviews_list = Review.objects.filter(tutor=tutor).select_related("student__user").order_by("-created_at")
     paginator = Paginator(reviews_list, 5)
     page_number = request.GET.get("page")
