@@ -5688,11 +5688,22 @@ img {
 }
 
 /* ── Responsive ── */
+@media (max-width: 1024px) {
+  .tutor-cards-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .tutor-cards-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
 @media (max-width: 900px) {
   .tutor-bottom-grid,
   .tutor-detail-layout,
-  .tutor-form-grid,
-  .tutor-cards-grid {
+  .tutor-form-grid {
     grid-template-columns: 1fr;
   }
 
