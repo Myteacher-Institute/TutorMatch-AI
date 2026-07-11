@@ -116,7 +116,7 @@ def tutor_verification(request):
 
 
 def tutor_list(request):
-    tutors = Tutor.objects.filter(is_publicly_visible=True)
+    tutors = Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
 
     subject_filter = request.GET.get('subject')
     location_filter = request.GET.get('location')
