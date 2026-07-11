@@ -52,60 +52,6 @@
       </div>
 
       <div class="mtc-admin-card" style="overflow-x: auto; margin-top: 16px;">
-        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-          <h2>Tutor Payout Table</h2>
-          <span class="mtc-admin-card-hint">{{ summary.paid_sessions }} paid · {{ summary.pending_sessions }} pending · {{ summary.failed_sessions }} failed</span>
-        </div>
-
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: left; min-width: 760px;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 700;">
-              <th style="padding: 12px 8px;">Tutor</th>
-              <th style="padding: 12px 8px; text-align: center;">Sessions</th>
-              <th style="padding: 12px 8px; text-align: right;">Collected</th>
-              <th style="padding: 12px 8px; text-align: right;">Platform Fee</th>
-              <th style="padding: 12px 8px; text-align: right;">Tutor Payout</th>
-              <th style="padding: 12px 8px; text-align: center;">Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for t in tutor_payouts %}
-            <tr style="border-bottom: 1px solid var(--line); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
-              <td style="padding: 14px 8px;">
-                <div style="display: flex; align-items: center; gap: 10px;">
-                  <div style="width: 36px; height: 36px; border-radius: 10px; overflow: hidden; flex-shrink: 0; display: grid; place-items: center; background: #e4efff; color: var(--blue); font-size: 14px; font-weight: 800;">
-                    {% if t.photo %}<img src="{{ t.photo }}" alt="{{ t.name }}" style="width: 100%; height: 100%; object-fit: cover;">{% else %}{{ t.name|slice:":1" }}{% endif %}
-                  </div>
-                  <div style="min-width: 0;">
-                    <div style="font-weight: 700; color: #0f172a;">{{ t.name }}</div>
-                    <div style="font-size: 11px; color: var(--muted);">{{ t.email }}</div>
-                  </div>
-                </div>
-              </td>
-              <td style="padding: 14px 8px; text-align: center; font-weight: 700;">{{ t.sessions }}</td>
-              <td style="padding: 14px 8px; text-align: right;">₦{{ t.total_collected|floatformat:2 }}</td>
-              <td style="padding: 14px 8px; text-align: right; color: #64748b;">₦{{ t.total_commission|floatformat:2 }}</td>
-              <td style="padding: 14px 8px; text-align: right; font-weight: 800; color: #16a34a;">₦{{ t.total_payout|floatformat:2 }}</td>
-              <td style="padding: 14px 8px; text-align: center;">
-                {% if t.status == "Pending Payout" %}
-                  <span style="border-radius: 999px; background: #fef3c7; color: #b45309; padding: 4px 10px; font-size: 11px; font-weight: 700;">{{ t.status }}</span>
-                {% else %}
-                  <span style="border-radius: 999px; background: #dcfce7; color: #166534; padding: 4px 10px; font-size: 11px; font-weight: 700;">{{ t.status }}</span>
-                {% endif %}
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="6" style="padding: 28px; text-align: center; color: var(--muted);">
-                No tutor payouts recorded yet. Once students complete payments, tutor earnings will appear here.
-              </td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
-      </div>
-
-      <div class="mtc-admin-card" style="overflow-x: auto; margin-top: 16px;">
         <h2>Financial Ledger</h2>
         <p style="margin: 0 0 8px; color: var(--muted); font-size: 13px;">Escrow bookkeeping and transaction logs with Paystack references and commission splits.</p>
 
@@ -196,6 +142,62 @@
         </nav>
         {% endif %}
       </div>
+
+      <div class="mtc-admin-card" style="overflow-x: auto; margin-top: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+          <h2>Tutor Payout Table</h2>
+          <span class="mtc-admin-card-hint">{{ summary.paid_sessions }} paid · {{ summary.pending_sessions }} pending · {{ summary.failed_sessions }} failed</span>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: left; min-width: 760px;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 700;">
+              <th style="padding: 12px 8px;">Tutor</th>
+              <th style="padding: 12px 8px; text-align: center;">Sessions</th>
+              <th style="padding: 12px 8px; text-align: right;">Collected</th>
+              <th style="padding: 12px 8px; text-align: right;">Platform Fee</th>
+              <th style="padding: 12px 8px; text-align: right;">Tutor Payout</th>
+              <th style="padding: 12px 8px; text-align: center;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tutor_payouts %}
+            <tr style="border-bottom: 1px solid var(--line); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
+              <td style="padding: 14px 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 36px; height: 36px; border-radius: 10px; overflow: hidden; flex-shrink: 0; display: grid; place-items: center; background: #e4efff; color: var(--blue); font-size: 14px; font-weight: 800;">
+                    {% if t.photo %}<img src="{{ t.photo }}" alt="{{ t.name }}" style="width: 100%; height: 100%; object-fit: cover;">{% else %}{{ t.name|slice:":1" }}{% endif %}
+                  </div>
+                  <div style="min-width: 0;">
+                    <div style="font-weight: 700; color: #0f172a;">{{ t.name }}</div>
+                    <div style="font-size: 11px; color: var(--muted);">{{ t.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="padding: 14px 8px; text-align: center; font-weight: 700;">{{ t.sessions }}</td>
+              <td style="padding: 14px 8px; text-align: right;">₦{{ t.total_collected|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: right; color: #64748b;">₦{{ t.total_commission|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: right; font-weight: 800; color: #16a34a;">₦{{ t.total_payout|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: center;">
+                {% if t.status == "Pending Payout" %}
+                  <span style="border-radius: 999px; background: #fef3c7; color: #b45309; padding: 4px 10px; font-size: 11px; font-weight: 700;">{{ t.status }}</span>
+                {% else %}
+                  <span style="border-radius: 999px; background: #dcfce7; color: #166534; padding: 4px 10px; font-size: 11px; font-weight: 700;">{{ t.status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" style="padding: 28px; text-align: center; color: var(--muted);">
+                No tutor payouts recorded yet. Once students complete payments, tutor earnings will appear here.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+
     </div>
   </section>
 </div>
