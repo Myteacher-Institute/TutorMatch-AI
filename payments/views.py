@@ -87,13 +87,21 @@ def verify_payment(request):
         amount = booking.amount
         commission = amount * Decimal('0.15')
         tutor_payout = amount * Decimal('0.85')
-        Payment.objects.create(
+
+        existing = Payment.objects.filter(booking=booking)
+        if existing.count() > 1:
+            keep = existing.order_by("-created_at").first()
+            existing.exclude(pk=keep.pk).delete()
+
+        Payment.objects.update_or_create(
             booking=booking,
-            amount=amount,
-            commission=commission,
-            tutor_payout=tutor_payout,
-            payment_status="paid",
-            paystack_reference=reference,
+            defaults={
+                "amount": amount,
+                "commission": commission,
+                "tutor_payout": tutor_payout,
+                "payment_status": "paid",
+                "paystack_reference": reference,
+            },
         )
         messages.success(request, "Payment verified successfully.")
         return redirect("payment_success")

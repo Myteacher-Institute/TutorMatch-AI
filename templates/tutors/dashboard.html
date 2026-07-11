@@ -62,25 +62,26 @@
 
         <!-- Metric Cards -->
         <div class="mtc-admin-metrics-grid" style="margin-top:28px;">
-          <div class="mtc-admin-metric-card tutor-metric-blue" style="border-left:4px solid var(--blue);">
-            <span><i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Subjects</span>
+          <div class="mtc-admin-metric-card tutor-metric-blue" style="border-left:4px solid var(--blue); display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Subjects</span>
             <strong>{{ profile.subjects.count }}</strong>
-            <p class="tutor-metric-sub">Subjects taught</p>
+         
           </div>
-          <div class="mtc-admin-metric-card tutor-metric-green" style="border-left:4px solid #16a34a;">
-            <span><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>Experience</span>
+          <div class="mtc-admin-metric-card tutor-metric-green" style="border-left:4px solid #16a34a; display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>Experience</span>
             <strong>{{ profile.years_experience }}yr{% if profile.years_experience != 1 %}s{% endif %}</strong>
-            <p class="tutor-metric-sub">Teaching experience</p>
+            
           </div>
-          <div class="mtc-admin-metric-card tutor-metric-purple" style="border-left:4px solid red">
-            <span><i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>Bookings</span>
+          <div class="mtc-admin-metric-card tutor-metric-purple" style="border-left:4px solid red ; display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>Bookings</span> 
+         
             <strong>{{ bookings_count|default:"0" }}</strong>
-            <p class="tutor-metric-sub">Total bookings</p>
+          
           </div>
-          <div class="mtc-admin-metric-card tutor-metric-yellow" style="border-left:4px solid var(--yellow);">
-            <span><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
+          <div class="mtc-admin-metric-card tutor-metric-yellow" style="border-left:4px solid var(--yellow); display:flex;align-items:center;justify-content:space-between; flex-direction:column;">  
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
             <strong>{% if total_earnings %}&#8358;{{ total_earnings }}{% else %}&#8358;0{% endif %}</strong>
-            <p class="tutor-metric-sub">Total earned</p>
+          
           </div>
         </div>
 

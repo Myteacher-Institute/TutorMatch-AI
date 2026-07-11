@@ -41,6 +41,16 @@ def book_tutor(request, tutor_id):
             booking.student = student_profile
             booking.tutor = tutor
             booking.amount = amount
+            existing = Booking.objects.filter(
+                student=student_profile,
+                tutor=tutor,
+                booking_date=booking.booking_date,
+                lesson_time=booking.lesson_time,
+                status="pending",
+            ).first()
+            if existing:
+                messages.info(request, "You already have a pending request for this time slot.")
+                return redirect("payment_checkout", booking_id=existing.id)
             booking.save()
             messages.success(request, "Your booking request has been created.")
             return redirect("payment_checkout", booking_id=booking.id)
@@ -109,18 +119,33 @@ def student_bookings(request):
 @login_required
 def tutor_bookings(request):
     tutor = get_object_or_404(Tutor, user=_profile_for_user(request.user))
-    # Only show bookings where the student has a successful (paid) payment
     bookings_queryset = (
-        Booking.objects.filter(tutor=tutor, payments__payment_status="paid")
+        Booking.objects.filter(tutor=tutor)
         .select_related("student__user")
         .prefetch_related("payments")
-        .distinct()
         .order_by("-created_at")
     )
     pending_count = bookings_queryset.filter(status="pending").count()
     accepted_count = bookings_queryset.filter(status="accepted").count()
     completed_count = bookings_queryset.filter(status="completed").count()
     page_obj = _paginated_bookings(request, bookings_queryset)
+
+    for booking in page_obj:
+        payments = list(booking.payments.all())
+        paid_payment = next(
+            (payment for payment in payments if payment.payment_status == "paid"),
+            None,
+        )
+        released = next(
+            (payment for payment in payments if payment.payment_status == "released"),
+            None,
+        )
+        latest_payment = payments[0] if payments else None
+        display_payment = released or paid_payment or latest_payment
+        booking.display_payment_status = display_payment.payment_status if display_payment else "pending"
+        booking.display_payment_status_label = (
+            display_payment.get_payment_status_display() if display_payment else "Pending"
+        )
 
     return render(
         request,

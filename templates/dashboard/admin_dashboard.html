@@ -7,33 +7,389 @@
   <section class="mtc-admin-layout">
     {% include "dashboard/_admin_nav.html" %}
     <div class="mtc-admin-content">
-      <h1>Admin Dashboard</h1>
-      <p class="lead">System-wide metrics and general activity overview.</p>
-      
-      <div class="mtc-admin-metrics-grid">
-        <div class="mtc-admin-metric-card">
-          <span><i class="fas fa-chalkboard-teacher"></i> Total Tutors</span>
-          <strong>{{ metrics.total_tutors }}</strong>
+      <div class="mtc-admin-hero">
+        <div class="mtc-admin-hero-content">
+          <h1 style="color: #fff;">Dashboard Overview</h1>
+          <p>Welcome back. Here's what's happening on Myteacherconnect today.</p>
+          <div class="mtc-admin-hero-actions">
+            <a href="{% url 'admin_verifications' %}" class="mtc-hero-btn">
+              <i class="fa-solid fa-check-circle"></i> Review Verifications
+            </a>
+            <a href="{% url 'admin_users' %}" class="mtc-hero-btn mtc-hero-btn-secondary">
+              <i class="fa-solid fa-users"></i> Manage Users
+            </a>
+          </div>
         </div>
-        <div class="mtc-admin-metric-card">
-          <span><i class="fas fa-user-graduate"></i> Total Students</span>
-          <strong>{{ metrics.total_students }}</strong>
-        </div>
-        <div class="mtc-admin-metric-card">
-          <span><i class="fas fa-calendar-check"></i> Total Bookings</span>
-          <strong>{{ metrics.total_bookings }}</strong>
-        </div>
-        <div class="mtc-admin-metric-card">
-          <span><i class="fas fa-money-bill-wave"></i> Total Revenue</span>
-          <strong>₦{{ metrics.total_revenue }}</strong>
+        <div class="mtc-admin-date-badge">
+          <i class="fa-regular fa-calendar"></i>
+          <span>{{ today|default:""|date:"l, M d, Y" }}</span>
         </div>
       </div>
-      
-      <div class="mtc-admin-card">
-        <h2>Recent Activity</h2>
-        <p>Bookings, tutor approvals, and payment events will appear here once the team connects their models. General system indicators and audit logs will be rendered in this panel.</p>
+
+      <div class="mtc-admin-metrics-grid">
+        <div class="mtc-admin-metric-card mtc-metric-tutors">
+          <div class="mtc-metric-icon"><i class="fas fa-chalkboard-teacher"></i></div>
+          <div class="mtc-metric-content">
+            <span>Total Tutors</span>
+            <strong>{{ metrics.total_tutors }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-students">
+          <div class="mtc-metric-icon"><i class="fas fa-user-graduate"></i></div>
+          <div class="mtc-metric-content">
+            <span>Total Students</span>
+            <strong>{{ metrics.total_students }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-bookings">
+          <div class="mtc-metric-icon"><i class="fas fa-calendar-check"></i></div>
+          <div class="mtc-metric-content">
+            <span>Total Bookings</span>
+            <strong>{{ metrics.total_bookings }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-revenue">
+          <div class="mtc-metric-icon"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="mtc-metric-content">
+            <span>Total Revenue</span>
+            <strong>₦{{ metrics.total_revenue }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="mtc-admin-charts-row">
+        <div class="mtc-admin-card mtc-admin-chart-card">
+          <div class="mtc-admin-card-header">
+            <h2><i class="fa-solid fa-arrow-trend-up"></i> Growth Analytics</h2>
+            <span class="mtc-admin-card-hint">Last 7 days</span>
+          </div>
+          <div class="mtc-chart-wrap">
+            <canvas id="growthChart"></canvas>
+          </div>
+        </div>
+        <div class="mtc-admin-card mtc-admin-chart-card">
+          <div class="mtc-admin-card-header">
+            <h2><i class="fa-solid fa-chart-pie"></i> Booking Status</h2>
+            <span class="mtc-admin-card-hint">All time</span>
+          </div>
+          <div class="mtc-booking-status-layout">
+            <div class="mtc-chart-wrap mtc-chart-wrap-doughnut">
+              <canvas id="bookingStatusChart"></canvas>
+            </div>
+            <div class="mtc-booking-legend">
+              <div class="mtc-booking-legend-item">
+                <span class="mtc-booking-legend-dot" style="background: #0d9488;"></span>
+                <span class="mtc-booking-legend-label">Completed</span>
+                <span class="mtc-booking-legend-value">{{ booking_status_counts.completed|default:0 }}</span>
+              </div>
+              <div class="mtc-booking-legend-item">
+                <span class="mtc-booking-legend-dot" style="background: #2563eb;"></span>
+                <span class="mtc-booking-legend-label">Accepted</span>
+                <span class="mtc-booking-legend-value">{{ booking_status_counts.accepted|default:0 }}</span>
+              </div>
+              <div class="mtc-booking-legend-item">
+                <span class="mtc-booking-legend-dot" style="background: #d97706;"></span>
+                <span class="mtc-booking-legend-label">Pending</span>
+                <span class="mtc-booking-legend-value">{{ booking_status_counts.pending|default:0 }}</span>
+              </div>
+              <div class="mtc-booking-legend-item">
+                <span class="mtc-booking-legend-dot" style="background: #be123c;"></span>
+                <span class="mtc-booking-legend-label">Cancelled</span>
+                <span class="mtc-booking-legend-value">{{ booking_status_counts.cancelled|default:0 }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mtc-admin-charts-row">
+        <div class="mtc-admin-card mtc-admin-chart-card">
+          <div class="mtc-admin-card-header">
+            <h2><i class="fa-solid fa-chart-column"></i> Revenue Analytics</h2>
+            <span class="mtc-admin-card-hint">Last 7 days</span>
+          </div>
+          <div class="mtc-chart-wrap">
+            <canvas id="revenueChart"></canvas>
+          </div>
+          <div class="mtc-revenue-breakdown">
+            <div class="mtc-revenue-item">
+              <span class="mtc-revenue-label">Platform Commission (15%)</span>
+              <strong class="mtc-revenue-value">₦{{ metrics.total_commission }}</strong>
+            </div>
+            <div class="mtc-revenue-item">
+              <span class="mtc-revenue-label">Tutor Payouts (85%)</span>
+              <strong class="mtc-revenue-value">₦{{ metrics.total_tutor_payout }}</strong>
+            </div>
+          </div>
+          <div class="mtc-revenue-top">
+            <div class="mtc-revenue-top-head">
+              <span class="mtc-revenue-label">Top Tutors by Payout</span>
+              <a href="{% url 'admin_revenue' %}" class="mtc-revenue-top-link">View all <i class="fa-solid fa-arrow-right"></i></a>
+            </div>
+            {% for t in top_tutors %}
+            <div class="mtc-revenue-top-row">
+              <div class="mtc-revenue-top-avatar">
+                {% if t.photo %}
+                  <img src="{{ t.photo }}" alt="{{ t.name }}">
+                {% else %}
+                  {{ t.name|slice:":1" }}
+                {% endif %}
+              </div>
+              <span class="mtc-revenue-top-name">{{ t.name }}</span>
+              <span class="mtc-revenue-top-sessions">{{ t.sessions }} paid</span>
+              <strong class="mtc-revenue-top-amount">₦{{ t.payout|floatformat:2 }}</strong>
+            </div>
+            {% empty %}
+            <p class="mtc-admin-empty">No payouts recorded yet.</p>
+            {% endfor %}
+          </div>
+        </div>
+        <div class="mtc-admin-card mtc-admin-activity-card">
+          <div class="mtc-admin-card-header">
+            <h2><i class="fa-solid fa-bolt"></i> Live Activities</h2>
+            <span class="mtc-admin-card-hint mtc-activity-live-dot">Live</span>
+          </div>
+          <div class="mtc-activity-list">
+            {% for act in recent_activities %}
+            <div class="mtc-activity-item">
+              <div class="mtc-activity-icon" style="background: {{ act.bg }}; color: {{ act.color }};">
+                <i class="fa-solid {{ act.icon }}"></i>
+              </div>
+              <div class="mtc-activity-body">
+                <p class="mtc-activity-text">{{ act.text }}</p>
+                <span class="mtc-activity-time">{{ act.timestamp|date:"M d, Y H:i" }}</span>
+              </div>
+            </div>
+            {% empty %}
+            <p class="mtc-admin-empty">No recent activity yet.</p>
+            {% endfor %}
+          </div>
+        </div>
       </div>
     </div>
   </section>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const isDark = document.documentElement.classList.contains('dark');
+    const gridColor = isDark ? '#334155' : '#e2e8f0';
+    const textColor = isDark ? '#cbd5e1' : '#475569';
+    const tooltipBg = isDark ? '#1e293b' : '#ffffff';
+    const tooltipText = isDark ? '#f1f5f9' : '#0f172a';
+    const siteFont = '"Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif';
+
+    if (typeof Chart === 'undefined') {
+      document.querySelectorAll('.mtc-chart-wrap, .mtc-chart-wrap-doughnut').forEach(function(el) {
+        el.innerHTML = '<p class="mtc-admin-empty">Chart library failed to load.</p>';
+      });
+      return;
+    }
+
+    Chart.defaults.font.family = siteFont;
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+
+    const growthCtx = document.getElementById("growthChart");
+    if (growthCtx) {
+      new Chart(growthCtx, {
+        type: "line",
+        data: {
+          labels: {{ chart_labels|safe }},
+          datasets: [
+            {
+              label: "New Users",
+              data: {{ user_growth|safe }},
+              borderColor: "#2563eb",
+              backgroundColor: "rgba(37, 99, 235, 0.1)",
+              tension: 0.4,
+              fill: true,
+              pointRadius: 4,
+              pointBackgroundColor: "#2563eb",
+            },
+            {
+              label: "Bookings",
+              data: {{ booking_growth|safe }},
+              borderColor: "#16a34a",
+              backgroundColor: "rgba(22, 163, 74, 0.08)",
+              tension: 0.4,
+              fill: true,
+              pointRadius: 4,
+              pointBackgroundColor: "#16a34a",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: {
+              position: "top",
+              labels: { usePointStyle: true, pointStyle: "circle", padding: 20, font: { size: 12, weight: "600" } },
+            },
+            tooltip: {
+              backgroundColor: tooltipBg,
+              titleColor: tooltipText,
+              bodyColor: tooltipText,
+              borderColor: gridColor,
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 8,
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              min: -0.5,
+              ticks: { stepSize: 1, font: { size: 11 } },
+              grid: { color: gridColor },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } },
+            },
+          },
+        },
+      });
+    }
+
+    const statusCtx = document.getElementById("bookingStatusChart");
+    if (statusCtx) {
+      const statusData = [
+        {{ booking_status_counts.completed|default:0 }},
+        {{ booking_status_counts.accepted|default:0 }},
+        {{ booking_status_counts.pending|default:0 }},
+        {{ booking_status_counts.cancelled|default:0 }},
+      ];
+      const statusTotal = statusData.reduce(function(a, b) { return a + b; }, 0);
+
+      new Chart(statusCtx, {
+        type: "doughnut",
+        data: {
+          labels: ["Completed", "Accepted", "Pending", "Cancelled"],
+          datasets: [
+            {
+              data: statusTotal > 0 ? statusData : [1],
+              backgroundColor: statusTotal > 0 ? ["#0d9488", "#2563eb", "#d97706", "#be123c"] : ["#e2e8f0"],
+              borderColor: "#ffffff",
+              borderWidth: 3,
+              hoverOffset: 8,
+              borderRadius: 6,
+              spacing: 4,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          cutout: "72%",
+          layout: {
+            padding: 16,
+          },
+          plugins: {
+            legend: {
+              display: false,
+            },
+            tooltip: {
+              enabled: statusTotal > 0,
+              backgroundColor: tooltipBg,
+              titleColor: tooltipText,
+              bodyColor: tooltipText,
+              borderColor: gridColor,
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function (context) {
+                  const value = context.parsed;
+                  const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                  const percentage = total > 0 ? ((value / total) * 100).toFixed(1) : 0;
+                  return " " + context.label + ": " + value + " (" + percentage + "%)";
+                },
+              },
+            },
+          },
+        },
+        plugins: [
+          {
+            id: "centerText",
+            beforeDraw(chart) {
+              const chartArea = chart.chartArea;
+              if (!chartArea) return;
+              const { ctx } = chart;
+              const { left, top, width, height } = chartArea;
+              ctx.save();
+              ctx.font = 'bold 26px "Inter", ui-sans-serif, system-ui, sans-serif';
+              ctx.fillStyle = isDark ? "#f1f5f9" : "#0f172a";
+              ctx.textAlign = "center";
+              ctx.textBaseline = "middle";
+              ctx.fillText(statusTotal, left + width / 2, top + height / 2 - 10);
+              ctx.font = '12px "Inter", ui-sans-serif, system-ui, sans-serif';
+              ctx.fillStyle = isDark ? "#94a3b8" : "#64748b";
+              ctx.fillText("Total Bookings", left + width / 2, top + height / 2 + 14);
+              ctx.restore();
+            },
+          },
+        ],
+      });
+    }
+
+    const revenueCtx = document.getElementById("revenueChart");
+    if (revenueCtx) {
+      new Chart(revenueCtx, {
+        type: "bar",
+        data: {
+          labels: {{ chart_labels|safe }},
+          datasets: [
+            {
+              label: "Revenue (₦)",
+              data: {{ revenue_growth|safe }},
+              backgroundColor: "#2563eb",
+              borderRadius: 8,
+              borderSkipped: false,
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              backgroundColor: tooltipBg,
+              titleColor: tooltipText,
+              bodyColor: tooltipText,
+              borderColor: gridColor,
+              borderWidth: 1,
+              padding: 10,
+              cornerRadius: 8,
+              callbacks: {
+                label: function (ctx) {
+                  return "₦" + ctx.parsed.y.toLocaleString();
+                },
+              },
+            },
+          },
+          scales: {
+            y: {
+              beginAtZero: true,
+              ticks: {
+                font: { size: 11 },
+                callback: function (v) {
+                  return "₦" + v.toLocaleString();
+                },
+              },
+              grid: { color: gridColor },
+            },
+            x: {
+              grid: { display: false },
+              ticks: { font: { size: 11 } },
+            },
+          },
+        },
+      });
+    }
+  });
+</script>
 {% endblock %}

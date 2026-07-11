@@ -7,14 +7,276 @@
   <section class="mtc-admin-layout">
     {% include "dashboard/_admin_nav.html" %}
     <div class="mtc-admin-content">
-      <h1>Revenue & Payments</h1>
+      <h1>Revenue &amp; Payments</h1>
       <p class="lead">Track escrow deposits, commission splits, and payouts to verified tutors.</p>
-      
-      <div class="mtc-admin-card">
+
+      <div class="mtc-admin-metrics-grid" style="grid-template-columns: repeat(4, 1fr);">
+        <div class="mtc-admin-metric-card mtc-metric-revenue">
+          <div class="mtc-metric-icon"><i class="fas fa-money-bill-wave"></i></div>
+          <div class="mtc-metric-content">
+            <span>Total Collected</span>
+            <strong>₦{{ summary.total_collected|floatformat:2 }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-tutors">
+          <div class="mtc-metric-icon"><i class="fas fa-percentage"></i></div>
+          <div class="mtc-metric-content">
+            <span>Platform Commission</span>
+            <strong>₦{{ summary.total_commission|floatformat:2 }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-bookings">
+          <div class="mtc-metric-icon"><i class="fas fa-hand-holding-dollar"></i></div>
+          <div class="mtc-metric-content">
+            <span>Tutor Payouts</span>
+            <strong>₦{{ summary.total_payout|floatformat:2 }}</strong>
+          </div>
+        </div>
+        <div class="mtc-admin-metric-card mtc-metric-students">
+          <div class="mtc-metric-icon"><i class="fas fa-hourglass-half"></i></div>
+          <div class="mtc-metric-content">
+            <span>Pending Payouts</span>
+            <strong>₦{{ summary.pending_amount|floatformat:2 }}</strong>
+          </div>
+        </div>
+      </div>
+
+      <div class="mtc-admin-card mtc-admin-chart-card" style="margin-top: 16px;">
+        <div class="mtc-admin-card-header">
+          <h2><i class="fa-solid fa-chart-column"></i> Revenue Analytics</h2>
+          <span class="mtc-admin-card-hint">Last 7 days</span>
+        </div>
+        <div class="mtc-chart-wrap">
+          <canvas id="revenueChart"></canvas>
+        </div>
+      </div>
+
+      <div class="mtc-admin-card" style="overflow-x: auto; margin-top: 16px;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+          <h2>Tutor Payout Table</h2>
+          <span class="mtc-admin-card-hint">{{ summary.paid_sessions }} paid · {{ summary.pending_sessions }} pending · {{ summary.failed_sessions }} failed</span>
+        </div>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: left; min-width: 760px;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 700;">
+              <th style="padding: 12px 8px;">Tutor</th>
+              <th style="padding: 12px 8px; text-align: center;">Sessions</th>
+              <th style="padding: 12px 8px; text-align: right;">Collected</th>
+              <th style="padding: 12px 8px; text-align: right;">Platform Fee</th>
+              <th style="padding: 12px 8px; text-align: right;">Tutor Payout</th>
+              <th style="padding: 12px 8px; text-align: center;">Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for t in tutor_payouts %}
+            <tr style="border-bottom: 1px solid var(--line); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
+              <td style="padding: 14px 8px;">
+                <div style="display: flex; align-items: center; gap: 10px;">
+                  <div style="width: 36px; height: 36px; border-radius: 10px; overflow: hidden; flex-shrink: 0; display: grid; place-items: center; background: #e4efff; color: var(--blue); font-size: 14px; font-weight: 800;">
+                    {% if t.photo %}<img src="{{ t.photo }}" alt="{{ t.name }}" style="width: 100%; height: 100%; object-fit: cover;">{% else %}{{ t.name|slice:":1" }}{% endif %}
+                  </div>
+                  <div style="min-width: 0;">
+                    <div style="font-weight: 700; color: #0f172a;">{{ t.name }}</div>
+                    <div style="font-size: 11px; color: var(--muted);">{{ t.email }}</div>
+                  </div>
+                </div>
+              </td>
+              <td style="padding: 14px 8px; text-align: center; font-weight: 700;">{{ t.sessions }}</td>
+              <td style="padding: 14px 8px; text-align: right;">₦{{ t.total_collected|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: right; color: #64748b;">₦{{ t.total_commission|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: right; font-weight: 800; color: #16a34a;">₦{{ t.total_payout|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: center;">
+                {% if t.status == "Pending Payout" %}
+                  <span style="border-radius: 999px; background: #fef3c7; color: #b45309; padding: 4px 10px; font-size: 11px; font-weight: 700;">{{ t.status }}</span>
+                {% else %}
+                  <span style="border-radius: 999px; background: #dcfce7; color: #166534; padding: 4px 10px; font-size: 11px; font-weight: 700;">{{ t.status }}</span>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="6" style="padding: 28px; text-align: center; color: var(--muted);">
+                No tutor payouts recorded yet. Once students complete payments, tutor earnings will appear here.
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      <div class="mtc-admin-card" style="overflow-x: auto; margin-top: 16px;">
         <h2>Financial Ledger</h2>
-        <p>Escrow bookkeeping and transaction logs. Payment entries, Paystack transaction references, commission percentages, and tutor payouts will be populated here.</p>
+        <p style="margin: 0 0 8px; color: var(--muted); font-size: 13px;">Escrow bookkeeping and transaction logs with Paystack references and commission splits.</p>
+
+        <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; text-align: left; min-width: 760px;">
+          <thead>
+            <tr style="border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 700;">
+              <th style="padding: 12px 8px;">Reference</th>
+              <th style="padding: 12px 8px;">Tutor</th>
+              <th style="padding: 12px 8px;">Student</th>
+              <th style="padding: 12px 8px; text-align: right;">Amount</th>
+              <th style="padding: 12px 8px; text-align: right;">Payout</th>
+              <th style="padding: 12px 8px; text-align: center;">Status</th>
+              <th style="padding: 12px 8px; text-align: right;">Date</th>
+              <th style="padding: 12px 8px; text-align: center;">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for p in ledger_page %}
+            <tr style="border-bottom: 1px solid var(--line); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
+              <td style="padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;">{{ p.reference }}</td>
+              <td style="padding: 14px 8px; font-weight: 700;">{{ p.tutor }}</td>
+              <td style="padding: 14px 8px;">{{ p.student }}</td>
+              <td style="padding: 14px 8px; text-align: right;">₦{{ p.amount|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: right; font-weight: 800; color: #16a34a;">₦{{ p.payout|floatformat:2 }}</td>
+              <td style="padding: 14px 8px; text-align: center;">
+                {% if p.status == "released" %}
+                  <span style="border-radius: 999px; background: #dcfce7; color: #166534; padding: 4px 10px; font-size: 11px; font-weight: 700;">Released</span>
+                {% elif p.status == "paid" %}
+                  <span style="border-radius: 999px; background: #dbeafe; color: #1d4ed8; padding: 4px 10px; font-size: 11px; font-weight: 700;">Paid</span>
+                {% elif p.status == "pending" %}
+                  <span style="border-radius: 999px; background: #fef3c7; color: #b45309; padding: 4px 10px; font-size: 11px; font-weight: 700;">Pending</span>
+                {% else %}
+                  <span style="border-radius: 999px; background: #fef2f2; color: #b91c1c; padding: 4px 10px; font-size: 11px; font-weight: 700;">Failed</span>
+                {% endif %}
+              </td>
+              <td style="padding: 14px 8px; text-align: right; color: var(--muted); white-space: nowrap;">{{ p.created_at|date:"M d, Y H:i" }}</td>
+              <td style="padding: 14px 8px; text-align: center;">
+                {% if p.status == "released" %}
+                  <span style="font-size: 11px; font-weight: 700; color: #16a34a;"><i class="fa-solid fa-check"></i> Paid out</span>
+                {% elif p.status == "paid" %}
+                  <form method="post" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="release">
+                    <input type="hidden" name="payment_id" value="{{ p.id }}">
+                    <button type="submit" class="btn btn-primary" style="min-height: 30px; padding: 0 14px; font-size: 12px; font-weight: 700; border-radius: 7px;">
+                      <i class="fa-solid fa-money-bill-transfer"></i> Mark Paid Out
+                    </button>
+                  </form>
+                {% else %}
+                  <form method="post" style="display: inline-block;">
+                    {% csrf_token %}
+                    <input type="hidden" name="action" value="mark_paid">
+                    <input type="hidden" name="payment_id" value="{{ p.id }}">
+                    <button type="submit" class="btn btn-primary" style="min-height: 30px; padding: 0 14px; font-size: 12px; font-weight: 700; border-radius: 7px;">
+                      <i class="fa-solid fa-money-bill-transfer"></i> Mark Paid
+                    </button>
+                  </form>
+                {% endif %}
+              </td>
+            </tr>
+            {% empty %}
+            <tr>
+              <td colspan="8" style="padding: 28px; text-align: center; color: var(--muted);">No transactions recorded yet.</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+
+        {% if ledger_paginator.num_pages > 1 %}
+        <nav class="mtc-admin-pagination" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 20px; flex-wrap: wrap;">
+          {% if ledger_page.has_previous %}
+            <a href="?page={{ ledger_page.previous_page_number }}" style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--white); color: var(--ink); font-size: 13px; font-weight: 800; text-decoration: none; padding: 0 10px;">Previous</a>
+          {% else %}
+            <span class="is-disabled" style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 6px; background: #f1f5f9; color: #94a3b8; font-size: 13px; font-weight: 800; padding: 0 10px;">Previous</span>
+          {% endif %}
+          {% for num in ledger_paginator.page_range %}
+            {% if ledger_page.number == num %}
+              <span style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--blue); border-radius: 6px; background: var(--blue); color: var(--white); font-size: 13px; font-weight: 800;">{{ num }}</span>
+            {% elif num > ledger_page.number|add:'-3' and num < ledger_page.number|add:'3' %}
+              <a href="?page={{ num }}" style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--white); color: var(--ink); font-size: 13px; font-weight: 800; text-decoration: none;">{{ num }}</a>
+            {% endif %}
+          {% endfor %}
+          {% if ledger_page.has_next %}
+            <a href="?page={{ ledger_page.next_page_number }}" style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 6px; background: var(--white); color: var(--ink); font-size: 13px; font-weight: 800; text-decoration: none; padding: 0 10px;">Next</a>
+          {% else %}
+            <span class="is-disabled" style="display: inline-flex; align-items: center; justify-content: center; min-width: 36px; height: 36px; border: 1px solid var(--line); border-radius: 6px; background: #f1f5f9; color: #94a3b8; font-size: 13px; font-weight: 800; padding: 0 10px;">Next</span>
+          {% endif %}
+        </nav>
+        {% endif %}
       </div>
     </div>
   </section>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    if (typeof Chart === "undefined") {
+      var wrap = document.querySelector(".mtc-chart-wrap");
+      if (wrap) wrap.innerHTML = '<p class="mtc-admin-empty">Chart library failed to load.</p>';
+      return;
+    }
+
+    var siteFont = getComputedStyle(document.body).fontFamily || "Inter, system-ui, sans-serif";
+    var textColor = "#475569";
+    var gridColor = "#e2e8f0";
+    var tooltipBg = "#0f172a";
+    var tooltipText = "#f8fafc";
+
+    Chart.defaults.font.family = siteFont;
+    Chart.defaults.color = textColor;
+    Chart.defaults.borderColor = gridColor;
+
+    var revenueCtx = document.getElementById("revenueChart");
+    if (revenueCtx) {
+      new Chart(revenueCtx, {
+        type: "bar",
+        data: {
+          labels: {{ chart_labels|safe }},
+          datasets: [
+            {
+              label: "Revenue (₦)",
+              data: {{ revenue_growth|safe }},
+              backgroundColor: "#2563eb",
+              borderRadius: 8,
+              borderSkipped: false,
+              yAxisID: "y",
+            },
+            {
+              label: "Tutor Payouts (₦)",
+              data: {{ payout_growth|safe }},
+              backgroundColor: "#16a34a",
+              borderRadius: 8,
+              borderSkipped: false,
+              yAxisID: "y",
+            },
+          ],
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: {
+            legend: { display: true, position: "top" },
+            tooltip: {
+              backgroundColor: tooltipBg,
+              titleColor: tooltipText,
+              bodyColor: tooltipText,
+              borderColor: gridColor,
+              borderWidth: 1,
+              padding: 10,
+              callbacks: {
+                label: function (ctx) {
+                  return ctx.dataset.label + ": ₦" + Number(ctx.parsed.y).toLocaleString();
+                },
+              },
+            },
+          },
+          scales: {
+            x: { grid: { display: false } },
+            y: {
+              beginAtZero: true,
+              ticks: {
+                callback: function (value) {
+                  return "₦" + Number(value).toLocaleString();
+                },
+              },
+            },
+          },
+        },
+      });
+    }
+  });
+</script>
 {% endblock %}

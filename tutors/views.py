@@ -17,7 +17,9 @@ from django.views.decorators.csrf import ensure_csrf_cookie
 def tutor_dashboard(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
     bookings_count = Booking.objects.filter(tutor=profile, payments__payment_status="paid").distinct().count()
-    total_earnings = profile.payments.aggregate(total= Sum('amount'))['total'] or 0   
+    total_earnings = Payment.objects.filter(
+        booking__tutor=profile, payment_status="released"
+    ).aggregate(total=Sum("tutor_payout"))["total"] or 0
     upcoming_bookings = (
         Booking.objects.filter(
             tutor=profile,

@@ -1,9 +1,13 @@
 from accounts.models import UserProfile
 from django.core.paginator import Paginator
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.apps import apps
 from accounts.decorators import admin_required
 from tutors.models import Tutor
+from django.utils import timezone
+from datetime import timedelta
+from django.db.models import Sum, Count, Q
+import json
 
 
 def home(request):
@@ -59,7 +63,11 @@ def admin_dashboard(request):
 
     total_bookings = 0
     total_revenue = "0.00"
+    total_commission = "0.00"
+    total_tutor_payout = "0.00"
 
+    Booking = None
+    Payment = None
     try:
         Booking = apps.get_model("bookings", "Booking")
         total_bookings = Booking.objects.count()
@@ -69,18 +77,146 @@ def admin_dashboard(request):
     try:
         Payment = apps.get_model("payments", "Payment")
         from django.db.models import Sum
-        paid_amount = Payment.objects.filter(payment_status="paid").aggregate(Sum("amount"))["amount__sum"] or 0
-        total_revenue = f"{float(paid_amount):,.2f}"
+        received_amount = Payment.objects.filter(
+            payment_status__in=["paid", "released"]
+        ).aggregate(Sum("amount"))["amount__sum"] or 0
+        total_revenue = f"{float(received_amount):,.2f}"
+        total_commission = f"{float(received_amount) * 0.15:,.2f}"
+        total_tutor_payout = f"{float(received_amount) * 0.85:,.2f}"
     except (LookupError, AttributeError, ValueError):
         pass
+
+    today = timezone.now().date()
+    last_7_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+    day_labels = [d.strftime("%a") for d in last_7_days]
+
+    user_growth = []
+    booking_growth = []
+    revenue_growth = []
+
+    for d in last_7_days:
+        day_start = timezone.make_aware(timezone.datetime.combine(d, timezone.datetime.min.time()))
+        day_end = day_start + timedelta(days=1)
+        user_growth.append(UserProfile.objects.filter(created_at__gte=day_start, created_at__lt=day_end).count())
+        if Booking:
+            booking_growth.append(Booking.objects.filter(created_at__gte=day_start, created_at__lt=day_end).count())
+        else:
+            booking_growth.append(0)
+        if Payment:
+            day_revenue = Payment.objects.filter(created_at__gte=day_start, created_at__lt=day_end, payment_status__in=["paid", "released"]).aggregate(Sum("amount"))["amount__sum"] or 0
+            revenue_growth.append(float(day_revenue))
+        else:
+            revenue_growth.append(0.0)
+
+    booking_status_counts = {
+        "completed": 0,
+        "accepted": 0,
+        "pending": 0,
+        "cancelled": 0,
+    }
+    if Booking:
+        qs = Booking.objects.values("status").annotate(c=Count("id"))
+        for row in qs:
+            booking_status_counts[row["status"]] = row["c"]
+
+    top_tutors = []
+    if Payment:
+        try:
+            payout_rows = (
+                Payment.objects
+                .filter(payment_status__in=["paid", "released"])
+                .values("booking__tutor")
+                .annotate(total_payout=Sum("tutor_payout"), sessions=Count("id"))
+                .order_by("-total_payout")[:5]
+            )
+            tutor_ids = [r["booking__tutor"] for r in payout_rows if r["booking__tutor"]]
+            tutor_map = {
+                t.id: t
+                for t in Tutor.objects.filter(id__in=tutor_ids).select_related("user__user")
+            }
+            for r in payout_rows:
+                t = tutor_map.get(r["booking__tutor"])
+                if not t:
+                    continue
+                top_tutors.append({
+                    "name": t.get_full_name or t.username,
+                    "photo": t.profile_photo,
+                    "payout": float(r["total_payout"]),
+                    "sessions": r["sessions"],
+                })
+        except (LookupError, AttributeError, TypeError):
+            pass
+
+    recent_activities = []
+
+    for profile in UserProfile.objects.select_related("user").order_by("-created_at")[:10]:
+        recent_activities.append({
+            "timestamp": profile.created_at,
+            "text": f"New account registered: {profile.user.get_full_name() or profile.user.username} ({profile.get_role_display()})",
+            "icon": "fa-user-plus",
+            "color": "#2563eb",
+            "bg": "#eff6ff",
+        })
+
+    if Booking:
+        for b in Booking.objects.select_related("student__user", "tutor__user").order_by("-created_at")[:10]:
+            recent_activities.append({
+                "timestamp": b.created_at,
+                "text": f"Booking {b.status} — {b.student.user.get_full_name() or b.student.user.username} with {b.tutor.user.user.get_full_name() or b.tutor.user.user.username}",
+                "icon": "fa-calendar-check",
+                "color": "#16a34a" if b.status == "completed" else "#f59e0b" if b.status == "accepted" else "#ef4444" if b.status == "cancelled" else "#64748b",
+                "bg": "#dcfce7" if b.status == "completed" else "#fef3c7" if b.status == "accepted" else "#fef2f2" if b.status == "cancelled" else "#f1f5f9",
+            })
+
+    if Payment:
+        for p in Payment.objects.select_related("booking__student__user").order_by("-created_at")[:10]:
+            recent_activities.append({
+                "timestamp": p.created_at,
+                "text": f"Payment {p.payment_status} — ₦{float(p.amount):,.2f} from {p.booking.student.user.get_full_name() or p.booking.student.user.username}",
+                "icon": "fa-money-bill-wave",
+                "color": "#16a34a" if p.payment_status == "paid" else "#ef4444" if p.payment_status == "failed" else "#f59e0b",
+                "bg": "#dcfce7" if p.payment_status == "paid" else "#fef2f2" if p.payment_status == "failed" else "#fef3c7",
+            })
+
+    ChatSession = None
+    try:
+        ChatSession = apps.get_model("Chat", "ChatSession")
+    except (LookupError, AttributeError):
+        pass
+    if ChatSession:
+        for c in ChatSession.objects.select_related("student", "tutor").order_by("-created_at")[:10]:
+            recent_activities.append({
+                "timestamp": c.created_at,
+                "text": f"Chat started between {c.student.username} and {c.tutor.username}",
+                "icon": "fa-comments",
+                "color": "#8b5cf6",
+                "bg": "#f3e8ff",
+            })
+
+    recent_activities.sort(key=lambda x: x["timestamp"], reverse=True)
+    recent_activities = recent_activities[:20]
 
     metrics = {
         "total_tutors": total_tutors,
         "total_students": total_students,
         "total_bookings": total_bookings,
         "total_revenue": total_revenue,
+        "total_commission": total_commission,
+        "total_tutor_payout": total_tutor_payout,
     }
-    return render(request, "dashboard/admin_dashboard.html", {"metrics": metrics})
+
+    context = {
+        "metrics": metrics,
+        "today": today,
+        "chart_labels": json.dumps(day_labels),
+        "user_growth": json.dumps(user_growth),
+        "booking_growth": json.dumps(booking_growth),
+        "revenue_growth": json.dumps(revenue_growth),
+        "booking_status_counts": booking_status_counts,
+        "recent_activities": recent_activities,
+        "top_tutors": top_tutors,
+    }
+    return render(request, "dashboard/admin_dashboard.html", context)
 
 
 @admin_required
@@ -179,12 +315,204 @@ def users(request):
 
 @admin_required
 def bookings(request):
-    return render(request, "dashboard/bookings.html")
+    Booking = None
+    try:
+        Booking = apps.get_model("bookings", "Booking")
+    except (LookupError, AttributeError):
+        pass
+
+    booking_list = []
+    status_counts = {
+        "pending": 0,
+        "accepted": 0,
+        "completed": 0,
+        "cancelled": 0,
+    }
+    total_value = 0.0
+
+    if Booking:
+        try:
+            base_qs = Booking.objects.select_related(
+                "student__user", "tutor__user__user"
+            ).order_by("-created_at")
+
+            # Summary metrics are computed over ALL bookings, not just the current page
+            status_rows = Booking.objects.values("status").annotate(c=Count("id"))
+            for row in status_rows:
+                status_counts[row["status"]] = row["c"]
+            total_value = float(
+                base_qs.exclude(status="cancelled").aggregate(Sum("amount"))["amount__sum"] or 0
+            )
+
+            status_filter = request.GET.get("status", "").strip()
+            qs = base_qs
+            if status_filter in status_counts:
+                qs = qs.filter(status=status_filter)
+
+            paginator = Paginator(qs, 10)
+            page_number = request.GET.get("page")
+            page_obj = paginator.get_page(page_number)
+
+            for b in page_obj.object_list:
+                booking_list.append({
+                    "id": b.id,
+                    "student": b.student.user.get_full_name if b.student and b.student.user else (b.student.user.username if b.student and b.student.user else "-"),
+                    "student_email": b.student.user.email if b.student and b.student.user else "",
+                    "tutor": b.tutor.get_full_name if b.tutor else (b.tutor.username if b.tutor else "-"),
+                    "tutor_photo": b.tutor.profile_photo if b.tutor else "",
+                    "booking_date": b.booking_date,
+                    "lesson_time": b.lesson_time,
+                    "amount": float(b.amount),
+                    "status": b.status,
+                    "note": b.lesson_note,
+                    "created_at": b.created_at,
+                })
+        except (LookupError, AttributeError, TypeError):
+            pass
+
+    context = {
+        "booking_list": booking_list,
+        "status_counts": status_counts,
+        "total_value": total_value,
+        "active_filter": request.GET.get("status", ""),
+        "paginator": paginator,
+        "page_obj": page_obj,
+    }
+    return render(request, "dashboard/bookings.html", context)
 
 
 @admin_required
 def revenue(request):
-    return render(request, "dashboard/revenue.html")
+    Payment = None
+    try:
+        Payment = apps.get_model("payments", "Payment")
+    except (LookupError, AttributeError):
+        pass
+
+    if request.method == "POST":
+        action = request.POST.get("action")
+        payment_id = request.POST.get("payment_id")
+        if Payment and payment_id:
+            try:
+                payment = Payment.objects.get(pk=payment_id)
+                if action == "mark_paid":
+                    payment.payment_status = "paid"
+                elif action == "release":
+                    payment.payment_status = "released"
+                payment.save(update_fields=["payment_status"])
+            except Payment.DoesNotExist:
+                pass
+        return redirect("admin_revenue")
+
+    summary = {
+        "total_collected": 0.0,
+        "total_commission": 0.0,
+        "total_payout": 0.0,
+        "pending_amount": 0.0,
+        "failed_amount": 0.0,
+        "paid_sessions": 0,
+        "pending_sessions": 0,
+        "failed_sessions": 0,
+    }
+    tutor_payouts = []
+    recent_payments = []
+
+    if Payment:
+        try:
+            received = Payment.objects.filter(payment_status__in=["paid", "released"])
+            released = Payment.objects.filter(payment_status="released")
+            pending = Payment.objects.filter(payment_status="pending")
+            failed = Payment.objects.filter(payment_status="failed")
+
+            summary["total_collected"] = float(received.aggregate(Sum("amount"))["amount__sum"] or 0)
+            summary["total_commission"] = float(received.aggregate(Sum("commission"))["commission__sum"] or 0)
+            summary["total_payout"] = float(released.aggregate(Sum("tutor_payout"))["tutor_payout__sum"] or 0)
+            summary["pending_amount"] = float(pending.aggregate(Sum("tutor_payout"))["tutor_payout__sum"] or 0)
+            summary["failed_amount"] = float(failed.aggregate(Sum("amount"))["amount__sum"] or 0)
+            summary["paid_sessions"] = received.count()
+            summary["pending_sessions"] = pending.count()
+            summary["failed_sessions"] = failed.count()
+
+            payout_rows = (
+                Payment.objects
+                .values("booking__tutor")
+                .annotate(
+                    total_collected=Sum("amount", filter=Q(payment_status__in=["paid", "released"])),
+                    total_commission=Sum("commission", filter=Q(payment_status__in=["paid", "released"])),
+                    total_payout=Sum("tutor_payout", filter=Q(payment_status="released")),
+                    paid_sessions=Count("id", filter=Q(payment_status__in=["paid", "released"])),
+                    pending_sessions=Count("id", filter=Q(payment_status="pending")),
+                    sessions=Count("id"),
+                )
+                .order_by("-total_collected")
+            )
+            tutor_ids = [r["booking__tutor"] for r in payout_rows if r["booking__tutor"]]
+            tutor_map = {
+                t.id: t
+                for t in Tutor.objects.filter(id__in=tutor_ids).select_related("user__user")
+            }
+            for r in payout_rows:
+                t = tutor_map.get(r["booking__tutor"])
+                if not t:
+                    continue
+                has_pending = (r["pending_sessions"] or 0) > 0
+                tutor_payouts.append({
+                    "name": t.get_full_name or t.username,
+                    "photo": t.profile_photo,
+                    "email": t.user.user.email if t.user and t.user.user else "",
+                    "total_collected": float(r["total_collected"] or 0),
+                    "total_commission": float(r["total_commission"] or 0),
+                    "total_payout": float(r["total_payout"] or 0),
+                    "paid_sessions": r["paid_sessions"] or 0,
+                    "pending_sessions": r["pending_sessions"] or 0,
+                    "sessions": r["sessions"] or 0,
+                    "status": "Pending Payout" if has_pending else "Paid",
+                })
+
+            for p in Payment.objects.select_related("booking__tutor__user__user", "booking__student__user").order_by("-created_at"):
+                tutor = p.booking.tutor if p.booking else None
+                student = p.booking.student if p.booking else None
+                recent_payments.append({
+                    "id": p.id,
+                    "reference": p.paystack_reference or "-",
+                    "tutor": tutor.get_full_name if tutor else "-",
+                    "student": student.user.get_full_name if student and student.user else (student.user.username if student and student.user else "-"),
+                    "amount": float(p.amount),
+                    "commission": float(p.commission),
+                    "payout": float(p.tutor_payout),
+                    "status": p.payment_status,
+                    "created_at": p.created_at,
+                })
+
+            ledger_paginator = Paginator(recent_payments, 10)
+            ledger_page = ledger_paginator.get_page(request.GET.get("page"))
+
+            today = timezone.now().date()
+            last_7_days = [today - timedelta(days=i) for i in range(6, -1, -1)]
+            chart_labels = [d.strftime("%a") for d in last_7_days]
+            revenue_growth = []
+            payout_growth = []
+            for d in last_7_days:
+                day_start = timezone.make_aware(timezone.datetime.combine(d, timezone.datetime.min.time()))
+                day_end = day_start + timedelta(days=1)
+                day_rev = received.filter(created_at__gte=day_start, created_at__lt=day_end).aggregate(Sum("amount"))["amount__sum"] or 0
+                day_payout = released.filter(created_at__gte=day_start, created_at__lt=day_end).aggregate(Sum("tutor_payout"))["tutor_payout__sum"] or 0
+                revenue_growth.append(float(day_rev))
+                payout_growth.append(float(day_payout))
+        except (LookupError, AttributeError, TypeError):
+            pass
+
+    context = {
+        "summary": summary,
+        "tutor_payouts": tutor_payouts,
+        "recent_payments": recent_payments,
+        "ledger_paginator": ledger_paginator,
+        "ledger_page": ledger_page,
+        "chart_labels": json.dumps(chart_labels),
+        "revenue_growth": json.dumps(revenue_growth),
+        "payout_growth": json.dumps(payout_growth),
+    }
+    return render(request, "dashboard/revenue.html", context)
 
 
 def Termsofservice(request):

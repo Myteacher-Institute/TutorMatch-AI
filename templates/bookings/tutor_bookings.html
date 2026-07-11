@@ -52,6 +52,7 @@
                   <th>Date</th>
                   <th>Time</th>
                   <th>Amount</th>
+                  <th>Payment</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -73,6 +74,11 @@
                     <td>{{ booking.booking_date|date:"M j, Y" }}</td>
                     <td>{{ booking.lesson_time|time:"g:i A" }}</td>
                     <td><strong>₦{{ booking.amount }}</strong></td>
+                    <td>
+                      <span class="mtc-payment-{{ booking.display_payment_status }}">
+                        {{ booking.display_payment_status_label }}
+                      </span>
+                    </td>
                     <td>
                       <span class="mtc-status-pill mtc-status-{{ booking.status }}">
                         {{ booking.get_status_display }}

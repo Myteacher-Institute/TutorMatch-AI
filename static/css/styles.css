@@ -11,6 +11,10 @@
   --shadow: 0 18px 45px rgba(15, 23, 42, 0.09);
 }
 
+.admin-dashboard-light {
+  --line: #cbd5e1;
+}
+
 * {
   box-sizing: border-box;
   -webkit-tap-highlight-color: transparent;
@@ -2338,6 +2342,10 @@ img {
 }
 
 .mtc-admin-sidebar {
+   position: -webkit-sticky;
+   position: sticky;
+   top: 90px;
+   height: fit-content;
    border: 1px solid var(--line);
    border-radius: 14px;
    background: var(--white);
@@ -2461,10 +2469,13 @@ img {
 }
 
 .mtc-admin-metric-card strong {
-  font-size: 24px;
+  font-size: clamp(15px, 2.1vw, 24px);
   color: #12182c;
   font-weight: 700;
-  line-height: 1;
+  line-height: 1.1;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 }
 
 /* Upcoming Lessons - Blue */
@@ -2526,8 +2537,8 @@ img {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--white);
-  padding: 24px;
-  margin-top: 30px;
+  padding: 20px;
+  margin-top: 20px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.05);
 }
 .mtc-admin-card h2 {
@@ -2540,6 +2551,520 @@ img {
   font-size: 14px;
   color: var(--muted);
   line-height: 1.6;
+}
+
+/* Admin Dashboard Hero */
+.mtc-admin-hero {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  flex-wrap: wrap;
+  margin-bottom: 24px;
+  padding: 32px;
+  border-radius: 16px;
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  color: #ffffff;
+  box-shadow: 0 10px 30px rgba(37, 99, 235, 0.25);
+  position: relative;
+  overflow: hidden;
+}
+.mtc-admin-hero::before {
+  content: "";
+  position: absolute;
+  top: -50%;
+  right: -10%;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  pointer-events: none;
+}
+.mtc-admin-hero::after {
+  content: "";
+  position: absolute;
+  bottom: -30%;
+  left: -5%;
+  width: 200px;
+  height: 200px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.05);
+  pointer-events: none;
+}
+.mtc-admin-hero-content {
+  position: relative;
+  z-index: 1;
+  flex: 1 1 280px;
+}
+.admin-dashboard-light .mtc-admin-hero h1 {
+  margin: 0 0 8px;
+  color: #ffffff;
+  font-size: 30px;
+  font-weight: 800;
+  letter-spacing: -0.02em;
+}
+.admin-dashboard-light .mtc-admin-hero p {
+  margin: 0 0 18px;
+  color: rgba(255, 255, 255, 0.9);
+  font-size: 15px;
+  line-height: 1.5;
+  max-width: 520px;
+}
+html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero h1 {
+  color: #ffffff;
+}
+html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
+  color: rgba(255, 255, 255, 0.9);
+}
+.mtc-admin-hero-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+.mtc-hero-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 18px;
+  border-radius: 8px;
+  background: rgba(255, 255, 255, 0.15);
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(4px);
+  transition: all 0.2s ease;
+}
+.mtc-hero-btn:hover {
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(255, 255, 255, 0.4);
+  color: #ffffff;
+}
+.mtc-hero-btn-secondary {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+.mtc-hero-btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.15);
+  border-color: rgba(255, 255, 255, 0.3);
+}
+.mtc-admin-date-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.15);
+  padding: 8px 16px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #ffffff;
+  white-space: nowrap;
+  backdrop-filter: blur(4px);
+  position: relative;
+  z-index: 1;
+}
+
+/* Charts Row */
+.mtc-admin-charts-row {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+.mtc-admin-chart-card {
+  display: flex;
+  flex-direction: column;
+}
+.mtc-admin-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.mtc-admin-card-header h2 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
+}
+.mtc-admin-card-header h2 i {
+  font-size: 14px;
+  opacity: 0.8;
+}
+.mtc-admin-card-hint {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.mtc-chart-wrap {
+  position: relative;
+  width: 100%;
+  height: 220px;
+}
+.mtc-chart-wrap-doughnut {
+  height: 220px;
+}
+
+/* Booking Status Chart Layout */
+.mtc-booking-status-layout {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 20px;
+  align-items: center;
+}
+.mtc-booking-legend {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.mtc-booking-legend-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.mtc-booking-legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 3px;
+  flex-shrink: 0;
+}
+.mtc-booking-legend-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  flex: 1;
+}
+.mtc-booking-legend-value {
+  font-size: 14px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+/* Revenue Breakdown */
+.mtc-revenue-breakdown {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+.mtc-revenue-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.mtc-revenue-label {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.mtc-revenue-value {
+  font-size: 16px;
+  color: var(--ink);
+  font-weight: 800;
+}
+
+/* Revenue Top Tutors */
+.mtc-revenue-top {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.mtc-revenue-top-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 6px;
+}
+.mtc-revenue-top-link {
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--blue);
+  text-decoration: none;
+}
+.mtc-revenue-top-link:hover {
+  text-decoration: underline;
+}
+.mtc-revenue-top-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  background: #f8fafc;
+  transition: all 0.2s ease;
+}
+.mtc-revenue-top-row:hover {
+  background: #ffffff;
+  border-color: #bfdbfe;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+.mtc-revenue-top-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background: #e4efff;
+  color: var(--blue);
+  font-size: 14px;
+  font-weight: 800;
+  flex-shrink: 0;
+}
+.mtc-revenue-top-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.mtc-revenue-top-name {
+  font-size: 13px;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.mtc-revenue-top-sessions {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
+}
+.mtc-revenue-top-amount {
+  font-size: 14px;
+  font-weight: 800;
+  color: #16a34a;
+  white-space: nowrap;
+}
+
+/* Activity Feed */
+.mtc-admin-activity-card {
+  display: flex;
+  flex-direction: column;
+}
+.mtc-activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding-right: 4px;
+}
+.mtc-activity-list::-webkit-scrollbar {
+  width: 6px;
+}
+.mtc-activity-list::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.mtc-activity-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px;
+  border-radius: 10px;
+  background: #f8fafc;
+  border: 1px solid var(--line);
+  transition: all 0.2s ease;
+}
+.mtc-activity-item:hover {
+  background: #ffffff;
+  border-color: #bfdbfe;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+.mtc-activity-icon {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  border-radius: 10px;
+  font-size: 14px;
+  flex-shrink: 0;
+}
+.mtc-activity-body {
+  min-width: 0;
+  flex: 1;
+}
+.mtc-activity-text {
+  margin: 0;
+  font-size: 13px;
+  color: #334155;
+  line-height: 1.45;
+  font-weight: 600;
+}
+.mtc-activity-time {
+  display: block;
+  margin-top: 4px;
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 700;
+}
+.mtc-activity-live-dot {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.mtc-activity-live-dot::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #16a34a;
+  box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7);
+  animation: mtc-live-pulse 2s infinite;
+}
+@keyframes mtc-live-pulse {
+  0% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0.7); }
+  70% { box-shadow: 0 0 0 8px rgba(22, 163, 74, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(22, 163, 74, 0); }
+}
+.mtc-admin-empty {
+  margin: 0;
+  font-size: 13px;
+  color: var(--muted);
+  text-align: center;
+  padding: 20px;
+}
+
+/* Metric color variants */
+.mtc-metric-tutors::before { background-color: #2563eb; }
+.mtc-metric-tutors .mtc-metric-icon { background-color: #dbeafe; color: #2563eb; }
+.mtc-metric-tutors span { color: #2563eb; }
+
+.mtc-metric-students::before { background-color: #8b5cf6; }
+.mtc-metric-students .mtc-metric-icon { background-color: #ede9fe; color: #8b5cf6; }
+.mtc-metric-students span { color: #8b5cf6; }
+
+.mtc-metric-bookings::before { background-color: #f59e0b; }
+.mtc-metric-bookings .mtc-metric-icon { background-color: #fef3c7; color: #f59e0b; }
+.mtc-metric-bookings span { color: #f59e0b; }
+
+.mtc-metric-revenue::before { background-color: #16a34a; }
+.mtc-metric-revenue .mtc-metric-icon { background-color: #dcfce7; color: #16a34a; }
+.mtc-metric-revenue span { color: #16a34a; }
+
+@media (max-width: 1024px) {
+  .mtc-admin-charts-row {
+    grid-template-columns: 1fr;
+  }
+  .mtc-admin-metrics-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+@media (max-width: 640px) {
+  .mtc-admin-metrics-grid {
+    grid-template-columns: 1fr;
+  }
+  .mtc-admin-header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .mtc-chart-wrap {
+    height: 260px;
+  }
+  .mtc-chart-wrap-doughnut {
+    height: 240px;
+  }
+}
+
+/* Desktop: always show sidebar, no dropdown */
+@media (min-width: 901px) {
+  .mtc-admin-sidebar .mtc-admin-nav {
+    display: grid !important;
+  }
+  .mtc-admin-sidebar-toggle {
+    display: none !important;
+  }
+  .mtc-admin-sidebar-header {
+    display: none !important;
+  }
+}
+
+/* Mobile Admin Sidebar Dropdown */
+@media (max-width: 900px) {
+  .mtc-admin-layout {
+    grid-template-columns: 1fr;
+  }
+  .mtc-admin-sidebar {
+    position: static;
+    height: auto;
+    border-radius: 12px;
+    margin-bottom: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  .mtc-admin-sidebar-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 0;
+  }
+  .mtc-admin-sidebar-toggle {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    background: var(--white);
+    color: #42506b;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .mtc-admin-sidebar-toggle:hover {
+    background: #f1f5f9;
+    border-color: #bfdbfe;
+    color: var(--blue);
+  }
+  .mtc-admin-sidebar-toggle i {
+    font-size: 12px;
+    transition: transform 0.3s ease;
+  }
+  .mtc-admin-sidebar:not(.is-open) .mtc-admin-nav {
+    display: none;
+  }
+  .mtc-admin-sidebar:not(.is-open) .mtc-admin-sidebar-toggle i {
+    transform: rotate(-90deg);
+  }
+  .mtc-admin-sidebar.is-open .mtc-admin-nav {
+    display: grid;
+  }
+  .mtc-admin-sidebar.is-open .mtc-admin-sidebar-toggle i {
+    transform: rotate(0deg);
+  }
+  .mtc-admin-hero {
+    padding: 24px;
+  }
+  .mtc-admin-hero h1 {
+    font-size: 24px;
+  }
+  .mtc-admin-hero-actions {
+    width: 100%;
+  }
+  .mtc-admin-hero-btn {
+    flex: 1;
+    justify-content: center;
+    min-height: 44px;
+  }
 }
 
 .mtc-dashboard-hero {
@@ -6404,6 +6929,19 @@ img {
   color: #b91c1c;
 }
 
+.mtc-payment-pending,
+.mtc-payment-paid,
+.mtc-payment-failed,
+.mtc-payment-released {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
 .mtc-payment-pending {
   background: #fffbeb;
   color: #b45309;
@@ -6417,6 +6955,11 @@ img {
 .mtc-payment-failed {
   background: #fef2f2;
   color: #b91c1c;
+}
+
+.mtc-payment-released {
+  background: #dbeafe;
+  color: #1d4ed8;
 }
 
 .mtc-review-button {
