@@ -61,21 +61,27 @@
           <div class="tutor-form-section-title">
             <i class="fa-solid fa-upload" style="color:var(--blue);margin-right:8px;"></i>Upload a Document
           </div>
-          <p style="color:var(--muted);font-size:14px;margin:0 0 20px;">Accepted formats: JPG, PNG, PDF. Max 5MB per
-            file.</p>
+
+          {% if documents and documents.0.verification_status == 'approved' %}
+          <div class="tutor-verification-already-approved">
+            <i class="fa-solid fa-circle-check" style="font-size:32px;color:#16a34a;margin-bottom:12px;"></i>
+            <h3 style="margin:0 0 8px;color:#166534;">Document Already Verified</h3>
+            <p style="margin:0;color:#166534;">Your document has been verified by our team. You cannot re-upload a verified document.</p>
+          </div>
+          {% else %}
+          <p style="color:var(--muted);font-size:14px;margin:0 0 20px;">Accepted formats: JPG, PNG, PDF. Max 5MB per file.</p>
 
           <form method="post" enctype="multipart/form-data" id="uploadForm">
             {% csrf_token %}
             <div class="verification-form-layout">
               <!-- Left Column -->
               <div class="verification-left-col">
-          <div class="tutor-form-field">
-            <label>Document Type <span class="tutor-field-required">*</span></label>
-            {{ form.document_type }}
-            <small>Choose the category that best matches your file.</small>
-            {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}
-            </p>{% endif %}
-          </div>
+                <div class="tutor-form-field">
+                  <label>Document Type <span class="tutor-field-required">*</span></label>
+                  {{ form.document_type }}
+                  <small>Choose the category that best matches your file.</small>
+                  {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}</p>{% endif %}
+                </div>
 
                 <div class="verification-requirements">
                   <div class="verification-req-title">Requirements</div>
@@ -116,8 +122,7 @@
                     </button>
                   </div>
                 </div>
-                {% if form.document_file.errors %}<p class="tutor-field-error">{{ form.document_file.errors|join:", " }}
-                </p>{% endif %}
+                {% if form.document_file.errors %}<p class="tutor-field-error">{{ form.document_file.errors|join:", " }}</p>{% endif %}
               </div>
             </div>
 
@@ -131,6 +136,7 @@
               </div>
             </div>
           </form>
+          {% endif %}
         </div>
 
         <!-- Uploaded Documents -->

@@ -77,6 +77,11 @@ def tutor_verification(request):
     form = TutorDocumentForm(request.POST or None, request.FILES or None)
 
     if form.is_valid():
+        existing_approved = profile.documents.filter(verification_status="approved").exists()
+        if existing_approved:
+            messages.error(request, 'Your document has already been verified. Cannot re-upload.')
+            return redirect('tutor_verification')
+
         document_file = form.cleaned_data.get('document_file')
         is_valid_file, error = validate_file(document_file)
         if not is_valid_file:
