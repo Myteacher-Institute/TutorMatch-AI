@@ -12,9 +12,9 @@ class SubjectAdmin(admin.ModelAdmin):
 
 @admin.register(Tutor)
 class TutorAdmin(admin.ModelAdmin):
-    list_display = ("user", "profile_photo", "bio", "location", "hourly_rate", "years_experience", "verification_status")
+    list_display = ("user", "profile_photo", "bio", "location", "hourly_rate", "years_experience", "verification_status", "is_home_featured", "home_featured_order")
     search_fields = ("user__user__username", "user__user__email", "bio", "location")
-    list_filter = ("verification_status",)
+    list_filter = ("verification_status", "is_home_featured")
 
 
 @admin.register(TutorDocument)

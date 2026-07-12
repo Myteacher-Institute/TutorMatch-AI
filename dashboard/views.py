@@ -1,4 +1,5 @@
 from accounts.models import UserProfile
+from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect
 from django.apps import apps
@@ -6,41 +7,37 @@ from accounts.decorators import admin_required
 from tutors.models import Tutor
 from django.utils import timezone
 from datetime import timedelta
-from django.db.models import Sum, Count, Q
+from django.db.models import Avg, Sum, Count, Q
 import json
 
 
 def home(request):
-    featured_tutors = [
-        {
-            "id": 1,
-            "name": "Dr. Samuel Adebayo",
-            "title": "MSc. Applied Mathematics",
-            "rate": "5k",
-            "rating": "4.9",
-            "tags": ["Mathematics", "Physics", "JAMB/WAEC"],
-            "photo": "https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=700&q=80",
-        },
-        {
-            "id": 2,
-            "name": "Sarah Johnson",
-            "title": "IELTS/TOEFL Expert",
-            "rate": "4.5k",
-            "rating": "5.0",
-            "tags": ["English", "Literature", "Diction"],
-            "photo": "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=700&q=80",
-        },
-        {
-            "id": 3,
-            "name": "Chidi Okoro",
-            "title": "Senior Software Engineer",
-            "rate": "8k",
-            "rating": "4.8",
-            "tags": ["Python", "Web Dev", "Scratch"],
-            "photo": "https://images.unsplash.com/photo-1519085360753-af0119f7cbe7?auto=format&fit=crop&w=700&q=80",
-        },
-    ]
+    base_featured_tutors = (
+        Tutor.objects.select_related("user__user")
+        .prefetch_related("subjects")
+        .filter(is_publicly_visible=True, verification_status="approved")
+        .annotate(avg_rating=Avg("tutor_reviews__rating"))
+    )
+    selected_featured_tutors = list(
+        base_featured_tutors
+        .filter(is_home_featured=True)
+        .order_by("home_featured_order", "user__created_at", "id")[:3]
+    )
+    featured_tutors = selected_featured_tutors or list(
+        base_featured_tutors
+        .order_by("user__created_at", "id")[:3]
+    )
     return render(request, "home.html", {"featured_tutors": featured_tutors})
+
+
+def _available_home_tutors():
+    return (
+        Tutor.objects.select_related("user__user")
+        .prefetch_related("subjects")
+        .filter(is_publicly_visible=True, verification_status="approved")
+        .annotate(avg_rating=Avg("tutor_reviews__rating"))
+        .order_by("-is_home_featured", "home_featured_order", "user__created_at", "id")
+    )
 
 
 def about(request):
@@ -204,7 +201,6 @@ def admin_dashboard(request):
         "total_commission": total_commission,
         "total_tutor_payout": total_tutor_payout,
     }
-
     context = {
         "metrics": metrics,
         "today": today,
@@ -217,6 +213,41 @@ def admin_dashboard(request):
         "top_tutors": top_tutors,
     }
     return render(request, "dashboard/admin_dashboard.html", context)
+
+
+@admin_required
+def homepage_tutors(request):
+    if request.method == "POST":
+        selected_ids = request.POST.getlist("featured_tutor_ids")[:3]
+        valid_tutors = Tutor.objects.filter(
+            id__in=selected_ids,
+            is_publicly_visible=True,
+            verification_status="approved",
+        )
+        tutor_map = {str(tutor.id): tutor for tutor in valid_tutors}
+
+        Tutor.objects.update(is_home_featured=False, home_featured_order=0)
+        saved_count = 0
+        for position, tutor_id in enumerate(selected_ids, start=1):
+            tutor = tutor_map.get(tutor_id)
+            if tutor:
+                tutor.is_home_featured = True
+                tutor.home_featured_order = position
+                tutor.save(update_fields=["is_home_featured", "home_featured_order"])
+                saved_count += 1
+
+        if saved_count:
+            suffix = "s" if saved_count != 1 else ""
+            messages.success(request, f"Homepage tutors updated. {saved_count} tutor{suffix} selected.")
+        else:
+            messages.warning(request, "No approved tutors were selected for the homepage.")
+        return redirect("admin_homepage_tutors")
+
+    return render(
+        request,
+        "dashboard/homepage_tutors.html",
+        {"available_home_tutors": _available_home_tutors()},
+    )
 
 
 @admin_required

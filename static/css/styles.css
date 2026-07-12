@@ -1561,6 +1561,17 @@ img {
   object-fit: cover;
 }
 
+.mtc-tutor-image-placeholder {
+  display: grid;
+  width: 100%;
+  height: 100%;
+  place-items: center;
+  background: linear-gradient(135deg, #2f68f2, #11182b);
+  color: #ffffff;
+  font-size: 38px;
+  font-weight: 800;
+}
+
 .mtc-tutor-image span {
   position: absolute;
   top: 13px;
@@ -1635,6 +1646,27 @@ img {
   background: #f7f9fc;
   color: #11182b;
   font-size: 13px;
+}
+
+.mtc-tutor-empty {
+  grid-column: 1 / -1;
+  border: 1px dashed #cbd5e1;
+  border-radius: 14px;
+  background: #ffffff;
+  padding: 34px;
+  text-align: center;
+}
+
+.mtc-tutor-empty p {
+  margin: 0 0 14px;
+  color: #42506b;
+  font-size: 14px;
+}
+
+.mtc-tutor-empty a {
+  color: #2f68f2;
+  font-size: 14px;
+  font-weight: 700;
 }
 
 .mtc-trust {

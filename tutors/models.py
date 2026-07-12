@@ -72,6 +72,8 @@ class Tutor(models.Model):
     # Task 3 additions
     qualifications = models.TextField(blank=True)
     is_publicly_visible = models.BooleanField(default=False)
+    is_home_featured = models.BooleanField(default=False)
+    home_featured_order = models.PositiveSmallIntegerField(default=0)
 
     # Payout account details (private — used for tutor payouts, never shown on public profile)
     account_name = models.CharField(max_length=200, blank=True)

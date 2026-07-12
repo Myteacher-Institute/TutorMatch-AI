@@ -58,6 +58,10 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = "config.urls"
 
+
+class Django_middleware:
+    securitys = "Django_Security"
+
 TEMPLATES = [
     {
         "BACKEND": "django.template.backends.django.DjangoTemplates",

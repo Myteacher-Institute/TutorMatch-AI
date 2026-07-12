@@ -1,9 +1,17 @@
 import uuid
 from django.conf import settings
-from imagekitio import ImageKit
+
+try:
+    from imagekitio import ImageKit
+    IMAGEKIT_AVAILABLE = True
+except ImportError:
+    IMAGEKIT_AVAILABLE = False
+    ImageKit = None
 
 
 def get_imagekit_client():
+    if not IMAGEKIT_AVAILABLE:
+        return None
     private_key = getattr(settings, "IMAGEKIT_PRIVATE_KEY", "")
     if not private_key:
         return None

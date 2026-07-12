@@ -140,30 +140,43 @@
       {% for tutor in featured_tutors %}
       <article class="mtc-tutor-card">
         <div class="mtc-tutor-image">
-          <img src="{{ tutor.photo }}" alt="{{ tutor.name }}">
+          {% if tutor.profile_photo %}
+          <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name }}">
+          {% else %}
+          <div class="mtc-tutor-image-placeholder">
+            {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
+          </div>
+          {% endif %}
           <span style="display: inline-flex; align-items: center; gap: 4px;">
             <svg viewBox="0 0 24 24" width="12" height="12" fill="#fbbf24" style="display: inline-block; vertical-align: middle;">
               <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
             </svg>
-            {{ tutor.rating }}
+            {% if tutor.avg_rating %}{{ tutor.avg_rating|floatformat:1 }}{% else %}New{% endif %}
           </span>
         </div>
         <div class="mtc-tutor-body">
           <div class="mtc-tutor-name">
             <div>
-              <h3>{{ tutor.name }}</h3>
-              <p>{{ tutor.title }}</p>
+              <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
+              <p>{% if tutor.years_experience %}{{ tutor.years_experience }} yr{% if tutor.years_experience != 1 %}s{% endif %} experience{% else %}Verified Tutor{% endif %}</p>
             </div>
-            <strong>₦{{ tutor.rate }}<small>/hr</small></strong>
+            <strong>₦{{ tutor.hourly_rate }}<small>/hr</small></strong>
           </div>
           <div class="mtc-tags">
-            {% for tag in tutor.tags %}
-            <span>{{ tag }}</span>
+            {% for subject in tutor.subjects.all|slice:":3" %}
+            <span>{{ subject.subject_name }}</span>
+            {% empty %}
+            <span>General tutoring</span>
             {% endfor %}
           </div>
           <a href="{% url 'tutor_detail' tutor.id %}" class="mtc-profile-btn">View Profile</a>
         </div>
       </article>
+      {% empty %}
+      <div class="mtc-tutor-empty">
+        <p>No verified tutors are available yet.</p>
+        <a href="{% url 'register' %}">Become the first tutor</a>
+      </div>
       {% endfor %}
     </div>
   </div>

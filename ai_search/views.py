@@ -11,6 +11,7 @@ from .assistant import (
     reset_conversation,
     start_conversation,
     generate_assistant_reply_only,
+    detect_navigation_intent,
 )
 from .forms import TutorSearchForm
 from .services import extract_search_intent, search_tutors, suggested_prompts
@@ -63,6 +64,11 @@ def ai_assistant(request, conversation_id=None):
     if request.method == "POST":
         message = request.POST.get("message", "").strip()
         generate_only = request.POST.get("generate_only") == "1"
+
+        # Check if user is asking to navigate somewhere
+        nav_path = detect_navigation_intent(message)
+        if nav_path:
+            return redirect(nav_path)
 
         if generate_only:
             generate_assistant_reply_only(conversation)

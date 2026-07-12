@@ -1,0 +1,308 @@
+{% extends "base.html" %}
+
+{% block title %}Homepage Tutors | Myteacherconnect{% endblock %}
+
+{% block content %}
+<style>
+  .mtc-homepage-admin-hero {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 20px;
+    border-radius: 22px;
+    background: linear-gradient(135deg, #0f172a, #2563eb);
+    color: #ffffff;
+    padding: 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 24px 60px rgba(37, 99, 235, 0.18);
+  }
+
+  .mtc-homepage-admin-hero h1 {
+    margin: 0 0 8px;
+    color: #ffffff;
+    font-size: 30px;
+    font-weight: 900;
+  }
+
+  .mtc-homepage-admin-hero p {
+    margin: 0;
+    color: rgba(255, 255, 255, 0.82);
+    max-width: 680px;
+    line-height: 1.55;
+  }
+
+  .mtc-home-featured-count {
+    flex: 0 0 auto;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.16);
+    color: #ffffff;
+    font-weight: 850;
+    font-size: 13px;
+    padding: 10px 15px;
+  }
+
+  .mtc-home-featured-admin {
+    overflow: hidden;
+  }
+
+  .mtc-home-featured-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+  }
+
+  .mtc-home-featured-card {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    min-height: 100%;
+    border: 1px solid #e2e8f0;
+    border-radius: 18px;
+    background: #ffffff;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.07);
+    overflow: hidden;
+    cursor: pointer;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+
+  .mtc-home-featured-card:hover {
+    transform: translateY(-3px);
+    border-color: #bfdbfe;
+    box-shadow: 0 18px 44px rgba(37, 99, 235, 0.12);
+  }
+
+  .mtc-home-featured-card input {
+    position: absolute;
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  .mtc-home-featured-card:has(input:checked) {
+    border-color: #2563eb;
+    box-shadow: 0 18px 48px rgba(37, 99, 235, 0.2);
+  }
+
+  .mtc-home-featured-photo {
+    height: 180px;
+    background: linear-gradient(135deg, #eff6ff, #dbeafe);
+    overflow: hidden;
+  }
+
+  .mtc-home-featured-photo img,
+  .mtc-home-featured-placeholder {
+    width: 100%;
+    height: 100%;
+  }
+
+  .mtc-home-featured-photo img {
+    display: block;
+    object-fit: cover;
+  }
+
+  .mtc-home-featured-placeholder {
+    display: grid;
+    place-items: center;
+    color: #ffffff;
+    background: linear-gradient(135deg, #2563eb, #111827);
+    font-size: 36px;
+    font-weight: 900;
+  }
+
+  .mtc-home-featured-check {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border-radius: 999px;
+    color: #94a3b8;
+    background: rgba(255, 255, 255, 0.94);
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+    transition: color 0.2s ease, background 0.2s ease;
+  }
+
+  .mtc-home-featured-card:has(input:checked) .mtc-home-featured-check {
+    color: #ffffff;
+    background: #2563eb;
+    border-color: #2563eb;
+  }
+
+  .mtc-home-featured-body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 11px;
+    padding: 18px;
+  }
+
+  .mtc-home-featured-body h3 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 900;
+  }
+
+  .mtc-home-featured-meta,
+  .mtc-home-featured-subjects {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    color: #64748b;
+    font-size: 12px;
+    font-weight: 750;
+  }
+
+  .mtc-home-featured-meta span,
+  .mtc-home-featured-subjects span {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    border-radius: 999px;
+    background: #f8fafc;
+    padding: 8px 10px;
+  }
+
+  .mtc-home-featured-save {
+    position: sticky;
+    bottom: 16px;
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 22px;
+    pointer-events: none;
+  }
+
+  .mtc-home-featured-save button {
+    border: 0;
+    border-radius: 14px;
+    background: #2563eb;
+    color: #ffffff;
+    font-weight: 900;
+    padding: 14px 20px;
+    cursor: pointer;
+    pointer-events: auto;
+    box-shadow: 0 16px 34px rgba(37, 99, 235, 0.3);
+  }
+
+  .mtc-home-featured-empty {
+    border: 1px dashed #cbd5e1;
+    border-radius: 18px;
+    color: #64748b;
+    background: #f8fafc;
+    padding: 24px;
+  }
+
+  @media (max-width: 1100px) {
+    .mtc-home-featured-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 720px) {
+    .mtc-homepage-admin-hero {
+      flex-direction: column;
+      padding: 22px;
+    }
+
+    .mtc-home-featured-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .mtc-home-featured-save {
+      justify-content: stretch;
+    }
+
+    .mtc-home-featured-save button {
+      width: 100%;
+    }
+  }
+</style>
+
+<div class="mtc-shell admin-dashboard-light">
+  <section class="mtc-admin-layout">
+    {% include "dashboard/_admin_nav.html" %}
+    <div class="mtc-admin-content">
+      <div class="mtc-homepage-admin-hero">
+        <div>
+          <h1>Homepage Tutors</h1>
+          <p>Select the three approved tutors that should appear in the "Meet Our Top Rated Tutors" section on the homepage.</p>
+        </div>
+        <span class="mtc-home-featured-count"><span id="homeFeaturedCount">0</span>/3 selected</span>
+      </div>
+
+      <div class="mtc-admin-card mtc-home-featured-admin">
+        <form method="post" id="homeFeaturedTutorsForm">
+          {% csrf_token %}
+          {% if available_home_tutors %}
+          <div class="mtc-home-featured-grid">
+            {% for tutor in available_home_tutors %}
+            <label class="mtc-home-featured-card">
+              <input type="checkbox" name="featured_tutor_ids" value="{{ tutor.id }}" {% if tutor.is_home_featured %}checked{% endif %}>
+              <span class="mtc-home-featured-check"><i class="fa-solid fa-check"></i></span>
+              <span class="mtc-home-featured-photo">
+                {% if tutor.profile_photo %}
+                  <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+                {% else %}
+                  <span class="mtc-home-featured-placeholder">
+                    {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
+                  </span>
+                {% endif %}
+              </span>
+              <span class="mtc-home-featured-body">
+                <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
+                <span class="mtc-home-featured-meta">
+                  <span><i class="fa-solid fa-location-dot"></i> {{ tutor.location|default:"No location" }}</span>
+                  <span><i class="fa-solid fa-naira-sign"></i> {{ tutor.hourly_rate|default:0 }}/hr</span>
+                  <span><i class="fa-solid fa-calendar"></i> Joined {{ tutor.user.created_at|date:"M j, Y" }}</span>
+                </span>
+                <span class="mtc-home-featured-subjects">
+                  {% for subject in tutor.subjects.all|slice:":3" %}
+                    <span>{{ subject.subject_name }}</span>
+                  {% empty %}
+                    <span>General tutoring</span>
+                  {% endfor %}
+                </span>
+              </span>
+            </label>
+            {% endfor %}
+          </div>
+          <div class="mtc-home-featured-save">
+            <button type="submit"><i class="fa-solid fa-floppy-disk"></i> Save Homepage Tutors</button>
+          </div>
+          {% else %}
+          <p class="mtc-home-featured-empty">No approved public tutors are available yet. Approve tutor verifications first, then select the homepage three here.</p>
+          {% endif %}
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function () {
+    const featuredForm = document.getElementById("homeFeaturedTutorsForm");
+    if (!featuredForm) return;
+
+    const featuredChecks = Array.from(featuredForm.querySelectorAll('input[name="featured_tutor_ids"]'));
+    const featuredCount = document.getElementById("homeFeaturedCount");
+    const updateFeaturedCount = function () {
+      const checkedCount = featuredChecks.filter(function (check) { return check.checked; }).length;
+      if (featuredCount) featuredCount.textContent = checkedCount;
+    };
+
+    featuredChecks.forEach(function (check) {
+      check.addEventListener("change", function () {
+        const checkedCount = featuredChecks.filter(function (item) { return item.checked; }).length;
+        if (checkedCount > 3) {
+          check.checked = false;
+          window.alert("Please select only three homepage tutors.");
+        }
+        updateFeaturedCount();
+      });
+    });
+    updateFeaturedCount();
+  });
+</script>
+{% endblock %}

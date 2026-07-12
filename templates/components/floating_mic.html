@@ -1,0 +1,528 @@
+<!-- Floating Voice Mic Widget - General Voice Assistant -->
+<div id="floating-mic-widget" class="floating-mic-widget" aria-live="polite">
+  <button id="floating-mic-btn" class="floating-mic-btn" type="button" title="Voice Assistant" aria-label="Voice Assistant" aria-pressed="false">
+    <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+      <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+      <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+      <line x1="12" y1="19" x2="12" y2="23"></line>
+      <line x1="8" y1="23" x2="16" y2="23"></line>
+    </svg>
+  </button>
+  <div id="floating-mic-indicator" class="floating-mic-indicator" hidden></div>
+  <div id="floating-mic-transcript" class="floating-mic-transcript" hidden>
+    <div id="floating-mic-status" class="floating-mic-status">Ready</div>
+    <div id="floating-mic-text">Click the mic and speak.</div>
+  </div>
+</div>
+
+<script>
+(function () {
+  const widget = document.getElementById('floating-mic-widget');
+  const btn = document.getElementById('floating-mic-btn');
+  const indicator = document.getElementById('floating-mic-indicator');
+  const transcriptBox = document.getElementById('floating-mic-transcript');
+  const statusText = document.getElementById('floating-mic-status');
+  const transcriptText = document.getElementById('floating-mic-text');
+
+  if (!widget || !btn || !indicator || !transcriptBox || !statusText || !transcriptText) return;
+
+  const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+  const SILENCE_DURATION = 1500;
+  const HIDE_DELAY = 3500;
+
+  let recognition = null;
+  let isRecording = false;
+  let manuallyStopped = false;
+  let silenceTimeout = null;
+  let hideTimeout = null;
+  let lastTranscript = '';
+  let processedTranscript = '';
+  let lastTextTarget = null;
+  let isDragging = false;
+  let dragOffsetX = 0;
+  let dragOffsetY = 0;
+  let posX = 0;
+  let posY = 0;
+
+  widget.style.position = 'fixed';
+  widget.style.bottom = '30px';
+  widget.style.right = '30px';
+  widget.style.zIndex = '9999';
+
+  function isTextTarget(element) {
+    if (!element) return false;
+    const tag = element.tagName;
+    if (tag === 'TEXTAREA') return true;
+    if (tag === 'INPUT') {
+      const type = (element.getAttribute('type') || 'text').toLowerCase();
+      return !['button', 'checkbox', 'color', 'file', 'hidden', 'image', 'radio', 'range', 'reset', 'submit'].includes(type);
+    }
+    return element.isContentEditable || element.contentEditable === 'true' || element.classList.contains('editable');
+  }
+
+  document.addEventListener('focusin', function (event) {
+    if (isTextTarget(event.target)) {
+      lastTextTarget = event.target;
+    }
+  });
+
+  btn.addEventListener('pointerdown', function (event) {
+    event.preventDefault();
+  });
+
+  function showTranscript(status, text) {
+    clearTimeout(hideTimeout);
+    transcriptBox.hidden = false;
+    statusText.textContent = status;
+    transcriptText.textContent = text;
+  }
+
+  function hideTranscriptLater(delay) {
+    clearTimeout(hideTimeout);
+    hideTimeout = setTimeout(function () {
+      if (!isRecording) transcriptBox.hidden = true;
+    }, delay || HIDE_DELAY);
+  }
+
+  function setRecordingState(recording) {
+    isRecording = recording;
+    btn.classList.toggle('recording', recording);
+    btn.setAttribute('aria-pressed', recording ? 'true' : 'false');
+    indicator.hidden = !recording;
+  }
+
+  function resetTranscriptState() {
+    lastTranscript = '';
+    processedTranscript = '';
+    manuallyStopped = false;
+    clearTimeout(silenceTimeout);
+  }
+
+  function getActiveTextTarget() {
+    if (isTextTarget(document.activeElement)) return document.activeElement;
+    if (lastTextTarget && document.contains(lastTextTarget) && !lastTextTarget.disabled && !lastTextTarget.readOnly) {
+      return lastTextTarget;
+    }
+    return null;
+  }
+
+  function detectNavigation(text) {
+    const lowered = String(text || '').toLowerCase().trim();
+    const navPatterns = {
+      '/tutors/': ['take me to tutor', 'take me to tutors', 'go to tutor', 'go to tutors', 'show tutors', 'show tutor', 'tutor page', 'tutors page', 'find tutor', 'find tutors', 'search tutor', 'search tutors'],
+      '/dashboard/': ['take me to dashboard', 'go to dashboard', 'my dashboard', 'show dashboard', 'dashboard page'],
+      '/': ['go to home', 'go home', 'home page', 'main page', 'homepage', 'take me home'],
+      '/bookings/': ['take me to booking', 'take me to bookings', 'go to booking', 'go to bookings', 'my bookings', 'show bookings', 'booking page'],
+      '/Chat/': ['take me to chat', 'go to chat', 'my chat', 'show chat', 'chat page']
+    };
+
+    for (const path in navPatterns) {
+      for (const pattern of navPatterns[path]) {
+        if (lowered.includes(pattern)) return path;
+      }
+    }
+    return null;
+  }
+
+  function cleanTextForInput(text) {
+    let cleaned = String(text || '');
+    [
+      'take me to', 'navigate to', 'go to', 'take me', 'show me',
+      'show', 'go', 'find me', 'search for', 'type'
+    ].forEach(function (phrase) {
+      cleaned = cleaned.replace(new RegExp('\\b' + phrase + '\\b', 'gi'), '').trim();
+    });
+    return cleaned.trim();
+  }
+
+  function insertTextIntoInput(element, text) {
+    const value = String(text || '').trim();
+    if (!value) return;
+
+    if (element.tagName === 'TEXTAREA' || element.tagName === 'INPUT') {
+      const start = element.selectionStart == null ? element.value.length : element.selectionStart;
+      const end = element.selectionEnd == null ? element.value.length : element.selectionEnd;
+      const oldValue = element.value || '';
+      const prefix = start > 0 && oldValue[start - 1] && !/\s/.test(oldValue[start - 1]) ? ' ' : '';
+      const textToInsert = prefix + value;
+      element.value = oldValue.slice(0, start) + textToInsert + oldValue.slice(end);
+      const cursor = start + textToInsert.length;
+      element.focus();
+      element.setSelectionRange(cursor, cursor);
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+      element.dispatchEvent(new Event('change', { bubbles: true }));
+    } else if (element.isContentEditable || element.contentEditable === 'true') {
+      element.focus();
+      document.execCommand('insertText', false, value);
+      element.dispatchEvent(new Event('input', { bubbles: true }));
+    }
+  }
+
+  function processVoiceInput(transcript) {
+    const text = String(transcript || '').trim();
+    if (!text || text === processedTranscript) return;
+    processedTranscript = text;
+
+    const textTarget = getActiveTextTarget();
+    const navPath = detectNavigation(text);
+
+    if (navPath && !textTarget) {
+      showTranscript('Navigating', text);
+      window.location.href = navPath;
+      return;
+    }
+
+    if (textTarget) {
+      const value = navPath ? cleanTextForInput(text) : text;
+      insertTextIntoInput(textTarget, value);
+      showTranscript('Typed', value || text);
+      hideTranscriptLater(1800);
+      return;
+    }
+
+    showTranscript('Heard', text);
+    hideTranscriptLater();
+  }
+
+  function scheduleAutoStop() {
+    clearTimeout(silenceTimeout);
+    silenceTimeout = setTimeout(function () {
+      if (recognition && isRecording) {
+        showTranscript('Processing', lastTranscript || 'Processing your voice...');
+        recognition.stop();
+      }
+    }, SILENCE_DURATION);
+  }
+
+  function createRecognition() {
+    if (!SpeechRecognition) return null;
+
+    const instance = new SpeechRecognition();
+    instance.lang = 'en-US';
+    instance.continuous = true;
+    instance.interimResults = true;
+    instance.maxAlternatives = 1;
+
+    instance.onstart = function () {
+      resetTranscriptState();
+      setRecordingState(true);
+      showTranscript('Listening', 'Speak now...');
+    };
+
+    instance.onresult = function (event) {
+      let combined = '';
+      let finalText = '';
+
+      for (let i = 0; i < event.results.length; i += 1) {
+        const resultText = event.results[i][0].transcript;
+        combined += resultText + ' ';
+        if (event.results[i].isFinal) finalText += resultText + ' ';
+      }
+
+      lastTranscript = (finalText || combined).trim();
+      showTranscript(event.results[event.results.length - 1].isFinal ? 'Heard' : 'Listening', lastTranscript || 'Listening...');
+      scheduleAutoStop();
+
+      if (finalText.trim()) {
+        processVoiceInput(finalText.trim());
+      }
+    };
+
+    instance.onerror = function (event) {
+      setRecordingState(false);
+      clearTimeout(silenceTimeout);
+
+      const messages = {
+        'not-allowed': 'Microphone access denied. Allow mic permission in the address bar.',
+        'service-not-allowed': 'Speech recognition is blocked by this browser.',
+        'no-speech': 'No speech detected. Click the mic and try again.',
+        'audio-capture': 'No microphone was found.',
+        'network': 'Speech service network error. Try again.'
+      };
+      showTranscript('Mic error', messages[event.error] || ('Speech error: ' + event.error));
+      hideTranscriptLater(5000);
+    };
+
+    instance.onend = function () {
+      const transcriptToProcess = lastTranscript.trim();
+      setRecordingState(false);
+      clearTimeout(silenceTimeout);
+
+      if (transcriptToProcess && !manuallyStopped) {
+        processVoiceInput(transcriptToProcess);
+      } else if (!transcriptToProcess && !manuallyStopped) {
+        showTranscript('No speech', 'I did not catch anything. Try again.');
+        hideTranscriptLater();
+      } else {
+        hideTranscriptLater(1800);
+      }
+    };
+
+    return instance;
+  }
+
+  recognition = createRecognition();
+  if (!recognition) {
+    btn.classList.add('unsupported');
+    btn.title = 'Voice recognition is not supported in this browser';
+  }
+
+  function startRecognition() {
+    if (!recognition) {
+      showTranscript('Unsupported', 'Use Chrome or Edge for browser speech recognition.');
+      hideTranscriptLater(5000);
+      return;
+    }
+
+    try {
+      manuallyStopped = false;
+      showTranscript('Starting', 'Requesting microphone...');
+      recognition.start();
+    } catch (error) {
+      if (String(error && error.message || '').toLowerCase().includes('already')) {
+        showTranscript('Listening', lastTranscript || 'Speak now...');
+      } else {
+        showTranscript('Mic error', 'Could not start the microphone. Try again.');
+        hideTranscriptLater();
+      }
+    }
+  }
+
+  function stopRecognition() {
+    manuallyStopped = true;
+    clearTimeout(silenceTimeout);
+    if (recognition && isRecording) recognition.stop();
+  }
+
+  btn.addEventListener('click', function (event) {
+    event.preventDefault();
+    event.stopPropagation();
+    if (isRecording) {
+      stopRecognition();
+    } else {
+      startRecognition();
+    }
+  });
+
+  function loadPosition() {
+    try {
+      const saved = localStorage.getItem('floating-mic-position');
+      if (!saved) return;
+      const pos = JSON.parse(saved);
+      posX = Number(pos.x) || 0;
+      posY = Number(pos.y) || 0;
+      widget.style.transform = 'translate(' + posX + 'px, ' + posY + 'px)';
+    } catch (error) {}
+  }
+
+  function savePosition() {
+    try {
+      localStorage.setItem('floating-mic-position', JSON.stringify({ x: posX, y: posY }));
+    } catch (error) {}
+  }
+
+  widget.addEventListener('mousedown', function (event) {
+    if (event.target.closest('#floating-mic-btn')) return;
+    isDragging = true;
+    dragOffsetX = event.clientX - posX;
+    dragOffsetY = event.clientY - posY;
+    widget.style.cursor = 'grabbing';
+  });
+
+  document.addEventListener('mousemove', function (event) {
+    if (!isDragging) return;
+    posX = event.clientX - dragOffsetX;
+    posY = event.clientY - dragOffsetY;
+    widget.style.transform = 'translate(' + posX + 'px, ' + posY + 'px)';
+  });
+
+  document.addEventListener('mouseup', function () {
+    if (!isDragging) return;
+    isDragging = false;
+    widget.style.cursor = 'grab';
+    savePosition();
+  });
+
+  widget.addEventListener('touchstart', function (event) {
+    if (event.target.closest('#floating-mic-btn')) return;
+    isDragging = true;
+    const touch = event.touches[0];
+    dragOffsetX = touch.clientX - posX;
+    dragOffsetY = touch.clientY - posY;
+  }, { passive: true });
+
+  document.addEventListener('touchmove', function (event) {
+    if (!isDragging) return;
+    const touch = event.touches[0];
+    posX = touch.clientX - dragOffsetX;
+    posY = touch.clientY - dragOffsetY;
+    widget.style.transform = 'translate(' + posX + 'px, ' + posY + 'px)';
+  }, { passive: true });
+
+  document.addEventListener('touchend', function () {
+    if (!isDragging) return;
+    isDragging = false;
+    savePosition();
+  });
+
+  loadPosition();
+})();
+</script>
+
+<style>
+.floating-mic-widget {
+  padding: 8px;
+  border-radius: 50%;
+  box-shadow: 0 8px 24px rgba(37, 99, 235, 0.35);
+  background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+  user-select: none;
+  cursor: grab;
+  will-change: transform;
+  position: relative;
+}
+
+.floating-mic-widget:active {
+  cursor: grabbing;
+}
+
+.floating-mic-btn {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  height: 48px;
+  border: 0;
+  border-radius: 50%;
+  background: #ffffff;
+  color: #2563eb;
+  cursor: pointer;
+  padding: 0;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, color 0.2s ease;
+}
+
+.floating-mic-btn:hover {
+  transform: scale(1.08);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
+.floating-mic-btn:active {
+  transform: scale(0.94);
+}
+
+.floating-mic-btn.recording {
+  background: #ef4444;
+  color: #ffffff;
+  animation: pulse-recording 1s infinite;
+}
+
+.floating-mic-btn.unsupported {
+  opacity: 0.65;
+}
+
+.floating-mic-indicator {
+  position: absolute;
+  top: -2px;
+  right: -2px;
+  z-index: 11;
+  width: 14px;
+  height: 14px;
+  border: 2px solid #ffffff;
+  border-radius: 50%;
+  background: #ef4444;
+  animation: pulse-dot 1s infinite;
+}
+
+.floating-mic-transcript {
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  z-index: 9;
+  width: max-content;
+  max-width: min(320px, calc(100vw - 32px));
+  margin-bottom: 12px;
+  transform: translateX(-50%);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  background: rgba(15, 23, 42, 0.94);
+  color: #ffffff;
+  padding: 12px 14px;
+  box-shadow: 0 14px 34px rgba(15, 23, 42, 0.32);
+  animation: transcript-appear 0.22s ease;
+}
+
+.floating-mic-transcript::after {
+  content: "";
+  position: absolute;
+  bottom: -6px;
+  left: 50%;
+  width: 0;
+  height: 0;
+  transform: translateX(-50%);
+  border-left: 6px solid transparent;
+  border-right: 6px solid transparent;
+  border-top: 6px solid rgba(15, 23, 42, 0.94);
+}
+
+.floating-mic-status {
+  margin-bottom: 4px;
+  color: #93c5fd;
+  font-size: 11px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+#floating-mic-text {
+  color: #ffffff;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+
+@keyframes transcript-appear {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
+@keyframes pulse-recording {
+  0%, 100% {
+    box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.42);
+  }
+  50% {
+    box-shadow: 0 0 0 12px rgba(239, 68, 68, 0);
+  }
+}
+
+@keyframes pulse-dot {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.62;
+    transform: scale(1.2);
+  }
+}
+
+@media (max-width: 768px) {
+  .floating-mic-btn {
+    width: 44px;
+    height: 44px;
+  }
+
+  .floating-mic-transcript {
+    max-width: min(260px, calc(100vw - 28px));
+  }
+}
+</style>

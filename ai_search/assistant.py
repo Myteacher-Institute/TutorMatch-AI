@@ -22,6 +22,13 @@ Your job:
 - Help with assignments by guiding and explaining. Do not simply do all assessed work for the student.
 - Suggest courses or learning paths when the student wants to learn something like HTML, coding, WAEC prep, JAMB prep, or school subjects.
 - Be concise, friendly, and practical. Use Nigerian context where helpful.
+
+SPECIAL COMMANDS (respond only with "NAVIGATE: /path" when user asks):
+- If user asks "take me to tutors", "go to find tutors", "show me tutors page" → respond with: NAVIGATE: /tutors/
+- If user asks "show dashboard", "go to dashboard" → respond with: NAVIGATE: /dashboard/
+- If user asks "go to home", "home page", "main page" → respond with: NAVIGATE: /
+- If user asks "go to bookings", "show my bookings" → respond with: NAVIGATE: /bookings/
+- If user asks "show my chats", "go to chats" → respond with: NAVIGATE: /chat/
 """
 
 
@@ -301,6 +308,30 @@ def _detect_learning_mode(text):
     if any(word in lowered for word in ["learn", "course", "html", "coding", "programming"]):
         return "course"
     return "tutor_match"
+
+
+def detect_navigation_intent(text):
+    """
+    Detect if user is asking for navigation to a specific page.
+    Returns the path if a navigation command is found, otherwise None.
+    """
+    lowered = (text or "").lower().strip()
+    
+    # Navigation mappings
+    nav_patterns = {
+        "/tutors/": ["take me to tutor", "go to find tutor", "show me tutor", "tutor page", "find tutor", "go to tutors", "tutors page"],
+        "/dashboard/": ["show dashboard", "go to dashboard", "my dashboard", "dashboard page"],
+        "/": ["go to home", "home page", "main page", "homepage", "take me home", "home"],
+        "/bookings/": ["go to booking", "show my booking", "my booking", "booking page"],
+        "/Chat/": ["show my chat", "go to chat", "my chat", "chat page"],
+    }
+    
+    for path, patterns in nav_patterns.items():
+        for pattern in patterns:
+            if pattern in lowered:
+                return path
+    
+    return None
 
 
 def _generate_service_error_reply():
