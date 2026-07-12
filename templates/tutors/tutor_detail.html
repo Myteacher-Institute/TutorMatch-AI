@@ -191,6 +191,22 @@
 
           <p class="tutor-booking-note">Booking handled by the sessions module.</p>
 
+          <!-- Address -->
+          <div class="tutor-booking-address">
+            <p style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 10px;">
+              <i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:6px;"></i>Address
+            </p>
+            {% if tutor.location or tutor.local_government or tutor.state or tutor.country %}
+              <div class="tutor-address-lines">
+                {% if tutor.location %}<span>{{ tutor.location }}</span>{% endif %}
+                {% if tutor.local_government %}<span>{{ tutor.local_government }}</span>{% endif %}
+                {% if tutor.state %}<span>{{ tutor.state }}{% if tutor.country %}, {{ tutor.country }}{% endif %}</span>{% elif tutor.country %}<span>{{ tutor.country }}</span>{% endif %}
+              </div>
+            {% else %}
+              <p style="font-size:14px;color:#94a3b8;margin:0;">No address provided.</p>
+            {% endif %}
+          </div>
+
           {% if tutor.is_verified %}
             <div class="tutor-verified-note">
               <i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;font-size:16px;"></i>

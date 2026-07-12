@@ -5781,6 +5781,26 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   font-weight: 600;
 }
 
+.tutor-booking-address {
+  margin-top: 18px;
+  padding-top: 16px;
+  border-top: 1px solid var(--line);
+}
+
+.tutor-address-lines {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.tutor-address-lines span:last-child {
+  font-weight: 600;
+  color: #12182c;
+}
+
 /* ── File input styling ── */
 .tutor-file-drop {
   position: relative;

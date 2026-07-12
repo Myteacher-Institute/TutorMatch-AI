@@ -1,9 +1,33 @@
 from django import forms
 from .models import Tutor, TutorDocument, Subject
+from .geo_data import (
+    NIGERIAN_STATES,
+    COUNTRIES_BY_CONTINENT,
+    DEFAULT_COUNTRY,
+)
 
 
 class TutorProfileForm(forms.ModelForm):
     profile_photo_upload = forms.ImageField(required=False)
+
+    state = forms.ChoiceField(
+        choices=[("", "Select state")] + [(s, s) for s in NIGERIAN_STATES],
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    local_government = forms.CharField(
+        required=False,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
+    country = forms.ChoiceField(
+        choices=([("", "Select country")] + [
+            (continent, [(c, c) for c in countries])
+            for continent, countries in COUNTRIES_BY_CONTINENT.items()
+        ]),
+        required=False,
+        initial=DEFAULT_COUNTRY,
+        widget=forms.Select(attrs={'class': 'form-control'}),
+    )
     subjects_input = forms.CharField(
         required=False,
         widget=forms.TextInput(attrs={
@@ -18,6 +42,9 @@ class TutorProfileForm(forms.ModelForm):
         fields = [
             'profile_photo_upload',
             'bio',
+            'state',
+            'local_government',
+            'country',
             'location',
             'hourly_rate',
             'years_experience',

@@ -10,7 +10,9 @@ from bookings.models import Booking
 from payments.models import Payment
 from reviews.models import Review
 from .forms import TutorProfileForm, TutorDocumentForm
+from .geo_data import NIGERIAN_LGAS, DEFAULT_COUNTRY
 from django.views.decorators.csrf import ensure_csrf_cookie
+import json
 
 
 @tutor_required
@@ -71,7 +73,13 @@ def tutor_profile(request):
         messages.success(request, 'Profile updated successfully.')
         return redirect('tutor_dashboard')
 
-    return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile, 'active_tab': 'profile'})
+    return render(request, 'tutors/profile_form.html', {
+        'form': form,
+        'profile': profile,
+        'active_tab': 'profile',
+        'lgas_json': json.dumps(NIGERIAN_LGAS),
+        'default_country': DEFAULT_COUNTRY,
+    })
 
 
 @tutor_required
