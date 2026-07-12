@@ -3,6 +3,7 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.http import Http404
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
 from .models import Tutor, TutorDocument, Subject
@@ -158,9 +159,18 @@ def tutor_detail(request, tutor_id):
     tutor = get_object_or_404(
         Tutor.objects.select_related("user__user").prefetch_related("subjects"),
         id=tutor_id,
-        is_publicly_visible=True,
-        verification_status="approved",
     )
+
+    if tutor.verification_status != "approved" or not tutor.is_publicly_visible:
+        is_owner = (
+            request.user.is_authenticated
+            and hasattr(request.user, "profile")
+            and getattr(request.user.profile, "tutor_profile", None)
+            and request.user.profile.tutor_profile.id == tutor_id
+        )
+        if not is_owner:
+            raise Http404("No Tutor matches the given query.")
+
     reviews_list = Review.objects.filter(tutor=tutor).select_related("student__user").order_by("-created_at")
     paginator = Paginator(reviews_list, 5)
     page_number = request.GET.get("page")
