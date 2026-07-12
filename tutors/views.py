@@ -3,6 +3,7 @@ from django.db.models import Sum
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils import timezone
+from django.http import Http404
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
 from .models import Tutor, TutorDocument, Subject
@@ -10,7 +11,9 @@ from bookings.models import Booking
 from payments.models import Payment
 from reviews.models import Review
 from .forms import TutorProfileForm, TutorDocumentForm
+from .geo_data import NIGERIAN_LGAS, DEFAULT_COUNTRY
 from django.views.decorators.csrf import ensure_csrf_cookie
+import json
 
 
 @tutor_required
@@ -71,7 +74,13 @@ def tutor_profile(request):
         messages.success(request, 'Profile updated successfully.')
         return redirect('tutor_dashboard')
 
-    return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile, 'active_tab': 'profile'})
+    return render(request, 'tutors/profile_form.html', {
+        'form': form,
+        'profile': profile,
+        'active_tab': 'profile',
+        'lgas_json': json.dumps(NIGERIAN_LGAS),
+        'default_country': DEFAULT_COUNTRY,
+    })
 
 
 @tutor_required
@@ -135,7 +144,7 @@ def tutor_list(request):
 
     tutors_qs = tutors_qs.distinct()
 
-    paginator = Paginator(tutors_qs, 10)
+    paginator = Paginator(tutors_qs, 9)
     page_number = request.GET.get("page")
     tutors = paginator.get_page(page_number)
 
@@ -150,9 +159,18 @@ def tutor_detail(request, tutor_id):
     tutor = get_object_or_404(
         Tutor.objects.select_related("user__user").prefetch_related("subjects"),
         id=tutor_id,
-        is_publicly_visible=True,
-        verification_status="approved",
     )
+
+    if tutor.verification_status != "approved" or not tutor.is_publicly_visible:
+        is_owner = (
+            request.user.is_authenticated
+            and hasattr(request.user, "profile")
+            and getattr(request.user.profile, "tutor_profile", None)
+            and request.user.profile.tutor_profile.id == tutor_id
+        )
+        if not is_owner:
+            raise Http404("No Tutor matches the given query.")
+
     reviews_list = Review.objects.filter(tutor=tutor).select_related("student__user").order_by("-created_at")
     paginator = Paginator(reviews_list, 5)
     page_number = request.GET.get("page")

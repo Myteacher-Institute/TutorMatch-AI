@@ -77,7 +77,10 @@
           </div>
         {% endif %}
 
-        <!-- Reviews -->
+      </div>
+
+      <!-- Reviews -->
+      <div class="tutor-detail-reviews">
         <div class="mtc-admin-card" style="margin-top:20px;">
           <h2 style="margin:0 0 14px;font-size:18px;color:#12182c;"><i class="fa-solid fa-star" style="color:#fbbf24;margin-right:8px;"></i>Reviews</h2>
           {% if reviews %}
@@ -190,6 +193,23 @@
           {% endif %}
 
           <p class="tutor-booking-note">Booking handled by the sessions module.</p>
+
+          <!-- Address -->
+          <div class="tutor-booking-address">
+            <p style="font-size:12px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.06em;margin:0 0 10px;">
+              <i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:6px;"></i>Address
+            </p>
+            {% if tutor.location or tutor.local_government or tutor.state or tutor.country %}
+              <div class="tutor-address-lines">
+                {% if tutor.location %}<div class="tutor-address-field"><span class="tutor-address-label">Location</span><span>{{ tutor.location }}</span></div>{% endif %}
+                {% if tutor.local_government %}<div class="tutor-address-field"><span class="tutor-address-label">Local Government</span><span>{{ tutor.local_government }}</span></div>{% endif %}
+                {% if tutor.state %}<div class="tutor-address-field"><span class="tutor-address-label">State</span><span>{{ tutor.state }}</span></div>{% endif %}
+                {% if tutor.country %}<div class="tutor-address-field"><span class="tutor-address-label">Country</span><span>{{ tutor.country }}</span></div>{% endif %}
+              </div>
+            {% else %}
+              <p style="font-size:14px;color:#94a3b8;margin:0;">No address provided.</p>
+            {% endif %}
+          </div>
 
           {% if tutor.is_verified %}
             <div class="tutor-verified-note">
