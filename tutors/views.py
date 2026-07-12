@@ -143,7 +143,7 @@ def tutor_list(request):
 
     tutors_qs = tutors_qs.distinct()
 
-    paginator = Paginator(tutors_qs, 10)
+    paginator = Paginator(tutors_qs, 9)
     page_number = request.GET.get("page")
     tutors = paginator.get_page(page_number)
 
