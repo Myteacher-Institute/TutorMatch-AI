@@ -5828,13 +5828,6 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   white-space: nowrap;
 }
 
-.save-tutor-btn {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  z-index: 2;
-}
-
 .tutor-public-meta .location {
   display: inline-flex;
   align-items: center;

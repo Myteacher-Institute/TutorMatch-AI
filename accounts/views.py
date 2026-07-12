@@ -149,10 +149,10 @@ def saved_tutors(request):
     )
 
 
-@student_required
+@login_required
 @require_POST
 def toggle_save_tutor(request, tutor_id):
-    student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    user_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     tutor = get_object_or_404(
         Tutor,
         id=tutor_id,
@@ -160,7 +160,7 @@ def toggle_save_tutor(request, tutor_id):
         verification_status="approved",
     )
     saved, created = SavedTutor.objects.get_or_create(
-        student=student_profile, tutor=tutor
+        student=user_profile, tutor=tutor
     )
     if not created:
         saved.delete()
