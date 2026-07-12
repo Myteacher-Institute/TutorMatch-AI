@@ -164,9 +164,9 @@ def tutor_detail(request, tutor_id):
     if tutor.verification_status != "approved" or not tutor.is_publicly_visible:
         is_owner = (
             request.user.is_authenticated
-            and hasattr(request.user, "profile")
-            and getattr(request.user.profile, "tutor_profile", None)
-            and request.user.profile.tutor_profile.id == tutor_id
+            and tutor.user
+            and tutor.user.user
+            and request.user == tutor.user.user
         )
         if not is_owner:
             raise Http404("No Tutor matches the given query.")
