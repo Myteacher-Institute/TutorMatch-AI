@@ -36,6 +36,12 @@
     box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
+    transition: transform 0.25s ease, margin-bottom 0.25s ease;
+  }
+  .tutor-filter-shell.is-hidden {
+    transform: translateY(-110%);
+    margin-bottom: 0;
+    pointer-events: none;
   }
   .tutor-toolbar {
     display: flex;
@@ -611,4 +617,32 @@
     {% endif %}
   </div>
 </section>
+
+<script>
+  (function () {
+    const filter = document.querySelector('.tutor-filter-shell');
+    if (!filter || window.matchMedia('(max-width: 768px)').matches) return;
+
+    let lastY = window.scrollY;
+    let ticking = false;
+    const threshold = 80;
+
+    function onScroll() {
+      if (ticking) return;
+      ticking = true;
+      requestAnimationFrame(function () {
+        const currentY = window.scrollY;
+        if (currentY > lastY && currentY > threshold) {
+          filter.classList.add('is-hidden');
+        } else {
+          filter.classList.remove('is-hidden');
+        }
+        lastY = currentY;
+        ticking = false;
+      });
+    }
+
+    window.addEventListener('scroll', onScroll, { passive: true });
+  })();
+</script>
 {% endblock %}
