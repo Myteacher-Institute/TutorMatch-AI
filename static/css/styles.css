@@ -8777,7 +8777,7 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 }
 
 .mtc-ledger-scroll {
-  overflow: visible;
+  overflow-x: auto;
   border: 1px solid var(--line);
   border-radius: 14px;
   background: var(--white);
@@ -8786,6 +8786,7 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 
 .mtc-ledger-table {
   width: 100%;
+  min-width: 1040px;
   border-collapse: collapse;
   font-size: 13px;
   text-align: left;
@@ -8800,13 +8801,13 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   font-size: 11px;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  padding: 12px;
+  padding: 14px 16px;
   border-bottom: 1px solid var(--line);
   white-space: nowrap;
 }
 
 .mtc-ledger-table tbody td {
-  padding: 12px 14px;
+  padding: 16px;
   border-bottom: 1px solid var(--line);
   vertical-align: middle;
   color: #334155;
@@ -8822,17 +8823,6 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 
 .mtc-ledger-table tbody tr:hover td {
   background: #f8fafc;
-}
-
-@media (max-width: 920px) {
-  .mtc-ledger-scroll {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .mtc-ledger-table {
-    min-width: 880px;
-  }
 }
 
 .mtc-ledger-ref {
@@ -8921,9 +8911,9 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   color: #b45309;
 }
 
-.mtc-ledger-status.is-failed {
-  background: #fef2f2;
-  color: #b91c1c;
+.mtc-ledger-status.is-refunded {
+  background: #ede9fe;
+  color: #6d28d9;
 }
 
 .mtc-ledger-paidout {

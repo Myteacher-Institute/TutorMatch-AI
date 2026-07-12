@@ -13,6 +13,7 @@ Payment_CHOICES = [
     ("paid", "Paid"),
     ("failed", "Failed"),
     ("released", "Released"),
+    ("refunded", "Refunded"),
 ]
 
 

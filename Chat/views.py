@@ -37,7 +37,10 @@ def _user_can_access_booking_chat(user, booking):
     has_paid = booking.payments.filter(payment_status="paid").exists()
 
     if is_student:
-        return has_paid
+        # Students can access the chat once they've paid OR the tutor has
+        # accepted/completed the booking. This prevents the "not authorized"
+        # message after a tutor accepts.
+        return has_paid or booking.status in ("accepted", "completed")
 
     if is_tutor:
         # Tutors can always access and reply to a booking's chat,

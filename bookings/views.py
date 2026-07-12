@@ -87,10 +87,16 @@ def student_bookings(request):
         )
         latest_payment = payments[0] if payments else None
         display_payment = paid_payment or latest_payment
-        booking.display_payment_status = display_payment.payment_status if display_payment else "pending"
-        booking.display_payment_status_label = (
-            display_payment.get_payment_status_display() if display_payment else "Pending"
-        )
+        display_status = display_payment.payment_status if display_payment else "pending"
+        # Students should not see the internal "released" (tutor payout) state;
+        # from their perspective the payment is simply paid.
+        if display_status == "released":
+            display_status = "paid"
+            display_label = "Paid"
+        else:
+            display_label = display_payment.get_payment_status_display() if display_payment else "Pending"
+        booking.display_payment_status = display_status
+        booking.display_payment_status_label = display_label
     completed_lessons_count = Booking.objects.filter(
         student=student_profile,
         status="completed",
@@ -180,7 +186,38 @@ def update_booking_status(request, booking_id, status):
         messages.error(request, "This booking cannot be updated from its current status.")
         return redirect("tutor_bookings")
 
+    if status == "cancelled":
+        error, refunded = _refund_booking_if_paid(booking)
+        if error:
+            messages.error(request, error)
+            return redirect("tutor_bookings")
+        if refunded:
+            messages.success(request, "Booking rejected. The student's payment has been refunded.")
+            return redirect("tutor_bookings")
+
     booking.status = status
     booking.save(update_fields=["status"])
     messages.success(request, success_message)
     return redirect("tutor_bookings")
+
+
+def _refund_booking_if_paid(booking):
+    """Refund a paid payment for a booking being rejected.
+
+    Returns a tuple (error_message, refunded). On failure `error_message` is
+    set so the caller can abort the cancellation. `refunded` is True when a
+    payment was actually refunded.
+    """
+    payment = booking.payments.filter(payment_status="paid").first()
+    if not payment or not payment.paystack_reference:
+        return None, False
+
+    from payments.views import initiate_paystack_refund
+
+    ok, message, _ = initiate_paystack_refund(payment.paystack_reference)
+    if not ok:
+        return f"Refund failed: {message}. The booking was not rejected.", False
+
+    payment.payment_status = "refunded"
+    payment.save(update_fields=["payment_status"])
+    return None, True

@@ -669,6 +669,10 @@ def revenue(request):
             for p in Payment.objects.select_related("booking__tutor__user__user", "booking__student__user").order_by("-created_at"):
                 tutor = p.booking.tutor if p.booking else None
                 student = p.booking.student if p.booking else None
+                booking_status = p.booking.status if p.booking else "pending"
+                booking_status_label = p.booking.get_status_display() if p.booking else "Pending"
+                if booking_status == "cancelled":
+                    booking_status_label = "Rejected"
                 recent_payments.append({
                     "id": p.id,
                     "reference": p.paystack_reference or "-",
@@ -678,6 +682,8 @@ def revenue(request):
                     "commission": float(p.commission),
                     "payout": float(p.tutor_payout),
                     "status": p.payment_status,
+                    "booking_status": booking_status,
+                    "booking_status_label": booking_status_label,
                     "created_at": p.created_at,
                     "account_name": tutor.account_name if tutor else "",
                     "bank_name": tutor.bank_name if tutor else "",

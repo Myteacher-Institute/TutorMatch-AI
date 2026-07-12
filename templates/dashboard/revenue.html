@@ -67,6 +67,7 @@
                 <th>Tutor</th>
                 <th>Bank Details</th>
                 <th>Student</th>
+                <th>Learning Status</th>
                 <th class="mtc-ledger-amount">Amount</th>
                 <th class="mtc-ledger-payout">Payout</th>
                 <th>Status</th>
@@ -87,17 +88,26 @@
                   </div>
                 </td>
                 <td>{{ p.student }}</td>
+                <td>
+                  <span class="mtc-status-pill mtc-status-{{ p.booking_status }}">
+                    {{ p.booking_status_label }}
+                  </span>
+                </td>
                 <td class="mtc-ledger-amount">₦{{ p.amount|floatformat:2 }}</td>
                 <td class="mtc-ledger-payout">₦{{ p.payout|floatformat:2 }}</td>
                 <td>
-                  <span class="mtc-ledger-status {% if p.status == 'released' %}is-released{% elif p.status == 'paid' %}is-paid{% elif p.status == 'pending' %}is-pending{% else %}is-failed{% endif %}">
-                    {% if p.status == "released" %}Released{% elif p.status == "paid" %}Paid{% elif p.status == "pending" %}Pending{% else %}Failed{% endif %}
+                  <span class="mtc-ledger-status {% if p.status == 'released' %}is-released{% elif p.status == 'paid' %}is-paid{% elif p.status == 'pending' %}is-pending{% elif p.status == 'refunded' %}is-refunded{% else %}is-failed{% endif %}">
+                    {% if p.status == "released" %}Released{% elif p.status == "paid" %}Paid{% elif p.status == "pending" %}Pending{% elif p.status == "refunded" %}Refunded{% else %}Failed{% endif %}
                   </span>
                 </td>
                 <td class="mtc-ledger-date">{{ p.created_at|date:"M d, Y H:i" }}</td>
                 <td class="mtc-ledger-actions">
-                  {% if p.status == "released" %}
+                  {% if p.booking_status == "cancelled" %}
+                    <span class="mtc-ledger-paidout" style="color: #6d28d9;"><i class="fa-solid fa-rotate-left"></i> Refunded</span>
+                  {% elif p.status == "released" %}
                     <span class="mtc-ledger-paidout"><i class="fa-solid fa-check"></i> Paid out</span>
+                  {% elif p.status == "refunded" %}
+                    <span class="mtc-ledger-paidout" style="color: #6d28d9;"><i class="fa-solid fa-rotate-left"></i> Refunded</span>
                   {% elif p.status == "paid" %}
                     <form method="post" style="display: inline-block;">
                       {% csrf_token %}
@@ -121,7 +131,7 @@
               </tr>
               {% empty %}
               <tr>
-                <td colspan="9" class="mtc-ledger-empty">No transactions recorded yet.</td>
+                <td colspan="10" class="mtc-ledger-empty">No transactions recorded yet.</td>
               </tr>
               {% endfor %}
             </tbody>

@@ -19,11 +19,33 @@ def payment_failed(request):
 
 PAYSTACK_INIT_URL = "https://api.paystack.co/transaction/initialize"
 PAYSTACK_VERIFY_URL = "https://api.paystack.co/transaction/verify/"
+PAYSTACK_REFUND_URL = "https://api.paystack.co/refund"
 
 headers = {
     "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
     "Content-Type": "application/json",
 }
+
+
+def initiate_paystack_refund(reference, amount_kobo=None):
+    """Refund a successful Paystack transaction by its reference.
+
+    Returns a tuple (success, message, data). On success the caller should
+    treat the payment as refunded.
+    """
+    payload = {"transaction": reference}
+    if amount_kobo is not None:
+        payload["amount"] = amount_kobo
+    try:
+        response = requests.post(PAYSTACK_REFUND_URL, json=payload, headers=headers, timeout=20)
+        data = response.json()
+    except requests.RequestException:
+        return False, "Payment gateway is unavailable, refund could not be processed.", None
+
+    if data.get("status"):
+        return True, data.get("message", "Refund initiated."), data.get("data")
+
+    return False, data.get("message", "Refund request failed."), None
 
 
 @login_required
