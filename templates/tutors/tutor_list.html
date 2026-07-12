@@ -529,9 +529,11 @@
                 </div>
               {% endif %}
 
+              {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
               <button type="button" class="tutor-favourite-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}" data-tutor-id="{{ tutor.id }}" onclick="toggleSaveTutor(this)" aria-label="Save {{ tutor.user.user.get_full_name }}">
                 <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
               </button>
+              {% endif %}
 
               <div class="tutor-rate-pill">&#8358;{{ tutor.hourly_rate }}/hr</div>
             </div>
