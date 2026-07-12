@@ -93,7 +93,7 @@ def recent_conversations(request, search_query=""):
 
 def start_conversation(conversation, initial_prompt=""):
     if initial_prompt and not conversation.messages.exists():
-        handle_user_message(conversation, initial_prompt)
+        AIMessage.objects.create(conversation=conversation, role=AIMessage.ROLE_USER, content=initial_prompt.strip())
     return conversation
 
 
@@ -103,7 +103,10 @@ def handle_user_message(conversation, user_text):
         return None
 
     AIMessage.objects.create(conversation=conversation, role=AIMessage.ROLE_USER, content=user_text)
+    return generate_assistant_reply_only(conversation)
 
+
+def generate_assistant_reply_only(conversation):
     state = _merge_state(conversation)
     tutors = _recommend_tutors(state)
     assistant_text = _generate_assistant_reply(conversation, state, tutors)

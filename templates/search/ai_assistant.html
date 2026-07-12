@@ -1508,6 +1508,100 @@
 
     // Recheck responsive layout elements
     handleResponsiveLayout();
+
+    // Auto-generate reply if the last message in the thread is a user message
+    const threadInner = document.querySelector('.message-thread-inner');
+    if (threadInner && threadInner.lastElementChild) {
+      const lastMsg = threadInner.lastElementChild;
+      if (lastMsg.classList.contains('user-msg') && !document.getElementById('thinking-bubble')) {
+        triggerAutoReplyGeneration();
+      }
+    }
+  }
+
+  function triggerAutoReplyGeneration() {
+    const chatContainer = document.getElementById('chat-thread-container');
+    const threadInner = chatContainer ? chatContainer.querySelector('.message-thread-inner') : null;
+    if (!threadInner) return;
+
+    // Append AI Thinking message bubble
+    const aiThinkingHTML = `
+      <article class="chat-msg-row assistant-msg" id="thinking-bubble">
+        <div class="msg-body-container" style="display:flex; gap:16px; align-items:flex-start;">
+          <div class="avatar-avatar ai-icon" style="background:var(--ai-avatar-bg); color:var(--ai-avatar-color); width:32px; height:32px; border-radius:50%; display:grid; place-items:center; font-size:13px; font-weight:700; flex-shrink:0;">
+            AI
+          </div>
+          <div class="msg-body-container">
+            <div class="msg-text-bubble">
+              <div class="ai-thinking-indicator">
+                <span></span>
+                <span></span>
+                <span></span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+    `;
+    threadInner.insertAdjacentHTML('beforeend', aiThinkingHTML);
+
+    // Scroll to bottom
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+
+    // Disable composer textarea during generation
+    const textareas = [
+      document.getElementById('ai-message-input'),
+      document.getElementById('ai-message-input-chat')
+    ];
+    textareas.forEach(t => { if (t) t.disabled = true; });
+
+    // POST request to trigger reply generation
+    const formData = new FormData();
+    const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]') 
+      ? document.querySelector('[name=csrfmiddlewaretoken]').value 
+      : '';
+    formData.append('csrfmiddlewaretoken', csrfToken);
+    formData.append('generate_only', '1');
+
+    fetch(window.location.href, {
+      method: 'POST',
+      body: formData,
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest'
+      }
+    })
+    .then(response => {
+      const finalUrl = response.redirected ? response.url : window.location.href;
+      return response.text().then(html => ({ html, finalUrl }));
+    })
+    .then(({ html, finalUrl }) => {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(html, 'text/html');
+
+      history.pushState(null, '', finalUrl);
+
+      const currentSidebar = document.querySelector('.sidebar-scroll');
+      const newSidebar = doc.querySelector('.sidebar-scroll');
+      if (currentSidebar && newSidebar) {
+        currentSidebar.innerHTML = newSidebar.innerHTML;
+      }
+
+      const currentViewport = document.querySelector('.chat-view-viewport');
+      const newViewport = doc.querySelector('.chat-view-viewport');
+      if (currentViewport && newViewport) {
+        currentViewport.innerHTML = newViewport.innerHTML;
+      }
+
+      initNewPageElements();
+    })
+    .catch(err => {
+      console.error("Auto generation failed:", err);
+      const bubble = document.getElementById('thinking-bubble');
+      if (bubble) {
+        bubble.querySelector('.msg-text-bubble').innerHTML = `<span style="color:#ef4444;">Failed to generate response. Please try again.</span>`;
+      }
+      textareas.forEach(t => { if (t) t.disabled = false; });
+    });
   }
 
   function escapeHTML(str) {
