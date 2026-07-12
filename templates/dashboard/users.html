@@ -81,7 +81,7 @@
                   {% endif %}
                 </td>
                 <td style="padding: 14px 8px; text-align: right; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
-                  <form method="post" style="display: inline-block;">
+                  <form method="post" style="display: inline-block;"{% if profile.is_verified %} data-confirm="Revoking verification will hide this tutor from students. Do you want to continue?" data-confirm-title="Revoke Verification" data-confirm-label="Revoke" data-confirm-danger{% endif %}>
                     {% csrf_token %}
                     <input type="hidden" name="user_id" value="{{ profile.pk }}">
                     <input type="hidden" name="action" value="toggle_verify">
@@ -90,7 +90,7 @@
                     </button>
                   </form>
                   {% if profile.user != request.user %}
-                  <form method="post" style="display: inline-block;" onsubmit="return confirm('Are you sure you want to delete this user?');">
+                  <form method="post" style="display: inline-block;" data-confirm="This will permanently delete the user account and all associated data. This action cannot be undone." data-confirm-title="Delete User" data-confirm-label="Delete" data-confirm-danger>
                     {% csrf_token %}
                     <input type="hidden" name="user_id" value="{{ profile.pk }}">
                     <input type="hidden" name="action" value="delete">

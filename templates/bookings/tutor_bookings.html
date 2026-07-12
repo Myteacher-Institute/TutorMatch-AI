@@ -91,7 +91,7 @@
                             {% csrf_token %}
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-accept">Accept</button>
                           </form>
-                          <form method="post" action="{% url 'update_booking_status' booking.id 'cancelled' %}">
+                          <form method="post" action="{% url 'update_booking_status' booking.id 'cancelled' %}" data-confirm="Rejecting will cancel this booking request and notify the student. Are you sure?" data-confirm-title="Reject Booking" data-confirm-label="Reject" data-confirm-danger>
                             {% csrf_token %}
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject">Reject</button>
                           </form>

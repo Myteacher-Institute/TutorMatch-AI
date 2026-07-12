@@ -8626,3 +8626,126 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
     justify-content: flex-end;
   }
 }
+
+.mtc-confirm-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 2000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(15, 23, 42, 0.55);
+  backdrop-filter: blur(2px);
+  animation: mtc-confirm-fade 0.18s ease-out;
+}
+
+.mtc-confirm-overlay[hidden] {
+  display: none;
+}
+
+.mtc-confirm-modal {
+  width: 100%;
+  max-width: 420px;
+  background: var(--white, #ffffff);
+  border: 1px solid var(--line, #e2e8f0);
+  border-radius: 16px;
+  padding: 28px 26px 22px;
+  text-align: center;
+  box-shadow: 0 24px 60px rgba(15, 23, 42, 0.25);
+  animation: mtc-confirm-pop 0.2s ease-out;
+}
+
+.mtc-confirm-icon {
+  width: 56px;
+  height: 56px;
+  margin: 0 auto 16px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  background: #fef2f2;
+  color: #dc2626;
+  font-size: 22px;
+}
+
+.mtc-confirm-title {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mtc-confirm-message {
+  margin: 0 0 22px;
+  font-size: 14px;
+  line-height: 1.5;
+  color: #475569;
+}
+
+.mtc-confirm-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.mtc-confirm-btn {
+  min-height: 42px;
+  padding: 0 20px;
+  border-radius: 10px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid transparent;
+  transition: background 0.15s, transform 0.05s;
+}
+
+.mtc-confirm-btn:active {
+  transform: translateY(1px);
+}
+
+.mtc-confirm-cancel {
+  background: #f1f5f9;
+  border-color: #e2e8f0;
+  color: #334155;
+}
+
+.mtc-confirm-cancel:hover {
+  background: #e2e8f0;
+}
+
+.mtc-confirm-ok {
+  background: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+}
+
+.mtc-confirm-ok:hover {
+  background: #1d4ed8;
+}
+
+.mtc-confirm-overlay.is-danger .mtc-confirm-ok {
+  background: #dc2626;
+  border-color: #dc2626;
+}
+
+.mtc-confirm-overlay.is-danger .mtc-confirm-ok:hover {
+  background: #b91c1c;
+}
+
+@keyframes mtc-confirm-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes mtc-confirm-pop {
+  from { opacity: 0; transform: translateY(8px) scale(0.97); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mtc-confirm-overlay,
+  .mtc-confirm-modal {
+    animation: none;
+  }
+}

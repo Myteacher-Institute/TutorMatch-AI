@@ -1079,7 +1079,7 @@
               <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
               <span>{{ item.title }}</span>
             </a>
-            <a href="{% url 'delete_conversation' item.id %}" class="delete-chat-btn" title="Delete conversation" aria-label="Delete conversation">
+            <a href="{% url 'delete_conversation' item.id %}" class="delete-chat-btn" title="Delete conversation" aria-label="Delete conversation" data-confirm="This conversation and its messages will be permanently deleted. Are you sure?" data-confirm-title="Delete Conversation" data-confirm-label="Delete" data-confirm-danger>
               <svg viewBox="0 0 24 24" width="12" height="12" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
             </a>
           </div>

@@ -44,7 +44,7 @@
               
               <!-- Action Buttons -->
               <div style="display: flex; gap: 8px;">
-                <form method="post" style="display: inline-block;">
+                <form method="post" style="display: inline-block;" data-confirm="Rejecting will send the tutor back to re-upload their documents. Are you sure you want to reject?" data-confirm-title="Reject Tutor" data-confirm-label="Reject" data-confirm-danger>
                   {% csrf_token %}
                   <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
                   <input type="hidden" name="action" value="reject">
