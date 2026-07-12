@@ -10,6 +10,7 @@ from .assistant import (
     recent_conversations,
     reset_conversation,
     start_conversation,
+    generate_assistant_reply_only,
 )
 from .forms import TutorSearchForm
 from .services import extract_search_intent, search_tutors, suggested_prompts
@@ -34,8 +35,13 @@ def ai_assistant(request):
 
     if request.method == "POST":
         message = request.POST.get("message", "").strip()
-        if message:
-            handle_user_message(conversation, message)
+        generate_only = request.POST.get("generate_only") == "1"
+        
+        if generate_only:
+            generate_assistant_reply_only(conversation)
+        else:
+            if message:
+                handle_user_message(conversation, message)
         return redirect(f"{reverse('ai_assistant')}?{urlencode({'conversation': conversation.id})}")
 
     chat_messages = conversation.messages.all()
