@@ -1,5 +1,5 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from django.db.models import Sum
+from django.db.models import Avg, Count, Q, Sum
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils import timezone
@@ -131,9 +131,21 @@ def tutor_verification(request):
 def tutor_list(request):
     tutors_qs = Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
 
+    query = request.GET.get('q', '').strip()
     subject_filter = request.GET.get('subject')
     location_filter = request.GET.get('location')
     max_rate = request.GET.get('max_rate')
+    sort = request.GET.get('sort', 'recommended')
+
+    if query:
+        tutors_qs = tutors_qs.filter(
+            Q(user__user__first_name__icontains=query)
+            | Q(user__user__last_name__icontains=query)
+            | Q(user__user__username__icontains=query)
+            | Q(subjects__subject_name__icontains=query)
+            | Q(location__icontains=query)
+            | Q(bio__icontains=query)
+        )
 
     if subject_filter:
         tutors_qs = tutors_qs.filter(subjects__subject_name__icontains=subject_filter)
@@ -142,15 +154,40 @@ def tutor_list(request):
     if max_rate:
         tutors_qs = tutors_qs.filter(hourly_rate__lte=max_rate)
 
-    tutors_qs = tutors_qs.distinct()
+    tutors_qs = tutors_qs.annotate(
+        avg_rating=Avg("tutor_reviews__rating"),
+        review_count=Count("tutor_reviews", distinct=True),
+    ).distinct()
+
+    if sort == "rate_low":
+        tutors_qs = tutors_qs.order_by("hourly_rate", "-avg_rating", "user__user__first_name")
+    elif sort == "rate_high":
+        tutors_qs = tutors_qs.order_by("-hourly_rate", "-avg_rating", "user__user__first_name")
+    elif sort == "rating":
+        tutors_qs = tutors_qs.order_by("-avg_rating", "-review_count", "user__user__first_name")
+    elif sort == "experience":
+        tutors_qs = tutors_qs.order_by("-years_experience", "-avg_rating", "user__user__first_name")
+    else:
+        tutors_qs = tutors_qs.order_by("-is_publicly_visible", "-avg_rating", "user__user__first_name")
 
     paginator = Paginator(tutors_qs, 9)
     page_number = request.GET.get("page")
     tutors = paginator.get_page(page_number)
 
+    subjects = Subject.objects.filter(tutors__is_publicly_visible=True, tutors__verification_status="approved").distinct().order_by("subject_name")
+    locations = (
+        Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
+        .exclude(location="")
+        .values_list("location", flat=True)
+        .distinct()
+        .order_by("location")
+    )
+
     return render(request, 'tutors/tutor_list.html', {
         'tutors': tutors,
         'page_obj': tutors,
+        'subjects': subjects,
+        'locations': locations,
     })
 
 

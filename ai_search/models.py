@@ -49,3 +49,26 @@ class AIMessage(models.Model):
 
     def __str__(self):
         return f"{self.role}: {self.content[:60]}"
+
+
+class AdminAlert(models.Model):
+    ALERT_TYPE_CHOICES = [
+        ("ai_error", "AI Service Error"),
+        ("api_timeout", "API Timeout"),
+        ("payment_issue", "Payment Issue"),
+        ("system_error", "System Error"),
+    ]
+
+    alert_type = models.CharField(max_length=50, choices=ALERT_TYPE_CHOICES)
+    title = models.CharField(max_length=200)
+    message = models.TextField()
+    error_details = models.JSONField(default=dict, blank=True)
+    is_resolved = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    resolved_at = models.DateTimeField(null=True, blank=True)
+
+    class Meta:
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"[{self.alert_type}] {self.title}"

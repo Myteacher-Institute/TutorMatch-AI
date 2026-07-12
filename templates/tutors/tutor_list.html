@@ -1,139 +1,614 @@
 {% extends "base.html" %}
-{% block title %}Find a Tutor — TutorMatch AI{% endblock %}
+{% block title %}Find Your Perfect Tutor - TutorMatch AI{% endblock %}
 
 {% block content %}
-
-<!-- Page Hero -->
-<div class="mtc-page-hero">
+<style>
+  .tutor-marketplace-page {
+    background: #f8fafc;
+    padding: 42px 0 72px;
+  }
+  .tutor-marketplace-hero {
+    margin-bottom: 24px;
+  }
+  .tutor-marketplace-hero h1 {
+    margin: 0;
+    color: #0f172a;
+    font-size: clamp(32px, 4.5vw, 48px);
+    font-weight: 800;
+    line-height: 1.08;
+  }
+  .tutor-marketplace-hero p {
+    max-width: 620px;
+    margin: 12px 0 0;
+    color: #64748b;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+  .tutor-filter-shell {
+    position: sticky;
+    top: 74px;
+    z-index: 12;
+    margin-bottom: 26px;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.94);
+    padding: 16px;
+    box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+  }
+  .tutor-toolbar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    width: 100%;
+  }
+  .tutor-toolbar-search {
+    position: relative;
+    flex: 1 1 380px;
+    min-width: 260px;
+  }
+  .tutor-toolbar-search i {
+    position: absolute;
+    top: 50%;
+    left: 16px;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 14px;
+  }
+  .tutor-toolbar input,
+  .tutor-toolbar select {
+    height: 48px;
+    min-width: 0;
+    border: 1px solid #dbe3ef;
+    border-radius: 12px;
+    background: #f8fafc;
+    color: #0f172a;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    outline: none;
+  }
+  .tutor-toolbar input[type="search"] {
+    width: 100%;
+    padding: 0 16px 0 42px;
+  }
+  .tutor-toolbar input[type="number"] {
+    flex: 0 0 116px;
+    padding: 0 12px;
+  }
+  .tutor-toolbar select {
+    flex: 0 0 136px;
+    padding: 0 34px 0 12px;
+  }
+  .tutor-toolbar input:focus,
+  .tutor-toolbar select:focus {
+    border-color: #2563eb;
+    background: #ffffff;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+  .tutor-filter-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    flex: 0 0 auto;
+    height: 48px;
+    border: 0;
+    border-radius: 12px;
+    background: #2563eb;
+    padding: 0 18px;
+    color: #ffffff;
+    font: inherit;
+    font-size: 14px;
+    font-weight: 800;
+    cursor: pointer;
+    box-shadow: 0 10px 20px rgba(37, 99, 235, 0.22);
+    transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  }
+  .tutor-filter-button:hover {
+    background: #1d4ed8;
+    box-shadow: 0 14px 24px rgba(37, 99, 235, 0.28);
+    transform: translateY(-1px);
+  }
+  .tutor-category-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-top: 14px;
+    padding-top: 14px;
+    border-top: 1px solid #edf2f7;
+  }
+  .tutor-category-chips a {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 36px;
+    border: 1px solid #dbe3ef;
+    border-radius: 999px;
+    background: #ffffff;
+    padding: 0 14px;
+    color: #475569;
+    font-size: 13px;
+    font-weight: 800;
+    transition: background 0.18s ease, border-color 0.18s ease, color 0.18s ease;
+  }
+  .tutor-category-chips a:hover,
+  .tutor-category-chips a.is-active {
+    border-color: #2563eb;
+    background: #eff6ff;
+    color: #1d4ed8;
+  }
+  .tutor-category-chips a.is-active {
+    background: #2563eb;
+    color: #ffffff;
+  }
+  .tutor-results-head {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    margin: 0 0 18px;
+  }
+  .tutor-results-head p {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0;
+    color: #334155;
+    font-size: 14px;
+    font-weight: 900;
+  }
+  .tutor-results-head i {
+    color: #2563eb;
+  }
+  .tutor-results-head a {
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .tutor-marketplace-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 24px;
+  }
+  .tutor-marketplace-card {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    min-height: 100%;
+    overflow: hidden;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    background: #ffffff;
+    box-shadow: 0 10px 24px rgba(15, 23, 42, 0.06);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+  }
+  .tutor-marketplace-card:hover {
+    transform: translateY(-5px);
+    border-color: #c7d2fe;
+    box-shadow: 0 20px 42px rgba(15, 23, 42, 0.12);
+  }
+  .tutor-card-media,
+  .tutor-card-media img,
+  .tutor-card-placeholder {
+    height: 220px;
+  }
+  .tutor-card-media {
+    position: relative;
+    background: #eaf2ff;
+    overflow: hidden;
+  }
+  .tutor-card-media img {
+    width: 100%;
+    object-fit: cover;
+    object-position: center;
+  }
+  .tutor-card-placeholder {
+    display: grid;
+    width: 100%;
+    place-items: center;
+    background: linear-gradient(135deg, #2563eb, #0f172a);
+    color: #ffffff;
+    font-size: 42px;
+    font-weight: 900;
+  }
+  .tutor-favourite-btn {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    z-index: 2;
+    display: grid;
+    width: 40px;
+    height: 40px;
+    place-items: center;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.95);
+    color: #2563eb;
+    cursor: pointer;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.16);
+  }
+  .tutor-favourite-btn:hover,
+  .tutor-favourite-btn.is-saved {
+    background: #2563eb;
+    color: #ffffff;
+  }
+  .tutor-rate-pill {
+    position: absolute;
+    right: 14px;
+    bottom: 14px;
+    max-width: calc(100% - 28px);
+    overflow: hidden;
+    border: 1px solid rgba(226, 232, 240, 0.95);
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.96);
+    padding: 8px 12px;
+    color: #0f172a;
+    font-size: 13px;
+    font-weight: 900;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    box-shadow: 0 10px 22px rgba(15, 23, 42, 0.14);
+  }
+  .tutor-card-content {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: 12px;
+    padding: 18px;
+  }
+  .tutor-card-title-row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+  }
+  .tutor-card-title-row h2 {
+    margin: 0;
+    color: #0f172a;
+    font-size: 18px;
+    font-weight: 900;
+    line-height: 1.25;
+  }
+  .tutor-card-title-row span {
+    color: #2563eb;
+    font-size: 15px;
+  }
+  .tutor-rating-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 700;
+  }
+  .tutor-rating-row strong {
+    color: #0f172a;
+    font-weight: 900;
+  }
+  .tutor-stars {
+    color: #f59e0b;
+  }
+  .tutor-subject-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    min-height: 28px;
+  }
+  .tutor-subject-list span {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    border: 1px solid #bfdbfe;
+    border-radius: 999px;
+    background: #eff6ff;
+    padding: 0 10px;
+    color: #1d4ed8;
+    font-size: 12px;
+    font-weight: 800;
+  }
+  .tutor-location-row {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+    color: #64748b;
+    font-size: 13px;
+    font-weight: 800;
+  }
+  .tutor-location-row i {
+    color: #94a3b8;
+  }
+  .tutor-location-row span {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .tutor-card-bio {
+    display: -webkit-box;
+    min-height: 44px;
+    margin: 0;
+    overflow: hidden;
+    color: #475569;
+    font-size: 14px;
+    line-height: 1.55;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+  .tutor-profile-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 44px;
+    margin-top: auto;
+    border-radius: 12px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 900;
+    transition: background 0.18s ease, transform 0.18s ease;
+  }
+  .tutor-profile-button:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+  }
+  .tutor-marketplace-pagination {
+    margin-top: 28px;
+  }
+  .tutor-empty-marketplace {
+    display: grid;
+    place-items: center;
+    max-width: 520px;
+    margin: 36px auto 0;
+    text-align: center;
+  }
+  .tutor-empty-marketplace div {
+    display: grid;
+    width: 64px;
+    height: 64px;
+    place-items: center;
+    border-radius: 16px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 24px;
+  }
+  .tutor-empty-marketplace h2 {
+    margin: 18px 0 8px;
+    color: #0f172a;
+    font-size: 22px;
+  }
+  .tutor-empty-marketplace p {
+    margin: 0 0 18px;
+    color: #64748b;
+    line-height: 1.6;
+  }
+  @media (max-width: 1120px) {
+    .tutor-toolbar {
+      flex-wrap: wrap;
+    }
+    .tutor-toolbar-search {
+      flex-basis: 100%;
+    }
+    .tutor-toolbar select,
+    .tutor-toolbar input[type="number"] {
+      flex: 1 1 150px;
+    }
+    .tutor-marketplace-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+  @media (max-width: 760px) {
+    .tutor-marketplace-page {
+      padding: 30px 0 56px;
+    }
+    .tutor-filter-shell {
+      position: static;
+      padding: 14px;
+    }
+    .tutor-toolbar {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+    }
+    .tutor-toolbar-search,
+    .tutor-filter-button {
+      grid-column: 1 / -1;
+    }
+    .tutor-marketplace-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 18px;
+    }
+  }
+  @media (max-width: 560px) {
+    .tutor-toolbar {
+      grid-template-columns: 1fr;
+    }
+    .tutor-toolbar-search,
+    .tutor-filter-button {
+      grid-column: auto;
+    }
+    .tutor-category-chips {
+      flex-wrap: nowrap;
+      margin-right: -14px;
+      overflow-x: auto;
+      padding-bottom: 2px;
+    }
+    .tutor-category-chips a {
+      flex: 0 0 auto;
+    }
+    .tutor-results-head {
+      align-items: flex-start;
+      flex-direction: column;
+    }
+    .tutor-marketplace-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+<section class="tutor-marketplace-page">
   <div class="mtc-shell">
-    <p class="eyebrow">Browse Tutors</p>
-    <h1 style="margin:12px 0 0;color:#12182c;font-size:clamp(30px,5vw,46px);font-weight:700;letter-spacing:-0.03em;">Find Your Perfect Tutor</h1>
-    <p class="mtc-lead">Browse verified tutors and book your first session today.</p>
-  </div>
-</div>
+    <header class="tutor-marketplace-hero">
+      <h1>Find Your Perfect Tutor</h1>
+      <p>Browse verified tutors and book your first session.</p>
+    </header>
 
-<div style="background:#f8fafc;padding:50px 0 70px;">
-  <div class="mtc-shell">
-    <div class="results-layout">
-      <!-- Top controls: search, categories, and upload -->
-      <div class="results-header-controls">
-        <div class="controls-left">
-          <form method="get" class="search-form">
-            <input type="search" name="q" placeholder="Search tutors, subjects, locations..." value="{{ request.GET.q|default:'' }}">
-            <button type="submit" class="search-submit"><i class="fa-solid fa-magnifying-glass"></i></button>
-          </form>
+    <div class="tutor-filter-shell">
+      <form method="get" class="tutor-toolbar" aria-label="Tutor filters">
+        <div class="tutor-toolbar-search">
+          <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
+          <input type="search" name="q" placeholder="Search by tutor, subject, or location" value="{{ request.GET.q|default:'' }}">
         </div>
-        <div class="controls-right">
-          <div class="category-chips">
-            <a href="?category=all" class="chip active">All</a>
-            <a href="?category=script" class="chip">Script</a>
-            <a href="?category=exploit" class="chip">Exploit</a>
-            <a href="?category=osint" class="chip">OSINT</a>
-            <a href="?category=malware" class="chip">Malware</a>
-            <a href="?category=defense" class="chip">Defense</a>
-          </div>
-          <a href="#" class="btn btn-primary" style="margin-left:12px;">Upload Tutor</a>
-        </div>
-      </div>
 
-      <!-- Compact filter row -->
-      <div class="filters-row">
-        <form method="get" class="filters-inline">
-          <input type="text" name="subject" placeholder="Subject (e.g. Mathematics)" value="{{ request.GET.subject }}">
-          <input type="text" name="location" placeholder="Location (e.g. Lagos)" value="{{ request.GET.location }}">
-          <input type="number" name="max_rate" placeholder="Max rate (NGN/hr)" value="{{ request.GET.max_rate }}">
-          <button type="submit" class="search-submit">Apply</button>
-          {% if request.GET %}
-            <a href="{% url 'tutor_list' %}" class="clear-filters">Clear</a>
-          {% endif %}
-        </form>
-      </div>
+        <select name="subject" aria-label="Subject">
+          <option value="">Subject</option>
+          {% for subject in subjects %}
+            <option value="{{ subject.subject_name }}" {% if request.GET.subject == subject.subject_name %}selected{% endif %}>{{ subject.subject_name }}</option>
+          {% endfor %}
+        </select>
 
-      <!-- Results grid -->
-      <div>
-        <p class="results-count" style="margin-bottom:20px;">
-          <i class="fa-solid fa-users" style="color:var(--blue);margin-right:6px;"></i>
-          {{ tutors.paginator.count }} tutor{% if tutors.paginator.count != 1 %}s{% endif %} found
-        </p>
+        <select name="location" aria-label="Location">
+          <option value="">Location</option>
+          {% for location in locations %}
+            <option value="{{ location }}" {% if request.GET.location == location %}selected{% endif %}>{{ location }}</option>
+          {% endfor %}
+        </select>
 
-        {% if tutors %}
-          <div class="tutor-cards-grid">
-            {% for tutor in tutors %}
-              <article class="tutor-public-card">
-                <div class="tutor-public-photo">
-                  {% if tutor.profile_photo %}
-                    <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name }}">
-                  {% else %}
-                    <div class="tutor-public-photo-placeholder">
-                      {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
-                    </div>
-                  {% endif %}
-                  <button type="button" class="save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}" data-tutor-id="{{ tutor.id }}" onclick="toggleSaveTutor(this)">
-                    <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
-                  </button>
-                  <div class="price-badge">&#8358;{{ tutor.hourly_rate }}</div>
-                </div>
+        <input type="number" name="max_rate" min="0" placeholder="Max rate" value="{{ request.GET.max_rate }}" aria-label="Max hourly rate">
 
-                <div class="tutor-public-body">
-                  <h3 class="tutor-name">{{ tutor.user.user.get_full_name }}</h3>
-                  <div class="tutor-public-subjects">
-                    {% for subject in tutor.subjects.all|slice:":3" %}
-                      <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
-                    {% empty %}
-                      <span class="tutor-subjects-empty">No subjects listed</span>
-                    {% endfor %}
-                  </div>
+        <select name="sort" aria-label="Sort tutors">
+          <option value="recommended" {% if request.GET.sort == "recommended" or not request.GET.sort %}selected{% endif %}>Recommended</option>
+          <option value="rating" {% if request.GET.sort == "rating" %}selected{% endif %}>Top rated</option>
+          <option value="rate_low" {% if request.GET.sort == "rate_low" %}selected{% endif %}>Lowest rate</option>
+          <option value="rate_high" {% if request.GET.sort == "rate_high" %}selected{% endif %}>Highest rate</option>
+          <option value="experience" {% if request.GET.sort == "experience" %}selected{% endif %}>Experience</option>
+        </select>
 
-                  <div class="tutor-public-meta">
-                    <span class="location"><i class="fa-solid fa-location-dot"></i>{{ tutor.location|default:"Remote" }}</span>
-                    <a href="{% url 'tutor_detail' tutor.pk %}" class="tutor-public-cta">View profile</a>
-                  </div>
-                </div>
-              </article>
-            {% endfor %}
-          </div>
+        <button type="submit" class="tutor-filter-button">
+          <i class="fa-solid fa-sliders" aria-hidden="true"></i>
+          Filter
+        </button>
+      </form>
 
-          {% if tutors.has_other_pages %}
-            <nav class="mtc-bookings-pagination" aria-label="Tutor list pagination" style="margin-top:24px;">
-              <div class="mtc-bookings-pagination-summary">
-                Page {{ tutors.number }} of {{ tutors.paginator.num_pages }}
-              </div>
-              <div class="mtc-bookings-pagination-controls">
-                {% if tutors.has_previous %}
-                  <a href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ tutors.previous_page_number }}">
-                    <i class="fa-solid fa-chevron-left"></i> Previous
-                  </a>
-                {% else %}
-                  <span class="is-disabled">
-                    <i class="fa-solid fa-chevron-left"></i> Previous
-                  </span>
-                {% endif %}
-                {% if tutors.has_next %}
-                  <a href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ tutors.next_page_number }}">
-                    Next <i class="fa-solid fa-chevron-right"></i>
-                  </a>
-                {% else %}
-                  <span class="is-disabled">
-                    Next <i class="fa-solid fa-chevron-right"></i>
-                  </span>
-                {% endif %}
-              </div>
-            </nav>
-          {% endif %}
-
-        {% else %}
-          <div class="empty-box" style="margin:0 auto;text-align:center;">
-            <div style="width:64px;height:64px;background:#eff6ff;border-radius:16px;display:grid;place-items:center;margin:0 auto 20px;font-size:26px;color:var(--blue);">
-              <i class="fa-solid fa-magnifying-glass"></i>
-            </div>
-            <h1 style="font-size:22px;">No tutors found</h1>
-            <p>Try adjusting your filters to find available tutors.</p>
-            <a href="{% url 'tutor_list' %}" class="btn btn-primary" style="margin-top:16px;">Clear all filters</a>
-          </div>
-        {% endif %}
-      </div>
-
+      <nav class="tutor-category-chips" aria-label="Popular subjects">
+        <a href="{% url 'tutor_list' %}" class="{% if not request.GET.subject %}is-active{% endif %}">All</a>
+        <a href="?subject=Mathematics" class="{% if request.GET.subject == 'Mathematics' %}is-active{% endif %}">Mathematics</a>
+        <a href="?subject=English" class="{% if request.GET.subject == 'English' %}is-active{% endif %}">English</a>
+        <a href="?subject=Physics" class="{% if request.GET.subject == 'Physics' %}is-active{% endif %}">Physics</a>
+        <a href="?subject=Chemistry" class="{% if request.GET.subject == 'Chemistry' %}is-active{% endif %}">Chemistry</a>
+        <a href="?subject=Biology" class="{% if request.GET.subject == 'Biology' %}is-active{% endif %}">Biology</a>
+        <a href="?subject=Economics" class="{% if request.GET.subject == 'Economics' %}is-active{% endif %}">Economics</a>
+      </nav>
     </div>
+
+    <div class="tutor-results-head">
+      <p>
+        <i class="fa-solid fa-users" aria-hidden="true"></i>
+        {{ tutors.paginator.count }} tutor{% if tutors.paginator.count != 1 %}s{% endif %} found
+      </p>
+      {% if request.GET %}
+        <a href="{% url 'tutor_list' %}">Clear filters</a>
+      {% endif %}
+    </div>
+
+    {% if tutors %}
+      <div class="tutor-marketplace-grid">
+        {% for tutor in tutors %}
+          <article class="tutor-marketplace-card">
+            <div class="tutor-card-media">
+              {% if tutor.profile_photo %}
+                <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name }}">
+              {% else %}
+                <div class="tutor-card-placeholder">
+                  {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
+                </div>
+              {% endif %}
+
+              <button type="button" class="tutor-favourite-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}" data-tutor-id="{{ tutor.id }}" onclick="toggleSaveTutor(this)" aria-label="Save {{ tutor.user.user.get_full_name }}">
+                <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+              </button>
+
+              <div class="tutor-rate-pill">&#8358;{{ tutor.hourly_rate }}/hr</div>
+            </div>
+
+            <div class="tutor-card-content">
+              <div class="tutor-card-title-row">
+                <h2>{{ tutor.user.user.get_full_name }}</h2>
+                {% if tutor.is_verified %}
+                  <span title="Verified tutor"><i class="fa-solid fa-circle-check" aria-hidden="true"></i></span>
+                {% endif %}
+              </div>
+
+              <div class="tutor-rating-row">
+                <span class="tutor-stars" aria-hidden="true">
+                  <i class="fa-solid fa-star"></i>
+                </span>
+                {% if tutor.avg_rating %}
+                  <strong>{{ tutor.avg_rating|floatformat:1 }}</strong>
+                  <span>({{ tutor.review_count }} review{% if tutor.review_count != 1 %}s{% endif %})</span>
+                {% else %}
+                  <strong>New</strong>
+                  <span>No reviews yet</span>
+                {% endif %}
+              </div>
+
+              <div class="tutor-subject-list">
+                {% for subject in tutor.subjects.all|slice:":3" %}
+                  <span>{{ subject.subject_name }}</span>
+                {% empty %}
+                  <span>No subjects listed</span>
+                {% endfor %}
+              </div>
+
+              <div class="tutor-location-row">
+                <i class="fa-solid fa-location-dot" aria-hidden="true"></i>
+                <span>{{ tutor.location|default:"Remote" }}</span>
+              </div>
+
+              <p class="tutor-card-bio">
+                {{ tutor.bio|default:"Verified tutor available for focused, personalised lessons tailored to your learning goals." }}
+              </p>
+
+              <a href="{% url 'tutor_detail' tutor.pk %}" class="tutor-profile-button">View Profile</a>
+            </div>
+          </article>
+        {% endfor %}
+      </div>
+
+      {% if tutors.has_other_pages %}
+        <nav class="mtc-bookings-pagination tutor-marketplace-pagination" aria-label="Tutor list pagination">
+          <div class="mtc-bookings-pagination-summary">
+            Page {{ tutors.number }} of {{ tutors.paginator.num_pages }}
+          </div>
+          <div class="mtc-bookings-pagination-controls">
+            {% if tutors.has_previous %}
+              <a href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ tutors.previous_page_number }}">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+              </a>
+            {% else %}
+              <span class="is-disabled">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+              </span>
+            {% endif %}
+            {% if tutors.has_next %}
+              <a href="?{% if request.GET %}{% for key, value in request.GET.items %}{% if key != 'page' %}{{ key }}={{ value }}&{% endif %}{% endfor %}{% endif %}page={{ tutors.next_page_number }}">
+                Next <i class="fa-solid fa-chevron-right"></i>
+              </a>
+            {% else %}
+              <span class="is-disabled">
+                Next <i class="fa-solid fa-chevron-right"></i>
+              </span>
+            {% endif %}
+          </div>
+        </nav>
+      {% endif %}
+    {% else %}
+      <div class="tutor-empty-marketplace">
+        <div><i class="fa-solid fa-magnifying-glass"></i></div>
+        <h2>No tutors found</h2>
+        <p>Try adjusting your search, subject, location, or rate filters.</p>
+        <a href="{% url 'tutor_list' %}" class="tutor-profile-button">Clear filters</a>
+      </div>
+    {% endif %}
   </div>
-</div>
+</section>
 {% endblock %}

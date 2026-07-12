@@ -2,8 +2,9 @@ import json
 import logging
 import os
 from django.db import transaction
+from django.utils import timezone
 
-from .models import AIMessage
+from .models import AIMessage, AdminAlert
 from .services import extract_search_intent, search_tutors, suggested_prompts
 
 logger = logging.getLogger(__name__)
@@ -147,11 +148,21 @@ def _merge_state(conversation):
     )
     latest_intent = extract_search_intent(user_text)
 
+    # Try to get user's profile location if they're authenticated
+    location = latest_intent.get("location") or previous_state.get("location", "")
+    if not location and conversation.user:
+        try:
+            tutor_profile = conversation.user.tutor_profile
+            if tutor_profile and tutor_profile.location:
+                location = tutor_profile.location
+        except:
+            pass
+
     state = {
         "query_text": user_text,
         "subject": latest_intent.get("subject") or previous_state.get("subject", ""),
         "level": latest_intent.get("level") or previous_state.get("level", ""),
-        "location": latest_intent.get("location") or previous_state.get("location", ""),
+        "location": location,
         "schedule": latest_intent.get("schedule") or previous_state.get("schedule", ""),
         "source": latest_intent.get("source", "fallback"),
     }
@@ -180,7 +191,10 @@ def _generate_assistant_reply(conversation, state, tutors):
         return _generate_gemini_reply(conversation, state, tutors)
     except Exception as e:
         logger.error("Gemini assistant response failed.", exc_info=True)
-        return _generate_fallback_reply(state, tutors)
+        # Create admin alert for the error
+        _create_admin_alert(e, conversation, state)
+        # Return a friendly message to the user
+        return _generate_service_error_reply()
 
 
 def _generate_gemini_reply(conversation, state, tutors):
@@ -223,16 +237,23 @@ def _generate_gemini_reply(conversation, state, tutors):
         }
     }
 
-    response = requests.post(url, json=payload, headers=headers, timeout=20)
-    response.raise_for_status()
-
-    res_data = response.json()
     try:
-        reply_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
-        return reply_text
-    except (KeyError, IndexError, ValueError) as e:
-        logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
-        raise ValueError("Failed to get response from Gemini API.") from e
+        response = requests.post(url, json=payload, headers=headers, timeout=30)
+        response.raise_for_status()
+
+        res_data = response.json()
+        try:
+            reply_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
+            return reply_text
+        except (KeyError, IndexError, ValueError) as e:
+            logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
+            raise ValueError("Failed to get response from Gemini API.") from e
+    except requests.exceptions.Timeout as e:
+        logger.error(f"Gemini API timeout after 30 seconds", exc_info=True)
+        raise TimeoutError("Gemini API did not respond within 30 seconds") from e
+    except requests.exceptions.ConnectionError as e:
+        logger.error(f"Gemini API connection error: {e}", exc_info=True)
+        raise ConnectionError("Failed to connect to Gemini API service") from e
 
 
 def _generate_fallback_reply(state, tutors):
@@ -280,6 +301,47 @@ def _detect_learning_mode(text):
     if any(word in lowered for word in ["learn", "course", "html", "coding", "programming"]):
         return "course"
     return "tutor_match"
+
+
+def _generate_service_error_reply():
+    """Return a friendly message when AI service fails."""
+    return (
+        "I'm experiencing a temporary issue connecting to the AI service. "
+        "Please try again in a moment. If the problem continues, our team has been notified. "
+        "In the meantime, I can still help you search for tutors if you tell me the subject, level, and location."
+    )
+
+
+def _create_admin_alert(error, conversation, state):
+    """Create an admin alert for AI service failures."""
+    try:
+        error_type = type(error).__name__
+        error_message = str(error)
+        
+        # Determine alert type based on error
+        if "timeout" in error_message.lower() or "timed out" in error_message.lower():
+            alert_type = "api_timeout"
+            title = "Gemini API Timeout"
+        else:
+            alert_type = "ai_error"
+            title = f"AI Service Error: {error_type}"
+        
+        # Create the admin alert
+        AdminAlert.objects.create(
+            alert_type=alert_type,
+            title=title,
+            message=f"Error occurred while generating AI response for conversation {conversation.id}",
+            error_details={
+                "error_type": error_type,
+                "error_message": error_message,
+                "conversation_id": str(conversation.id),
+                "user_id": conversation.user.id if conversation.user else None,
+                "state": state,
+            }
+        )
+        logger.warning(f"Created admin alert for {alert_type}: {title}")
+    except Exception as alert_error:
+        logger.error(f"Failed to create admin alert: {alert_error}", exc_info=True)
 
 
 def assistant_suggestions():
