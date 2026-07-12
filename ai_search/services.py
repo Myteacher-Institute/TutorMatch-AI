@@ -81,26 +81,22 @@ def extract_search_intent(prompt):
     except ImportError:
         pass
 
-    text = prompt or ""
+    text = (prompt or "").strip()
     empty_intent = {
         "query_text": text,
         "subject": "",
         "level": "",
         "location": "",
         "schedule": "",
-        "source": "openai",
+        "source": "gemini",
     }
     if not text:
         return empty_intent
 
-    if not os.getenv("OPENAI_API_KEY"):
-        logger.error("OPENAI_API_KEY is missing from environment.")
-        return empty_intent
-
     try:
-        return _extract_with_openai(text, empty_intent)
+        return _extract_with_gemini(text)
     except Exception:
-        logger.error("Failed to extract intent with OpenAI API.", exc_info=True)
+        logger.error("Failed to extract search intent with Gemini API.", exc_info=True)
         return empty_intent
 
 
@@ -199,48 +195,60 @@ def suggested_prompts():
     ]
 
 
-def _fallback_intent(prompt):
-    lowered = (prompt or "").lower()
-    return {
-        "query_text": prompt,
-        "subject": _find_first(SUBJECTS, lowered),
-        "level": _find_level(lowered),
-        "location": _find_location(lowered),
-        "schedule": _find_schedule(lowered),
-        "source": "fallback",
+def _extract_with_gemini(prompt):
+    import requests
+
+    api_key = os.getenv("GEMINI_API_KEY")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is missing from environment.")
+
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    headers = {"Content-Type": "application/json"}
+
+    system_instruction = (
+        "Extract tutor search intent from a Nigerian tutoring marketplace prompt. "
+        "Return only JSON with string keys: subject, level, location, schedule. "
+        "Use an empty string when a value is missing."
+    )
+
+    payload = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": f"Prompt: {prompt}"}
+                ]
+            }
+        ],
+        "systemInstruction": {
+            "parts": [
+                {"text": system_instruction}
+            ]
+        },
+        "generationConfig": {
+            "responseMimeType": "application/json",
+            "temperature": 0.0
+        }
     }
 
+    response = requests.post(url, json=payload, headers=headers, timeout=20)
+    response.raise_for_status()
 
-def _extract_with_openai(prompt, fallback):
-    from openai import OpenAI
-
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    response = client.chat.completions.create(
-        model=model,
-        response_format={"type": "json_object"},
-        temperature=0,
-        messages=[
-            {
-                "role": "system",
-                "content": (
-                    "Extract tutor search intent from a Nigerian tutoring marketplace prompt. "
-                    "Return only JSON with string keys: subject, level, location, schedule. "
-                    "Use an empty string when a value is missing."
-                ),
-            },
-            {"role": "user", "content": prompt},
-        ],
-    )
-    data = json.loads(response.choices[0].message.content or "{}")
+    res_data = response.json()
+    try:
+        text_content = res_data["candidates"][0]["content"]["parts"][0]["text"]
+        data = json.loads(text_content)
+    except (KeyError, IndexError, ValueError) as e:
+        logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
+        raise ValueError("Failed to extract intent from Gemini response.") from e
 
     return {
         "query_text": prompt,
-        "subject": _clean_choice(data.get("subject"), SUBJECTS) or fallback["subject"],
-        "level": _clean_choice(data.get("level"), LEVELS) or fallback["level"],
-        "location": _clean_choice(data.get("location"), LOCATIONS) or fallback["location"],
-        "schedule": str(data.get("schedule") or fallback["schedule"] or "").strip(),
-        "source": "openai",
+        "subject": _clean_choice(data.get("subject"), SUBJECTS),
+        "level": _clean_choice(data.get("level"), LEVELS),
+        "location": _clean_choice(data.get("location"), LOCATIONS),
+        "schedule": str(data.get("schedule") or "").strip(),
+        "source": "gemini",
     }
 
 
@@ -375,43 +383,7 @@ def _clean_choice(value, options):
     return str(value).strip()
 
 
-def _find_first(options, lowered):
-    for option in options:
-        if option.lower() in lowered:
-            return option
-    return ""
 
-
-def _find_location(lowered):
-    if re.search(r"\bph\b", lowered):
-        return "Port Harcourt"
-    return _find_first(LOCATIONS, lowered)
-
-
-def _find_level(lowered):
-    level = _find_first(LEVELS, lowered)
-    if level:
-        return level
-
-    age_match = re.search(r"\b(?:age|aged|is)\s*(\d{1,2})\b|\b(\d{1,2})\s*(?:years old|year old|yrs old)\b", lowered)
-    if age_match:
-        age = int(age_match.group(1) or age_match.group(2))
-        if age <= 10:
-            return "Primary"
-        if age <= 13:
-            return "JSS1"
-        if age <= 15:
-            return "JSS3"
-        return "SS3"
-
-    return ""
-
-
-def _find_schedule(lowered):
-    for word in SCHEDULE_WORDS:
-        if re.search(rf"\b{re.escape(word)}\b", lowered):
-            return word.title()
-    return ""
 
 
 def _same_text(left, right):

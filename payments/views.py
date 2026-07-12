@@ -132,5 +132,4 @@ def verify_payment(request):
     return redirect("payment_failed")
 
 
-def add_review(request, booking_id):
-    return HttpResponse("Review page will be built by Task 5.")
+

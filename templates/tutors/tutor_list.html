@@ -53,9 +53,7 @@
         {% if tutors %}
           <div class="tutor-cards-grid">
             {% for tutor in tutors %}
-              <div class="tutor-public-card">
-
-                <!-- Photo -->
+              <article class="tutor-public-card">
                 <div class="tutor-public-photo">
                   {% if tutor.profile_photo %}
                     <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name }}">
@@ -70,15 +68,14 @@
                     data-tutor-id="{{ tutor.id }}"
                     onclick="toggleSaveTutor(this)"
                     title="{% if tutor.id in saved_tutor_ids %}Remove from saved{% else %}Save tutor{% endif %}"
-                    style="position:absolute;top:10px;right:10px;background:rgba(255,255,255,0.92);border:none;border-radius:8px;width:34px;height:34px;display:grid;place-items:center;cursor:pointer;color:#2563eb;box-shadow:0 2px 8px rgba(15,23,42,0.12);"
                   >
                     <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
                   </button>
+                  <div class="price-badge">&#8358;{{ tutor.hourly_rate }}</div>
                 </div>
 
-                <!-- Info -->
                 <div class="tutor-public-body">
-                  <h3>{{ tutor.user.user.get_full_name }}</h3>
+                  <h3 class="tutor-name">{{ tutor.user.user.get_full_name }}</h3>
 
                   <div class="tutor-public-subjects">
                     {% for subject in tutor.subjects.all|slice:":3" %}
@@ -89,15 +86,11 @@
                   </div>
 
                   <div class="tutor-public-meta">
-                    <span><i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:4px;"></i>{{ tutor.location|default:"Remote" }}</span>
-                    <span class="tutor-rate-badge">&#8358;{{ tutor.hourly_rate }}/hr</span>
+                    <span class="location"><i class="fa-solid fa-location-dot"></i>{{ tutor.location|default:"Remote" }}</span>
+                    <a href="{% url 'tutor_detail' tutor.pk %}" class="tutor-public-cta">View profile</a>
                   </div>
-
-                  <a href="{% url 'tutor_detail' tutor.pk %}" class="tutor-public-cta">
-                    View Profile <i class="fa-solid fa-arrow-right" style="margin-left:5px;"></i>
-                  </a>
                 </div>
-              </div>
+              </article>
             {% endfor %}
           </div>
 

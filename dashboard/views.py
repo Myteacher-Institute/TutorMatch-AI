@@ -467,13 +467,16 @@ def users(request):
             if action == "toggle_verify":
                 profile.is_verified = not profile.is_verified
                 profile.save()
-                if not profile.is_verified:
-                    Tutor = apps.get_model("tutors", "Tutor")
-                    tutor_obj = Tutor.objects.filter(user=profile).first()
-                    if tutor_obj:
+                Tutor = apps.get_model("tutors", "Tutor")
+                tutor_obj = Tutor.objects.filter(user=profile).first()
+                if tutor_obj:
+                    if profile.is_verified:
+                        tutor_obj.verification_status = "approved"
+                        tutor_obj.documents.update(verification_status="approved")
+                    else:
                         tutor_obj.verification_status = "rejected"
-                        tutor_obj.save(update_fields=["verification_status"])
                         tutor_obj.documents.update(verification_status="rejected")
+                    tutor_obj.save(update_fields=["verification_status"])
             elif action == "delete":
                 profile.user.delete()
         except UserProfile.DoesNotExist:

@@ -23,12 +23,39 @@ def find_tutor(request):
     return redirect(f"{reverse('ai_assistant')}?reset=1")
 
 
-def ai_assistant(request):
-    conversation_id = request.GET.get("conversation")
-    conversation = get_or_create_conversation(request, conversation_id=conversation_id)
+def ai_assistant(request, conversation_id=None):
+    if conversation_id is None:
+        if request.GET.get("reset") == "1":
+            conversation = reset_conversation(request)
+        else:
+            active_id = request.session.get("ai_conversation_id")
+            conversation = None
+            if active_id:
+                from .models import AIConversation
+                try:
+                    conversation = AIConversation.objects.filter(id=active_id).first()
+                except Exception:
+                    pass
+            if not conversation:
+                conversation = reset_conversation(request)
 
-    if request.GET.get("reset") == "1":
-        conversation = reset_conversation(request)
+        url = reverse("ai_assistant_thread", kwargs={"conversation_id": conversation.id})
+        query_params = request.GET.copy()
+        if "reset" in query_params:
+            del query_params["reset"]
+        if query_params:
+            url = f"{url}?{urlencode(query_params)}"
+        return redirect(url)
+
+    from .models import AIConversation
+    from django.shortcuts import get_object_or_404
+
+    if request.user.is_authenticated:
+        conversation = get_object_or_404(AIConversation, id=conversation_id, user=request.user)
+    else:
+        conversation = get_object_or_404(AIConversation, id=conversation_id, session_key=request.session.session_key)
+
+    request.session["ai_conversation_id"] = str(conversation.id)
 
     initial_prompt = request.GET.get("q", "").strip()
     start_conversation(conversation, initial_prompt)
@@ -36,13 +63,13 @@ def ai_assistant(request):
     if request.method == "POST":
         message = request.POST.get("message", "").strip()
         generate_only = request.POST.get("generate_only") == "1"
-        
+
         if generate_only:
             generate_assistant_reply_only(conversation)
         else:
             if message:
                 handle_user_message(conversation, message)
-        return redirect(f"{reverse('ai_assistant')}?{urlencode({'conversation': conversation.id})}")
+        return redirect(reverse("ai_assistant_thread", kwargs={"conversation_id": conversation.id}))
 
     chat_messages = conversation.messages.all()
     latest_assistant = chat_messages.filter(role="assistant").last()
@@ -117,6 +144,9 @@ def delete_conversation(request, conversation_id):
         conversation = get_object_or_404(AIConversation, id=conversation_id, user=request.user)
     else:
         conversation = get_object_or_404(AIConversation, id=conversation_id, session_key=request.session.session_key)
+
+    if request.session.get("ai_conversation_id") == str(conversation.id):
+        del request.session["ai_conversation_id"]
 
     conversation.delete()
     return redirect("ai_assistant")

@@ -6,5 +6,4 @@ urlpatterns = [
     path("payment/success/", views.payment_success, name="payment_success"),
     path("payment/failed/", views.payment_failed, name="payment_failed"),
     path("payments/verify/", views.verify_payment, name="payment_verify"),
-    path("payment/<int:booking_id>/review/", views.add_review, name="add_review"),
 ]

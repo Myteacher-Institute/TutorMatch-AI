@@ -1,8 +1,7 @@
 import json
 import logging
 import os
-
-from openai import OpenAI
+from django.db import transaction
 
 from .models import AIMessage
 from .services import extract_search_intent, search_tutors, suggested_prompts
@@ -48,7 +47,7 @@ def get_or_create_conversation(request, conversation_id=None):
             return conversation
         conversation = AIConversation.objects.create(session_key=request.session.session_key)
 
-    request.session["ai_conversation_id"] = conversation.id
+    request.session["ai_conversation_id"] = str(conversation.id)
     return conversation
 
 
@@ -63,7 +62,7 @@ def reset_conversation(request):
     else:
         conversation = AIConversation.objects.create(session_key=request.session.session_key)
 
-    request.session["ai_conversation_id"] = conversation.id
+    request.session["ai_conversation_id"] = str(conversation.id)
     return conversation
 
 
@@ -107,19 +106,38 @@ def handle_user_message(conversation, user_text):
 
 
 def generate_assistant_reply_only(conversation):
-    state = _merge_state(conversation)
-    tutors = _recommend_tutors(state)
-    assistant_text = _generate_assistant_reply(conversation, state, tutors)
+    # Use a database transaction and row-level lock to avoid race conditions
+    from .models import AIConversation
 
-    assistant_message = AIMessage.objects.create(
-        conversation=conversation,
-        role=AIMessage.ROLE_ASSISTANT,
-        content=assistant_text,
-        metadata={"tutors": tutors[:3], "state": state},
-    )
-    conversation.state = state
-    conversation.save(update_fields=["state", "updated_at"])
-    return assistant_message
+    with transaction.atomic():
+        locked_conv = AIConversation.objects.select_for_update().get(id=conversation.id)
+
+        # 1. Pre-API check: if the last message is already an assistant message, skip
+        last_msg = locked_conv.messages.order_by("created_at").last()
+        if last_msg and last_msg.role == AIMessage.ROLE_ASSISTANT:
+            return last_msg
+
+        state = _merge_state(locked_conv)
+        tutors = _recommend_tutors(state)
+        assistant_text = _generate_assistant_reply(locked_conv, state, tutors)
+
+        # 2. Post-API check: if another concurrent request already created the assistant message, skip
+        last_msg = locked_conv.messages.order_by("created_at").last()
+        if last_msg and last_msg.role == AIMessage.ROLE_ASSISTANT:
+            # If identical content already exists, return it; otherwise skip creating a duplicate
+            if last_msg.content and last_msg.content.strip() == assistant_text.strip():
+                return last_msg
+            return last_msg
+
+        assistant_message = AIMessage.objects.create(
+            conversation=locked_conv,
+            role=AIMessage.ROLE_ASSISTANT,
+            content=assistant_text,
+            metadata={"tutors": tutors[:3], "state": state},
+        )
+        locked_conv.state = state
+        locked_conv.save(update_fields=["state", "updated_at"])
+        return assistant_message
 
 
 def _merge_state(conversation):
@@ -156,55 +174,65 @@ def _generate_assistant_reply(conversation, state, tutors):
     except ImportError:
         pass
 
-    if not os.getenv("OPENAI_API_KEY"):
+    if not os.getenv("GEMINI_API_KEY"):
         return _generate_fallback_reply(state, tutors)
     try:
-        return _generate_openai_reply(conversation, state, tutors)
+        return _generate_gemini_reply(conversation, state, tutors)
     except Exception as e:
-        logger.error("OpenAI assistant response failed.", exc_info=True)
+        logger.error("Gemini assistant response failed.", exc_info=True)
         return _generate_fallback_reply(state, tutors)
 
 
-def _generate_openai_reply(conversation, state, tutors):
-    client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-    model = os.getenv("OPENAI_MODEL", "gpt-4o-mini")
-    messages = _conversation_input(conversation, state, tutors)
+def _generate_gemini_reply(conversation, state, tutors):
+    import requests
 
-    if hasattr(client, "responses"):
-        response = client.responses.create(
-            model=model,
-            instructions=ASSISTANT_INSTRUCTIONS,
-            input=messages,
-        )
-        return getattr(response, "output_text", "") or _generate_fallback_reply(state, tutors)
+    api_key = os.getenv("GEMINI_API_KEY")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    if not api_key:
+        raise ValueError("GEMINI_API_KEY is missing from environment.")
 
-    response = client.chat.completions.create(
-        model=model,
-        temperature=0.4,
-        messages=[{"role": "system", "content": ASSISTANT_INSTRUCTIONS}, *messages],
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
+    headers = {"Content-Type": "application/json"}
+
+    system_text = (
+        f"{ASSISTANT_INSTRUCTIONS}\n\n"
+        "Current extracted student need:\n"
+        f"{json.dumps(state, ensure_ascii=True)}\n\n"
+        "Available tutor matches from our database:\n"
+        f"{json.dumps(tutors[:5], ensure_ascii=True)}\n\n"
+        "If required details are missing, ask the next best question. "
+        "If tutor matches exist, recommend them by name and why they fit. "
+        "If the student asks for assignment or course help, teach briefly and suggest a learning path."
     )
-    return response.choices[0].message.content
 
+    contents = []
+    for msg in conversation.messages.order_by("created_at")[:12]:
+        role = "user" if msg.role == "user" else "model"
+        contents.append({
+            "role": role,
+            "parts": [{"text": msg.content}]
+        })
 
-def _conversation_input(conversation, state, tutors):
-    history = [
-        {"role": msg.role, "content": msg.content}
-        for msg in conversation.messages.order_by("-created_at")[:12]
-    ]
-    history.reverse()
-    context = {
-        "role": "developer",
-        "content": (
-            "Current extracted student need:\n"
-            f"{json.dumps(state, ensure_ascii=True)}\n\n"
-            "Available tutor matches from our database:\n"
-            f"{json.dumps(tutors[:5], ensure_ascii=True)}\n\n"
-            "If required details are missing, ask the next best question. "
-            "If tutor matches exist, recommend them by name and why they fit. "
-            "If the student asks for assignment or course help, teach briefly and suggest a learning path."
-        ),
+    payload = {
+        "contents": contents,
+        "systemInstruction": {
+            "parts": [{"text": system_text}]
+        },
+        "generationConfig": {
+            "temperature": 0.4
+        }
     }
-    return [context, *history]
+
+    response = requests.post(url, json=payload, headers=headers, timeout=20)
+    response.raise_for_status()
+
+    res_data = response.json()
+    try:
+        reply_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
+        return reply_text
+    except (KeyError, IndexError, ValueError) as e:
+        logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
+        raise ValueError("Failed to get response from Gemini API.") from e
 
 
 def _generate_fallback_reply(state, tutors):
