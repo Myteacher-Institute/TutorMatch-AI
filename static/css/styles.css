@@ -5651,8 +5651,26 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 .tutor-detail-layout {
   display: grid;
   grid-template-columns: 1fr 300px;
+  grid-template-areas:
+    "main sidebar"
+    "reviews sidebar";
   gap: 26px;
   align-items: start;
+}
+
+.tutor-detail-main {
+  grid-area: main;
+  min-width: 0;
+}
+
+.tutor-detail-sidebar {
+  grid-area: sidebar;
+  min-width: 0;
+}
+
+.tutor-detail-reviews {
+  grid-area: reviews;
+  min-width: 0;
 }
 
 .tutor-detail-header-card {
@@ -5790,13 +5808,25 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 .tutor-address-lines {
   display: flex;
   flex-direction: column;
-  gap: 4px;
-  font-size: 14px;
-  color: #475569;
-  line-height: 1.5;
+  gap: 10px;
 }
 
-.tutor-address-lines span:last-child {
+.tutor-address-field {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.tutor-address-label {
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--muted);
+}
+
+.tutor-address-field > span:last-child {
+  font-size: 14px;
   font-weight: 600;
   color: #12182c;
 }
@@ -6281,9 +6311,16 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 
 @media (max-width: 900px) {
   .tutor-bottom-grid,
-  .tutor-detail-layout,
   .tutor-form-grid {
     grid-template-columns: 1fr;
+  }
+
+  .tutor-detail-layout {
+    grid-template-columns: 1fr;
+    grid-template-areas:
+      "main"
+      "sidebar"
+      "reviews";
   }
 
   .tutor-hero-banner {
