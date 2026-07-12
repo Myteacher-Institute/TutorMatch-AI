@@ -157,12 +157,12 @@ def _generate_assistant_reply(conversation, state, tutors):
         pass
 
     if not os.getenv("OPENAI_API_KEY"):
-        return "OpenAI API Key is missing. Please configure it in your .env file."
+        return _generate_fallback_reply(state, tutors)
     try:
         return _generate_openai_reply(conversation, state, tutors)
     except Exception as e:
         logger.error("OpenAI assistant response failed.", exc_info=True)
-        return f"Error contacting OpenAI API: {str(e)}. Please check your API key configuration."
+        return _generate_fallback_reply(state, tutors)
 
 
 def _generate_openai_reply(conversation, state, tutors):

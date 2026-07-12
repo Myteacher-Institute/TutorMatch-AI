@@ -4,6 +4,14 @@ from .models import Tutor, TutorDocument, Subject
 
 class TutorProfileForm(forms.ModelForm):
     profile_photo_upload = forms.ImageField(required=False)
+    subjects_input = forms.CharField(
+        required=False,
+        widget=forms.TextInput(attrs={
+            'placeholder': 'e.g. Mathematics, Physics, Chemistry',
+            'class': 'tutor-subject-tag-input',
+        }),
+        help_text='Type a subject and press Enter or comma to add it.',
+    )
 
     class Meta:
         model = Tutor
@@ -13,13 +21,17 @@ class TutorProfileForm(forms.ModelForm):
             'location',
             'hourly_rate',
             'years_experience',
-            'subjects',
             'qualifications',
+            'account_name',
+            'bank_name',
+            'account_number',
         ]
         widgets = {
             'bio': forms.Textarea(attrs={'rows': 4}),
             'qualifications': forms.Textarea(attrs={'rows': 4}),
-            'subjects': forms.CheckboxSelectMultiple(),
+            'account_name': forms.TextInput(attrs={'placeholder': 'e.g. Samuel Godnews'}),
+            'bank_name': forms.TextInput(attrs={'placeholder': 'e.g. Access Bank'}),
+            'account_number': forms.TextInput(attrs={'placeholder': 'e.g. 0123456789'}),
         }
 
 

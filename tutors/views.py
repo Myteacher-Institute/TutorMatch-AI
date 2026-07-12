@@ -1,30 +1,54 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Sum
 from django.contrib import messages
+from django.core.paginator import Paginator
+from django.utils import timezone
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
-from .models import Tutor, TutorDocument
+from .models import Tutor, TutorDocument, Subject
 from bookings.models import Booking
 from payments.models import Payment
+from reviews.models import Review
 from .forms import TutorProfileForm, TutorDocumentForm
+from django.views.decorators.csrf import ensure_csrf_cookie
 
 
 @tutor_required
 def tutor_dashboard(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
-    bookings_count = profile.bookings.count()
-    total_earnings = profile.payments.aggregate(total= Sum('amount'))['total'] or 0   
+    bookings_count = Booking.objects.filter(tutor=profile, payments__payment_status="paid").distinct().count()
+    total_earnings = Payment.objects.filter(
+        booking__tutor=profile, payment_status="released"
+    ).aggregate(total=Sum("tutor_payout"))["total"] or 0
+    upcoming_bookings = (
+        Booking.objects.filter(
+            tutor=profile,
+            status="accepted",
+            booking_date__gte=timezone.localdate(),
+            payments__payment_status="paid",
+        )
+        .select_related("student__user")
+        .distinct()
+        .order_by("booking_date", "lesson_time")
+    )
     return render(request, 'tutors/dashboard.html', 
                   {'profile': profile, 
                    'bookings_count': bookings_count,
                    'total_earnings': total_earnings,
+                   'upcoming_bookings': upcoming_bookings,
                    'active_tab': 'dashboard'})
 
 
 @tutor_required
 def tutor_profile(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
-    form = TutorProfileForm(request.POST or None, request.FILES or None, instance=profile)
+    
+    if request.method == 'POST':
+        form = TutorProfileForm(request.POST, request.FILES, instance=profile)
+    else:
+        form = TutorProfileForm(instance=profile)
+        existing_subjects = profile.subjects.values_list('subject_name', flat=True)
+        form.fields['subjects_input'].initial = ', '.join(existing_subjects)
 
     if form.is_valid():
         profile = form.save(commit=False)
@@ -37,7 +61,13 @@ def tutor_profile(request):
             profile.profile_photo = upload_file_in_memory(photo, folder="/tutor_photos")
 
         profile.save()
-        form.save_m2m()
+        subjects_input = form.cleaned_data.get('subjects_input', '')
+        subject_names = [s.strip() for s in subjects_input.split(',') if s.strip()]
+        subject_objs = []
+        for name in subject_names:
+            subject, _ = Subject.objects.get_or_create(subject_name=name)
+            subject_objs.append(subject)
+        profile.subjects.set(subject_objs)
         messages.success(request, 'Profile updated successfully.')
         return redirect('tutor_dashboard')
 
@@ -50,6 +80,11 @@ def tutor_verification(request):
     form = TutorDocumentForm(request.POST or None, request.FILES or None)
 
     if form.is_valid():
+        existing_approved = profile.documents.filter(verification_status="approved").exists()
+        if existing_approved:
+            messages.error(request, 'Your document has already been verified. Cannot re-upload.')
+            return redirect('tutor_verification')
+
         document_file = form.cleaned_data.get('document_file')
         is_valid_file, error = validate_file(document_file)
         if not is_valid_file:
@@ -61,10 +96,16 @@ def tutor_verification(request):
                 'active_tab': 'verification',
             })
 
+        profile.documents.all().delete()
+        profile.verification_status = "pending"
+        profile.user.is_verified = False
+        profile.user.save(update_fields=["is_verified"])
+
         doc = form.save(commit=False)
         doc.tutor = profile
         doc.document_url = upload_file_in_memory(document_file, folder="/tutor_documents")
         doc.save()
+        profile.save(update_fields=["verification_status"])
         messages.success(request, 'Document uploaded successfully.')
         return redirect('tutor_verification')
 
@@ -77,23 +118,43 @@ def tutor_verification(request):
     })
 
 
+@ensure_csrf_cookie
 def tutor_list(request):
-    tutors = Tutor.objects.filter(is_publicly_visible=True)
+    tutors_qs = Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
 
     subject_filter = request.GET.get('subject')
     location_filter = request.GET.get('location')
     max_rate = request.GET.get('max_rate')
 
     if subject_filter:
-        tutors = tutors.filter(subjects__subject_name__icontains=subject_filter)
+        tutors_qs = tutors_qs.filter(subjects__subject_name__icontains=subject_filter)
     if location_filter:
-        tutors = tutors.filter(location__icontains=location_filter)
+        tutors_qs = tutors_qs.filter(location__icontains=location_filter)
     if max_rate:
-        tutors = tutors.filter(hourly_rate__lte=max_rate)
+        tutors_qs = tutors_qs.filter(hourly_rate__lte=max_rate)
 
-    return render(request, 'tutors/tutor_list.html', {'tutors': tutors})
+    tutors_qs = tutors_qs.distinct()
+
+    paginator = Paginator(tutors_qs, 10)
+    page_number = request.GET.get("page")
+    tutors = paginator.get_page(page_number)
+
+    return render(request, 'tutors/tutor_list.html', {
+        'tutors': tutors,
+        'page_obj': tutors,
+    })
 
 
+@ensure_csrf_cookie
 def tutor_detail(request, tutor_id):
-    tutor = get_object_or_404(Tutor.objects.select_related("user__user").prefetch_related("subjects"), id=tutor_id)
-    return render(request, 'tutors/tutor_detail.html', {'tutor': tutor})
+    tutor = get_object_or_404(
+        Tutor.objects.select_related("user__user").prefetch_related("subjects"),
+        id=tutor_id,
+        is_publicly_visible=True,
+        verification_status="approved",
+    )
+    reviews_list = Review.objects.filter(tutor=tutor).select_related("student__user").order_by("-created_at")
+    paginator = Paginator(reviews_list, 5)
+    page_number = request.GET.get("page")
+    reviews = paginator.get_page(page_number)
+    return render(request, 'tutors/tutor_detail.html', {'tutor': tutor, 'reviews': reviews})

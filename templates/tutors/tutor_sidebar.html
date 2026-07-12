@@ -1,4 +1,7 @@
 <aside class="mtc-admin-sidebar tutor-sidebar">
+  <button class="tutor-hamburger" id="tutor-sidebar-toggle" aria-label="Toggle sidebar">
+    <i class="fa-solid fa-bars"></i>
+  </button>
   <div class="tutor-sidebar-profile">
     <div class="tutor-avatar-ring">
       {% if profile.profile_photo %}
@@ -22,7 +25,7 @@
     <div class="tutor-sidebar-status">
       {% if profile.verification_status == 'approved' %}
         <span class="tutor-verified-tag">
-          <i class="fa-solid fa-circle-check" style="margin-right:5px;"></i>Verified
+          <i class="fa-solid fa-circle-check"></i>
         </span>
       {% elif profile.verification_status == 'rejected' %}
         <span class="mtc-status-pill mtc-status-cancelled">
@@ -48,6 +51,11 @@
     </a>
     <a href="{% url 'tutor_bookings' %}" {% if active_tab == 'bookings' %}class="active"{% endif %}>
       <i class="fa-solid fa-receipt" style="width:18px;margin-right:8px;"></i>Bookings
+      {% if pending_bookings_count %}
+        <span style="margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:#dc2626;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">
+          {{ pending_bookings_count }}
+        </span>
+      {% endif %}
     </a>
     <a href="{% url 'chat:tutor_chat_list' %}" {% if active_tab == 'chats' %}class="active"{% endif %}>
       <i class="fa-solid fa-comments" style="width:18px;margin-right:8px;"></i>Chats
@@ -64,3 +72,18 @@
     <strong>{% if profile.hourly_rate %}&#8358;{{ profile.hourly_rate }}{% else %}Not set{% endif %}</strong>
   </div>
 </aside>
+<script>
+  const toggle = document.getElementById('tutor-sidebar-toggle');
+  const overlay = document.getElementById('tutor-sidebar-overlay');
+  const sidebar = document.querySelector('.tutor-sidebar');
+
+  toggle.addEventListener('click', function () {
+    sidebar.classList.toggle('tutor-sidebar-open');
+    overlay.classList.toggle('tutor-sidebar-overlay-open');
+  });
+
+  overlay.addEventListener('click', function () {
+    sidebar.classList.remove('tutor-sidebar-open');
+    overlay.classList.remove('tutor-sidebar-overlay-open');
+  });
+</script>

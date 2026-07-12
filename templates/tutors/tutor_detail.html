@@ -12,7 +12,7 @@
   </div>
 </div>
 
-<div style="background:#f8fafc;padding:50px 0 70px;">
+<div class="admin-dashboard-light" style="background:#f8fafc;padding:50px 0 70px;">
   <div class="mtc-shell">
     <div class="tutor-detail-layout">
 
@@ -38,7 +38,7 @@
                 <h1 style="margin:0;font-size:clamp(22px,4vw,30px);color:#12182c;font-weight:700;">{{ tutor.user.user.get_full_name }}</h1>
                   {% if tutor.is_verified %}
                     <span class="verified-badge tutor-verified-badge">
-                      <i class="fa-solid fa-circle-check" style="margin-right:4px; color: green;"></i>Verified
+                      <i class="fa-solid fa-circle-check" style="margin-right:4px; color: #ffffff;"></i>Verified
                     </span>
                   {% endif %}
               </div>
@@ -53,6 +53,8 @@
               <div class="tutor-public-subjects" style="margin-top:14px;">
                 {% for subject in tutor.subjects.all %}
                   <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                {% empty %}
+                  <span class="tutor-subjects-empty">No subjects listed</span>
                 {% endfor %}
               </div>
             </div>
@@ -75,14 +77,74 @@
           </div>
         {% endif %}
 
-        <!-- Reviews Placeholder -->
+        <!-- Reviews -->
         <div class="mtc-admin-card" style="margin-top:20px;">
           <h2 style="margin:0 0 14px;font-size:18px;color:#12182c;"><i class="fa-solid fa-star" style="color:#fbbf24;margin-right:8px;"></i>Reviews</h2>
-          <div class="tutor-empty-state">
-            <div class="tutor-empty-icon" style="background:#fffbeb;color:#f59e0b;"><i class="fa-regular fa-star"></i></div>
-            <p>No reviews yet.</p>
-            <small>Reviews will appear here after completed sessions.</small>
-          </div>
+          {% if reviews %}
+            <div class="tutor-reviews-list">
+              {% for review in reviews %}
+              <div class="tutor-review-card">
+                <div class="tutor-review-header">
+                  <div class="tutor-review-avatar">
+                    {% if review.student.user.first_name %}
+                      {{ review.student.user.first_name|first|upper }}{{ review.student.user.last_name|first|upper }}
+                    {% else %}
+                      {{ review.student.user.username|first|upper }}
+                    {% endif %}
+                  </div>
+                  <div class="tutor-review-meta">
+                    <strong>{{ review.student.user.get_full_name|default:review.student.user.username }}</strong>
+                    <div class="tutor-review-stars">
+                      {% for i in "12345" %}
+                        {% if i|add:0 <= review.rating %}
+                          <i class="fa-solid fa-star"></i>
+                        {% else %}
+                          <i class="fa-regular fa-star"></i>
+                        {% endif %}
+                      {% endfor %}
+                    </div>
+                    <span class="tutor-review-date">{{ review.created_at|date:"M j, Y" }}</span>
+                  </div>
+                </div>
+                {% if review.review %}
+                <p class="tutor-review-text">{{ review.review }}</p>
+                {% endif %}
+              </div>
+              {% endfor %}
+            </div>
+
+            {% if reviews.has_other_pages %}
+            <div class="tutor-reviews-pagination">
+              {% if reviews.has_previous %}
+              <a href="?page={{ reviews.previous_page_number }}" class="tutor-reviews-page-btn">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+              </a>
+              {% else %}
+              <span class="tutor-reviews-page-btn is-disabled">
+                <i class="fa-solid fa-chevron-left"></i> Previous
+              </span>
+              {% endif %}
+
+              <span class="tutor-reviews-page-info">Page {{ reviews.number }} of {{ reviews.paginator.num_pages }}</span>
+
+              {% if reviews.has_next %}
+              <a href="?page={{ reviews.next_page_number }}" class="tutor-reviews-page-btn">
+                Next <i class="fa-solid fa-chevron-right"></i>
+              </a>
+              {% else %}
+              <span class="tutor-reviews-page-btn is-disabled">
+                Next <i class="fa-solid fa-chevron-right"></i>
+              </span>
+              {% endif %}
+            </div>
+            {% endif %}
+          {% else %}
+            <div class="tutor-empty-state">
+              <div class="tutor-empty-icon" style="background:#fffbeb;color:#f59e0b;"><i class="fa-regular fa-star"></i></div>
+              <p>No reviews yet.</p>
+              <small>Reviews will appear here after completed sessions.</small>
+            </div>
+          {% endif %}
         </div>
 
       </div>
@@ -107,10 +169,26 @@
             </div>
           </div>
 
-          <!-- Book button — wired by Task 4 -->
+          <!-- Book button — hidden when the viewer is a tutor -->
+          {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
           <button class="btn btn-primary tutor-book-btn">
             <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i><a href="{% url 'book_tutor' tutor_id=tutor.id %}">Book a Session</a>
           </button>
+          {% endif %}
+
+          {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
+          <button
+            type="button"
+            class="btn btn-ghost save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}"
+            data-tutor-id="{{ tutor.id }}"
+            onclick="toggleSaveTutor(this)"
+            style="width:100%;border:1px solid var(--line);border-radius:10px;margin-top:10px;font-weight:700;background:#fff;color:#475569;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;"
+          >
+            <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
+            <span class="save-tutor-label">{% if tutor.id in saved_tutor_ids %}Saved{% else %}Save Tutor{% endif %}</span>
+          </button>
+          {% endif %}
+
           <p class="tutor-booking-note">Booking handled by the sessions module.</p>
 
           {% if tutor.is_verified %}

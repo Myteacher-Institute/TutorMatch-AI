@@ -2,6 +2,27 @@ from django.db import models
 from accounts.models import UserProfile
 
 
+class SavedTutor(models.Model):
+    student = models.ForeignKey(
+        UserProfile,
+        on_delete=models.CASCADE,
+        related_name="saved_tutors",
+    )
+    tutor = models.ForeignKey(
+        "Tutor",
+        on_delete=models.CASCADE,
+        related_name="saved_by",
+    )
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        unique_together = ("student", "tutor")
+        ordering = ["-created_at"]
+
+    def __str__(self):
+        return f"{self.student} saved {self.tutor}"
+
+
 class Subject(models.Model):
     subject_name = models.CharField(max_length=100, unique=True)
 
@@ -49,6 +70,17 @@ class Tutor(models.Model):
     qualifications = models.TextField(blank=True)
     is_publicly_visible = models.BooleanField(default=False)
 
+    # Payout account details (private — used for tutor payouts, never shown on public profile)
+    account_name = models.CharField(max_length=200, blank=True)
+    bank_name = models.CharField(max_length=100, blank=True)
+    account_number = models.CharField(max_length=10, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.is_publicly_visible = self.verification_status == "approved"
+        if kwargs.get("update_fields") is not None and "verification_status" in kwargs["update_fields"]:
+            kwargs["update_fields"] = list(kwargs["update_fields"]) + ["is_publicly_visible"]
+        super().save(*args, **kwargs)
+
     def __str__(self):
         return f"{self.user} - {self.location}"
 
@@ -56,12 +88,28 @@ class Tutor(models.Model):
     def is_verified(self):
         return self.verification_status == "approved"
 
+    @property
+    def first_name(self):
+        return self.user.user.first_name if self.user and self.user.user else ""
+
+    @property
+    def last_name(self):
+        return self.user.user.last_name if self.user and self.user.user else ""
+
+    @property
+    def get_full_name(self):
+        return self.user.user.get_full_name() if self.user and self.user.user else ""
+
+    @property
+    def username(self):
+        return self.user.user.username if self.user and self.user.user else ""
+
 
 class TutorDocument(models.Model):
 
     DOCUMENT_TYPES = [
         ('government_id', 'Government ID'),
-        ('selfie', 'Selfie'),
+        ('nin', 'NIN Document'),
         ('certificate', 'Certificate'),
     ]
 

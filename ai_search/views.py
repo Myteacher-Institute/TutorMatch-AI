@@ -19,8 +19,8 @@ from .services import extract_search_intent, search_tutors, suggested_prompts
 def find_tutor(request):
     query = request.GET.get("q", "").strip()
     if query:
-        return redirect(f"{reverse('ai_assistant')}?{urlencode({'q': query})}")
-    return redirect("ai_assistant")
+        return redirect(f"{reverse('ai_assistant')}?{urlencode({'reset': '1', 'q': query})}")
+    return redirect(f"{reverse('ai_assistant')}?reset=1")
 
 
 def ai_assistant(request):

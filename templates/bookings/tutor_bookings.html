@@ -4,7 +4,8 @@
 {% block title %}Tutor Bookings | TutorMatch AI{% endblock %}
 
 {% block content %}
-<div class="mtc-shell">
+<div class="mtc-shell admin-dashboard-light">
+  <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
   <section class="mtc-admin-layout">
     {% include "tutors/tutor_sidebar.html" with profile=tutor_profile active_tab="bookings" %}
 
@@ -51,6 +52,7 @@
                   <th>Date</th>
                   <th>Time</th>
                   <th>Amount</th>
+                  <th>Payment</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -73,6 +75,11 @@
                     <td>{{ booking.lesson_time|time:"g:i A" }}</td>
                     <td><strong>₦{{ booking.amount }}</strong></td>
                     <td>
+                      <span class="mtc-payment-{{ booking.display_payment_status }}">
+                        {{ booking.display_payment_status_label }}
+                      </span>
+                    </td>
+                    <td>
                       <span class="mtc-status-pill mtc-status-{{ booking.status }}">
                         {{ booking.get_status_display }}
                       </span>
@@ -84,7 +91,7 @@
                             {% csrf_token %}
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-accept">Accept</button>
                           </form>
-                          <form method="post" action="{% url 'update_booking_status' booking.id 'cancelled' %}">
+                          <form method="post" action="{% url 'update_booking_status' booking.id 'cancelled' %}" data-confirm="Rejecting will cancel this booking request and notify the student. Are you sure?" data-confirm-title="Reject Booking" data-confirm-label="Reject" data-confirm-danger>
                             {% csrf_token %}
                             <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject">Reject</button>
                           </form>

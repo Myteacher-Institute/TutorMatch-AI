@@ -2,8 +2,12 @@
 {% block title %}Tutor Dashboard — TutorMatch AI{% endblock %}
 
 {% block content %}
-<div class="tutor-portal-bg">
+{% load humanize %}
+<div class="tutor-portal-bg admin-dashboard-light">
   <div class="mtc-shell">
+
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+
     <div class="mtc-admin-layout">
 
       {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="dashboard" %}
@@ -14,7 +18,7 @@
         <div class="tutor-page-heading">
           <div>
             <p class="tutor-eyebrow">Tutor Dashboard</p>
-            <h1>Welcome, {{ profile.user.user.first_name }} </h1>
+            <h1>Welcome, {{ profile.user.user.first_name }}</h1>
             <p class="tutor-subtext">Here's an overview of your profile and activity.</p>
           </div>
           <a href="{% url 'tutor_detail' tutor_id=profile.id %}" class="btn btn-primary tutor-view-btn">
@@ -43,42 +47,42 @@
               <span>Yrs Exp.</span>
             </div>
             <div class="tutor-stat-chip">
-              <strong>{% if profile.verification_status == 'approved' %}<i class="fa-solid fa-circle-check"
-                  style="color:#4ade80;"></i>
+              {% if profile.verification_status == 'approved' %}
+                <strong><i class="fa-solid fa-circle-check" style="color:#4ade80;"></i></strong>
                 <span>Verified</span>
-
-                {% elif profile.verification_status == 'rejected' %}<i class="fa-solid fa-circle-xmark"
-                  style="color:#ff0000;"></i>
+              {% elif profile.verification_status == 'rejected' %}
+                <strong><i class="fa-solid fa-circle-xmark" style="color:#fca5a5;"></i></strong>
                 <span>Rejected</span>
-
-                {% else %}<i class="fa-solid fa-clock" style="color:#ff0000;"></i>
+              {% else %}
+                <strong><i class="fa-solid fa-clock" style="color:#fbbf24;"></i></strong>
                 <span>Pending</span>
-                {% endif %}</strong>
+              {% endif %}
             </div>
           </div>
         </div>
 
         <!-- Metric Cards -->
         <div class="mtc-admin-metrics-grid" style="margin-top:28px;">
-          <div class="mtc-admin-metric-card tutor-metric-blue">
-            <span><i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Subjects</span>
+          <div class="mtc-admin-metric-card tutor-metric-blue" style="border-left:4px solid var(--blue); display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Subjects</span>
             <strong>{{ profile.subjects.count }}</strong>
-            <p class="tutor-metric-sub">Subjects taught</p>
+         
           </div>
-          <div class="mtc-admin-metric-card tutor-metric-green">
-            <span><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>Experience</span>
+          <div class="mtc-admin-metric-card tutor-metric-green" style="border-left:4px solid #16a34a; display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>Experience</span>
             <strong>{{ profile.years_experience }}yr{% if profile.years_experience != 1 %}s{% endif %}</strong>
-            <p class="tutor-metric-sub">Teaching experience</p>
+            
           </div>
-          <div class="mtc-admin-metric-card tutor-metric-purple">
-            <span><i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>Bookings</span>
-            <strong>{{ bookings_count }}</strong>
-            <p class="tutor-metric-sub">View your bookings</p>
+          <div class="mtc-admin-metric-card tutor-metric-purple" style="border-left:4px solid red ; display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>Bookings</span> 
+         
+            <strong>{{ bookings_count|default:"0" }}</strong>
+          
           </div>
-          <div class="mtc-admin-metric-card tutor-metric-yellow">
-            <span><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
-            <strong>{{ total_earnings }}</strong>
-            <p class="tutor-metric-sub">Payments module</p>
+          <div class="mtc-admin-metric-card tutor-metric-yellow" style="border-left:4px solid var(--yellow); display:flex;align-items:center;justify-content:space-between; flex-direction:column;">  
+            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
+            <strong>{% if total_earnings %}&#8358;{{ total_earnings|intcomma }}{% else %}&#8358;0{% endif %}</strong>
+          
           </div>
         </div>
 
@@ -88,15 +92,37 @@
           <!-- Upcoming Lessons -->
           <div class="mtc-admin-card">
             <div class="tutor-card-head">
-              <h2><i class="fa-solid fa-calendar-days" style="color:var(--blue);margin-right:8px;"></i>Upcoming Lessons
-              </h2>
-              <span class="tutor-coming-soon-tag">Coming soon</span>
+              <h2><i class="fa-solid fa-calendar-days" style="color:var(--blue);margin-right:8px;"></i>Upcoming Lessons</h2>
             </div>
-            <div class="tutor-empty-state">
-              <div class="tutor-empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>
-              <p>No upcoming lessons yet.</p>
-              <small>Once students book you, sessions will appear here.</small>
-            </div>
+            {% if upcoming_bookings %}
+              <div class="mtc-dashboard-recent-bookings">
+                {% for booking in upcoming_bookings %}
+                <div class="mtc-dashboard-booking-row">
+                  <div class="mtc-student-bookings-tutor">
+                    <span>
+                      {% if booking.student.user.first_name %}{{ booking.student.user.first_name|slice:":1" }}{% else %}S{% endif %}
+                    </span>
+                    <div>
+                      <strong>{{ booking.student.user.get_full_name|default:booking.student.user.username }}</strong>
+                      <small>₦{{ booking.amount }} — {{ booking.lesson_time|time:"g:i A" }}</small>
+                    </div>
+                  </div>
+                  <div class="mtc-dashboard-booking-meta">
+                    <span class="mtc-status-pill mtc-status-{{ booking.status }}">
+                      {{ booking.get_status_display }}
+                    </span>
+                    <small>{{ booking.booking_date|date:"M j, Y" }}</small>
+                  </div>
+                </div>
+                {% endfor %}
+              </div>
+            {% else %}
+              <div class="tutor-empty-state">
+                <div class="tutor-empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>
+                <p>No upcoming lessons yet.</p>
+                <small>Once students book you, sessions will appear here.</small>
+              </div>
+            {% endif %}
           </div>
 
           <div style="display:grid;gap:20px;">
@@ -104,23 +130,28 @@
             <!-- Verification -->
             <div class="mtc-admin-card">
               <div class="tutor-card-head">
-                <h2><i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;"></i>Verification
-                </h2>
-                <span
-                  class="mtc-status-pill {% if profile.verification_status == 'approved' %}mtc-status-accepted{% elif profile.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
-                  {{ profile.get_verification_status_display }}
-                </span>
+                <h2><i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;"></i>Verification</h2>
+                {% if profile.verification_status == 'approved' %}
+                  <span class="tutor-status-green">
+                    <i class="fa-solid fa-circle-check" style="margin-right:4px;"></i>Approved
+                  </span>
+                {% elif profile.verification_status == 'rejected' %}
+                  <span class="tutor-status-red">
+                    <i class="fa-solid fa-circle-xmark" style="margin-right:4px;"></i>Rejected
+                  </span>
+                {% else %}
+                  <span class="tutor-status-yellow">
+                    <i class="fa-solid fa-clock" style="margin-right:4px;"></i>Pending
+                  </span>
+                {% endif %}
               </div>
               <p class="tutor-card-desc">
                 {% if profile.verification_status == 'approved' %}
-                <i class="fa-solid fa-circle-check" style="color:#16a34a;margin-right:4px;"></i>Your account is
-                verified. You appear in public listings.
+                  <i class="fa-solid fa-circle-check" style="color:#16a34a;margin-right:4px;"></i>Your account is verified. You appear in public listings.
                 {% elif profile.verification_status == 'rejected' %}
-                <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;margin-right:4px;"></i>Documents
-                rejected. Please re-upload.
+                  <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;margin-right:4px;"></i>Documents rejected. Please re-upload.
                 {% else %}
-                <i class="fa-solid fa-clock" style="color:#d97706;margin-right:4px;"></i>Upload documents to get
-                verified and appear in search results.
+                  <i class="fa-solid fa-clock" style="color:#d97706;margin-right:4px;"></i>Upload documents to get verified and appear in search results.
                 {% endif %}
               </p>
               <a href="{% url 'tutor_verification' %}" class="tutor-card-link">
@@ -131,19 +162,17 @@
             <!-- Subjects -->
             <div class="mtc-admin-card">
               <div class="tutor-card-head">
-                <h2><i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach
-                </h2>
+                <h2><i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach</h2>
                 <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Edit</a>
               </div>
               {% if profile.subjects.all %}
-              <div class="tutor-subject-tags">
-                {% for subject in profile.subjects.all %}
-                <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
-                {% endfor %}
-              </div>
+                <div class="tutor-subject-tags">
+                  {% for subject in profile.subjects.all %}
+                    <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+                  {% endfor %}
+                </div>
               {% else %}
-              <p class="tutor-card-desc">No subjects added yet. <a href="{% url 'tutor_profile' %}"
-                  class="tutor-card-link">Add some &#8594;</a></p>
+                <p class="tutor-card-desc">No subjects added yet. <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Add some &#8594;</a></p>
               {% endif %}
             </div>
 

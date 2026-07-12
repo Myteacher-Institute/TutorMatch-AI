@@ -5,8 +5,19 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}TutorMatch AI{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260702">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260712">
+  <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260712">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script>
+    (function () {
+      try {
+        var theme = localStorage.getItem('ai-theme') || 'system';
+        var dark = theme === 'dark' ||
+          (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (e) {}
+    })();
+  </script>
 </head>
 <body>
   <header class="site-header">
@@ -140,6 +151,19 @@
       </div>
     </div>
   </footer>
+
+  <div class="mtc-confirm-overlay" id="mtcConfirmOverlay" hidden>
+    <div class="mtc-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="mtcConfirmTitle" aria-describedby="mtcConfirmMessage">
+      <div class="mtc-confirm-icon"><i class="fa-solid fa-triangle-exclamation"></i></div>
+      <h3 class="mtc-confirm-title" id="mtcConfirmTitle">Are you sure?</h3>
+      <p class="mtc-confirm-message" id="mtcConfirmMessage"></p>
+      <div class="mtc-confirm-actions">
+        <button type="button" class="mtc-confirm-btn mtc-confirm-cancel" id="mtcConfirmCancel">Cancel</button>
+        <button type="button" class="mtc-confirm-btn mtc-confirm-ok" id="mtcConfirmOk">Yes, I'm sure</button>
+      </div>
+    </div>
+  </div>
+
   <script>
     document.addEventListener('DOMContentLoaded', () => {
       const mobileBtn = document.getElementById('mobile-menu-btn');
@@ -263,5 +287,7 @@
     });
   </script>
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
+  <script src="{% static 'js/app-shell.js' %}?v=20260702"></script>
+  <script src="{% static 'js/confirm-modal.js' %}?v=20260712"></script>
 </body>
 </html>

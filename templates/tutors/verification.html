@@ -2,8 +2,10 @@
 {% block title %}Verification — TutorMatch AI{% endblock %}
 
 {% block content %}
-<div class="tutor-portal-bg">
+<div class="tutor-portal-bg admin-dashboard-light">
   <div class="mtc-shell">
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+
     <div class="mtc-admin-layout">
 
       {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="verification" %}
@@ -23,99 +25,281 @@
         </div>
 
         {% if messages %}
-          {% for message in messages %}
-            <div class="tutor-alert {% if message.tags == 'success' %}tutor-alert-success{% else %}tutor-alert-error{% endif %}">
-              <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}" style="margin-right:8px;"></i>
-              {{ message }}
-            </div>
-          {% endfor %}
+        {% for message in messages %}
+        <div
+          class="tutor-alert {% if message.tags == 'success' %}tutor-alert-success{% else %}tutor-alert-error{% endif %}">
+          <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}"
+            style="margin-right:8px;"></i>
+          {{ message }}
+        </div>
+        {% endfor %}
         {% endif %}
 
         <!-- Status Banner -->
-        <div class="tutor-verification-banner {% if profile.verification_status == 'approved' %}tutor-vbanner-approved{% elif profile.verification_status == 'rejected' %}tutor-vbanner-rejected{% else %}tutor-vbanner-pending{% endif %}">
+        {% if profile.verification_status == 'approved' %}
+        <div class="tutor-verification-banner tutor-vbanner-approved">
           <div class="tutor-vbanner-icon">
-            {% if profile.verification_status == 'approved' %}
-              <i class="fa-solid fa-circle-check"></i>
-            {% elif profile.verification_status == 'rejected' %}
-              <i class="fa-solid fa-circle-xmark"></i>
-            {% else %}
-              <i class="fa-solid fa-clock"></i>
-            {% endif %}
+            <i class="fa-solid fa-circle-check"></i>
           </div>
           <div>
-            <strong>
-              {% if profile.verification_status == 'approved' %}Your account is verified
-              {% elif profile.verification_status == 'rejected' %}Verification rejected
-              {% else %}Verification pending review{% endif %}
-            </strong>
-            <p>
-              {% if profile.verification_status == 'approved' %}You are visible in public tutor listings.
-              {% elif profile.verification_status == 'rejected' %}Please re-upload your documents below.
-              {% else %}Our team is reviewing your submission. This usually takes 1-2 business days.{% endif %}
-            </p>
+            <strong>Your account is verified</strong>
+            <p>You are visible in public tutor listings.</p>
           </div>
         </div>
+        {% else %}
+        <div class="tutor-verification-banner tutor-vbanner-rejected">
+          <div class="tutor-vbanner-icon">
+            <i class="fa-solid fa-circle-xmark"></i>
+          </div>
+          <div>
+            <strong>Your account is not verified</strong>
+            <p>You need to upload your verification documents below to be visible to students. Without verified documents, students will not be able to find or book you.</p>
+          </div>
+        </div>
+        {% endif %}
 
         <!-- Upload Form -->
         <div class="mtc-admin-card tutor-form-card">
           <div class="tutor-form-section-title">
             <i class="fa-solid fa-upload" style="color:var(--blue);margin-right:8px;"></i>Upload a Document
           </div>
+
+          {% if documents and documents.0.verification_status == 'approved' %}
+          <div class="tutor-verification-already-approved">
+            <i class="fa-solid fa-circle-check" style="font-size:32px;color:#16a34a;margin-bottom:12px;"></i>
+            <h3 style="margin:0 0 8px;color:#166534;">Document Already Verified</h3>
+            <p style="margin:0;color:#166534;">Your document has been verified by our team. You cannot re-upload a verified document.</p>
+          </div>
+          {% else %}
           <p style="color:var(--muted);font-size:14px;margin:0 0 20px;">Accepted formats: JPG, PNG, PDF. Max 5MB per file.</p>
 
-          <form method="post" enctype="multipart/form-data">
+          <form method="post" enctype="multipart/form-data" id="uploadForm">
             {% csrf_token %}
-            <div class="tutor-form-grid">
-              <div class="tutor-form-field">
-                <label>Document Type</label>
-                {{ form.document_type }}
-                {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}</p>{% endif %}
+            <div class="verification-form-layout">
+              <!-- Left Column -->
+              <div class="verification-left-col">
+                <div class="tutor-form-field">
+                  <label>Document Type <span class="tutor-field-required">*</span></label>
+                  {{ form.document_type }}
+                  <small>Choose the category that best matches your file.</small>
+                  {% if form.document_type.errors %}<p class="tutor-field-error">{{ form.document_type.errors|join:", " }}</p>{% endif %}
+                </div>
+
+                <div class="verification-requirements">
+                  <div class="verification-req-title">Requirements</div>
+                  <ul class="verification-req-list">
+                    <li class="verification-req-item">
+                      <i class="fa-solid fa-circle-check" style="color:var(--blue);margin-right:8px;"></i>
+                      Clear, unobstructed image
+                    </li>
+                    <li class="verification-req-item">
+                      <i class="fa-solid fa-circle-check" style="color:var(--blue);margin-right:8px;"></i>
+                      All corners visible
+                    </li>
+                    <li class="verification-req-item">
+                      <i class="fa-solid fa-circle-check" style="color:var(--blue);margin-right:8px;"></i>
+                      File size under 5MB
+                    </li>
+                  </ul>
+                </div>
               </div>
-              <div class="tutor-form-field">
-                <label>File</label>
-                <div class="tutor-file-drop">
+
+              <!-- Right Column -->
+              <div class="verification-right-col">
+                <div class="verification-drop-zone" id="verificationDropZone">
                   {{ form.document_file }}
-                  <p><i class="fa-solid fa-cloud-arrow-up" style="font-size:22px;color:#94a3b8;display:block;margin-bottom:6px;"></i>Click to choose a file or drag and drop</p>
+                  <div class="verification-drop-content" id="verificationDropContent">
+                    <i class="fa-solid fa-cloud-arrow-up" id="verificationDropIcon"></i>
+                    <p class="verification-drop-main" id="verificationDropMain">Drag &amp; drop your file here</p>
+                    <p class="verification-drop-sub" id="verificationDropSub">or click to browse from your device</p>
+                    <span class="verification-drop-btn" id="verificationDropBtn">Browse file</span>
+                  </div>
+                  <div class="verification-file-preview" id="verificationFilePreview" style="display:none;">
+                    <div class="verification-file-info">
+                      <i class="fa-solid fa-file-image" id="verificationFileIcon"></i>
+                      <span class="verification-file-name" id="verificationFileName"></span>
+                    </div>
+                    <button type="button" class="verification-remove-file" id="verificationRemoveFile">
+                      <i class="fa-solid fa-xmark"></i>
+                    </button>
+                  </div>
                 </div>
                 {% if form.document_file.errors %}<p class="tutor-field-error">{{ form.document_file.errors|join:", " }}</p>{% endif %}
               </div>
             </div>
-            <button type="submit" class="btn btn-primary tutor-save-btn" style="margin-top:18px;">
-              <i class="fa-solid fa-cloud-arrow-up" style="margin-right:6px;"></i>Upload Document
-            </button>
+
+            <div class="verification-footer">
+              <p class="verification-disclaimer">By uploading you confirm this document belongs to you.</p>
+              <div class="verification-footer-actions">
+                <a href="{% url 'tutor_dashboard' %}" class="btn btn-light">Cancel</a>
+                <button type="submit" class="btn btn-primary tutor-save-btn" id="uploadSubmitBtn" disabled>
+                  <i class="fa-solid fa-cloud-arrow-up" style="margin-right:6px;"></i>Upload document
+                </button>
+              </div>
+            </div>
           </form>
+          {% endif %}
         </div>
 
         <!-- Uploaded Documents -->
         <div class="mtc-admin-card" style="margin-top:24px;">
           <div class="tutor-card-head">
-            <h2><i class="fa-solid fa-folder-open" style="color:var(--blue);margin-right:8px;"></i>Uploaded Documents</h2>
+            <h2><i class="fa-solid fa-folder-open" style="color:var(--blue);margin-right:8px;"></i>Uploaded Documents
+            </h2>
           </div>
           {% if documents %}
-            <div class="tutor-docs-list">
-              {% for doc in documents %}
-                <div class="tutor-doc-row">
-                  <div class="tutor-doc-icon">
-                    <i class="fa-solid fa-file-lines"></i>
-                  </div>
-                  <div class="tutor-doc-info">
-                    <strong>{{ doc.get_document_type_display }}</strong>
-                    <span>Uploaded {{ doc.uploaded_at|date:"N j, Y" }}</span>
-                  </div>
-                  <span class="mtc-status-pill {% if doc.verification_status == 'approved' %}mtc-status-accepted{% elif doc.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
-                    {{ doc.get_verification_status_display }}
-                  </span>
-                </div>
-              {% endfor %}
+          <div class="tutor-docs-list">
+            {% for doc in documents %}
+            <div class="tutor-doc-row">
+              <div class="tutor-doc-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <div class="tutor-doc-info">
+                <strong>{{ doc.get_document_type_display }}</strong>
+                <span>Uploaded {{ doc.uploaded_at|date:"N j, Y" }}</span>
+              </div>
+              <span
+                class="mtc-status-pill {% if doc.verification_status == 'approved' %}mtc-status-accepted{% elif doc.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
+                {{ doc.get_verification_status_display }}
+              </span>
             </div>
+            {% endfor %}
+          </div>
           {% else %}
-            <div class="tutor-empty-state">
-              <div class="tutor-empty-icon"><i class="fa-regular fa-folder-open"></i></div>
-              <p>No documents uploaded yet.</p>
-              <small>Upload your ID, selfie, and certificates above.</small>
-            </div>
+          <div class="tutor-empty-state">
+            <div class="tutor-empty-icon"><i class="fa-regular fa-folder-open"></i></div>
+            <p>No documents uploaded yet.</p>
+            <small>Upload your ID, NIN document, and certificates above.</small>
+          </div>
           {% endif %}
         </div>
+
+        <script>
+          (function() {
+            var dropZone = document.getElementById('verificationDropZone');
+            var fileInput = dropZone ? dropZone.querySelector('input[type="file"]') : null;
+            var dropContent = document.getElementById('verificationDropContent');
+            var filePreview = document.getElementById('verificationFilePreview');
+            var fileName = document.getElementById('verificationFileName');
+            var removeBtn = document.getElementById('verificationRemoveFile');
+            var submitBtn = document.getElementById('uploadSubmitBtn');
+            var docTypeSelect = document.querySelector('select[name="document_type"]');
+            var fileIcon = document.getElementById('verificationFileIcon');
+
+            var ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf'];
+            var MAX_SIZE = 5 * 1024 * 1024; // 5MB
+
+            function updateSubmitButton() {
+              var hasDocType = docTypeSelect && docTypeSelect.value !== '';
+              var hasFile = fileInput && fileInput.files && fileInput.files.length > 0;
+              if (submitBtn) {
+                submitBtn.disabled = !(hasDocType && hasFile);
+                if (submitBtn.disabled) {
+                  submitBtn.classList.add('upload-btn-disabled');
+                } else {
+                  submitBtn.classList.remove('upload-btn-disabled');
+                }
+              }
+            }
+
+            function showPreview(file) {
+              if (!dropContent || !filePreview || !fileName) return;
+              dropContent.style.display = 'none';
+              filePreview.style.display = 'flex';
+              fileName.textContent = file.name;
+              if (fileIcon) {
+                if (file.type === 'application/pdf') {
+                  fileIcon.className = 'fa-solid fa-file-pdf';
+                } else {
+                  fileIcon.className = 'fa-solid fa-file-image';
+                }
+              }
+              updateSubmitButton();
+            }
+
+            function clearFile() {
+              if (!fileInput) return;
+              var dt = new DataTransfer();
+              fileInput.files = dt.files;
+              if (dropContent) dropContent.style.display = 'flex';
+              if (filePreview) filePreview.style.display = 'none';
+              if (fileName) fileName.textContent = '';
+              updateSubmitButton();
+            }
+
+            function validateFile(file) {
+              if (!ALLOWED_TYPES.includes(file.type)) {
+                alert('Invalid file type. Please upload JPG, PNG, or PDF.');
+                return false;
+              }
+              if (file.size > MAX_SIZE) {
+                alert('File is too large. Maximum size is 5MB.');
+                return false;
+              }
+              return true;
+            }
+
+            if (fileInput) {
+              fileInput.addEventListener('change', function() {
+                if (this.files && this.files.length > 0) {
+                  if (validateFile(this.files[0])) {
+                    showPreview(this.files[0]);
+                  } else {
+                    clearFile();
+                  }
+                } else {
+                  clearFile();
+                }
+                updateSubmitButton();
+              });
+            }
+
+            if (removeBtn) {
+              removeBtn.addEventListener('click', function() {
+                clearFile();
+              });
+            }
+
+            if (docTypeSelect) {
+              docTypeSelect.addEventListener('change', updateSubmitButton);
+            }
+
+            if (dropZone && fileInput) {
+              ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(function(eventName) {
+                dropZone.addEventListener(eventName, function(e) {
+                  e.preventDefault();
+                  e.stopPropagation();
+                });
+              });
+
+              ['dragenter', 'dragover'].forEach(function(eventName) {
+                dropZone.addEventListener(eventName, function() {
+                  dropZone.classList.add('drag-over');
+                });
+              });
+
+              ['dragleave', 'drop'].forEach(function(eventName) {
+                dropZone.addEventListener(eventName, function() {
+                  dropZone.classList.remove('drag-over');
+                });
+              });
+
+              dropZone.addEventListener('drop', function(e) {
+                var files = e.dataTransfer.files;
+                if (files && files.length > 0) {
+                  if (validateFile(files[0])) {
+                    var dt = new DataTransfer();
+                    dt.items.add(files[0]);
+                    fileInput.files = dt.files;
+                    showPreview(files[0]);
+                  }
+                }
+              });
+            }
+
+            updateSubmitButton();
+          })();
+        </script>
 
       </main>
     </div>
