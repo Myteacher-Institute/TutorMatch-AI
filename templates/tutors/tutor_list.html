@@ -15,35 +15,41 @@
 <div style="background:#f8fafc;padding:50px 0 70px;">
   <div class="mtc-shell">
     <div class="results-layout">
+      <!-- Top controls: search, categories, and upload -->
+      <div class="results-header-controls">
+        <div class="controls-left">
+          <form method="get" class="search-form">
+            <input type="search" name="q" placeholder="Search tutors, subjects, locations..." value="{{ request.GET.q|default:'' }}">
+            <button type="submit" class="search-submit"><i class="fa-solid fa-magnifying-glass"></i></button>
+          </form>
+        </div>
+        <div class="controls-right">
+          <div class="category-chips">
+            <a href="?category=all" class="chip active">All</a>
+            <a href="?category=script" class="chip">Script</a>
+            <a href="?category=exploit" class="chip">Exploit</a>
+            <a href="?category=osint" class="chip">OSINT</a>
+            <a href="?category=malware" class="chip">Malware</a>
+            <a href="?category=defense" class="chip">Defense</a>
+          </div>
+          <a href="#" class="btn btn-primary" style="margin-left:12px;">Upload Tutor</a>
+        </div>
+      </div>
 
-      <!-- Filter Sidebar -->
-      <aside class="filter-panel">
-        <h2><i class="fa-solid fa-sliders" style="color:var(--blue);margin-right:8px;"></i>Filters</h2>
-        <form method="get">
-          <div>
-            <label>Subject</label>
-            <input type="text" name="subject" value="{{ request.GET.subject }}" placeholder="e.g. Mathematics">
-          </div>
-          <div>
-            <label>Location</label>
-            <input type="text" name="location" value="{{ request.GET.location }}" placeholder="e.g. Lagos">
-          </div>
-          <div>
-            <label>Max Rate (&#8358;/hr)</label>
-            <input type="number" name="max_rate" value="{{ request.GET.max_rate }}" placeholder="e.g. 5000">
-          </div>
-          <button type="submit" class="search-submit">
-            <i class="fa-solid fa-magnifying-glass" style="margin-right:6px;"></i>Apply Filters
-          </button>
+      <!-- Compact filter row -->
+      <div class="filters-row">
+        <form method="get" class="filters-inline">
+          <input type="text" name="subject" placeholder="Subject (e.g. Mathematics)" value="{{ request.GET.subject }}">
+          <input type="text" name="location" placeholder="Location (e.g. Lagos)" value="{{ request.GET.location }}">
+          <input type="number" name="max_rate" placeholder="Max rate (NGN/hr)" value="{{ request.GET.max_rate }}">
+          <button type="submit" class="search-submit">Apply</button>
           {% if request.GET %}
-            <a href="{% url 'tutor_list' %}" style="display:block;text-align:center;margin-top:10px;font-size:13px;color:var(--muted);">
-              Clear filters
-            </a>
+            <a href="{% url 'tutor_list' %}" class="clear-filters">Clear</a>
           {% endif %}
         </form>
-      </aside>
+      </div>
 
-      <!-- Results -->
+      <!-- Results grid -->
       <div>
         <p class="results-count" style="margin-bottom:20px;">
           <i class="fa-solid fa-users" style="color:var(--blue);margin-right:6px;"></i>
@@ -62,13 +68,7 @@
                       {{ tutor.user.user.first_name|first|upper }}{{ tutor.user.user.last_name|first|upper }}
                     </div>
                   {% endif %}
-                  <button
-                    type="button"
-                    class="save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}"
-                    data-tutor-id="{{ tutor.id }}"
-                    onclick="toggleSaveTutor(this)"
-                    title="{% if tutor.id in saved_tutor_ids %}Remove from saved{% else %}Save tutor{% endif %}"
-                  >
+                  <button type="button" class="save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}" data-tutor-id="{{ tutor.id }}" onclick="toggleSaveTutor(this)">
                     <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
                   </button>
                   <div class="price-badge">&#8358;{{ tutor.hourly_rate }}</div>
@@ -76,7 +76,6 @@
 
                 <div class="tutor-public-body">
                   <h3 class="tutor-name">{{ tutor.user.user.get_full_name }}</h3>
-
                   <div class="tutor-public-subjects">
                     {% for subject in tutor.subjects.all|slice:":3" %}
                       <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
