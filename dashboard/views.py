@@ -127,7 +127,7 @@ def admin_dashboard(request):
                 .filter(payment_status__in=["paid", "released"])
                 .values("booking__tutor")
                 .annotate(total_payout=Sum("tutor_payout"), sessions=Count("id"))
-                .order_by("-total_payout")[:5]
+                .order_by("-total_payout")[:2]
             )
             tutor_ids = [r["booking__tutor"] for r in payout_rows if r["booking__tutor"]]
             tutor_map = {

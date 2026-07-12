@@ -51,80 +51,82 @@
         </div>
       </div>
 
-      <div class="mtc-admin-card" style="overflow-x: auto; margin-top: 16px;">
-        <h2>Financial Ledger</h2>
-        <p style="margin: 0 0 8px; color: var(--muted); font-size: 13px;">Escrow bookkeeping and transaction logs with Paystack references and commission splits.</p>
+      <div class="mtc-admin-card mtc-ledger-card">
+        <div class="mtc-ledger-head">
+          <div>
+            <h2>Financial Ledger</h2>
+            <p>Escrow bookkeeping and transaction logs with Paystack references and commission splits.</p>
+          </div>
+        </div>
 
-        <table style="width: 100%; border-collapse: collapse; margin-top: 12px; font-size: 13px; text-align: left; min-width: 760px;">
-          <thead>
-            <tr style="border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 700;">
-              <th style="padding: 12px 8px;">Reference</th>
-              <th style="padding: 12px 8px;">Tutor</th>
-              <th style="padding: 12px 8px; font-weight: 800;">Bank</th>
-              <th style="padding: 12px 8px; font-weight: 800;">Account Name</th>
-              <th style="padding: 12px 8px; font-weight: 800;">Account No.</th>
-              <th style="padding: 12px 8px;">Student</th>
-              <th style="padding: 12px 8px; text-align: right;">Amount</th>
-              <th style="padding: 12px 8px; text-align: right;">Payout</th>
-              <th style="padding: 12px 8px; text-align: center;">Status</th>
-              <th style="padding: 12px 8px; text-align: right;">Date</th>
-              <th style="padding: 12px 8px; text-align: center;">Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            {% for p in ledger_page %}
-            <tr style="border-bottom: 1px solid var(--line); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
-              <td style="padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px;">{{ p.reference }}</td>
-              <td style="padding: 14px 8px; font-weight: 700;">{{ p.tutor }}</td>
-              <td style="padding: 14px 8px; font-weight: 700;">{{ p.bank_name|default:"none" }}</td>
-              <td style="padding: 14px 8px; font-weight: 700;">{{ p.account_name|default:"none" }}</td>
-              <td style="padding: 14px 8px; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; font-weight: 700;">{{ p.account_number|default:"none" }}</td>
-              <td style="padding: 14px 8px;">{{ p.student }}</td>
-              <td style="padding: 14px 8px; text-align: right;">₦{{ p.amount|floatformat:2 }}</td>
-              <td style="padding: 14px 8px; text-align: right; font-weight: 800; color: #16a34a;">₦{{ p.payout|floatformat:2 }}</td>
-              <td style="padding: 14px 8px; text-align: center;">
-                {% if p.status == "released" %}
-                  <span style="border-radius: 999px; background: #dcfce7; color: #166534; padding: 4px 10px; font-size: 11px; font-weight: 700;">Released</span>
-                {% elif p.status == "paid" %}
-                  <span style="border-radius: 999px; background: #dbeafe; color: #1d4ed8; padding: 4px 10px; font-size: 11px; font-weight: 700;">Paid</span>
-                {% elif p.status == "pending" %}
-                  <span style="border-radius: 999px; background: #fef3c7; color: #b45309; padding: 4px 10px; font-size: 11px; font-weight: 700;">Pending</span>
-                {% else %}
-                  <span style="border-radius: 999px; background: #fef2f2; color: #b91c1c; padding: 4px 10px; font-size: 11px; font-weight: 700;">Failed</span>
-                {% endif %}
-              </td>
-              <td style="padding: 14px 8px; text-align: right; color: var(--muted); white-space: nowrap;">{{ p.created_at|date:"M d, Y H:i" }}</td>
-              <td style="padding: 14px 8px; text-align: center;">
-                {% if p.status == "released" %}
-                  <span style="font-size: 11px; font-weight: 700; color: #16a34a;"><i class="fa-solid fa-check"></i> Paid out</span>
-                {% elif p.status == "paid" %}
-                  <form method="post" style="display: inline-block;">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="release">
-                    <input type="hidden" name="payment_id" value="{{ p.id }}">
-                    <button type="submit" class="btn btn-primary" style="min-height: 30px; padding: 0 14px; font-size: 12px; font-weight: 700; border-radius: 7px;">
-                      <i class="fa-solid fa-money-bill-transfer"></i> Mark Paid Out
-                    </button>
-                  </form>
-                {% else %}
-                  <form method="post" style="display: inline-block;">
-                    {% csrf_token %}
-                    <input type="hidden" name="action" value="mark_paid">
-                    <input type="hidden" name="payment_id" value="{{ p.id }}">
-                    <button type="submit" class="btn btn-primary" style="min-height: 30px; padding: 0 14px; font-size: 12px; font-weight: 700; border-radius: 7px;">
-                      <i class="fa-solid fa-money-bill-transfer"></i> Mark Paid
-                    </button>
-                  </form>
-                {% endif %}
-              </td>
-            </tr>
-            {% empty %}
-            <tr>
-              <td colspan="11" style="padding: 28px; text-align: center; color: var(--muted);">No transactions recorded yet.</td>
-            </tr>
-            {% endfor %}
-          </tbody>
-        </table>
+        <div class="mtc-ledger-scroll">
+          <table class="mtc-ledger-table">
+            <thead>
+              <tr>
+                <th>Reference</th>
+                <th>Tutor</th>
+                <th>Bank Details</th>
+                <th>Student</th>
+                <th class="mtc-ledger-amount">Amount</th>
+                <th class="mtc-ledger-payout">Payout</th>
+                <th>Status</th>
+                <th class="mtc-ledger-date">Date</th>
+                <th class="mtc-ledger-actions">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for p in ledger_page %}
+              <tr>
+                <td class="mtc-ledger-ref">{{ p.reference }}</td>
+                <td class="mtc-ledger-name">{{ p.tutor }}</td>
+                <td>
+                  <div class="mtc-ledger-bank">{{ p.bank_name|default:"—" }}</div>
+                  <div class="mtc-ledger-bank-account">
+                    {{ p.account_name|default:"—" }}
+                    <span class="mtc-ledger-ref">{{ p.account_number|default:"—" }}</span>
+                  </div>
+                </td>
+                <td>{{ p.student }}</td>
+                <td class="mtc-ledger-amount">₦{{ p.amount|floatformat:2 }}</td>
+                <td class="mtc-ledger-payout">₦{{ p.payout|floatformat:2 }}</td>
+                <td>
+                  <span class="mtc-ledger-status {% if p.status == 'released' %}is-released{% elif p.status == 'paid' %}is-paid{% elif p.status == 'pending' %}is-pending{% else %}is-failed{% endif %}">
+                    {% if p.status == "released" %}Released{% elif p.status == "paid" %}Paid{% elif p.status == "pending" %}Pending{% else %}Failed{% endif %}
+                  </span>
+                </td>
+                <td class="mtc-ledger-date">{{ p.created_at|date:"M d, Y H:i" }}</td>
+                <td class="mtc-ledger-actions">
+                  {% if p.status == "released" %}
+                    <span class="mtc-ledger-paidout"><i class="fa-solid fa-check"></i> Paid out</span>
+                  {% elif p.status == "paid" %}
+                    <form method="post" style="display: inline-block;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="release">
+                      <input type="hidden" name="payment_id" value="{{ p.id }}">
+                      <button type="submit" class="mtc-ledger-btn">
+                      <i class="fa-solid fa-money-bill-transfer"></i>Mark Paid
+                      </button>
+                    </form>
+                  {% else %}
+                    <form method="post" style="display: inline-block;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="mark_paid">
+                      <input type="hidden" name="payment_id" value="{{ p.id }}">
+                      <button type="submit" class="mtc-ledger-btn">
+                        <i class="fa-solid fa-money-bill-transfer"></i> Mark Paid
+                      </button>
+                    </form>
+                  {% endif %}
+                </td>
+              </tr>
+              {% empty %}
+              <tr>
+                <td colspan="9" class="mtc-ledger-empty">No transactions recorded yet.</td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
 
         {% if ledger_paginator.num_pages > 1 %}
         <nav class="mtc-admin-pagination" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 20px; flex-wrap: wrap;">

@@ -8749,3 +8749,220 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
     animation: none;
   }
 }
+
+.mtc-ledger-card {
+  margin-top: 16px;
+}
+
+.mtc-ledger-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+  margin-bottom: 4px;
+}
+
+.mtc-ledger-head h2 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.mtc-ledger-head p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.mtc-ledger-scroll {
+  overflow: visible;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: var(--white);
+  margin-top: 14px;
+}
+
+.mtc-ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 13px;
+  text-align: left;
+}
+
+.mtc-ledger-table thead th {
+  position: sticky;
+  top: 0;
+  background: #f8fafc;
+  color: #64748b;
+  font-weight: 700;
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  padding: 12px;
+  border-bottom: 1px solid var(--line);
+  white-space: nowrap;
+}
+
+.mtc-ledger-table tbody td {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: middle;
+  color: #334155;
+}
+
+.mtc-ledger-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.mtc-ledger-table tbody tr {
+  transition: background 0.15s ease;
+}
+
+.mtc-ledger-table tbody tr:hover td {
+  background: #f8fafc;
+}
+
+@media (max-width: 920px) {
+  .mtc-ledger-scroll {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .mtc-ledger-table {
+    min-width: 880px;
+  }
+}
+
+.mtc-ledger-ref {
+  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+  font-size: 12px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.mtc-ledger-name {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.mtc-ledger-bank {
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.mtc-ledger-bank-account {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 2px;
+  color: #64748b;
+  font-size: 12px;
+  flex-wrap: wrap;
+}
+
+.mtc-ledger-amount {
+  text-align: right;
+  font-weight: 700;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.mtc-ledger-payout {
+  text-align: right;
+  font-weight: 800;
+  color: #16a34a;
+  white-space: nowrap;
+}
+
+.mtc-ledger-date {
+  text-align: right;
+  color: var(--muted);
+  line-height: 1.3;
+}
+
+.mtc-ledger-actions {
+  text-align: center;
+  white-space: nowrap;
+}
+
+.mtc-ledger-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border-radius: 999px;
+  padding: 4px 12px;
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.mtc-ledger-status::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+
+.mtc-ledger-status.is-released {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.mtc-ledger-status.is-paid {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.mtc-ledger-status.is-pending {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.mtc-ledger-status.is-failed {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.mtc-ledger-paidout {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #16a34a;
+}
+
+.mtc-ledger-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--blue);
+  border-radius: 8px;
+  background: var(--blue);
+  color: #ffffff;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s ease, transform 0.05s ease;
+}
+
+.mtc-ledger-btn:hover {
+  background: var(--blue-dark, #1d4ed8);
+}
+
+.mtc-ledger-btn:active {
+  transform: translateY(1px);
+}
+
+.mtc-ledger-empty {
+  padding: 36px;
+  text-align: center;
+  color: var(--muted);
+  font-size: 14px;
+}
