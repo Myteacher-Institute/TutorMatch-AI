@@ -1586,7 +1586,7 @@ html.dark .student-workspace .tutor-public-cta:hover {
   border-color: #4a7cff;
   color: #7eb0ff;
 }
-html.dark .student-workspace .save-tutor-btn {
+html.dark .student-workspace .tutor-public-photo .save-tutor-btn {
   background: rgba(0, 0, 0, 0.35);
   color: #60a5fa;
 }

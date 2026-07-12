@@ -865,7 +865,7 @@ img {
   background: linear-gradient(135deg, var(--blue), var(--blue-dark));
 }
 
-.save-tutor-btn {
+.tutor-public-photo .save-tutor-btn {
   position: absolute;
   top: 12px;
   right: 12px;
