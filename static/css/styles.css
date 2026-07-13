@@ -5285,12 +5285,17 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   border-radius: 20px;
   padding: 36px 32px;
   display: flex;
-  align-items: center;
+  align-items:last baseline;
   justify-content: space-between;
   gap: 24px;
   flex-wrap: wrap;
   color: #fff;
+  position: relative;
+
 }
+
+
+
 
 .tutor-hero-label {
   margin: 0 0 10px;
@@ -5323,6 +5328,43 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 
 .tutor-hero-cta:hover {
   background: #eff6ff;
+}
+
+.tutor-hero-top-btn {
+  position: absolute;
+  top: 24px;
+  right: 28px;
+  display: inline-flex;
+  align-items: center;
+  min-height: 42px;
+  border-radius: 9px;
+  background: #fff;
+  color: var(--blue);
+  padding: 0 20px;
+  font-size: 13px;
+  font-weight: 800;
+  text-decoration: none;
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.tutor-hero-top-btn:hover {
+  background: #eff6ff;
+}
+
+.tutor-hero-banner h1 {
+  color: #ffffff;
+  margin: 0;
+  font-size: clamp(22px, 4vw, 30px);
+  font-weight: 700;
+  letter-spacing: -0.03em;
+}
+
+.tutor-hero-banner .tutor-eyebrow {
+  color: #bfdbfe;
+}
+
+.tutor-hero-banner .tutor-subtext {
+  color: rgba(255, 255, 255, 0.85);
 }
 
 .tutor-hero-stats {
@@ -6129,7 +6171,7 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 }
 
 .tutor-booking-stat {
-  background: #f8fafc;
+  background: #ffffff;
   border-radius: 10px;
   padding: 14px;
   text-align: center;

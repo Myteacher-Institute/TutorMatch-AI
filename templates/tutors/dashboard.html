@@ -15,51 +15,52 @@
       <!-- MAIN -->
       <main class="mtc-admin-content">
 
-        <div class="tutor-page-heading">
-          <div>
-            <p class="tutor-eyebrow">Tutor Dashboard</p>
-            <h1>Welcome, {{ profile.user.user.first_name }}</h1>
-            <p class="tutor-subtext">Here's an overview of your profile and activity.</p>
-          </div>
-          <a href="{% url 'tutor_detail' tutor_id=profile.id %}" class="btn btn-primary tutor-view-btn">
-            <i class="fa-solid fa-eye" style="margin-right:6px;"></i>View Public Profile
-          </a>
-        </div>
+          <!-- Hero Banner -->
+          <div class="tutor-hero-banner mtc-dashboard-hero">
+           
+            <div class="tutor-hero-left">
+             <div>
+               <p class="tutor-eyebrow">Tutor Dashboard</p>
+               <h1 style="color: #e8f3ff;">Welcome, {{ profile.user.user.first_name }}</h1>
+              
+             </div>
+           
+              <p class="tutor-hero-label">
+              
+              </p>
+              <h2>Manage your subjects,<br>sessions &amp; verification.</h2>
+              <a href="{% url 'tutor_profile' %}" class="tutor-hero-cta">
+                <i class="fa-solid fa-pen-to-square" style="margin-right:6px;"></i>Complete Your Profile
+              </a>
+            </div>
+            <div class="tutor-hero-stats">
+             
+              <div class="tutor-stat-chip">
+                <strong>{{ profile.subjects.count }}</strong>
+                <span>Subject{% if profile.subjects.count != 1 %}s{% endif %}</span>
+              </div>
+              <div class="tutor-stat-chip">
+                <strong>{{ profile.years_experience }}</strong>
+                <span>Yrs Exp.</span>
+              </div>
+              <div class="tutor-stat-chip">
+                {% if profile.verification_status == 'approved' %}
+                  <strong><i class="fa-solid fa-circle-check" style="color:#4ade80;"></i></strong>
+                  <span>Verified</span>
+                {% elif profile.verification_status == 'rejected' %}
+                  <strong><i class="fa-solid fa-circle-xmark" style="color:#fca5a5;"></i></strong>
+                  <span>Rejected</span>
+                {% else %}
+                  <strong><i class="fa-solid fa-clock" style="color:#fbbf24;"></i></strong>
+                  <span>Pending</span>
+                {% endif %}
+              </div>
+            </div>
 
-        <!-- Hero Banner -->
-        <div class="tutor-hero-banner mtc-dashboard-hero">
-          <div class="tutor-hero-left">
-            <p class="tutor-hero-label">
-              <i class="fa-solid fa-circle-dot" style="margin-right:5px;font-size:9px;"></i>Profile active
-            </p>
-            <h2>Manage your subjects,<br>sessions &amp; verification.</h2>
-            <a href="{% url 'tutor_profile' %}" class="tutor-hero-cta">
-              <i class="fa-solid fa-pen-to-square" style="margin-right:6px;"></i>Complete Your Profile
+            <a href="{% url 'tutor_detail' tutor_id=profile.id %}" class="tutor-hero-top-btn">
+              <i class="fa-solid fa-eye" style="margin-right:6px;"></i>View Public Profile
             </a>
           </div>
-          <div class="tutor-hero-stats">
-            <div class="tutor-stat-chip">
-              <strong>{{ profile.subjects.count }}</strong>
-              <span>Subject{% if profile.subjects.count != 1 %}s{% endif %}</span>
-            </div>
-            <div class="tutor-stat-chip">
-              <strong>{{ profile.years_experience }}</strong>
-              <span>Yrs Exp.</span>
-            </div>
-            <div class="tutor-stat-chip">
-              {% if profile.verification_status == 'approved' %}
-                <strong><i class="fa-solid fa-circle-check" style="color:#4ade80;"></i></strong>
-                <span>Verified</span>
-              {% elif profile.verification_status == 'rejected' %}
-                <strong><i class="fa-solid fa-circle-xmark" style="color:#fca5a5;"></i></strong>
-                <span>Rejected</span>
-              {% else %}
-                <strong><i class="fa-solid fa-clock" style="color:#fbbf24;"></i></strong>
-                <span>Pending</span>
-              {% endif %}
-            </div>
-          </div>
-        </div>
 
         <!-- Metric Cards -->
         <div class="mtc-admin-metrics-grid" style="margin-top:28px;">

@@ -4,19 +4,23 @@
 {% block title %}Tutor Bookings | TutorMatch AI{% endblock %}
 
 {% block content %}
-<div class="mtc-shell admin-dashboard-light">
-  <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
-  <section class="mtc-admin-layout">
-    {% include "tutors/tutor_sidebar.html" with profile=tutor_profile active_tab="bookings" %}
+<div class="tutor-portal-bg admin-dashboard-light">
+  <div class="mtc-shell">
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+    <section class="mtc-admin-layout">
+      {% include "tutors/tutor_sidebar.html" with profile=tutor_profile active_tab="bookings" %}
 
-    <div class="mtc-admin-content">
-      <div class="mtc-student-bookings-head">
-        <div>
-          <p class="mtc-student-bookings-eyebrow">Booking Requests</p>
-          <h1>Tutor Bookings</h1>
-          <p class="lead">Review student booking requests, confirm lessons, reject unavailable times, and complete lessons after they are done.</p>
+      <div class="mtc-admin-content">
+        <div class="tutor-page-heading">
+          <div>
+            <p class="tutor-eyebrow">Tutor Dashboard</p>
+            <h1>Tutor Bookings</h1>
+            <p class="tutor-subtext">Review student booking requests, confirm lessons, reject unavailable times, and complete lessons after they are done.</p>
+          </div>
+          <a href="{% url 'tutor_dashboard' %}" class="tutor-back-btn">
+            <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Back
+          </a>
         </div>
-      </div>
 
       <div class="mtc-student-bookings-summary">
         <article>
@@ -159,6 +163,7 @@
       </div>
     </div>
   </section>
+  </div>
 </div>
 {% endblock %}
 

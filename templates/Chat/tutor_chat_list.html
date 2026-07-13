@@ -4,20 +4,26 @@
 {% block title %}Tutor Chat List | TutorMatch AI{% endblock %}
 
 {% block content %}
-<div class="mtc-shell admin-dashboard-light">
-  <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
-  <section class="mtc-admin-layout">
-    {% include "tutors/tutor_sidebar.html" with profile=tutor_profile active_tab="chats" %}
+<div class="tutor-portal-bg admin-dashboard-light">
+  <div class="mtc-shell">
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+    <section class="mtc-admin-layout">
+      {% include "tutors/tutor_sidebar.html" with profile=tutor_profile active_tab="chats" %}
 
-    <div class="mtc-admin-content">
-      <div class="mtc-chat-page">
-        <div class="mtc-chat-container">
+      <div class="mtc-admin-content">
+        <div class="tutor-page-heading">
           <div>
-            <p class="mtc-chat-eyebrow">INBOX</p>
-            <h1 class="mtc-chat-title">Messages</h1>
-            <p class="mtc-chat-subtitle">{{ chat_sessions|length }} conversations · {{ total_unread }} unread</p>
+            <p class="tutor-eyebrow">Tutor Dashboard</p>
+            <h1>Messages</h1>
+            <p class="tutor-subtext">{{ chat_sessions|length }} conversations · {{ total_unread }} unread</p>
           </div>
+          <a href="{% url 'chat:tutor_chat_list' %}" class="tutor-back-btn">
+            <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Back
+          </a>
+        </div>
 
+        <div class="mtc-chat-page">
+        <div class="mtc-chat-container">
           <form class="mtc-chat-search" method="get" action="">
             <span class="mtc-chat-search-icon" aria-hidden="true"><i class="fa-solid fa-magnifying-glass"></i></span>
             <input type="text" name="q" placeholder="Search people, bookings, or messages..." aria-label="Search chats" value="{{ request.GET.q|default:'' }}" autofocus>
@@ -89,10 +95,12 @@
             </div>
           </div>
           {% endif %}
-        </div>
-      </div>
-    </div>
-  </section>
+         </div>
+       </div>
+     </div>
+     </div>
+   </section>
+  </div>
 </div>
 
 <script>
