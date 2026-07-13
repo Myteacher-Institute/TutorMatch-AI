@@ -73,6 +73,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "Chat.context_processors.chat_badges",
+                "bookings.context_processors.pending_payment_badge",
                 "dashboard.context_processors.admin_badges",
                 "tutors.context_processors.saved_tutor_ids",
                 "tutors.context_processors.tutor_badges",

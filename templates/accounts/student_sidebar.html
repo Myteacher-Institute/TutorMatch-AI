@@ -19,10 +19,12 @@
     <a class="sidebar-link {% if active_tab == 'bookings' %}active{% endif %}" href="{% url 'student_bookings' %}">
       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16v16H4z"></path><path d="M4 9h16M9 14h6"></path></svg>
       <span>Bookings</span>
+      {% if pending_payment_count %}<span class="sidebar-nav-badge">{{ pending_payment_count }}</span>{% endif %}
     </a>
     <a class="sidebar-link {% if active_tab == 'chats' %}active{% endif %}" href="{% url 'chat:student_chat_list' %}">
-      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-      <span>Chats{% if chat_unread_count %} ({{ chat_unread_count }}){% endif %}</span>
+      <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 0 0 1-2 2H7l-4 4V5a2 0 0 1 2-2h14a2 0 0 1 2 2z"></path></svg>
+      <span>Chats</span>
+      {% if chat_unread_count %}<span class="sidebar-nav-badge is-green">{{ chat_unread_count }}</span>{% endif %}
     </a>
     <a class="sidebar-link {% if active_tab == 'saved_tutors' %}active{% endif %}" href="{% url 'saved_tutors' %}">
       <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path></svg>

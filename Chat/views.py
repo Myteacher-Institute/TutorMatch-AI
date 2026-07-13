@@ -174,7 +174,9 @@ def tutor_chat_list(request):
 
     # Get chat sessions where the current user is the tutor
     # Order by the latest message or session update for active chats
-    base_qs = ChatSession.objects.filter(tutor=request.user).order_by('-updated_at')
+    # Only show sessions that contain at least one message, so a receiver
+    # never sees an empty chat that the sender has not written to yet.
+    base_qs = ChatSession.objects.filter(tutor=request.user, messages__isnull=False).distinct().order_by('-updated_at')
     unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
     total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
 
@@ -258,7 +260,7 @@ def admin_chat_list(request):
         messages.error(request, "You are not authorized to view this page.")
         return redirect('home')
 
-    base_qs = ChatSession.objects.all().order_by('-updated_at')
+    base_qs = ChatSession.objects.filter(messages__isnull=False).distinct().order_by('-updated_at')
     unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
     total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
 
@@ -328,7 +330,9 @@ def student_chat_list(request):
         return redirect('home')
 
     # Get chat sessions where the current user is the student
-    base_qs = ChatSession.objects.filter(student=request.user).order_by('-updated_at')
+    # Only show sessions that contain at least one message, so a receiver
+    # never sees an empty chat that the sender has not written to yet.
+    base_qs = ChatSession.objects.filter(student=request.user, messages__isnull=False).distinct().order_by('-updated_at')
     unread_filter = Q(messages__is_read=False) & ~Q(messages__sender=request.user)
     total_unread = base_qs.annotate(unread_count=Count('messages', filter=unread_filter)).filter(unread_count__gt=0).count()
 

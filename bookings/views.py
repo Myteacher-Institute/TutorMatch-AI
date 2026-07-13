@@ -91,6 +91,7 @@ def student_bookings(request):
     )
     pending_review_count = bookings_queryset.filter(status="pending").count()
     page_obj = _paginated_bookings(request, bookings_queryset)
+    pending_payment_count = 0
     for booking in page_obj:
         payments = list(booking.payments.all())
         paid_payment = next(
@@ -109,6 +110,8 @@ def student_bookings(request):
             display_label = display_payment.get_payment_status_display() if display_payment else "Pending"
         booking.display_payment_status = display_status
         booking.display_payment_status_label = display_label
+        if display_status == "pending":
+            pending_payment_count += 1
     completed_lessons_count = Booking.objects.filter(
         student=student_profile,
         status="completed",
@@ -127,6 +130,7 @@ def student_bookings(request):
             "bookings_count": page_obj.paginator.count,
             "page_obj": page_obj,
             "pending_review_count": pending_review_count,
+            "pending_payment_count": pending_payment_count,
             "next_booking": next_booking,
             "completed_lessons_count": completed_lessons_count,
             "active_tab": "bookings",
@@ -196,6 +200,10 @@ def update_booking_status(request, booking_id, status):
     booking = get_object_or_404(Booking, pk=booking_id, tutor=tutor)
     if booking.status != required_status:
         messages.error(request, "This booking cannot be updated from its current status.")
+        return redirect("tutor_bookings")
+
+    if status == "accepted" and booking.payments.filter(payment_status="pending").exists():
+        messages.error(request, "You can only accept bookings that have been paid for.")
         return redirect("tutor_bookings")
 
     if status == "cancelled":

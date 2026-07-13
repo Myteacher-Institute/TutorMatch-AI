@@ -7425,6 +7425,24 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   color: #b45309;
 }
 
+.mtc-pending-payment-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #dc2626;
+  color: #ffffff;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  font-weight: 800;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(220, 38, 38, 0.35);
+}
+
+.mtc-pending-payment-badge i {
+  font-size: 12px;
+}
+
 .mtc-payment-paid {
   background: #ecfdf5;
   color: #047857;

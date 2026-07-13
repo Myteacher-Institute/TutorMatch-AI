@@ -19,7 +19,7 @@
     <a href="{% url 'admin_bookings' %}" class="{% if url_name == 'admin_bookings' %}active{% endif %}"><i class="fas fa-calendar-check"></i> Bookings</a>
     <a href="{% url 'chat:admin_chat_list' %}" class="{% if url_name == 'admin_chat_list' %}active{% endif %}"><i class="fas fa-comments"></i> Chats
       {% if chat_unread_count %}
-        <span style="margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #2563eb; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">{{ chat_unread_count }}</span>
+        <span style="margin-left: auto; min-width: 22px; height: 22px; padding: 0 7px; border-radius: 999px; background: #16a34a; color: #ffffff; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700;">{{ chat_unread_count }}</span>
       {% endif %}
     </a>
     <a href="{% url 'admin_revenue' %}" class="{% if url_name == 'admin_revenue' %}active{% endif %}"><i class="fas fa-wallet"></i> Revenue

@@ -131,6 +131,12 @@
                 <h2 style="color: #1D4ED8;">Booking List</h2>
                 <p>All lessons you have requested are shown here.</p>
               </div>
+              {% if pending_payment_count %}
+              <span class="mtc-pending-payment-badge">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+                {{ pending_payment_count }} pending payment{{ pending_payment_count|pluralize }}
+              </span>
+              {% endif %}
             </div>
 
             {% if bookings %}
