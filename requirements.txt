@@ -29,8 +29,6 @@ jiter==0.16.0
 msgpack==1.2.1
 openai==2.44.0
 packaging==26.2
-paystack-sdk==1.0.1
-paystackapi==2.1.3
 pycparser==3.0
 pydantic==2.13.4
 pydantic_core==2.46.4

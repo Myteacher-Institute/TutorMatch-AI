@@ -109,7 +109,7 @@ def student_dashboard(request):
         .filter(is_publicly_visible=True, verification_status="approved")
         .prefetch_related("subjects")
         .annotate(review_count=Count("tutor_reviews"))
-        .order_by("-years_experience", "hourly_rate")[:4]
+        .order_by("-years_experience", "rate_amount")[:4]
     )
     return render(
         request,
@@ -168,4 +168,5 @@ def toggle_save_tutor(request, tutor_id):
             {"saved": False, "message": "Tutor removed from saved list."}
         )
     return JsonResponse({"saved": True, "message": "Tutor saved."})
+
 

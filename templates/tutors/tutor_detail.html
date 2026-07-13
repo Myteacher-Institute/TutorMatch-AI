@@ -157,8 +157,8 @@
         <div class="mtc-admin-card tutor-booking-card">
 
           <div class="tutor-booking-rate">
-            <strong>&#8358;{{ tutor.hourly_rate }}</strong>
-            <span>per hour</span>
+            <strong>&#8358;{{ tutor.rate_amount }}</strong>
+            <span>per {{ tutor.rate_period_label|lower }}</span>
           </div>
 
           <div class="tutor-booking-stats">
@@ -174,9 +174,9 @@
 
           <!-- Book button — hidden when the viewer is a tutor -->
           {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
-          <button class="btn btn-primary tutor-book-btn">
-            <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i><a href="{% url 'book_tutor' tutor_id=tutor.id %}">Book a Session</a>
-          </button>
+          <a href="{% url 'book_tutor' tutor_id=tutor.id %}" class="btn btn-primary tutor-book-btn">
+            <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i>Book a Session
+          </a>
           {% endif %}
 
           {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
@@ -237,3 +237,5 @@
   </div>
 </div>
 {% endblock %}
+
+

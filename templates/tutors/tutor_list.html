@@ -25,9 +25,8 @@
     line-height: 1.6;
   }
   .tutor-filter-shell {
-    position: sticky;
-    top: 74px;
-    z-index: 12;
+    position: relative;
+    z-index: 1;
     margin-bottom: 26px;
     border: 1px solid #e2e8f0;
     border-radius: 16px;
@@ -36,12 +35,6 @@
     box-shadow: 0 16px 36px rgba(15, 23, 42, 0.08);
     backdrop-filter: blur(14px);
     -webkit-backdrop-filter: blur(14px);
-    transition: transform 0.25s ease, margin-bottom 0.25s ease;
-  }
-  .tutor-filter-shell.is-hidden {
-    transform: translateY(-110%);
-    margin-bottom: 0;
-    pointer-events: none;
   }
   .tutor-toolbar {
     display: flex;
@@ -479,7 +472,7 @@
           {% endfor %}
         </select>
 
-        <input type="number" name="max_rate" min="0" placeholder="Max rate" value="{{ request.GET.max_rate }}" aria-label="Max hourly rate">
+        <input type="number" name="max_rate" min="0" placeholder="Max rate" value="{{ request.GET.max_rate }}" aria-label="Max rate">
 
         <select name="sort" aria-label="Sort tutors">
           <option value="recommended" {% if request.GET.sort == "recommended" or not request.GET.sort %}selected{% endif %}>Recommended</option>
@@ -535,7 +528,7 @@
               </button>
               {% endif %}
 
-              <div class="tutor-rate-pill">&#8358;{{ tutor.hourly_rate }}/hr</div>
+              <div class="tutor-rate-pill">&#8358;{{ tutor.rate_amount }}/{{ tutor.rate_period_label|lower }}</div>
             </div>
 
             <div class="tutor-card-content">
@@ -620,31 +613,6 @@
   </div>
 </section>
 
-<script>
-  (function () {
-    const filter = document.querySelector('.tutor-filter-shell');
-    if (!filter || window.matchMedia('(max-width: 768px)').matches) return;
-
-    let lastY = window.scrollY;
-    let ticking = false;
-    const threshold = 80;
-
-    function onScroll() {
-      if (ticking) return;
-      ticking = true;
-      requestAnimationFrame(function () {
-        const currentY = window.scrollY;
-        if (currentY > lastY && currentY > threshold) {
-          filter.classList.add('is-hidden');
-        } else {
-          filter.classList.remove('is-hidden');
-        }
-        lastY = currentY;
-        ticking = false;
-      });
-    }
-
-    window.addEventListener('scroll', onScroll, { passive: true });
-  })();
-</script>
 {% endblock %}
+
+

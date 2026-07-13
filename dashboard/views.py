@@ -709,7 +709,7 @@ def revenue(request):
                     booking_status_label = "Rejected"
                 recent_payments.append({
                     "id": p.id,
-                    "reference": p.paystack_reference or "-",
+                    "reference": p.flutterwave_reference or p.flutterwave_transaction_id or "-",
                     "tutor": tutor.get_full_name if tutor else "-",
                     "student": student.user.get_full_name if student and student.user else (student.user.username if student and student.user else "-"),
                     "amount": float(p.amount),

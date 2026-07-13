@@ -31,8 +31,11 @@ def book_tutor(request, tutor_id):
         is_publicly_visible=True,
         verification_status="approved",
     )
-    amount = tutor.hourly_rate or 0
+    amount = tutor.rate_amount or 0
     student_profile = _profile_for_user(request.user)
+    if amount <= 0:
+        messages.error(request, "This tutor has not set a booking rate yet, so booking is unavailable.")
+        return redirect("tutor_detail", tutor_id=tutor.id)
 
     if request.method == "POST":
         form = BookingForm(request.POST)
@@ -40,12 +43,19 @@ def book_tutor(request, tutor_id):
             booking = form.save(commit=False)
             booking.student = student_profile
             booking.tutor = tutor
-            booking.amount = amount
+            booking.rate_amount = tutor.rate_amount
+            booking.rate_period = tutor.rate_period
+            booking.amount = tutor.calculate_booking_amount(
+                booking.duration_value,
+                booking.duration_unit,
+            )
             existing = Booking.objects.filter(
                 student=student_profile,
                 tutor=tutor,
                 booking_date=booking.booking_date,
                 lesson_time=booking.lesson_time,
+                duration_value=booking.duration_value,
+                duration_unit=booking.duration_unit,
                 status="pending",
             ).first()
             if existing:
@@ -55,7 +65,7 @@ def book_tutor(request, tutor_id):
             messages.success(request, "Your booking request has been created.")
             return redirect("payment_checkout", booking_id=booking.id)
     else:
-        form = BookingForm(initial={"amount": amount})
+        form = BookingForm()
 
     return render(
         request,
@@ -64,6 +74,8 @@ def book_tutor(request, tutor_id):
             "form": form,
             "tutor": tutor,
             "amount": amount,
+            "rate_period": tutor.rate_period,
+            "rate_period_label": tutor.rate_period_label,
         },
     )
 
@@ -209,12 +221,12 @@ def _refund_booking_if_paid(booking):
     payment was actually refunded.
     """
     payment = booking.payments.filter(payment_status="paid").first()
-    if not payment or not payment.paystack_reference:
+    if not payment or not payment.flutterwave_transaction_id:
         return None, False
 
-    from payments.views import initiate_paystack_refund
+    from payments.views import initiate_flutterwave_refund
 
-    ok, message, _ = initiate_paystack_refund(payment.paystack_reference)
+    ok, message, _ = initiate_flutterwave_refund(payment.flutterwave_transaction_id, payment.amount)
     if not ok:
         return f"Refund failed: {message}. The booking was not rejected.", False
 

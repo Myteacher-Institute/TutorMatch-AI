@@ -164,7 +164,10 @@
                           </div>
                         </td>
                         <td>{{ booking.booking_date|date:"M j, Y" }}</td>
-                        <td>{{ booking.lesson_time|time:"g:i A" }}</td>
+                        <td>
+                          {{ booking.lesson_time|time:"g:i A" }}<br>
+                          <small>{{ booking.duration_value }} {{ booking.get_duration_unit_display }}</small>
+                        </td>
                         <td>
                           <span class="mtc-status-pill mtc-status-{{ booking.status }}">
                             {{ booking.get_status_display }}

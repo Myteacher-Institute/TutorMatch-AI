@@ -254,7 +254,7 @@
                 <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
                 <span class="mtc-home-featured-meta">
                   <span><i class="fa-solid fa-location-dot"></i> {{ tutor.location|default:"No location" }}</span>
-                  <span><i class="fa-solid fa-naira-sign"></i> {{ tutor.hourly_rate|default:0 }}/hr</span>
+                  <span><i class="fa-solid fa-naira-sign"></i> {{ tutor.rate_amount|default:0 }}/{{ tutor.rate_period_label|lower }}</span>
                   <span><i class="fa-solid fa-calendar"></i> Joined {{ tutor.user.created_at|date:"M j, Y" }}</span>
                 </span>
                 <span class="mtc-home-featured-subjects">
@@ -306,3 +306,4 @@
   });
 </script>
 {% endblock %}
+

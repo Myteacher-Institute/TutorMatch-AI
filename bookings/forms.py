@@ -10,15 +10,16 @@ from datetime import date, datetime
 class BookingForm(forms.ModelForm):
     class Meta:
         model = Booking
-        fields = [ 'booking_date', 'lesson_time', 'lesson_note', 'amount']
+        fields = [ 'booking_date', 'lesson_time', 'duration_value', 'duration_unit', 'lesson_note']
         widgets = {
             'booking_date': forms.DateInput(attrs={'type': 'date'}),
             'lesson_time': forms.TimeInput(attrs={'type': 'time'}),
+            'duration_value': forms.NumberInput(attrs={'min': 1, 'value': 1}),
+            'duration_unit': forms.Select(),
             'lesson_note': forms.Textarea(attrs={
                 'rows': 5,
                 'placeholder': 'Tell the tutor the subject, class level, exam goal, preferred lesson format, or any learning concerns.',
             }),
-            'amount': forms.HiddenInput(),
         }
 
     def clean_booking_date(self):
@@ -33,3 +34,9 @@ class BookingForm(forms.ModelForm):
         if booking_date == date.today() and lesson_time <= datetime.now().time():
             raise ValidationError("You can't book a lesson in the past")
         return lesson_time
+
+    def clean_duration_value(self):
+        duration_value = self.cleaned_data["duration_value"]
+        if duration_value < 1:
+            raise ValidationError("Duration must be at least 1.")
+        return duration_value

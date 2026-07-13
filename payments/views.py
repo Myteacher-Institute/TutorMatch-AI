@@ -1,8 +1,8 @@
 from decimal import Decimal
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.urls import reverse
 import requests
 from django.conf import settings
 from bookings.models import Booking
@@ -17,27 +17,65 @@ def payment_failed(request):
     return render(request, "payments/payment_failed.html")
 
 
-PAYSTACK_INIT_URL = "https://api.paystack.co/transaction/initialize"
-PAYSTACK_VERIFY_URL = "https://api.paystack.co/transaction/verify/"
-PAYSTACK_REFUND_URL = "https://api.paystack.co/refund"
-
-headers = {
-    "Authorization": f"Bearer {settings.PAYSTACK_SECRET_KEY}",
-    "Content-Type": "application/json",
-}
+FLUTTERWAVE_PAYMENT_URL = "https://api.flutterwave.com/v3/payments"
+FLUTTERWAVE_VERIFY_URL = "https://api.flutterwave.com/v3/transactions/{transaction_id}/verify"
+FLUTTERWAVE_REFUND_URL = "https://api.flutterwave.com/v3/transactions/{transaction_id}/refund"
 
 
-def initiate_paystack_refund(reference, amount_kobo=None):
-    """Refund a successful Paystack transaction by its reference.
+def flutterwave_headers():
+    return {
+        "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY}",
+        "Content-Type": "application/json",
+    }
 
-    Returns a tuple (success, message, data). On success the caller should
-    treat the payment as refunded.
-    """
-    payload = {"transaction": reference}
-    if amount_kobo is not None:
-        payload["amount"] = amount_kobo
+
+def _upsert_booking_payment(
+    booking,
+    *,
+    status,
+    reference="",
+    transaction_id="",
+):
+    duplicates = Payment.objects.filter(booking=booking)
+    if duplicates.count() > 1:
+        keep = duplicates.order_by("-created_at").first()
+        duplicates.exclude(pk=keep.pk).delete()
+
+    payment, _ = Payment.objects.update_or_create(
+        booking=booking,
+        defaults={
+            "amount": booking.amount,
+            "payment_status": status,
+            "flutterwave_reference": reference,
+            "flutterwave_transaction_id": transaction_id,
+        },
+    )
+    return payment
+
+
+def _mark_booking_paid(booking):
+    if booking.status == "pending":
+        booking.status = "accepted"
+        booking.save(update_fields=["status"])
+
+
+def initiate_flutterwave_refund(transaction_id, amount=None):
+    """Refund a successful Flutterwave transaction by transaction ID."""
+    if str(transaction_id).startswith("DEV-"):
+        return True, "Dev refund completed.", {"id": transaction_id}
+    if not settings.FLUTTERWAVE_SECRET_KEY:
+        return False, "Flutterwave secret key is not configured.", None
+
+    payload = {}
+    if amount is not None:
+        payload["amount"] = str(amount)
     try:
-        response = requests.post(PAYSTACK_REFUND_URL, json=payload, headers=headers, timeout=20)
+        response = requests.post(
+            FLUTTERWAVE_REFUND_URL.format(transaction_id=transaction_id),
+            json=payload,
+            headers=flutterwave_headers(),
+            timeout=20,
+        )
         data = response.json()
     except requests.RequestException:
         return False, "Payment gateway is unavailable, refund could not be processed.", None
@@ -57,23 +95,51 @@ def checkout(request, booking_id):
     )
 
     if request.method == "POST":
-        amount_kobo = int(booking.amount * Decimal('100'))
+        if not settings.FLUTTERWAVE_SECRET_KEY:
+            if getattr(settings, "FLUTTERWAVE_ALLOW_DEV_PAYMENT", False):
+                _upsert_booking_payment(
+                    booking,
+                    status="paid",
+                    reference=f"DEV-{booking.id}",
+                    transaction_id=f"DEV-{booking.id}",
+                )
+                _mark_booking_paid(booking)
+                messages.success(request, "Dev payment completed. Your booking is now active.")
+                return redirect("payment_success")
+
+            messages.error(request, "Flutterwave is not configured yet. Add your Flutterwave keys before accepting real payments.")
+            return redirect("payment_failed")
+
+        tx_ref = f"BOOKING-{booking.id}-{timezone_now_ref()}"
         data = {
-            "email": request.user.email,
-            "amount": amount_kobo,
-            "callback_url": settings.PAYSTACK_CALLBACK_URL,
-            "metadata": {"booking_id": booking.id},
+            "tx_ref": tx_ref,
+            "amount": str(booking.amount),
+            "currency": "NGN",
+            "redirect_url": request.build_absolute_uri(reverse("payment_verify")),
+            "customer": {
+                "email": request.user.email or f"{request.user.username}@example.com",
+                "name": request.user.get_full_name() or request.user.username,
+            },
+            "meta": {"booking_id": booking.id},
+            "customizations": {
+                "title": "MyteacherConnect Booking",
+                "description": f"Lesson booking #{booking.id}",
+                "logo": request.build_absolute_uri("/static/images/logo.png"),
+            },
         }
         try:
-            response = requests.post(PAYSTACK_INIT_URL, json=data, headers=headers, timeout=20)
+            _upsert_booking_payment(booking, status="pending", reference=tx_ref)
+            response = requests.post(FLUTTERWAVE_PAYMENT_URL, json=data, headers=flutterwave_headers(), timeout=20)
             res_data = response.json()
         except requests.RequestException:
             messages.error(request, "Payment gateway unavailable. Please try again.")
             return redirect("payment_failed")
 
-        if res_data.get("status"):
-            return redirect(res_data["data"]["authorization_url"])
+        payment_link = (res_data.get("data") or {}).get("link")
+        if res_data.get("status") == "success" and payment_link:
+            return redirect(payment_link)
 
+        _upsert_booking_payment(booking, status="failed", reference=tx_ref)
         messages.error(request, "Payment initialization failed. Please try again.")
         return redirect("payment_failed")
 
@@ -84,52 +150,78 @@ def checkout(request, booking_id):
         "commission": commission,
         "tutor_payout": tutor_payout,
         "tutor_subjects": booking.tutor.subjects.all(),
+        "flutterwave_ready": bool(settings.FLUTTERWAVE_SECRET_KEY),
+        "dev_payment_enabled": bool(getattr(settings, "FLUTTERWAVE_ALLOW_DEV_PAYMENT", False)),
     }
     return render(request, "payments/checkout.html", template_context)
 
 
 @login_required
 def verify_payment(request):
-    reference = request.GET.get("reference") or request.GET.get("trxref")
-    if not reference:
+    status = request.GET.get("status")
+    transaction_id = request.GET.get("transaction_id")
+    tx_ref = request.GET.get("tx_ref")
+    if status == "cancelled":
+        messages.error(request, "Payment was cancelled.")
+        return redirect("payment_failed")
+    if not transaction_id:
         messages.error(request, "Missing payment reference.")
         return redirect("payment_failed")
+    if not settings.FLUTTERWAVE_SECRET_KEY:
+        messages.error(request, "Flutterwave is not configured.")
+        return redirect("payment_failed")
 
-    url = f"{PAYSTACK_VERIFY_URL}{reference}"
     try:
-        response = requests.get(url, headers=headers, timeout=20)
+        response = requests.get(
+            FLUTTERWAVE_VERIFY_URL.format(transaction_id=transaction_id),
+            headers=flutterwave_headers(),
+            timeout=20,
+        )
         data = response.json()
     except requests.RequestException:
         messages.error(request, "Payment gateway unavailable. Please try again.")
         return redirect("payment_failed")
 
-    if data.get("status") and data["data"]["status"] == "success":
-        booking_id = data["data"]["metadata"]["booking_id"]
+    payment_data = data.get("data") or {}
+    meta = payment_data.get("meta") or {}
+    if (
+        data.get("status") == "success"
+        and payment_data.get("status") == "successful"
+        and str(payment_data.get("currency", "")).upper() == "NGN"
+    ):
+        booking_id = meta.get("booking_id")
         booking = get_object_or_404(Booking, id=booking_id)
         amount = booking.amount
+        if Decimal(str(payment_data.get("amount", "0"))) < amount:
+            messages.error(request, "Payment amount did not match the booking amount.")
+            return redirect("payment_failed")
         commission = amount * Decimal('0.15')
         tutor_payout = amount * Decimal('0.85')
 
-        existing = Payment.objects.filter(booking=booking)
-        if existing.count() > 1:
-            keep = existing.order_by("-created_at").first()
-            existing.exclude(pk=keep.pk).delete()
-
-        Payment.objects.update_or_create(
-            booking=booking,
-            defaults={
-                "amount": amount,
-                "commission": commission,
-                "tutor_payout": tutor_payout,
-                "payment_status": "paid",
-                "paystack_reference": reference,
-            },
+        _upsert_booking_payment(
+            booking,
+            status="paid",
+            reference=tx_ref or payment_data.get("tx_ref", ""),
+            transaction_id=str(transaction_id),
         )
+        _mark_booking_paid(booking)
         messages.success(request, "Payment verified successfully.")
         return redirect("payment_success")
 
+    if tx_ref:
+        booking_id = str(tx_ref).split("-")[1] if str(tx_ref).startswith("BOOKING-") and "-" in str(tx_ref) else None
+        if booking_id:
+            booking = Booking.objects.filter(id=booking_id).first()
+            if booking:
+                _upsert_booking_payment(booking, status="failed", reference=tx_ref, transaction_id=str(transaction_id))
     messages.error(request, "Payment verification failed.")
     return redirect("payment_failed")
+
+
+def timezone_now_ref():
+    from django.utils import timezone
+
+    return timezone.now().strftime("%Y%m%d%H%M%S")
 
 
 

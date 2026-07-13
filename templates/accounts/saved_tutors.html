@@ -107,7 +107,7 @@ TutorMatch AI{% endblock %} {% block content %}
 
                 <div class="tutor-public-meta">
                   <span><i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:4px;"></i>{{ tutor.location|default:"Remote" }}</span>
-                  <span class="tutor-rate-badge">&#8358;{{ tutor.hourly_rate }}/hr</span>
+                  <span class="tutor-rate-badge">&#8358;{{ tutor.rate_amount }}/{{ tutor.rate_period_label|lower }}</span>
                 </div>
 
                 <a href="{% url 'tutor_detail' tutor.pk %}" class="tutor-public-cta">
@@ -131,3 +131,4 @@ TutorMatch AI{% endblock %} {% block content %}
   </div>
 </div>
 {% endblock %}
+

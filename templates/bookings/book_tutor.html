@@ -1,168 +1,177 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Book Tutor | TutorMatch AI{% endblock %}
+{% block title %}Book {{ tutor.user.user.get_full_name|default:tutor.user.user.username }} | TutorMatch AI{% endblock %}
 
 {% block content %}
-<section class="mtc-booking-section">
-  <div class="mtc-booking-container">
-    <div class="mtc-booking-header">
+<section class="booking-flow-page">
+  <div class="booking-flow-shell">
+    <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="booking-flow-back">
+      <i class="fa-solid fa-arrow-left"></i>
+      Back to tutor profile
+    </a>
+
+    <div class="booking-flow-hero">
       <div>
-        <p class="mtc-booking-eyebrow">Book a Tutor</p>
-        <h1>Schedule your lesson</h1>
+        <p class="booking-flow-kicker">Step 1 of 3</p>
+        <h1>Choose your lesson time</h1>
+        <p>Send a booking request to the tutor. You will review and pay on the next screen.</p>
       </div>
-      <a href="{% url 'search_results' %}" class="mtc-booking-back-link">
-        Back to tutor search
-      </a>
+      <div class="booking-flow-steps" aria-label="Booking progress">
+        <span class="is-active">Schedule</span>
+        <span>Review</span>
+        <span>Pay</span>
+      </div>
     </div>
 
     {% if messages %}
-      <div class="mtc-booking-messages">
+      <div class="booking-flow-messages">
         {% for message in messages %}
-          <div class="mtc-booking-message">
-            {{ message }}
-          </div>
+          <div class="booking-flow-message {{ message.tags }}">{{ message }}</div>
         {% endfor %}
       </div>
     {% endif %}
 
-    <div class="mtc-booking-layout">
-      <aside class="mtc-booking-tutor-card">
-        <div class="mtc-booking-tutor-head">
-          <div class="mtc-booking-tutor-profile">
-            {% if tutor.profile_photo %}
-              <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}" class="mtc-booking-avatar">
-            {% else %}
-<div class="mtc-booking-avatar-placeholder">
-                {% if tutor.user.user.first_name %}{{ tutor.user.user.first_name|slice:":1" }}{% else %}T{% endif %}
-              </div>
-            {% endif %}
-<div class="mtc-booking-tutor-name">
-              <h2>
-                {% if tutor.user.user.get_full_name %}
-                  {{ tutor.user.user.get_full_name }}
-                {% elif tutor.user.user.username %}
-                  {{ tutor.user.user.username }}
-                {% else %}
-                  Selected Tutor
-                {% endif %}
-              </h2>
-              <p>{{ tutor.location|default:"Location to be confirmed" }}</p>
-            </div>
+    <div class="booking-flow-grid">
+      <aside class="booking-flow-tutor-card">
+        <div class="booking-flow-tutor-media">
+          {% if tutor.profile_photo %}
+            <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+          {% else %}
+            <span>{{ tutor.user.user.first_name|first|upper|default:"T" }}{{ tutor.user.user.last_name|first|upper }}</span>
+          {% endif %}
+        </div>
+        <div class="booking-flow-tutor-copy">
+          <h2>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h2>
+          <p><i class="fa-solid fa-location-dot"></i>{{ tutor.location|default:"Location to be confirmed" }}</p>
+        </div>
+
+        <div class="booking-flow-rate-card">
+          <span>Tutor rate</span>
+          <strong>&#8358;{{ amount|floatformat:0 }}</strong>
+          <small>per {{ rate_period_label|lower }}</small>
+        </div>
+
+        <div class="booking-flow-mini-grid">
+          <div>
+            <strong>{{ tutor.years_experience|default:"0" }}</strong>
+            <span>Years exp.</span>
+          </div>
+          <div>
+            <strong>{{ tutor.subjects.count }}</strong>
+            <span>Subject{% if tutor.subjects.count != 1 %}s{% endif %}</span>
           </div>
         </div>
 
-        <div class="mtc-booking-tutor-body">
-          <div>
-            <h3>Tutor Summary</h3>
-            <p class="mtc-booking-summary">
-              {{ tutor.bio|default:"Choose your preferred lesson date and time. The tutor will review your request and confirm availability." }}
-            </p>
-          </div>
+        <div class="booking-flow-subjects">
+          {% for subject in tutor.subjects.all %}
+            <span>{{ subject.subject_name }}</span>
+          {% empty %}
+            <span>Subject to confirm</span>
+          {% endfor %}
+        </div>
 
-          <div class="mtc-booking-facts">
-            <div class="mtc-booking-fact">
-              <span>Hourly rate</span>
-              <strong>₦{{ tutor.hourly_rate|default:"0" }}/hr</strong>
-            </div>
-            <div class="mtc-booking-fact">
-              <span>Experience</span>
-              <strong>{{ tutor.years_experience|default:"0" }} year{{ tutor.years_experience|pluralize }}</strong>
-            </div>
-            <div class="mtc-booking-subjects">
-              <span>Subjects</span>
-              <div>
-                {% for subject in tutor.subjects.all %}
-                  <span class="mtc-booking-subject-pill">{{ subject.subject_name }}</span>
-                {% empty %}
-                  <span class="mtc-booking-empty-subject">Subject to be confirmed</span>
-                {% endfor %}
-              </div>
-            </div>
-          </div>
-
-          <div class="mtc-booking-note">
-            Payment is completed after the booking request is created. You will be redirected to checkout when payment is connected.
-          </div>
+        <div class="booking-flow-note-card">
+          <i class="fa-solid fa-shield-halved"></i>
+          <p>Payment is handled securely after you confirm the date and time.</p>
         </div>
       </aside>
 
-      <div class="mtc-booking-form-card">
-        <form method="post" class="mtc-booking-form">
+      <main class="booking-flow-form-card">
+        <div class="booking-flow-card-head">
+          <h2>Lesson details</h2>
+          <p>Pick a realistic time and include a short note so the tutor can prepare.</p>
+        </div>
+
+        <form method="post" class="booking-flow-form">
           {% csrf_token %}
 
           {% if form.non_field_errors %}
-            <div class="mtc-booking-error-box">
-              {{ form.non_field_errors }}
-            </div>
+            <div class="booking-flow-error">{{ form.non_field_errors }}</div>
           {% endif %}
 
-          <div class="mtc-booking-field-grid">
-            <label class="mtc-booking-field" for="{% if form.booking_date %}{{ form.booking_date.id_for_label }}{% else %}booking_date{% endif %}">
-              Lesson date
-              {% if form.booking_date %}
-                {{ form.booking_date }}
-                {% if form.booking_date.errors %}<span class="mtc-booking-field-error">{{ form.booking_date.errors|striptags }}</span>{% endif %}
-              {% else %}
-                <input id="booking_date" name="booking_date" type="date" required>
-              {% endif %}
+          <div class="booking-flow-field-grid">
+            <label class="booking-flow-field" for="{{ form.booking_date.id_for_label }}">
+              <span>Lesson date</span>
+              {{ form.booking_date }}
+              {% if form.booking_date.errors %}<small>{{ form.booking_date.errors|striptags }}</small>{% endif %}
             </label>
 
-            <label class="mtc-booking-field" for="{% if form.lesson_time %}{{ form.lesson_time.id_for_label }}{% else %}lesson_time{% endif %}">
-              Lesson time
-              {% if form.lesson_time %}
-                {{ form.lesson_time }}
-                {% if form.lesson_time.errors %}<span class="mtc-booking-field-error">{{ form.lesson_time.errors|striptags }}</span>{% endif %}
-              {% else %}
-                <input id="lesson_time" name="lesson_time" type="time" required>
-              {% endif %}
+            <label class="booking-flow-field" for="{{ form.lesson_time.id_for_label }}">
+              <span>Lesson time</span>
+              {{ form.lesson_time }}
+              {% if form.lesson_time.errors %}<small>{{ form.lesson_time.errors|striptags }}</small>{% endif %}
             </label>
           </div>
 
-          <label class="mtc-booking-field" for="{% if form.lesson_note %}{{ form.lesson_note.id_for_label }}{% elif form.note %}{{ form.note.id_for_label }}{% else %}lesson_note{% endif %}">
-            Lesson note
-            {% if form.lesson_note %}
-              {{ form.lesson_note }}
-              {% if form.lesson_note.errors %}<span class="mtc-booking-field-error">{{ form.lesson_note.errors|striptags }}</span>{% endif %}
-            {% elif form.note %}
-              {{ form.note }}
-              {% if form.note.errors %}<span class="mtc-booking-field-error">{{ form.note.errors|striptags }}</span>{% endif %}
-            {% else %}
-              <textarea id="lesson_note" name="lesson_note" rows="5" placeholder="Tell the tutor the subject, class level, exam goal, preferred lesson format, or any learning concerns."></textarea>
-            {% endif %}
+          <div class="booking-flow-field-grid">
+            <label class="booking-flow-field" for="{{ form.duration_value.id_for_label }}">
+              <span>How long do you want to learn?</span>
+              {{ form.duration_value }}
+              {% if form.duration_value.errors %}<small>{{ form.duration_value.errors|striptags }}</small>{% endif %}
+            </label>
+
+            <label class="booking-flow-field" for="{{ form.duration_unit.id_for_label }}">
+              <span>Duration type</span>
+              {{ form.duration_unit }}
+              {% if form.duration_unit.errors %}<small>{{ form.duration_unit.errors|striptags }}</small>{% endif %}
+            </label>
+          </div>
+
+          <label class="booking-flow-field" for="{{ form.lesson_note.id_for_label }}">
+            <span>What should the tutor know?</span>
+            {{ form.lesson_note }}
+            {% if form.lesson_note.errors %}<small>{{ form.lesson_note.errors|striptags }}</small>{% endif %}
           </label>
 
-          <div class="mtc-booking-amount-box">
-            <div class="mtc-booking-amount-row">
-              <div>
-                <h2>Lesson amount</h2>
-                <p>Based on the tutor's hourly rate for one lesson.</p>
-              </div>
-              <strong>
-                {% if form.amount %}
-                  ₦{{ form.amount.value|default:tutor.hourly_rate|default:"0" }}
-                {% else %}
-                  ₦{{ amount|default:tutor.hourly_rate|default:"0" }}
-                {% endif %}
-              </strong>
+          <div class="booking-flow-summary-bar">
+            <div>
+              <span>Estimated total</span>
+              <strong id="bookingTotalPreview">&#8358;{{ amount|floatformat:0 }}</strong>
             </div>
-            {% if form.amount %}
-              <div class="mtc-booking-hidden-field">{{ form.amount }}</div>
-              {% if form.amount.errors %}<p class="mtc-booking-field-error">{{ form.amount.errors|striptags }}</p>{% endif %}
-            {% else %}
-              <input type="hidden" name="amount" value="{{ amount|default:tutor.hourly_rate|default:'0' }}">
-            {% endif %}
+            <p>
+              Tutor charges &#8358;{{ amount|floatformat:0 }} per {{ rate_period_label|lower }}.
+              Final amount is calculated from your selected duration.
+            </p>
           </div>
 
-          <div class="mtc-booking-actions">
-            <p>Your booking will be marked as pending until the tutor accepts it.</p>
-            <button type="submit" class="mtc-booking-submit">
-              Confirm booking
+          <div class="booking-flow-actions">
+            <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="booking-flow-secondary">Cancel</a>
+            <button type="submit" class="booking-flow-primary">
+              Continue to review
+              <i class="fa-solid fa-arrow-right"></i>
             </button>
           </div>
         </form>
-      </div>
+      </main>
     </div>
   </div>
 </section>
+<script>
+  (function () {
+    const rate = Number("{{ amount|default:0 }}");
+    const ratePeriod = "{{ rate_period|default:'weekly' }}";
+    const periodDays = { daily: 1, weekly: 7, monthly: 30 };
+    const unitDays = { days: 1, weeks: 7, months: 30 };
+    const valueInput = document.querySelector('[name="duration_value"]');
+    const unitInput = document.querySelector('[name="duration_unit"]');
+    const preview = document.getElementById("bookingTotalPreview");
+    if (!valueInput || !unitInput || !preview) return;
+
+    function formatNaira(value) {
+      return "₦" + Math.max(value, 0).toLocaleString("en-NG", { maximumFractionDigits: 0 });
+    }
+
+    function updateTotal() {
+      const value = Math.max(Number(valueInput.value || 1), 1);
+      const totalDays = value * (unitDays[unitInput.value] || 7);
+      const periods = Math.ceil(totalDays / (periodDays[ratePeriod] || 7));
+      preview.textContent = formatNaira(rate * periods);
+    }
+
+    valueInput.addEventListener("input", updateTotal);
+    unitInput.addEventListener("change", updateTotal);
+    updateTotal();
+  })();
+</script>
 {% endblock %}

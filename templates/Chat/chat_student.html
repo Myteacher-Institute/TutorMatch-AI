@@ -91,8 +91,8 @@
           {% endif %}
         </div>
         <div class="cth-name">{{ other_party.get_full_name|default:other_party.username }}</div>
-        {% if other_party.profile.role == 'tutor' and other_party.profile.tutor_profile.hourly_rate %}
-          <span class="cth-rate">&#8358;{{ other_party.profile.tutor_profile.hourly_rate }}/hr</span>
+        {% if other_party.profile.role == 'tutor' and other_party.profile.tutor_profile.rate_amount %}
+          <span class="cth-rate">&#8358;{{ other_party.profile.tutor_profile.rate_amount }}/{{ other_party.profile.tutor_profile.rate_period_label|lower }}</span>
         {% endif %}
       </div>
 
@@ -247,3 +247,4 @@
   });
 </script>
 {% endblock %}
+

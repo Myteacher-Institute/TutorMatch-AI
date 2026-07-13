@@ -2,6 +2,7 @@ import json
 import logging
 import os
 import re
+import time
 
 from django.apps import apps
 from django.conf import settings
@@ -9,7 +10,15 @@ from django.conf import settings
 logger = logging.getLogger(__name__)
 
 
-SUBJECTS = [
+def _safe_error_message(error):
+    text = str(error)
+    secret = os.getenv("GEMINI_API_KEY")
+    if secret:
+        text = text.replace(secret, "***")
+    return text
+
+
+DEFAULT_SUBJECTS = [
     "Mathematics",
     "English",
     "Physics",
@@ -17,13 +26,17 @@ SUBJECTS = [
     "Biology",
     "Economics",
     "HTML",
+    "CSS",
+    "JavaScript",
+    "Python",
+    "C++",
     "Coding",
     "Programming",
 ]
 
 LEVELS = ["Primary", "JSS1", "JSS2", "JSS3", "SS1", "SS2", "SS3", "WAEC", "NECO", "JAMB"]
 
-LOCATIONS = ["GRA", "Rumuola", "Trans Amadi", "D-Line", "Ada George", "Woji", "Port Harcourt"]
+DEFAULT_LOCATIONS = ["GRA", "Rumuola", "Trans Amadi", "D-Line", "Ada George", "Woji", "Port Harcourt"]
 
 SCHEDULE_WORDS = ["weekend", "weekends", "weekday", "weekdays", "evening", "mornings", "morning", "online"]
 
@@ -93,11 +106,77 @@ def extract_search_intent(prompt):
     if not text:
         return empty_intent
 
+    rule_intent = _extract_with_rules(text, empty_intent)
     try:
-        return _extract_with_gemini(text)
+        gemini_intent = _extract_with_gemini(text)
+        return {
+            "query_text": text,
+            "subject": rule_intent.get("subject") or gemini_intent.get("subject", ""),
+            "level": rule_intent.get("level") or gemini_intent.get("level", ""),
+            "location": rule_intent.get("location") or gemini_intent.get("location", ""),
+            "schedule": gemini_intent.get("schedule", "") or rule_intent.get("schedule", ""),
+            "source": "rules+gemini" if rule_intent.get("subject") or rule_intent.get("location") else gemini_intent.get("source", "gemini"),
+        }
     except Exception:
-        logger.error("Failed to extract search intent with Gemini API.", exc_info=True)
-        return empty_intent
+        logger.warning("Failed to extract search intent with Gemini API.")
+        return rule_intent
+
+
+def _extract_with_rules(text, base_intent=None):
+    intent = dict(base_intent or {})
+    normalized = _normalize_text(text)
+
+    subject_patterns = [
+        ("python backend", ["python backend", "backend python", "django", "fastapi", "flask"]),
+        ("Python", ["python", "py"]),
+        ("C++", ["c++", "cpp"]),
+        ("CSS", ["css"]),
+        ("HTML", ["html"]),
+        ("JavaScript", ["javascript", "js"]),
+        ("Web Development", ["web development", "frontend", "website"]),
+        ("Coding", ["coding", "programming"]),
+        ("Mathematics", ["mathematics", "maths", "math"]),
+        ("English", ["english"]),
+        ("Physics", ["physics"]),
+        ("Chemistry", ["chemistry"]),
+        ("Biology", ["biology"]),
+        ("Economics", ["economics"]),
+        ("WAEC", ["waec"]),
+        ("JAMB", ["jamb"]),
+    ]
+    for subject, patterns in subject_patterns:
+        if any(_normalize_text(pattern) in normalized for pattern in patterns):
+            intent["subject"] = subject
+            break
+
+    level_patterns = [
+        ("Beginner", ["0 knowledge", "zero knowledge", "complete beginner", "beginner", "no programming"]),
+        ("Intermediate", ["intermediate", "some experience"]),
+        ("Advanced", ["advanced"]),
+        *[(level, [level.lower()]) for level in LEVELS],
+    ]
+    for level, patterns in level_patterns:
+        if any(_normalize_text(pattern) in normalized for pattern in patterns):
+            intent["level"] = level
+            break
+
+    location_patterns = [
+        ("Port Harcourt", ["port harcourt", "ph"]),
+        ("GRA", ["gra"]),
+        ("Rumuola", ["rumuola"]),
+        ("Trans Amadi", ["trans amadi"]),
+        ("D-Line", ["d line", "d-line"]),
+        ("Ada George", ["ada george"]),
+        ("Woji", ["woji"]),
+        ("Online", ["online", "remote"]),
+    ]
+    for location, patterns in location_patterns:
+        if any(_normalize_text(pattern) in normalized for pattern in patterns):
+            intent["location"] = location
+            break
+
+    intent["source"] = "rules"
+    return intent
 
 
 def search_tutors(intent, filters=None):
@@ -119,15 +198,15 @@ def search_tutors(intent, filters=None):
     matched_any = False
 
     if subject:
-        tutors = [tutor for tutor in tutors if _same_text(tutor["subject"], subject)]
+        tutors = [tutor for tutor in tutors if _matches_subject(tutor, subject)]
         matched_any = True
 
     if location and location != "Port Harcourt":
-        tutors = [tutor for tutor in tutors if _contains_text(tutor["location"], location)]
+        tutors = [tutor for tutor in tutors if _matches_location(tutor["location"], location)]
         matched_any = True
 
     level = intent.get("level")
-    if level:
+    if level and level in LEVELS:
         # Match against bio or specialist if tutor level matches
         tutors = [tutor for tutor in tutors if _contains_text(tutor.get("level", ""), level) or _contains_text(tutor.get("bio", ""), level)]
         matched_any = True
@@ -144,7 +223,7 @@ def search_tutors(intent, filters=None):
     # If query text was provided, but didn't match any subject, location, or level,
     # check if it matches a tutor's name. Otherwise, it's a completely unmatched query!
     if query_text and not matched_any:
-        name_matches = [tutor for tutor in tutors if _contains_text(tutor["name"], query_text)]
+        name_matches = [tutor for tutor in tutors if _matches_query(tutor, query_text)]
         if name_matches:
             tutors = name_matches
         else:
@@ -199,15 +278,15 @@ def _extract_with_gemini(prompt):
     import requests
 
     api_key = os.getenv("GEMINI_API_KEY")
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    configured_model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
     if not api_key:
         raise ValueError("GEMINI_API_KEY is missing from environment.")
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
 
     system_instruction = (
         "Extract tutor search intent from a Nigerian tutoring marketplace prompt. "
+        "The subject can be an academic subject, exam, course, or tech skill such as Python, C++, CSS, HTML, or coding. "
         "Return only JSON with string keys: subject, level, location, schedule. "
         "Use an empty string when a value is missing."
     )
@@ -231,22 +310,50 @@ def _extract_with_gemini(prompt):
         }
     }
 
-    response = requests.post(url, json=payload, headers=headers, timeout=20)
-    response.raise_for_status()
+    models_to_try = []
+    for model in [configured_model, "gemini-2.0-flash", "gemini-flash-lite-latest", "gemini-flash-latest"]:
+        if model and model not in models_to_try:
+            models_to_try.append(model)
 
-    res_data = response.json()
-    try:
-        text_content = res_data["candidates"][0]["content"]["parts"][0]["text"]
-        data = json.loads(text_content)
-    except (KeyError, IndexError, ValueError) as e:
-        logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
-        raise ValueError("Failed to extract intent from Gemini response.") from e
+    last_error = None
+    for model in models_to_try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        try:
+            for attempt in range(2):
+                response = requests.post(
+                    url,
+                    params={"key": api_key},
+                    json=payload,
+                    headers=headers,
+                    timeout=20,
+                )
+                if response.status_code in {429, 500, 502, 503, 504} and attempt == 0:
+                    time.sleep(1)
+                    continue
+                response.raise_for_status()
+
+                res_data = response.json()
+                try:
+                    text_content = res_data["candidates"][0]["content"]["parts"][0]["text"]
+                    data = json.loads(text_content)
+                    break
+                except (KeyError, IndexError, ValueError) as e:
+                    logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
+                    raise ValueError("Failed to extract intent from Gemini response.") from e
+            else:
+                continue
+            break
+        except requests.exceptions.RequestException as e:
+            logger.warning("Gemini intent extraction failed for model %s: %s", model, _safe_error_message(e))
+            last_error = e
+    else:
+        raise last_error or ConnectionError("Failed to extract intent from Gemini API.")
 
     return {
         "query_text": prompt,
-        "subject": _clean_choice(data.get("subject"), SUBJECTS),
+        "subject": _clean_choice(data.get("subject"), _known_subjects()),
         "level": _clean_choice(data.get("level"), LEVELS),
-        "location": _clean_choice(data.get("location"), LOCATIONS),
+        "location": _clean_choice(data.get("location"), _known_locations()),
         "schedule": str(data.get("schedule") or "").strip(),
         "source": "gemini",
     }
@@ -267,10 +374,12 @@ def _load_database_tutors():
                     "id": tutor.pk,
                     "name": _tutor_name(tutor),
                     "subject": _tutor_subject(tutor),
+                    "subjects": _tutor_subjects(tutor),
                     "specialist": _tutor_specialist(tutor),
                     "level": _field_value(tutor, "level", "All levels"),
                     "location": _field_value(tutor, "location", "Port Harcourt"),
-                    "rate": int(_field_value(tutor, "hourly_rate", 0) or 0),
+                    "rate": int(_field_value(tutor, "rate_amount", _field_value(tutor, "hourly_rate", 0)) or 0),
+                    "rate_period": _field_value(tutor, "rate_period", "weekly"),
                     "experience": int(_field_value(tutor, "years_experience", 0) or 0),
                     "rating": float(_field_value(tutor, "rating", 4.8) or 4.8),
                     "verified": _is_verified_tutor(tutor),
@@ -326,12 +435,9 @@ def _tutor_name(tutor):
 
 
 def _tutor_subject(tutor):
-    subjects = getattr(tutor, "subjects", None)
-    if subjects and hasattr(subjects, "all"):
-        names = [_subject_name(subject) for subject in subjects.all()[:3]]
-        names = [name for name in names if name]
-        if names:
-            return names[0]
+    names = _tutor_subjects(tutor)
+    if names:
+        return names[0]
 
     subject = getattr(tutor, "subject", None)
     if subject:
@@ -340,13 +446,18 @@ def _tutor_subject(tutor):
     return "General"
 
 
-def _tutor_specialist(tutor):
+def _tutor_subjects(tutor):
     subjects = getattr(tutor, "subjects", None)
     if subjects and hasattr(subjects, "all"):
-        names = [_subject_name(subject) for subject in subjects.all()[:3]]
-        names = [name for name in names if name]
-        if names:
-            return " & ".join(names)
+        names = [_subject_name(subject) for subject in subjects.all()[:6]]
+        return [name for name in names if name]
+    return []
+
+
+def _tutor_specialist(tutor):
+    names = _tutor_subjects(tutor)[:3]
+    if names:
+        return " & ".join(names)
 
     return _tutor_subject(tutor)
 
@@ -373,6 +484,38 @@ def _photo_url(tutor):
     return "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=600&q=80"
 
 
+def _known_subjects():
+    try:
+        Subject = apps.get_model("tutors", "Subject")
+        values = list(
+            Subject.objects.filter(
+                tutors__is_publicly_visible=True,
+                tutors__verification_status="approved",
+            )
+            .values_list("subject_name", flat=True)
+            .distinct()
+            .order_by("subject_name")
+        )
+        return values or DEFAULT_SUBJECTS
+    except Exception:
+        return DEFAULT_SUBJECTS
+
+
+def _known_locations():
+    try:
+        Tutor = apps.get_model("tutors", "Tutor")
+        values = list(
+            Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
+            .exclude(location="")
+            .values_list("location", flat=True)
+            .distinct()
+            .order_by("location")
+        )
+        return values or DEFAULT_LOCATIONS
+    except Exception:
+        return DEFAULT_LOCATIONS
+
+
 def _clean_choice(value, options):
     if not value:
         return ""
@@ -392,3 +535,70 @@ def _same_text(left, right):
 
 def _contains_text(left, right):
     return right.lower() in left.lower()
+
+
+def _normalize_text(value):
+    return re.sub(r"[^a-z0-9+#]+", " ", str(value or "").lower()).strip()
+
+
+def _skill_terms(value):
+    normalized = _normalize_text(value)
+    terms = [term for term in normalized.split() if len(term) > 1]
+    phrase_map = {
+        "python": ["python", "backend", "django", "flask", "fastapi", "programming", "coding", "web development"],
+        "backend": ["backend", "python", "django", "flask", "fastapi", "web development", "api", "database"],
+        "web": ["web", "html", "css", "javascript", "frontend", "backend", "web development"],
+        "css": ["css", "frontend", "html", "web development"],
+        "html": ["html", "css", "frontend", "web development"],
+        "coding": ["coding", "programming", "python", "javascript", "web development"],
+        "programming": ["programming", "coding", "python", "javascript", "c++"],
+        "c++": ["c++", "cpp", "programming", "coding"],
+        "cpp": ["c++", "cpp", "programming", "coding"],
+    }
+    expanded = set(terms)
+    if normalized:
+        expanded.add(normalized)
+    for term in list(expanded):
+        expanded.update(phrase_map.get(term, []))
+    return expanded
+
+
+def _matches_subject(tutor, subject):
+    haystack = " ".join(
+        [
+            tutor.get("subject", ""),
+            tutor.get("specialist", ""),
+            " ".join(tutor.get("subjects", [])),
+            tutor.get("bio", ""),
+        ]
+    )
+    normalized_haystack = _normalize_text(haystack)
+    wanted_terms = _skill_terms(subject)
+    return any(_normalize_text(term) in normalized_haystack for term in wanted_terms)
+
+
+def _matches_query(tutor, query):
+    haystack = " ".join(
+        [
+            tutor.get("name", ""),
+            tutor.get("subject", ""),
+            tutor.get("specialist", ""),
+            " ".join(tutor.get("subjects", [])),
+            tutor.get("location", ""),
+            tutor.get("bio", ""),
+        ]
+    )
+    query_terms = _skill_terms(query)
+    normalized_haystack = _normalize_text(haystack)
+    return any(_normalize_text(term) in normalized_haystack for term in query_terms)
+
+
+def _matches_location(tutor_location, requested_location):
+    tutor_text = _normalize_text(tutor_location)
+    requested_text = _normalize_text(requested_location)
+    aliases = {
+        "ph": ["ph", "port harcourt"],
+        "port harcourt": ["port harcourt", "ph"],
+    }
+    requested_aliases = aliases.get(requested_text, [requested_text])
+    return any(alias in tutor_text for alias in requested_aliases)

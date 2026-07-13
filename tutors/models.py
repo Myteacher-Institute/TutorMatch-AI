@@ -1,3 +1,4 @@
+from decimal import Decimal, ROUND_CEILING
 from django.db import models
 from accounts.models import UserProfile
 
@@ -54,6 +55,17 @@ class Payment(models.Model):
 
 
 class Tutor(models.Model):
+    RATE_PERIOD_CHOICES = [
+        ("daily", "Daily"),
+        ("weekly", "Weekly"),
+        ("monthly", "Monthly"),
+    ]
+    RATE_PERIOD_DAYS = {
+        "daily": Decimal("1"),
+        "weekly": Decimal("7"),
+        "monthly": Decimal("30"),
+    }
+
     user = models.OneToOneField("accounts.UserProfile", on_delete=models.CASCADE, related_name="tutor_profile")
     profile_photo = models.URLField(blank=True, null=True)
     bio = models.TextField(blank=True)
@@ -61,7 +73,8 @@ class Tutor(models.Model):
     state = models.CharField(max_length=50, blank=True)
     local_government = models.CharField(max_length=80, blank=True)
     country = models.CharField(max_length=60, blank=True, default="Nigeria")
-    hourly_rate = models.PositiveIntegerField(default=0)
+    rate_amount = models.PositiveIntegerField(default=0)
+    rate_period = models.CharField(max_length=20, choices=RATE_PERIOD_CHOICES, default="weekly")
     years_experience = models.PositiveIntegerField(default=0)
     verification_status = models.CharField(max_length=20, default="pending")
     subjects = models.ManyToManyField("Subject", related_name="tutors", blank=True)
@@ -108,6 +121,25 @@ class Tutor(models.Model):
     @property
     def username(self):
         return self.user.user.username if self.user and self.user.user else ""
+
+    @property
+    def rate_period_label(self):
+        return self.get_rate_period_display()
+
+    @property
+    def rate_display(self):
+        return f"₦{self.rate_amount}/{self.rate_period_label.lower()}"
+
+    def calculate_booking_amount(self, duration_value, duration_unit):
+        unit_days = {
+            "days": Decimal("1"),
+            "weeks": Decimal("7"),
+            "months": Decimal("30"),
+        }
+        duration_days = Decimal(max(int(duration_value or 1), 1)) * unit_days.get(duration_unit, Decimal("7"))
+        period_days = self.RATE_PERIOD_DAYS.get(self.rate_period, Decimal("7"))
+        periods = (duration_days / period_days).to_integral_value(rounding=ROUND_CEILING)
+        return Decimal(self.rate_amount) * periods
 
 
 class TutorDocument(models.Model):

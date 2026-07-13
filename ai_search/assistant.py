@@ -1,6 +1,7 @@
 import json
 import logging
 import os
+import time
 from django.db import transaction
 from django.utils import timezone
 
@@ -16,12 +17,14 @@ You are Myteacher AI, a warm conversational tutor-matching and learning assistan
 Your job:
 - Have a natural conversation, not a one-shot search.
 - Ask one useful follow-up question at a time when details are missing.
-- Collect: subject/course, student age or class level, location, learning goal, schedule, budget, and whether online or home tutoring is preferred.
-- When tutor matches are provided, recommend the best options and explain why they fit the conversation.
-- If there are no tutor matches yet, keep helping: refine the need, suggest nearby/broader options, and propose next learning steps.
+- Collect: subject/course/skill, student age or class level where relevant, location, learning goal, schedule, budget, and whether online or home tutoring is preferred.
+- Primary goal: recommend tutors from our database once the user's need is clear enough.
+- When tutor matches are provided, recommend the best options by name and explain why they fit the conversation.
+- If there are no tutor matches yet, refine the tutor search by asking for location, preferred format, budget, or permission to broaden nearby/online tutors.
 - Help with assignments by guiding and explaining. Do not simply do all assessed work for the student.
-- Suggest courses or learning paths when the student wants to learn something like HTML, coding, WAEC prep, JAMB prep, or school subjects.
+- Do not offer a structured online curriculum as the main next step while the user is trying to find a tutor. Mention learning paths only after tutor options are shown or if the user explicitly asks for curriculum/course guidance.
 - Be concise, friendly, and practical. Use Nigerian context where helpful.
+- When the user has not provided a topic yet, ask: "What subject, course, or skill do you want help in finding the right tutor? For example Mathematics, Python, C++, CSS, HTML, WAEC, or JAMB."
 
 SPECIAL COMMANDS (respond only with "NAVIGATE: /path" when user asks):
 - If user asks "take me to tutors", "go to find tutors", "show me tutors page" → respond with: NAVIGATE: /tutors/
@@ -32,7 +35,7 @@ SPECIAL COMMANDS (respond only with "NAVIGATE: /path" when user asks):
 """
 
 
-REQUIRED_MATCH_FIELDS = ["subject", "level", "location"]
+REQUIRED_MATCH_FIELDS = ["subject", "location"]
 
 
 def get_or_create_conversation(request, conversation_id=None):
@@ -128,6 +131,8 @@ def generate_assistant_reply_only(conversation):
         state = _merge_state(locked_conv)
         tutors = _recommend_tutors(state)
         assistant_text = _generate_assistant_reply(locked_conv, state, tutors)
+        if not (assistant_text or "").strip():
+            assistant_text = _generate_fallback_reply(state, tutors)
 
         # 2. Post-API check: if another concurrent request already created the assistant message, skip
         last_msg = locked_conv.messages.order_by("created_at").last()
@@ -180,7 +185,7 @@ def _merge_state(conversation):
 
 
 def _recommend_tutors(state):
-    if not state.get("ready_for_tutor_match"):
+    if not state.get("subject"):
         return []
     return search_tutors(state, {})[:5]
 
@@ -194,25 +199,24 @@ def _generate_assistant_reply(conversation, state, tutors):
 
     if not os.getenv("GEMINI_API_KEY"):
         return _generate_fallback_reply(state, tutors)
+    if tutors:
+        return _generate_fallback_reply(state, tutors)
     try:
         return _generate_gemini_reply(conversation, state, tutors)
     except Exception as e:
-        logger.error("Gemini assistant response failed.", exc_info=True)
-        # Create admin alert for the error
+        logger.error("Gemini assistant response failed: %s", _safe_error_message(e))
         _create_admin_alert(e, conversation, state)
-        # Return a friendly message to the user
-        return _generate_service_error_reply()
+        return _generate_fallback_reply(state, tutors)
 
 
 def _generate_gemini_reply(conversation, state, tutors):
     import requests
 
     api_key = os.getenv("GEMINI_API_KEY")
-    model = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    configured_model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
     if not api_key:
         raise ValueError("GEMINI_API_KEY is missing from environment.")
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
     headers = {"Content-Type": "application/json"}
 
     system_text = (
@@ -222,8 +226,8 @@ def _generate_gemini_reply(conversation, state, tutors):
         "Available tutor matches from our database:\n"
         f"{json.dumps(tutors[:5], ensure_ascii=True)}\n\n"
         "If required details are missing, ask the next best question. "
-        "If tutor matches exist, recommend them by name and why they fit. "
-        "If the student asks for assignment or course help, teach briefly and suggest a learning path."
+        "If tutor matches exist, recommend them by name and why they fit, and invite the user to view or book a tutor. "
+        "If no tutor matches exist, ask to broaden the tutor search. Do not pivot to an online curriculum unless the user asks for one."
     )
 
     contents = []
@@ -244,51 +248,76 @@ def _generate_gemini_reply(conversation, state, tutors):
         }
     }
 
-    try:
-        response = requests.post(url, json=payload, headers=headers, timeout=30)
-        response.raise_for_status()
+    models_to_try = []
+    for model in [configured_model, "gemini-2.0-flash", "gemini-flash-lite-latest", "gemini-flash-latest"]:
+        if model and model not in models_to_try:
+            models_to_try.append(model)
 
-        res_data = response.json()
+    last_error = None
+    for model in models_to_try:
+        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
         try:
-            reply_text = res_data["candidates"][0]["content"]["parts"][0]["text"]
-            return reply_text
-        except (KeyError, IndexError, ValueError) as e:
-            logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
-            raise ValueError("Failed to get response from Gemini API.") from e
-    except requests.exceptions.Timeout as e:
-        logger.error(f"Gemini API timeout after 30 seconds", exc_info=True)
-        raise TimeoutError("Gemini API did not respond within 30 seconds") from e
-    except requests.exceptions.ConnectionError as e:
-        logger.error(f"Gemini API connection error: {e}", exc_info=True)
-        raise ConnectionError("Failed to connect to Gemini API service") from e
+            for attempt in range(2):
+                response = requests.post(
+                    url,
+                    params={"key": api_key},
+                    json=payload,
+                    headers=headers,
+                    timeout=30,
+                )
+                if response.status_code in {429, 500, 502, 503, 504} and attempt == 0:
+                    time.sleep(1)
+                    continue
+                response.raise_for_status()
+
+                res_data = response.json()
+                try:
+                    return res_data["candidates"][0]["content"]["parts"][0]["text"]
+                except (KeyError, IndexError, ValueError) as e:
+                    logger.error(f"Failed to parse Gemini response: {res_data}", exc_info=True)
+                    raise ValueError("Failed to get response from Gemini API.") from e
+        except requests.exceptions.Timeout as e:
+            logger.error("Gemini API timeout after 30 seconds for model %s", model)
+            last_error = TimeoutError(f"Gemini model {model} did not respond within 30 seconds")
+        except requests.exceptions.ConnectionError as e:
+            logger.error("Gemini API connection error for model %s", model)
+            last_error = ConnectionError(f"Failed to connect to Gemini model {model}")
+        except requests.exceptions.HTTPError as e:
+            logger.error("Gemini API HTTP error for model %s: %s", model, _safe_error_message(e))
+            last_error = e
+
+    raise last_error or ConnectionError("Failed to connect to Gemini API service")
 
 
 def _generate_fallback_reply(state, tutors):
     if tutors:
-        lines = ["I found tutor options that fit what you told me:"]
+        subject = state.get("subject") or "your learning goal"
+        location = state.get("location") or "your area"
+        lines = [
+            f"I found tutor options for **{subject}** around **{location}**.",
+            "",
+        ]
         for tutor in tutors[:3]:
+            rate_period = tutor.get("rate_period", "weekly")
             lines.append(
-                f"- {tutor['name']}: {tutor.get('specialist', tutor['subject'])}, "
-                f"{tutor['experience']} years experience, around {tutor['location']}, "
-                f"NGN {tutor['rate']}/hr."
+                f"- **{tutor['name']}** - {tutor.get('specialist', tutor['subject'])}; "
+                f"{tutor['experience']} yrs experience; {tutor['location']}; "
+                f"NGN {tutor['rate']}/{rate_period}."
             )
-        lines.append("Would you like the cheapest option, the most experienced option, or the best overall match?")
+        lines.extend([
+            "",
+            "Pick one to view the profile or book a lesson.",
+        ])
         return "\n".join(lines)
 
     missing = state.get("missing_fields", [])
     if "subject" in missing:
-        return "Sure. What subject or skill does the student want help with? For example Mathematics, English, HTML, WAEC, or JAMB."
-    if "level" in missing:
-        return "Got it. How old is the student, or what class/level are they in?"
+        return "What subject, course, or skill do you want help in finding the right tutor? For example Mathematics, Python, C++, CSS, HTML, WAEC, or JAMB."
     if "location" in missing:
         return "Great. What location should I search around? You can say Port Harcourt, GRA, Rumuola, Woji, or online."
 
-    if state.get("learning_mode") == "course":
-        return _course_suggestion_reply(state)
-
     return (
-        "I understand. I do not see a strong tutor match yet, but I can broaden the search by nearby locations, "
-        "online lessons, schedule, or budget. Which one should I adjust first?"
+        "I do not see a strong tutor match yet. Should I broaden the tutor search to nearby locations, online tutors, or related skills?"
     )
 
 
@@ -343,11 +372,20 @@ def _generate_service_error_reply():
     )
 
 
+def _safe_error_message(error):
+    text = str(error)
+    for secret_name in ("GEMINI_API_KEY", "FLUTTERWAVE_SECRET_KEY", "IMAGEKIT_PRIVATE_KEY", "IMAGEKIT_PUBLIC_KEY"):
+        secret = os.getenv(secret_name)
+        if secret:
+            text = text.replace(secret, "***")
+    return text
+
+
 def _create_admin_alert(error, conversation, state):
     """Create an admin alert for AI service failures."""
     try:
         error_type = type(error).__name__
-        error_message = str(error)
+        error_message = _safe_error_message(error)
         
         # Determine alert type based on error
         if "timeout" in error_message.lower() or "timed out" in error_message.lower():
@@ -379,7 +417,8 @@ def assistant_suggestions():
     return [
         "I need a tutor in PH for my SS2 daughter.",
         "My child is 12 and needs help with Mathematics on weekends.",
-        "I want to learn HTML from beginner level.",
+        "I want to learn Python from beginner level.",
+        "I need help with CSS and frontend web design.",
         "Can you help me understand my Physics assignment?",
         *suggested_prompts(),
     ]

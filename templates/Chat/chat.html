@@ -108,8 +108,8 @@
               <h2 style="margin: 0; font-size: 18px; color: #111827;">{{ other_party.get_full_name|default:other_party.username }}</h2>
             </div>
           {% endif %}
-          {% if other_party.profile.role == 'tutor' and other_party.profile.tutor_profile.hourly_rate %}
-            <span style="font-size: 14px; color: #64748b; margin-left: auto;">&#8358;{{ other_party.profile.tutor_profile.hourly_rate }}/hr</span>
+          {% if other_party.profile.role == 'tutor' and other_party.profile.tutor_profile.rate_amount %}
+            <span style="font-size: 14px; color: #64748b; margin-left: auto;">&#8358;{{ other_party.profile.tutor_profile.rate_amount }}/{{ other_party.profile.tutor_profile.rate_period_label|lower }}</span>
           {% endif %}
         </div>
 
@@ -236,3 +236,4 @@
   });
 </script>
 {% endblock %}
+

@@ -111,9 +111,16 @@
                 {% if form.location.errors %}<p class="tutor-field-error">{{ form.location.errors|join:", " }}</p>{% endif %}
               </div>
               <div class="tutor-form-field">
-                <label>Hourly Rate (&#8358;)</label>
-                {{ form.hourly_rate }}
-                {% if form.hourly_rate.errors %}<p class="tutor-field-error">{{ form.hourly_rate.errors|join:", " }}</p>{% endif %}
+                <label>Rate Amount (&#8358;)</label>
+                {{ form.rate_amount }}
+                <small>Set the amount you charge for your selected billing cycle.</small>
+                {% if form.rate_amount.errors %}<p class="tutor-field-error">{{ form.rate_amount.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div class="tutor-form-field">
+                <label>Billing Cycle</label>
+                {{ form.rate_period }}
+                <small>Choose whether this amount is charged daily, weekly, or monthly.</small>
+                {% if form.rate_period.errors %}<p class="tutor-field-error">{{ form.rate_period.errors|join:", " }}</p>{% endif %}
               </div>
               <div class="tutor-form-field">
                 <label>Years of Experience</label>

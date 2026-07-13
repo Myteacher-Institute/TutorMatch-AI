@@ -152,7 +152,7 @@ def tutor_list(request):
     if location_filter:
         tutors_qs = tutors_qs.filter(location__icontains=location_filter)
     if max_rate:
-        tutors_qs = tutors_qs.filter(hourly_rate__lte=max_rate)
+        tutors_qs = tutors_qs.filter(rate_amount__lte=max_rate)
 
     tutors_qs = tutors_qs.annotate(
         avg_rating=Avg("tutor_reviews__rating"),
@@ -160,9 +160,9 @@ def tutor_list(request):
     ).distinct()
 
     if sort == "rate_low":
-        tutors_qs = tutors_qs.order_by("hourly_rate", "-avg_rating", "user__user__first_name")
+        tutors_qs = tutors_qs.order_by("rate_amount", "-avg_rating", "user__user__first_name")
     elif sort == "rate_high":
-        tutors_qs = tutors_qs.order_by("-hourly_rate", "-avg_rating", "user__user__first_name")
+        tutors_qs = tutors_qs.order_by("-rate_amount", "-avg_rating", "user__user__first_name")
     elif sort == "rating":
         tutors_qs = tutors_qs.order_by("-avg_rating", "-review_count", "user__user__first_name")
     elif sort == "experience":
@@ -213,3 +213,4 @@ def tutor_detail(request, tutor_id):
     page_number = request.GET.get("page")
     reviews = paginator.get_page(page_number)
     return render(request, 'tutors/tutor_detail.html', {'tutor': tutor, 'reviews': reviews})
+

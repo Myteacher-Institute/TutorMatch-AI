@@ -1,5 +1,6 @@
 import os
 import requests
+from dotenv import load_dotenv
 
 def test_endpoint(model, key):
     url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
@@ -17,8 +18,13 @@ def test_endpoint(model, key):
         print(f"  Error: {e}")
 
 def main():
-    key = "AQ.Ab8RN6J8GsbMgv37wPYgRRn3AlxoWhIcv_nv5-ogQOXSdmvzNQ"
-    test_endpoint("gemini-3.5-flash", key)
+    load_dotenv()
+    key = os.getenv("GEMINI_API_KEY", "")
+    model = os.getenv("GEMINI_MODEL", "gemini-2.0-flash")
+    if not key:
+        print("GEMINI_API_KEY is not configured.")
+        return
+    test_endpoint(model, key)
 
 if __name__ == "__main__":
     main()

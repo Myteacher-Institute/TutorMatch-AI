@@ -10,7 +10,7 @@ accounts/     Registration, login, roles, student dashboard
 tutors/       Tutor profiles, subjects, verification, public listings
 ai_search/    Natural language tutor search and recommendations
 bookings/     Booking flow and booking status
-payments/     Paystack checkout and payment verification
+payments/     Flutterwave checkout and payment verification
 reviews/      Tutor reviews and ratings
 dashboard/    Public pages and admin dashboard
 templates/    Root Django templates folder

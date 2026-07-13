@@ -17,6 +17,27 @@ from .forms import TutorSearchForm
 from .services import extract_search_intent, search_tutors, suggested_prompts
 
 
+def _is_ajax(request):
+    return request.headers.get("x-requested-with") == "XMLHttpRequest"
+
+
+def _assistant_context(request, conversation):
+    chat_messages = conversation.messages.all()
+    latest_assistant = chat_messages.filter(role="assistant").last()
+    latest_tutors = []
+    if latest_assistant:
+        latest_tutors = latest_assistant.metadata.get("tutors", [])
+
+    return {
+        "conversation": conversation,
+        "chat_messages": chat_messages,
+        "latest_tutors": latest_tutors,
+        "suggested_prompts": assistant_suggestions(),
+        "recent_conversations": recent_conversations(request, request.GET.get("chat_search", "")),
+        "chat_search": request.GET.get("chat_search", ""),
+    }
+
+
 def find_tutor(request):
     query = request.GET.get("q", "").strip()
     if query:
@@ -75,26 +96,12 @@ def ai_assistant(request, conversation_id=None):
         else:
             if message:
                 handle_user_message(conversation, message)
+        if _is_ajax(request):
+            conversation.refresh_from_db()
+            return render(request, "search/ai_assistant.html", _assistant_context(request, conversation))
         return redirect(reverse("ai_assistant_thread", kwargs={"conversation_id": conversation.id}))
 
-    chat_messages = conversation.messages.all()
-    latest_assistant = chat_messages.filter(role="assistant").last()
-    latest_tutors = []
-    if latest_assistant:
-        latest_tutors = latest_assistant.metadata.get("tutors", [])
-
-    return render(
-        request,
-        "search/ai_assistant.html",
-        {
-            "conversation": conversation,
-            "chat_messages": chat_messages,
-            "latest_tutors": latest_tutors,
-            "suggested_prompts": assistant_suggestions(),
-            "recent_conversations": recent_conversations(request, request.GET.get("chat_search", "")),
-            "chat_search": request.GET.get("chat_search", ""),
-        },
-    )
+    return render(request, "search/ai_assistant.html", _assistant_context(request, conversation))
 
 
 

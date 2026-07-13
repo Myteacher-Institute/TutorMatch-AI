@@ -451,8 +451,8 @@ TutorMatch AI{% endblock %} {% block content %}
                 </div>
                 <div class="mtc-recommended-tutor-footer">
                   <div class="mtc-recommended-tutor-rate">
-                    <strong>₦{{ tutor.hourly_rate }}</strong>
-                    <span>/hr</span>
+                    <strong>₦{{ tutor.rate_amount }}</strong>
+                    <span>/{{ tutor.rate_period_label|lower }}</span>
                   </div>
                   <div class="mtc-recommended-tutor-actions">
                     <a
@@ -628,3 +628,4 @@ TutorMatch AI{% endblock %} {% block content %}
   });
 </script>
 {% endblock %}
+

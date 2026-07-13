@@ -111,7 +111,7 @@ class Command(BaseCommand):
                 "profile_email": "tutor1@example.com",
                 "bio": "Specializes in SS3 Mathematics, has extensive WAEC preparation experience with a 95% pass rate, teaches weekends, and is located just 1.2km from GRA Port Harcourt.",
                 "location": "GRA",
-                "hourly_rate": 7500,
+                "rate_amount": 7500,
                 "years_experience": 8,
                 "verification_status": "approved",
                 "subjects": ["Mathematics", "Physics"],
@@ -120,7 +120,7 @@ class Command(BaseCommand):
                 "profile_email": "tutor2@example.com",
                 "bio": "Dedicated Mathematics and Chemistry tutor with a passion for helping high schoolers succeed.",
                 "location": "Rumuola",
-                "hourly_rate": 5000,
+                "rate_amount": 5000,
                 "years_experience": 5,
                 "verification_status": "approved",
                 "subjects": ["Mathematics", "Chemistry"],
@@ -129,7 +129,7 @@ class Command(BaseCommand):
                 "profile_email": "tutor3@example.com",
                 "bio": "Energetic B.Sc Mathematics graduate focusing on building fundamental problem-solving skills.",
                 "location": "Trans Amadi",
-                "hourly_rate": 4500,
+                "rate_amount": 4500,
                 "years_experience": 3,
                 "verification_status": "approved",
                 "subjects": ["Mathematics"],
@@ -144,7 +144,7 @@ class Command(BaseCommand):
             tutor, created = Tutor.objects.get_or_create(user=profile)
             tutor.bio = t_data["bio"]
             tutor.location = t_data["location"]
-            tutor.hourly_rate = t_data["hourly_rate"]
+            tutor.rate_amount = t_data["rate_amount"]
             tutor.years_experience = t_data["years_experience"]
             tutor.verification_status = t_data["verification_status"]
             tutor.save()
@@ -159,7 +159,7 @@ class Command(BaseCommand):
         if trent:
             trent.verification_status = "approved"
             trent.location = "GRA"
-            trent.hourly_rate = 8000
+            trent.rate_amount = 8000
             trent.years_experience = 4
             trent.save()
             trent.subjects.set([subjects["English"], subjects["Economics"]])
@@ -168,3 +168,4 @@ class Command(BaseCommand):
             self.stdout.write("  Updated existing tutor Trent Baakers to approved and assigned subjects.")
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed successfully! All seeded users have password: password123"))
+

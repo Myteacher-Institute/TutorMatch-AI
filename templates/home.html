@@ -160,7 +160,7 @@
               <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
               <p>{% if tutor.years_experience %}{{ tutor.years_experience }} yr{% if tutor.years_experience != 1 %}s{% endif %} experience{% else %}Verified Tutor{% endif %}</p>
             </div>
-            <strong>₦{{ tutor.hourly_rate }}<small>/hr</small></strong>
+            <strong>₦{{ tutor.rate_amount }}<small>/{{ tutor.rate_period_label|lower }}</small></strong>
           </div>
           <div class="mtc-tags">
             {% for subject in tutor.subjects.all|slice:":3" %}
@@ -463,4 +463,5 @@
   });
 </script>
 {% endblock %}
+
 
