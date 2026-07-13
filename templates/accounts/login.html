@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block title %}Login | Myteacherconnect{% endblock %}
+{% block site_header %}{% endblock %}
+{% block site_footer %}{% endblock %}
 
 {% block content %}
 <section class="mtc-auth-section">
@@ -11,12 +13,21 @@
   <div class="mtc-auth-container" >
     <aside class="mtc-auth-sidebar">
       <img src="{% static 'images/Register-image.png' %}" alt="Myteacherconnect login preview">
+      <div class="mtc-auth-brand">
+        <span class="mtc-auth-logo-mark"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span>Myteacher<span>Connect</span></span>
+      </div>
+      <div class="mtc-auth-welcome">
+        <h2>Welcome Back</h2>
+        <p>Return to your lessons, upcoming bookings, saved tutors, and conversations with the teachers helping you move forward.</p>
+      </div>
+      <div class="mtc-auth-url">www.myteacherconnect.com</div>
     </aside>
 
     <div class="mtc-auth-form-wrapper">
       <div class="mtc-auth-form-card">
-        <h1>Welcome Back</h1>
-        <p class="subtitle">Login to continue to your dashboard.</p>
+        <h1>Sign In</h1>
+        <p class="subtitle">Access your dashboard, bookings, and saved tutors.</p>
 
         {% if form.non_field_errors %}
           <div class="mtc-alert mtc-alert-danger">

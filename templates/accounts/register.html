@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block title %}Sign Up | Myteacherconnect{% endblock %}
+{% block site_header %}{% endblock %}
+{% block site_footer %}{% endblock %}
 
 {% block content %}
 <section class="mtc-auth-section">
@@ -11,12 +13,21 @@
   <div class="mtc-auth-container">
     <aside class="mtc-auth-sidebar">
       <img src="{% static 'images/Register-image.png' %}" alt="Myteacherconnect sign up preview">
+      <div class="mtc-auth-brand">
+        <span class="mtc-auth-logo-mark"><i class="fa-solid fa-graduation-cap"></i></span>
+        <span>Myteacher<span>Connect</span></span>
+      </div>
+      <div class="mtc-auth-welcome">
+        <h2>Start Learning</h2>
+        <p>Connect with verified tutors, compare the right match for your goals, and book trusted sessions that fit your schedule.</p>
+      </div>
+      <div class="mtc-auth-url">www.myteacherconnect.com</div>
     </aside>
 
     <div class="mtc-auth-form-wrapper">
-      <div class="mtc-auth-form-card" style="max-width: 650px;">
-        <h1>Create Account</h1>
-        <p class="subtitle">Join Myteacherconnect and start finding the right tutor.</p>
+      <div class="mtc-auth-form-card mtc-auth-form-card-wide">
+        <h1>Sign Up</h1>
+        <p class="subtitle">Create your account as a student, parent, or tutor.</p>
 
         {% if form.non_field_errors %}
           <div class="mtc-alert mtc-alert-danger">

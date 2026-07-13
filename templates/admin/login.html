@@ -2,6 +2,8 @@
 {% load static %}
 
 {% block title %}Admin Login | TutorMatch AI{% endblock %}
+{% block site_header %}{% endblock %}
+{% block site_footer %}{% endblock %}
 
 {% block content %}
 <section class="mtc-auth-section">
@@ -11,12 +13,21 @@
   <div class="mtc-auth-container">
     <aside class="mtc-auth-sidebar">
       <img src="{% static 'images/Register-image.png' %}" alt="TutorMatch AI admin login preview">
+      <div class="mtc-auth-brand">
+        <span class="mtc-auth-logo-mark"><i class="fa-solid fa-shield-halved"></i></span>
+        <span>Myteacher<span>Connect</span></span>
+      </div>
+      <div class="mtc-auth-welcome">
+        <h2>Admin Access</h2>
+        <p>Manage platform activity, tutor approvals, bookings, revenue, and support workflows from one secure console.</p>
+      </div>
+      <div class="mtc-auth-url">private console</div>
     </aside>
 
     <div class="mtc-auth-form-wrapper">
       <div class="mtc-auth-form-card">
         <h1>Admin Portal</h1>
-        <p class="subtitle">Log in with your administrator credentials to access the console.</p>
+        <p class="subtitle">Use your administrator credentials to continue.</p>
 
         {% if form.non_field_errors %}
           <div class="mtc-alert mtc-alert-danger">

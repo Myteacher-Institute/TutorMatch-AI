@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}TutorMatch AI{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260712-4">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260713-dashboard-reverted">
   <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260712">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script>
@@ -20,6 +20,7 @@
   </script>
 </head>
 <body>
+  {% block site_header %}
   <header class="site-header">
     <nav class="site-nav" aria-label="Primary navigation">
       <a href="{% url 'home' %}" class="brand mtc-brand" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: #111827;">
@@ -63,6 +64,7 @@
       <div class="nav-overlay" id="nav-overlay"></div>
     </nav>
   </header>
+  {% endblock %}
 
   <main>
     {% if messages %}
@@ -95,6 +97,7 @@
     {% block content %}{% endblock %}
   </main>
 
+  {% block site_footer %}
   <footer class="mtc-footer" style="background: #0b0f19; border-top: 1px solid #1e293b; color: #94a3b8; padding: 60px 0 30px;">
     <div class="mtc-shell mtc-footer-grid" style="padding: 0 0 40px;">
       <div class="mtc-footer-about">
@@ -151,6 +154,7 @@
       </div>
     </div>
   </footer>
+  {% endblock %}
 
   <div class="mtc-confirm-overlay" id="mtcConfirmOverlay" hidden>
     <div class="mtc-confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="mtcConfirmTitle" aria-describedby="mtcConfirmMessage">
@@ -294,3 +298,10 @@
   {% include 'components/floating_mic.html' %}
 </body>
 </html>
+
+
+
+
+
+
+

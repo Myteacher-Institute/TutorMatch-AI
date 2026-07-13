@@ -27,8 +27,8 @@
   if (!widget || !btn || !indicator || !transcriptBox || !statusText || !transcriptText) return;
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-  const SILENCE_DURATION = 1500;
-  const HIDE_DELAY = 3500;
+  const SILENCE_DURATION = 650;
+  const HIDE_DELAY = 2200;
 
   let recognition = null;
   let isRecording = false;
@@ -37,6 +37,7 @@
   let hideTimeout = null;
   let lastTranscript = '';
   let processedTranscript = '';
+  let pendingNavigation = false;
   let lastTextTarget = null;
   let isDragging = false;
   let dragOffsetX = 0;
@@ -94,6 +95,7 @@
   function resetTranscriptState() {
     lastTranscript = '';
     processedTranscript = '';
+    pendingNavigation = false;
     manuallyStopped = false;
     clearTimeout(silenceTimeout);
   }
@@ -106,22 +108,66 @@
     return null;
   }
 
+  function getFocusedTextTarget() {
+    return isTextTarget(document.activeElement) ? document.activeElement : null;
+  }
+
   function detectNavigation(text) {
-    const lowered = String(text || '').toLowerCase().trim();
+    const lowered = String(text || '')
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
     const navPatterns = {
-      '/tutors/': ['take me to tutor', 'take me to tutors', 'go to tutor', 'go to tutors', 'show tutors', 'show tutor', 'tutor page', 'tutors page', 'find tutor', 'find tutors', 'search tutor', 'search tutors'],
-      '/dashboard/': ['take me to dashboard', 'go to dashboard', 'my dashboard', 'show dashboard', 'dashboard page'],
-      '/': ['go to home', 'go home', 'home page', 'main page', 'homepage', 'take me home'],
-      '/bookings/': ['take me to booking', 'take me to bookings', 'go to booking', 'go to bookings', 'my bookings', 'show bookings', 'booking page'],
-      '/Chat/': ['take me to chat', 'go to chat', 'my chat', 'show chat', 'chat page']
+      '/login/': ['login', 'log in', 'sign in', 'signin', 'login page', 'log in page', 'sign in page', 'take me to login', 'take me to log in', 'go to login', 'go to sign in'],
+      '/register/': ['signup', 'sign up', 'register', 'join', 'join free', 'create account', 'create an account', 'signup page', 'sign up page', 'register page', 'take me to signup', 'take me to sign up', 'go to signup', 'go to register'],
+      '/tutors/': ['tutor', 'tutors', 'find tutor', 'find tutors', 'search tutor', 'search tutors', 'tutor page', 'tutors page', 'take me to tutors', 'go to tutors', 'show tutors'],
+      '/dashboard/': ['dashboard', 'my dashboard', 'student dashboard', 'take me to dashboard', 'go to dashboard', 'show dashboard', 'dashboard page'],
+      '/saved-tutors/': ['saved tutor', 'saved tutors', 'my saved tutors', 'bookmarked tutors', 'saved tutors page'],
+      '/bookings/': ['booking', 'bookings', 'my bookings', 'take me to bookings', 'go to bookings', 'show bookings', 'booking page'],
+      '/password-reset/': ['forgot password', 'reset password', 'password reset', 'recover password'],
+      '/contact/': ['contact', 'contact us', 'support page', 'help page'],
+      '/about/': ['about', 'about us', 'about page'],
+      '/terms-of-service/': ['terms', 'terms of service', 'terms page'],
+      '/privacy-policy/': ['privacy', 'privacy policy', 'privacy page'],
+      '/admin-dashboard/': ['admin dashboard', 'admin panel', 'admin overview', 'control dashboard'],
+      '/admin-dashboard/homepage-tutors/': ['homepage tutors', 'home page tutors', 'featured tutors', 'top tutors'],
+      '/admin-dashboard/verifications/': ['verifications', 'verification queue', 'review verifications', 'tutor verification'],
+      '/admin-dashboard/users/': ['users', 'manage users', 'user management'],
+      '/admin-dashboard/bookings/': ['admin bookings', 'manage bookings'],
+      '/admin-dashboard/revenue/': ['revenue', 'payments', 'payouts', 'admin revenue'],
+      '/tutor/dashboard/': ['tutor dashboard', 'teacher dashboard'],
+      '/tutor/profile/': ['tutor profile', 'teacher profile'],
+      '/Chat/': ['chat', 'chats', 'my chat', 'messages', 'conversation', 'take me to chat', 'go to chat'],
+      '/': ['home', 'home page', 'main page', 'homepage', 'take me home', 'go home', 'go to home']
     };
 
     for (const path in navPatterns) {
       for (const pattern of navPatterns[path]) {
-        if (lowered.includes(pattern)) return path;
+        const escaped = pattern.replace(/[.*+?^${}()|[\]\\]/g, '\\$&').replace(/\s+/g, '\\s+');
+        if (new RegExp('(^|\\s)' + escaped + '(\\s|$)').test(lowered)) return path;
       }
     }
     return null;
+  }
+
+  function hasNavigationIntent(text) {
+    const lowered = String(text || '').toLowerCase();
+    return /\b(take me|navigate|open|go|show|visit|send me|bring me|move me)\b/.test(lowered);
+  }
+
+  function navigateTo(path, spokenText) {
+    if (!path || pendingNavigation) return;
+    pendingNavigation = true;
+    manuallyStopped = true;
+    clearTimeout(silenceTimeout);
+    showTranscript('Navigating', spokenText || path);
+    setTimeout(function () {
+      window.location.href = path;
+    }, 80);
+    if (recognition && isRecording) {
+      try { recognition.abort ? recognition.abort() : recognition.stop(); } catch (error) {}
+    }
   }
 
   function cleanTextForInput(text) {
@@ -163,12 +209,12 @@
     if (!text || text === processedTranscript) return;
     processedTranscript = text;
 
-    const textTarget = getActiveTextTarget();
     const navPath = detectNavigation(text);
+    const focusedTextTarget = getFocusedTextTarget();
+    const textTarget = getActiveTextTarget();
 
-    if (navPath && !textTarget) {
-      showTranscript('Navigating', text);
-      window.location.href = navPath;
+    if (navPath && (!focusedTextTarget || hasNavigationIntent(text))) {
+      navigateTo(navPath, text);
       return;
     }
 
@@ -192,6 +238,15 @@
         recognition.stop();
       }
     }, SILENCE_DURATION);
+  }
+
+  function scheduleQuickNavigation(interimText) {
+    const text = String(interimText || '').trim();
+    if (!text || pendingNavigation) return;
+    const navPath = detectNavigation(text);
+    if (navPath && (!getFocusedTextTarget() || hasNavigationIntent(text))) {
+      navigateTo(navPath, text);
+    }
   }
 
   function createRecognition() {
@@ -222,6 +277,7 @@
       lastTranscript = (finalText || combined).trim();
       showTranscript(event.results[event.results.length - 1].isFinal ? 'Heard' : 'Listening', lastTranscript || 'Listening...');
       scheduleAutoStop();
+      scheduleQuickNavigation(lastTranscript);
 
       if (finalText.trim()) {
         processVoiceInput(finalText.trim());
