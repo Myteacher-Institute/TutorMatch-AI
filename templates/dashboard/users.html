@@ -7,8 +7,13 @@
   <section class="mtc-admin-layout">
     {% include "dashboard/_admin_nav.html" %}
     <div class="mtc-admin-content">
-      <h1>User Management</h1>
-      <p class="lead">View and manage registered accounts, roles, and authorization levels.</p>
+      <div class="mtc-homepage-admin-hero">
+        <div>
+          <h1 style="color: #fff;">User Management</h1>
+          <p>View and manage registered accounts, roles, and authorization levels.</p>
+        </div>
+        <span class="mtc-home-featured-count">{{ paginator.count }} accounts</span>
+      </div>
       
       <div class="mtc-admin-card" style="overflow-x: auto;">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">

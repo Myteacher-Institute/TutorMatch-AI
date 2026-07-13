@@ -7,8 +7,13 @@
   <section class="mtc-admin-layout">
     {% include "dashboard/_admin_nav.html" %}
     <div class="mtc-admin-content">
-      <h1>Tutor Verification Queue</h1>
-      <p class="lead">Review pending government IDs, NIN documents, and academic certificates submitted by onboarding tutors.</p>
+      <div class="mtc-homepage-admin-hero">
+        <div>
+          <h1 style="color: #fff;">Tutor Verification Queue</h1>
+          <p>Review pending government IDs, NIN documents, and academic certificates submitted by onboarding tutors.</p>
+        </div>
+        <span class="mtc-home-featured-count">{{ pending_tutors|length }} pending</span>
+      </div>
       
       <div class="mtc-admin-card">
         <h2>Verification List ({{ pending_tutors|length }} pending)</h2>

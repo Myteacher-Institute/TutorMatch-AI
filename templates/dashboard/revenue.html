@@ -7,8 +7,13 @@
   <section class="mtc-admin-layout">
     {% include "dashboard/_admin_nav.html" %}
     <div class="mtc-admin-content">
-      <h1>Revenue &amp; Payments</h1>
-      <p class="lead">Track escrow deposits, commission splits, and payouts to verified tutors.</p>
+      <div class="mtc-homepage-admin-hero">
+        <div>
+          <h1 style="color: #fff;">Revenue &amp; Payments</h1>
+          <p>Track escrow deposits, commission splits, and payouts to verified tutors.</p>
+        </div>
+        <span class="mtc-home-featured-count">₦{{ summary.pending_amount|floatformat:2 }} pending payout</span>
+      </div>
 
       <div class="mtc-admin-metrics-grid" style="grid-template-columns: repeat(4, 1fr);">
         <div class="mtc-admin-metric-card mtc-metric-revenue">

@@ -7,8 +7,13 @@
   <section class="mtc-admin-layout">
     {% include "dashboard/_admin_nav.html" %}
     <div class="mtc-admin-content">
-      <h1>Booking Management</h1>
-      <p class="lead">Monitor active bookings, schedules, and lesson logs across the platform.</p>
+      <div class="mtc-homepage-admin-hero">
+        <div>
+          <h1 style="color: #fff;">Booking Management</h1>
+          <p>Monitor active bookings, schedules, and lesson logs across the platform.</p>
+        </div>
+        <span class="mtc-home-featured-count">{{ paginator.count }} bookings</span>
+      </div>
 
       <div class="mtc-admin-metrics-grid" style="grid-template-columns: repeat(4, 1fr);">
         <div class="mtc-admin-metric-card mtc-metric-bookings">
