@@ -14,8 +14,10 @@
     <aside class="mtc-auth-sidebar">
       <img src="{% static 'images/Register-image.png' %}" alt="Myteacherconnect sign up preview">
       <div class="mtc-auth-brand">
-        <span class="mtc-auth-logo-mark"><i class="fa-solid fa-graduation-cap"></i></span>
-        <span>Myteacher<span>Connect</span></span>
+        <a href="{% url 'home' %}" class="mtc-auth-brand-link">
+          <span class="mtc-auth-logo-mark"><i class="fa-solid fa-graduation-cap"></i></span>
+          <span>Myteacher<span>Connect</span></span>
+        </a>
       </div>
       <div class="mtc-auth-welcome">
         <h2>Start Learning</h2>

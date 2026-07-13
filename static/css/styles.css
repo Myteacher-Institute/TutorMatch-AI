@@ -3959,6 +3959,14 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   letter-spacing: 0;
 }
 
+.mtc-auth-brand-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+  color: inherit;
+  text-decoration: none;
+}
+
 .mtc-auth-brand > span:last-child span {
   color: #8bd8ff;
 }
