@@ -29,6 +29,7 @@ class Booking (models.Model):
     duration_unit = models.CharField(max_length=20, choices=Duration_CHOICES, default="weeks")
     rate_amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
     rate_period = models.CharField(max_length=20, default="weekly")
+    class_type = models.CharField(max_length=20, choices=[("online", "Online Class"), ("physical", "Physical Class")], default="online")
     status = models.CharField(max_length=20, choices= Booking_CHOICES, default="pending")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_at = models.DateTimeField(default=timezone.now)

@@ -31,23 +31,23 @@ def book_tutor(request, tutor_id):
         is_publicly_visible=True,
         verification_status="approved",
     )
-    amount = tutor.rate_amount or 0
     student_profile = _profile_for_user(request.user)
-    if amount <= 0:
-        messages.error(request, "This tutor has not set a booking rate yet, so booking is unavailable.")
-        return redirect("tutor_detail", tutor_id=tutor.id)
 
     if request.method == "POST":
         form = BookingForm(request.POST)
+        class_type = request.POST.get("class_type", "online")
         if form.is_valid():
             booking = form.save(commit=False)
             booking.student = student_profile
             booking.tutor = tutor
-            booking.rate_amount = tutor.rate_amount
+            booking.class_type = class_type
+            rate = tutor.online_class_fee if booking.class_type == "online" else tutor.physical_class_fee
+            booking.rate_amount = rate
             booking.rate_period = tutor.rate_period
             booking.amount = tutor.calculate_booking_amount(
                 booking.duration_value,
                 booking.duration_unit,
+                class_type=booking.class_type,
             )
             existing = Booking.objects.filter(
                 student=student_profile,
@@ -67,15 +67,20 @@ def book_tutor(request, tutor_id):
     else:
         form = BookingForm()
 
+    default_class_type = request.GET.get("class_type", "online")
+    default_amount = tutor.online_class_fee if default_class_type == "online" else tutor.physical_class_fee
     return render(
         request,
         "bookings/book_tutor.html",
         {
             "form": form,
             "tutor": tutor,
-            "amount": amount,
+            "amount": default_amount,
             "rate_period": tutor.rate_period,
             "rate_period_label": tutor.rate_period_label,
+            "online_class_fee": tutor.online_class_fee,
+            "physical_class_fee": tutor.physical_class_fee,
+            "default_class_type": default_class_type,
         },
     )
 

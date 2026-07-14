@@ -66,6 +66,10 @@
             <strong>&#8358;{{ booking.rate_amount|floatformat:0 }} / {{ booking.rate_period }}</strong>
           </div>
           <div>
+            <span>Class type</span>
+            <strong>{{ booking.get_class_type_display }}</strong>
+          </div>
+          <div>
             <span>Booking ID</span>
             <strong>#{{ booking.id|stringformat:"04d" }}</strong>
           </div>

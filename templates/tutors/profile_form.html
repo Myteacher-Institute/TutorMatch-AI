@@ -111,10 +111,16 @@
                 {% if form.location.errors %}<p class="tutor-field-error">{{ form.location.errors|join:", " }}</p>{% endif %}
               </div>
               <div class="tutor-form-field">
-                <label>Rate Amount (&#8358;)</label>
-                {{ form.rate_amount }}
-                <small>Set the amount you charge for your selected billing cycle.</small>
-                {% if form.rate_amount.errors %}<p class="tutor-field-error">{{ form.rate_amount.errors|join:", " }}</p>{% endif %}
+                <label>Online Class Fee (&#8358;)</label>
+                {{ form.online_class_fee }}
+                <small>Set the amount you charge for online classes.</small>
+                {% if form.online_class_fee.errors %}<p class="tutor-field-error">{{ form.online_class_fee.errors|join:", " }}</p>{% endif %}
+              </div>
+              <div class="tutor-form-field">
+                <label>Physical Class Fee (&#8358;)</label>
+                {{ form.physical_class_fee }}
+                <small>Set the amount you charge for physical/in-person classes.</small>
+                {% if form.physical_class_fee.errors %}<p class="tutor-field-error">{{ form.physical_class_fee.errors|join:", " }}</p>{% endif %}
               </div>
               <div class="tutor-form-field">
                 <label>Billing Cycle</label>
@@ -125,6 +131,7 @@
               <div class="tutor-form-field">
                 <label>Years of Experience</label>
                 {{ form.years_experience }}
+                <small>Enter the number of years you've been tutoring.</small>
                 {% if form.years_experience.errors %}<p class="tutor-field-error">{{ form.years_experience.errors|join:", " }}</p>{% endif %}
               </div>
             </div>

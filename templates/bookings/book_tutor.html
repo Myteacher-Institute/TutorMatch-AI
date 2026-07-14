@@ -48,8 +48,8 @@
 
         <div class="booking-flow-rate-card">
           <span>Tutor rate</span>
-          <strong>&#8358;{{ amount|floatformat:0 }}</strong>
-          <small>per {{ rate_period_label|lower }}</small>
+          <strong id="bookingRatePreview">&#8358;{{ amount|floatformat:0 }}</strong>
+          <small id="bookingRateLabel">per {{ rate_period_label|lower }}</small>
         </div>
 
         <div class="booking-flow-mini-grid">
@@ -118,11 +118,23 @@
             </label>
           </div>
 
+          <div class="booking-flow-class-toggle" id="classTypeToggle">
+            <span class="booking-flow-toggle-label">Class type</span>
+            <button type="button" class="class-toggle-btn is-active" data-class="online" data-rate="{{ online_class_fee }}">
+              <i class="fa-solid fa-globe"></i> Online Class
+            </button>
+            <button type="button" class="class-toggle-btn" data-class="physical" data-rate="{{ physical_class_fee }}">
+              <i class="fa-solid fa-building"></i> Physical Class
+            </button>
+          </div>
+
           <label class="booking-flow-field" for="{{ form.lesson_note.id_for_label }}">
             <span>What should the tutor know?</span>
             {{ form.lesson_note }}
             {% if form.lesson_note.errors %}<small>{{ form.lesson_note.errors|striptags }}</small>{% endif %}
           </label>
+
+          <input type="hidden" name="class_type" id="classTypeInput" value="{{ default_class_type }}">
 
           <div class="booking-flow-summary-bar">
             <div>
@@ -149,25 +161,43 @@
 </section>
 <script>
   (function () {
-    const rate = Number("{{ amount|default:0 }}");
+    const baseRate = Number("{{ amount|default:0 }}");
     const ratePeriod = "{{ rate_period|default:'weekly' }}";
     const periodDays = { daily: 1, weekly: 7, monthly: 30 };
     const unitDays = { days: 1, weeks: 7, months: 30 };
     const valueInput = document.querySelector('[name="duration_value"]');
     const unitInput = document.querySelector('[name="duration_unit"]');
     const preview = document.getElementById("bookingTotalPreview");
-    if (!valueInput || !unitInput || !preview) return;
+    const ratePreview = document.getElementById("bookingRatePreview");
+    const classTypeInput = document.getElementById("classTypeInput");
+    const toggleBtns = document.querySelectorAll(".class-toggle-btn");
 
     function formatNaira(value) {
       return "₦" + Math.max(value, 0).toLocaleString("en-NG", { maximumFractionDigits: 0 });
+    }
+
+    function getSelectedRate() {
+      const activeBtn = document.querySelector(".class-toggle-btn.is-active");
+      return Number(activeBtn ? activeBtn.dataset.rate : baseRate);
     }
 
     function updateTotal() {
       const value = Math.max(Number(valueInput.value || 1), 1);
       const totalDays = value * (unitDays[unitInput.value] || 7);
       const periods = Math.ceil(totalDays / (periodDays[ratePeriod] || 7));
+      const rate = getSelectedRate();
       preview.textContent = formatNaira(rate * periods);
+      ratePreview.textContent = formatNaira(rate);
     }
+
+    toggleBtns.forEach(function (btn) {
+      btn.addEventListener("click", function () {
+        toggleBtns.forEach(function (b) { b.classList.remove("is-active"); });
+        btn.classList.add("is-active");
+        if (classTypeInput) classTypeInput.value = btn.dataset.class;
+        updateTotal();
+      });
+    });
 
     valueInput.addEventListener("input", updateTotal);
     unitInput.addEventListener("change", updateTotal);

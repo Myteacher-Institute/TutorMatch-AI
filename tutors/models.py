@@ -75,6 +75,8 @@ class Tutor(models.Model):
     country = models.CharField(max_length=60, blank=True, default="Nigeria")
     rate_amount = models.PositiveIntegerField(default=0)
     rate_period = models.CharField(max_length=20, choices=RATE_PERIOD_CHOICES, default="weekly")
+    online_class_fee = models.PositiveIntegerField(default=0)
+    physical_class_fee = models.PositiveIntegerField(default=0)
     years_experience = models.PositiveIntegerField(default=0)
     verification_status = models.CharField(max_length=20, default="pending")
     subjects = models.ManyToManyField("Subject", related_name="tutors", blank=True)
@@ -130,7 +132,7 @@ class Tutor(models.Model):
     def rate_display(self):
         return f"₦{self.rate_amount}/{self.rate_period_label.lower()}"
 
-    def calculate_booking_amount(self, duration_value, duration_unit):
+    def calculate_booking_amount(self, duration_value, duration_unit, class_type="online"):
         unit_days = {
             "days": Decimal("1"),
             "weeks": Decimal("7"),
@@ -139,7 +141,8 @@ class Tutor(models.Model):
         duration_days = Decimal(max(int(duration_value or 1), 1)) * unit_days.get(duration_unit, Decimal("7"))
         period_days = self.RATE_PERIOD_DAYS.get(self.rate_period, Decimal("7"))
         periods = (duration_days / period_days).to_integral_value(rounding=ROUND_CEILING)
-        return Decimal(self.rate_amount) * periods
+        rate = self.online_class_fee if class_type == "online" else self.physical_class_fee
+        return Decimal(rate) * periods
 
 
 class TutorDocument(models.Model):
