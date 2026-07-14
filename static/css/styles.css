@@ -3174,6 +3174,12 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   .mtc-chart-wrap-doughnut {
     height: 240px;
   }
+  .mtc-booking-status-layout {
+    grid-template-columns: 1fr;
+  }
+  .mtc-booking-legend {
+    width: 100%;
+  }
 }
 
 /* Desktop: always show sidebar, no dropdown */
@@ -3256,6 +3262,20 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
     flex: 1;
     justify-content: center;
     min-height: 44px;
+  }
+}
+
+/* Phone: show date badge above hero content */
+@media (max-width: 560px) {
+  .mtc-admin-hero {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  .mtc-admin-hero-content {
+    order: 2;
+  }
+  .mtc-admin-date-badge {
+    order: 1;
   }
 }
 
@@ -6775,6 +6795,18 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   .tutor-page-heading {
     flex-direction: column;
     align-items: flex-start;
+  }
+
+  .tutor-hero-banner {
+    padding: 28px 22px;
+  }
+
+  .tutor-hero-top-btn {
+    position: static;
+    order: 3;
+    width: 100%;
+    justify-content: center;
+    margin-top: 4px;
   }
 
   .tutor-detail-profile-row {
