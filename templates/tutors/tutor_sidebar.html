@@ -1,3 +1,10 @@
+<style>
+  @media (max-width: 900px) {
+    #mobile-menu-btn {
+      display: none !important;
+    }
+  }
+</style>
 <aside class="mtc-admin-sidebar tutor-sidebar">
   <button class="tutor-hamburger" id="tutor-sidebar-toggle" aria-label="Toggle sidebar">
     <i class="fa-solid fa-bars"></i>
@@ -65,12 +72,10 @@
         </span>
       {% endif %}
     </a>
+    <a href="{% url 'home' %}" class="tutor-sidebar-back-link">
+      <i class="fa-solid fa-arrow-left" style="width:18px;margin-right:8px;"></i>Back to Website
+    </a>
   </nav>
-
-  <div class="tutor-sidebar-rate">
-    <span>Rate</span>
-    <strong>{% if profile.rate_amount %}&#8358;{{ profile.rate_amount }}/{{ profile.rate_period_label|lower }}{% else %}Not set{% endif %}</strong>
-  </div>
 </aside>
 <script>
   const toggle = document.getElementById('tutor-sidebar-toggle');

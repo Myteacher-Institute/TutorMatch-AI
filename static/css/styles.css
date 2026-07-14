@@ -5256,6 +5256,24 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   white-space: nowrap;
 }
 
+.tutor-sidebar-back-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  color: #64748b;
+  font-size: 13px;
+  font-weight: 700;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.tutor-sidebar-back-link:hover {
+  color: #2563eb;
+}
+
 .tutor-page-heading {
   display: flex;
   align-items: flex-start;
@@ -6909,8 +6927,8 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 .tutor-hamburger {
   display: none;
   position: fixed;
-  bottom: 24px;
-  right: 24px;
+  top: 16px;
+  right: 16px;
   z-index: 100;
   width: 50px;
   height: 50px;
@@ -6949,11 +6967,14 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
     left: -280px;
     width: 260px;
     height: 100vh;
+    height: 100dvh;
     z-index: 99;
     overflow-y: auto;
+    overflow-x: hidden;
     transition: left 0.3s ease;
     border-radius: 0;
     box-shadow: 4px 0 25px rgba(0,0,0,0.15);
+    padding: 20px;
   }
 
   .tutor-sidebar.tutor-sidebar-open {
@@ -6962,6 +6983,15 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 
   .mtc-admin-layout {
     grid-template-columns: 1fr;
+  }
+
+  .tutor-portal-bg {
+    padding: 24px 0 50px;
+  }
+
+  .tutor-sidebar-profile {
+    margin-bottom: 14px;
+    padding-bottom: 14px;
   }
 }
 
@@ -6987,52 +7017,23 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
     background: #e4efff;
     color: var(--blue);
   }
+
+  .tutor-sidebar-back-link {
+    margin-top: 12px;
+    padding-top: 12px;
+    border-top: 1px solid var(--line);
+    color: #64748b !important;
+    font-weight: 700 !important;
+  }
+
+  .tutor-sidebar-back-link:hover {
+    background: #f1f5f9 !important;
+    color: #475569 !important;
+  }
 }
 
 
 @media (max-width: 900px) {
-  .tutor-portal-bg {
-    padding: 24px 0 50px;
-  }
-
-  /* Stack sidebar above main content */
-  .mtc-admin-layout {
-    grid-template-columns: 1fr;
-    gap: 20px;
-  }
-
-  /* Sidebar */
-  .tutor-sidebar {
-    position: static;
-    padding: 20px;
-  }
-
-  .tutor-sidebar-profile {
-    margin-bottom: 14px;
-    padding-bottom: 14px;
-  }
-
-  /* Nav becomes horizontal scroll row */
-  .tutor-sidebar .mtc-admin-nav {
-    display: flex;
-    flex-direction: row;
-    overflow-x: auto;
-    gap: 8px;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
-  }
-
-  .tutor-sidebar .mtc-admin-nav a {
-    white-space: nowrap;
-    flex-shrink: 0;
-    padding: 10px 14px;
-    font-size: 13px;
-  }
-
-  .tutor-sidebar-rate {
-    display: none;
-  }
-
   /* Page heading */
   .tutor-page-heading {
     flex-direction: column;
