@@ -114,6 +114,36 @@
                           </form>
                           {% endif %}
                           <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-tutor-bookings-btn mtc-tutor-bookings-chat" style="background-color: #1d4ed8;"><i class="fa-regular fa-comment"></i>Chat</a>
+                          {% if booking.next_payout_installment %}
+                            <span class="mtc-unavailable-action" style="flex-basis: 100%; text-align: left;">
+                              Week {{ booking.next_payout_installment.week_number }} payout:
+                              {{ booking.next_payout_installment.get_status_display }}
+                            </span>
+                          {% endif %}
+                          <details style="flex-basis: 100%; max-width: 360px;">
+                            <summary class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject" style="cursor: pointer; display: inline-flex;">
+                              <i class="fa-solid fa-headset"></i>Complaint
+                            </summary>
+                            <form method="post" action="{% url 'tutor_complain_booking' booking.id %}" style="margin-top: 8px; display: grid; gap: 8px;">
+                              {% csrf_token %}
+                              {% if booking.next_payout_installment %}
+                                <input type="hidden" name="installment_id" value="{{ booking.next_payout_installment.id }}">
+                              {% endif %}
+                              <select name="reason" required style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                                <option value="attendance">Attendance or lateness</option>
+                                <option value="payment">Payment or payout</option>
+                                <option value="quality">Lesson disagreement</option>
+                                <option value="safety">Safety concern</option>
+                                <option value="other">Other</option>
+                              </select>
+                              <textarea name="message" rows="3" minlength="10" required placeholder="Explain what happened. Include lesson notes, attendance, chat, or meeting proof." style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;"></textarea>
+                              <input type="url" name="evidence_url" placeholder="Optional evidence link" style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                              <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-accept">Send to support</button>
+                            </form>
+                          </details>
+                          {% if booking.open_support_ticket %}
+                            <span class="mtc-unavailable-action" style="background: #fef3c7; color: #92400e;">Support: {{ booking.open_support_ticket.get_status_display }}</span>
+                          {% endif %}
                         {% else %}
                           <span class="mtc-unavailable-action">No action</span>
                         {% endif %}

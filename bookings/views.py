@@ -5,8 +5,10 @@ from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
 
 from accounts.models import UserProfile
-from .forms import BookingForm
+from .forms import BookingForm, SupportTicketForm
 from .models import Booking
+from payments.models import PayoutInstallment, SupportTicket
+from payments.services import next_actionable_installment, sync_due_installments
 from tutors.models import Tutor
 
 
@@ -88,10 +90,11 @@ def book_tutor(request, tutor_id):
 @login_required
 def student_bookings(request):
     student_profile = _profile_for_user(request.user)
+    sync_due_installments()
     bookings_queryset = (
         Booking.objects.filter(student=student_profile)
         .select_related("tutor__user__user")
-        .prefetch_related("payments", "reviews")
+        .prefetch_related("payments", "reviews", "payout_installments", "support_tickets")
         .order_by("-created_at")
     )
     pending_review_count = bookings_queryset.filter(status="pending").count()
@@ -117,6 +120,10 @@ def student_bookings(request):
         booking.display_payment_status_label = display_label
         if display_status == "pending":
             pending_payment_count += 1
+        booking.next_payout_installment = next_actionable_installment(booking)
+        booking.open_support_ticket = booking.support_tickets.filter(
+            status__in=[SupportTicket.STATUS_OPEN, SupportTicket.STATUS_IN_REVIEW]
+        ).first()
     completed_lessons_count = Booking.objects.filter(
         student=student_profile,
         status="completed",
@@ -146,10 +153,11 @@ def student_bookings(request):
 @login_required
 def tutor_bookings(request):
     tutor = get_object_or_404(Tutor, user=_profile_for_user(request.user))
+    sync_due_installments()
     bookings_queryset = (
         Booking.objects.filter(tutor=tutor)
         .select_related("student__user")
-        .prefetch_related("payments")
+        .prefetch_related("payments", "payout_installments", "support_tickets")
         .order_by("-created_at")
     )
     pending_count = bookings_queryset.filter(status="pending").count()
@@ -173,6 +181,10 @@ def tutor_bookings(request):
         booking.display_payment_status_label = (
             display_payment.get_payment_status_display() if display_payment else "Pending"
         )
+        booking.next_payout_installment = next_actionable_installment(booking)
+        booking.open_support_ticket = booking.support_tickets.filter(
+            status__in=[SupportTicket.STATUS_OPEN, SupportTicket.STATUS_IN_REVIEW]
+        ).first()
 
     return render(
         request,
@@ -245,4 +257,89 @@ def _refund_booking_if_paid(booking):
 
     payment.payment_status = "refunded"
     payment.save(update_fields=["payment_status"])
+    booking.payout_installments.exclude(status=PayoutInstallment.STATUS_RELEASED).update(
+        status=PayoutInstallment.STATUS_REFUNDED
+    )
     return None, True
+
+
+@login_required
+def student_confirm_payout(request, installment_id):
+    if request.method != "POST":
+        return redirect("student_bookings")
+
+    student_profile = _profile_for_user(request.user)
+    installment = get_object_or_404(
+        PayoutInstallment.objects.select_related("booking__student"),
+        pk=installment_id,
+        booking__student=student_profile,
+        status=PayoutInstallment.STATUS_AWAITING_STUDENT,
+    )
+    installment.mark_approved()
+    messages.success(request, f"Week {installment.week_number} approved. Tutor payout is now ready for admin release.")
+    return redirect("student_bookings")
+
+
+@login_required
+def student_complain_booking(request, booking_id):
+    if request.method != "POST":
+        return redirect("student_bookings")
+
+    student_profile = _profile_for_user(request.user)
+    booking = get_object_or_404(Booking, pk=booking_id, student=student_profile)
+    installment_id = request.POST.get("installment_id")
+    installment = None
+    if installment_id:
+        installment = get_object_or_404(PayoutInstallment, pk=installment_id, booking=booking)
+
+    form = SupportTicketForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Please add a reason and complaint details before submitting.")
+        return redirect("student_bookings")
+
+    ticket = form.save(commit=False)
+    ticket.booking = booking
+    ticket.installment = installment
+    ticket.raised_by = SupportTicket.ROLE_STUDENT
+    ticket.save()
+
+    if installment and installment.status in [
+        PayoutInstallment.STATUS_AWAITING_STUDENT,
+        PayoutInstallment.STATUS_APPROVED,
+    ]:
+        installment.status = PayoutInstallment.STATUS_DISPUTED
+        installment.save(update_fields=["status"])
+
+    messages.success(request, "Your complaint has been sent to support. The related payout is on hold while the team reviews it.")
+    return redirect("student_bookings")
+
+
+@login_required
+def tutor_complain_booking(request, booking_id):
+    if request.method != "POST":
+        return redirect("tutor_bookings")
+
+    tutor = get_object_or_404(Tutor, user=_profile_for_user(request.user))
+    booking = get_object_or_404(Booking, pk=booking_id, tutor=tutor)
+    installment_id = request.POST.get("installment_id")
+    installment = None
+    if installment_id:
+        installment = get_object_or_404(PayoutInstallment, pk=installment_id, booking=booking)
+
+    form = SupportTicketForm(request.POST)
+    if not form.is_valid():
+        messages.error(request, "Please add a reason and complaint details before submitting.")
+        return redirect("tutor_bookings")
+
+    ticket = form.save(commit=False)
+    ticket.booking = booking
+    ticket.installment = installment
+    ticket.raised_by = SupportTicket.ROLE_TUTOR
+    ticket.save()
+
+    if installment and installment.status != PayoutInstallment.STATUS_RELEASED:
+        installment.status = PayoutInstallment.STATUS_DISPUTED
+        installment.save(update_fields=["status"])
+
+    messages.success(request, "Your complaint has been sent to support for review.")
+    return redirect("tutor_bookings")

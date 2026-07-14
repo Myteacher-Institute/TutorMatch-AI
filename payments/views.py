@@ -7,6 +7,7 @@ import requests
 from django.conf import settings
 from bookings.models import Booking
 from .models import Payment
+from .services import create_weekly_payout_schedule
 
 
 def payment_success(request):
@@ -59,6 +60,11 @@ def _mark_booking_paid(booking):
         booking.save(update_fields=["status"])
 
 
+def _activate_platform_managed_payouts(payment):
+    if payment and payment.payment_status == "paid":
+        create_weekly_payout_schedule(payment)
+
+
 def initiate_flutterwave_refund(transaction_id, amount=None):
     """Refund a successful Flutterwave transaction by transaction ID."""
     if str(transaction_id).startswith("DEV-"):
@@ -103,6 +109,7 @@ def checkout(request, booking_id):
                     reference=f"DEV-{booking.id}",
                     transaction_id=f"DEV-{booking.id}",
                 )
+                _activate_platform_managed_payouts(booking.payments.order_by("-created_at").first())
                 _mark_booking_paid(booking)
                 messages.success(request, "Dev payment completed. Your booking is now active.")
                 return redirect("payment_success")
@@ -198,12 +205,13 @@ def verify_payment(request):
         commission = amount * Decimal('0.15')
         tutor_payout = amount * Decimal('0.85')
 
-        _upsert_booking_payment(
+        payment = _upsert_booking_payment(
             booking,
             status="paid",
             reference=tx_ref or payment_data.get("tx_ref", ""),
             transaction_id=str(transaction_id),
         )
+        _activate_platform_managed_payouts(payment)
         _mark_booking_paid(booking)
         messages.success(request, "Payment verified successfully.")
         return redirect("payment_success")

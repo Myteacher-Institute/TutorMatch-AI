@@ -9,6 +9,8 @@ from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Avg, Sum, Count, Q
 import json
+from payments.models import PayoutInstallment, SupportTicket
+from payments.services import sync_due_installments
 
 
 def home(request):
@@ -613,17 +615,140 @@ def bookings(request):
 
 
 @admin_required
+def support(request):
+    sync_due_installments()
+
+    if request.method == "POST":
+        ticket_id = request.POST.get("ticket_id")
+        action = request.POST.get("action")
+        admin_note = request.POST.get("admin_note", "").strip()
+        ticket = SupportTicket.objects.select_related("installment__payment").filter(pk=ticket_id).first()
+
+        if not ticket:
+            messages.error(request, "Support ticket not found.")
+            return redirect("admin_support")
+
+        installment = ticket.installment
+        if admin_note:
+            ticket.admin_note = admin_note
+
+        if action == "review":
+            ticket.status = SupportTicket.STATUS_IN_REVIEW
+            if installment and installment.status != PayoutInstallment.STATUS_RELEASED:
+                installment.status = PayoutInstallment.STATUS_DISPUTED
+                installment.save(update_fields=["status"])
+            ticket.save(update_fields=["status", "admin_note"])
+            messages.success(request, "Ticket moved to review and payout is held.")
+
+        elif action == "release":
+            if installment:
+                installment.mark_released()
+            ticket.status = SupportTicket.STATUS_RESOLVED
+            ticket.resolved_at = timezone.now()
+            ticket.save(update_fields=["status", "resolved_at", "admin_note"])
+            messages.success(request, "Ticket resolved and weekly tutor payout released.")
+
+        elif action == "refund":
+            if not installment:
+                messages.error(request, "This ticket is not linked to a weekly payout.")
+                return redirect("admin_support")
+            transaction_id = installment.payment.flutterwave_transaction_id
+            if not transaction_id:
+                messages.error(request, "No Flutterwave transaction ID found for this payment.")
+                return redirect("admin_support")
+
+            from payments.views import initiate_flutterwave_refund
+
+            ok, message, _ = initiate_flutterwave_refund(transaction_id, installment.amount)
+            if not ok:
+                messages.error(request, message)
+                return redirect("admin_support")
+
+            installment.status = PayoutInstallment.STATUS_REFUNDED
+            installment.save(update_fields=["status"])
+            ticket.status = SupportTicket.STATUS_RESOLVED
+            ticket.resolved_at = timezone.now()
+            ticket.save(update_fields=["status", "resolved_at", "admin_note"])
+            messages.success(request, "Ticket resolved and weekly payment refund was initiated.")
+
+        elif action == "close":
+            ticket.status = SupportTicket.STATUS_CLOSED
+            ticket.resolved_at = timezone.now()
+            ticket.save(update_fields=["status", "resolved_at", "admin_note"])
+            messages.success(request, "Ticket closed.")
+
+        return redirect("admin_support")
+
+    status_filter = request.GET.get("status", "").strip()
+    valid_statuses = dict(SupportTicket.STATUS_CHOICES)
+    qs = SupportTicket.objects.select_related(
+        "booking__student__user",
+        "booking__tutor__user__user",
+        "installment",
+    )
+    if status_filter in valid_statuses:
+        qs = qs.filter(status=status_filter)
+
+    paginator = Paginator(qs.order_by("-created_at"), 10)
+    page_obj = paginator.get_page(request.GET.get("page"))
+    status_counts = {
+        "open": SupportTicket.objects.filter(status=SupportTicket.STATUS_OPEN).count(),
+        "in_review": SupportTicket.objects.filter(status=SupportTicket.STATUS_IN_REVIEW).count(),
+        "resolved": SupportTicket.objects.filter(status=SupportTicket.STATUS_RESOLVED).count(),
+        "closed": SupportTicket.objects.filter(status=SupportTicket.STATUS_CLOSED).count(),
+    }
+
+    return render(
+        request,
+        "dashboard/support.html",
+        {
+            "tickets": page_obj.object_list,
+            "page_obj": page_obj,
+            "paginator": paginator,
+            "status_counts": status_counts,
+            "active_filter": status_filter,
+        },
+    )
+
+
+@admin_required
 def revenue(request):
+    sync_due_installments()
     Payment = None
+    Installment = None
     try:
         Payment = apps.get_model("payments", "Payment")
+        Installment = apps.get_model("payments", "PayoutInstallment")
     except (LookupError, AttributeError):
         pass
 
     if request.method == "POST":
         action = request.POST.get("action")
         payment_id = request.POST.get("payment_id")
-        if Payment and payment_id:
+        installment_id = request.POST.get("installment_id")
+        if Installment and installment_id:
+            try:
+                installment = Installment.objects.get(pk=installment_id)
+                if action == "release_installment" and installment.status in [
+                    PayoutInstallment.STATUS_APPROVED,
+                    PayoutInstallment.STATUS_AWAITING_STUDENT,
+                ]:
+                    if installment.status == PayoutInstallment.STATUS_AWAITING_STUDENT and not installment.is_auto_approved:
+                        messages.error(request, "This student still has time to complain before auto-approval.")
+                    else:
+                        installment.mark_released()
+                        messages.success(request, f"Week {installment.week_number} payout released.")
+                elif action == "approve_installment" and installment.status == PayoutInstallment.STATUS_DISPUTED:
+                    installment.status = PayoutInstallment.STATUS_APPROVED
+                    installment.save(update_fields=["status"])
+                    messages.success(request, f"Week {installment.week_number} dispute approved for payout.")
+                elif action == "hold_installment":
+                    installment.status = PayoutInstallment.STATUS_DISPUTED
+                    installment.save(update_fields=["status"])
+                    messages.success(request, f"Week {installment.week_number} payout held for support review.")
+            except Installment.DoesNotExist:
+                pass
+        elif Payment and payment_id:
             try:
                 payment = Payment.objects.get(pk=payment_id)
                 if action == "mark_paid":
@@ -651,8 +776,17 @@ def revenue(request):
     if Payment:
         try:
             received = Payment.objects.filter(payment_status__in=["paid", "released"])
-            released = Payment.objects.filter(payment_status="released")
-            pending = Payment.objects.filter(payment_status__in=["pending", "paid"])
+            installments = Installment.objects.select_related(
+                "payment",
+                "booking__tutor__user__user",
+                "booking__student__user",
+            )
+            released = installments.filter(status=Installment.STATUS_RELEASED)
+            pending = installments.filter(status__in=[
+                Installment.STATUS_AWAITING_STUDENT,
+                Installment.STATUS_APPROVED,
+                Installment.STATUS_DISPUTED,
+            ])
             failed = Payment.objects.filter(payment_status="failed")
 
             summary["total_collected"] = float(received.aggregate(Sum("amount"))["amount__sum"] or 0)
@@ -665,14 +799,18 @@ def revenue(request):
             summary["failed_sessions"] = failed.count()
 
             payout_rows = (
-                Payment.objects
+                installments
                 .values("booking__tutor")
                 .annotate(
-                    total_collected=Sum("amount", filter=Q(payment_status__in=["paid", "released"])),
-                    total_commission=Sum("commission", filter=Q(payment_status__in=["paid", "released"])),
-                    total_payout=Sum("tutor_payout", filter=Q(payment_status="released")),
-                    paid_sessions=Count("id", filter=Q(payment_status__in=["paid", "released"])),
-                    pending_sessions=Count("id", filter=Q(payment_status="pending")),
+                    total_collected=Sum("amount"),
+                    total_commission=Sum("commission"),
+                    total_payout=Sum("tutor_payout", filter=Q(status=Installment.STATUS_RELEASED)),
+                    paid_sessions=Count("id", filter=Q(status=Installment.STATUS_RELEASED)),
+                    pending_sessions=Count("id", filter=Q(status__in=[
+                        Installment.STATUS_AWAITING_STUDENT,
+                        Installment.STATUS_APPROVED,
+                        Installment.STATUS_DISPUTED,
+                    ])),
                     sessions=Count("id"),
                 )
                 .order_by("-total_collected")
@@ -700,7 +838,7 @@ def revenue(request):
                     "status": "Pending Payout" if has_pending else "Paid",
                 })
 
-            for p in Payment.objects.select_related("booking__tutor__user__user", "booking__student__user").order_by("-created_at"):
+            for p in installments.order_by("-period_start", "-created_at"):
                 tutor = p.booking.tutor if p.booking else None
                 student = p.booking.student if p.booking else None
                 booking_status = p.booking.status if p.booking else "pending"
@@ -709,13 +847,19 @@ def revenue(request):
                     booking_status_label = "Rejected"
                 recent_payments.append({
                     "id": p.id,
-                    "reference": p.flutterwave_reference or p.flutterwave_transaction_id or "-",
+                    "reference": p.payment.flutterwave_reference or p.payment.flutterwave_transaction_id or "-",
+                    "week_number": p.week_number,
+                    "period_start": p.period_start,
+                    "period_end": p.period_end,
+                    "auto_release_at": p.auto_release_at,
+                    "is_auto_approved": p.is_auto_approved,
                     "tutor": tutor.get_full_name if tutor else "-",
                     "student": student.user.get_full_name if student and student.user else (student.user.username if student and student.user else "-"),
                     "amount": float(p.amount),
                     "commission": float(p.commission),
                     "payout": float(p.tutor_payout),
-                    "status": p.payment_status,
+                    "status": p.status,
+                    "status_label": p.get_status_display(),
                     "booking_status": booking_status,
                     "booking_status_label": booking_status_label,
                     "created_at": p.created_at,
@@ -736,7 +880,7 @@ def revenue(request):
                 day_start = timezone.make_aware(timezone.datetime.combine(d, timezone.datetime.min.time()))
                 day_end = day_start + timedelta(days=1)
                 day_rev = received.filter(created_at__gte=day_start, created_at__lt=day_end).aggregate(Sum("amount"))["amount__sum"] or 0
-                day_payout = released.filter(created_at__gte=day_start, created_at__lt=day_end).aggregate(Sum("tutor_payout"))["tutor_payout__sum"] or 0
+                day_payout = released.filter(released_at__gte=day_start, released_at__lt=day_end).aggregate(Sum("tutor_payout"))["tutor_payout__sum"] or 0
                 revenue_growth.append(float(day_rev))
                 payout_growth.append(float(day_payout))
         except (LookupError, AttributeError, TypeError):

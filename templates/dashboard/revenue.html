@@ -10,7 +10,7 @@
       <div class="mtc-homepage-admin-hero">
         <div>
           <h1 style="color: #fff;">Revenue &amp; Payments</h1>
-          <p>Track escrow deposits, commission splits, and payouts to verified tutors.</p>
+          <p>Track platform-managed deposits, commission splits, and weekly payouts to verified tutors.</p>
         </div>
         <span class="mtc-home-featured-count">₦{{ summary.pending_amount|floatformat:2 }} pending payout</span>
       </div>
@@ -60,7 +60,7 @@
         <div class="mtc-ledger-head">
           <div>
             <h2>Financial Ledger</h2>
-            <p>Escrow bookkeeping and transaction logs with Flutterwave references and commission splits.</p>
+            <p>Platform-managed payout logs with Flutterwave references, weekly releases, complaints, and commission splits.</p>
           </div>
         </div>
 
@@ -83,7 +83,10 @@
             <tbody>
               {% for p in ledger_page %}
               <tr>
-                <td class="mtc-ledger-ref">{{ p.reference }}</td>
+                <td class="mtc-ledger-ref">
+                  {{ p.reference }}<br>
+                  <small>Week {{ p.week_number }}: {{ p.period_start|date:"M j" }} - {{ p.period_end|date:"M j" }}</small>
+                </td>
                 <td class="mtc-ledger-name">{{ p.tutor }}</td>
                 <td>
                   <div class="mtc-ledger-bank">{{ p.bank_name|default:"—" }}</div>
@@ -101,9 +104,12 @@
                 <td class="mtc-ledger-amount">₦{{ p.amount|floatformat:2 }}</td>
                 <td class="mtc-ledger-payout">₦{{ p.payout|floatformat:2 }}</td>
                 <td>
-                  <span class="mtc-ledger-status {% if p.status == 'released' %}is-released{% elif p.status == 'paid' %}is-paid{% elif p.status == 'pending' %}is-pending{% elif p.status == 'refunded' %}is-refunded{% else %}is-failed{% endif %}">
-                    {% if p.status == "released" %}Released{% elif p.status == "paid" %}Paid{% elif p.status == "pending" %}Pending{% elif p.status == "refunded" %}Refunded{% else %}Failed{% endif %}
+                  <span class="mtc-ledger-status {% if p.status == 'released' %}is-released{% elif p.status == 'approved' %}is-paid{% elif p.status == 'awaiting_student' or p.status == 'scheduled' %}is-pending{% elif p.status == 'refunded' %}is-refunded{% else %}is-failed{% endif %}">
+                    {{ p.status_label }}
                   </span>
+                  {% if p.status == "awaiting_student" %}
+                    <div class="mtc-ledger-ref">Auto after {{ p.auto_release_at|date:"M j, Y" }}</div>
+                  {% endif %}
                 </td>
                 <td class="mtc-ledger-date">{{ p.created_at|date:"M d, Y H:i" }}</td>
                 <td class="mtc-ledger-actions">
@@ -113,24 +119,34 @@
                     <span class="mtc-ledger-paidout"><i class="fa-solid fa-check"></i> Paid out</span>
                   {% elif p.status == "refunded" %}
                     <span class="mtc-ledger-paidout" style="color: #6d28d9;"><i class="fa-solid fa-rotate-left"></i> Refunded</span>
-                  {% elif p.status == "paid" %}
+                  {% elif p.status == "approved" or p.is_auto_approved %}
                     <form method="post" style="display: inline-block;">
                       {% csrf_token %}
-                      <input type="hidden" name="action" value="release">
-                      <input type="hidden" name="payment_id" value="{{ p.id }}">
+                      <input type="hidden" name="action" value="release_installment">
+                      <input type="hidden" name="installment_id" value="{{ p.id }}">
                       <button type="submit" class="mtc-ledger-btn">
-                      <i class="fa-solid fa-money-bill-transfer"></i>Mark Paid
+                      <i class="fa-solid fa-money-bill-transfer"></i>Release Week
+                      </button>
+                    </form>
+                    <form method="post" style="display: inline-block;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="hold_installment">
+                      <input type="hidden" name="installment_id" value="{{ p.id }}">
+                      <button type="submit" class="mtc-ledger-btn" style="background: #fff7ed; color: #c2410c;">
+                        <i class="fa-solid fa-hand"></i> Hold
+                      </button>
+                    </form>
+                  {% elif p.status == "disputed" %}
+                    <form method="post" style="display: inline-block;">
+                      {% csrf_token %}
+                      <input type="hidden" name="action" value="approve_installment">
+                      <input type="hidden" name="installment_id" value="{{ p.id }}">
+                      <button type="submit" class="mtc-ledger-btn">
+                        <i class="fa-solid fa-check"></i> Approve
                       </button>
                     </form>
                   {% else %}
-                    <form method="post" style="display: inline-block;">
-                      {% csrf_token %}
-                      <input type="hidden" name="action" value="mark_paid">
-                      <input type="hidden" name="payment_id" value="{{ p.id }}">
-                      <button type="submit" class="mtc-ledger-btn">
-                        <i class="fa-solid fa-money-bill-transfer"></i> Mark Paid
-                      </button>
-                    </form>
+                    <span class="mtc-ledger-paidout" style="color: #64748b;"><i class="fa-solid fa-clock"></i> Waiting</span>
                   {% endif %}
                 </td>
               </tr>

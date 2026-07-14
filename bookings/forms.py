@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from .models import Booking
+from payments.models import SupportTicket
 from django.core.exceptions import ValidationError
 from datetime import date, datetime
 
@@ -40,3 +41,25 @@ class BookingForm(forms.ModelForm):
         if duration_value < 1:
             raise ValidationError("Duration must be at least 1.")
         return duration_value
+
+
+class SupportTicketForm(forms.ModelForm):
+    class Meta:
+        model = SupportTicket
+        fields = ["reason", "message", "evidence_url"]
+        widgets = {
+            "reason": forms.Select(),
+            "message": forms.Textarea(attrs={
+                "rows": 3,
+                "placeholder": "Tell support what happened. Include attendance, lesson notes, chat details, or anything the team should review.",
+            }),
+            "evidence_url": forms.URLInput(attrs={
+                "placeholder": "Optional evidence link: screenshot, recording, document, or meeting link",
+            }),
+        }
+
+    def clean_message(self):
+        message = self.cleaned_data["message"].strip()
+        if len(message) < 10:
+            raise ValidationError("Please add a little more detail for support.")
+        return message

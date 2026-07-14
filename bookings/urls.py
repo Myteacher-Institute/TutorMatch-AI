@@ -11,4 +11,19 @@ urlpatterns = [
         views.update_booking_status,
         name="update_booking_status",
     ),
+    path(
+        "bookings/payouts/<int:installment_id>/confirm/",
+        views.student_confirm_payout,
+        name="student_confirm_payout",
+    ),
+    path(
+        "bookings/<int:booking_id>/complaint/",
+        views.student_complain_booking,
+        name="student_complain_booking",
+    ),
+    path(
+        "tutor/bookings/<int:booking_id>/complaint/",
+        views.tutor_complain_booking,
+        name="tutor_complain_booking",
+    ),
 ]
