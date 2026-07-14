@@ -9,6 +9,7 @@ urlpatterns = [
     path("verify/", views.verify_account, name="verify_account"),
     path("dashboard/", views.student_dashboard, name="student_dashboard"),
     path("saved-tutors/", views.saved_tutors, name="saved_tutors"),
+    path("delete-account/", views.delete_account, name="delete_account"),
     path(
         "toggle-save-tutor/<int:tutor_id>/",
         views.toggle_save_tutor,

@@ -4,8 +4,10 @@ from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import Registration, Login
 from .models import UserProfile
+from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 
 
 def register(request):
@@ -70,6 +72,7 @@ from bookings.models import Booking
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
+from payments.models import PayoutInstallment, SupportTicket
 
 
 @student_required
@@ -146,6 +149,100 @@ def saved_tutors(request):
         request,
         "accounts/saved_tutors.html",
         {"tutors": tutors, "active_tab": "saved_tutors"},
+    )
+
+
+def _delete_account_blockers(profile):
+    blockers = []
+    active_statuses = ["pending", "accepted"]
+    active_payout_statuses = [
+        PayoutInstallment.STATUS_SCHEDULED,
+        PayoutInstallment.STATUS_AWAITING_STUDENT,
+        PayoutInstallment.STATUS_APPROVED,
+        PayoutInstallment.STATUS_DISPUTED,
+    ]
+
+    if profile.role == UserProfile.ROLE_STUDENT:
+        active_bookings = Booking.objects.filter(
+            student=profile,
+            status__in=active_statuses,
+        ).count()
+        active_payouts = PayoutInstallment.objects.filter(
+            booking__student=profile,
+            status__in=active_payout_statuses,
+        ).count()
+        open_tickets = SupportTicket.objects.filter(
+            booking__student=profile,
+            status__in=[SupportTicket.STATUS_OPEN, SupportTicket.STATUS_IN_REVIEW],
+        ).count()
+    elif profile.role == UserProfile.ROLE_TUTOR:
+        tutor = Tutor.objects.filter(user=profile).first()
+        active_bookings = Booking.objects.filter(
+            tutor=tutor,
+            status__in=active_statuses,
+        ).count() if tutor else 0
+        active_payouts = PayoutInstallment.objects.filter(
+            booking__tutor=tutor,
+            status__in=active_payout_statuses,
+        ).count() if tutor else 0
+        open_tickets = SupportTicket.objects.filter(
+            booking__tutor=tutor,
+            status__in=[SupportTicket.STATUS_OPEN, SupportTicket.STATUS_IN_REVIEW],
+        ).count() if tutor else 0
+    else:
+        active_bookings = 0
+        active_payouts = 0
+        open_tickets = 0
+
+    if active_bookings:
+        blockers.append(f"{active_bookings} active booking{'s' if active_bookings != 1 else ''}")
+    if active_payouts:
+        blockers.append(f"{active_payouts} weekly payout item{'s' if active_payouts != 1 else ''} still in progress")
+    if open_tickets:
+        blockers.append(f"{open_tickets} open support ticket{'s' if open_tickets != 1 else ''}")
+    return blockers
+
+
+@login_required(login_url="login")
+def delete_account(request):
+    user = request.user
+    if user.is_staff or user.is_superuser:
+        messages.error(request, "Staff accounts cannot be deleted from this page.")
+        return redirect("admin_dashboard")
+
+    profile, _ = UserProfile.objects.get_or_create(user=user)
+    blockers = _delete_account_blockers(profile)
+
+    if request.method == "POST":
+        password = request.POST.get("password", "")
+        confirmation = request.POST.get("confirmation", "").strip()
+
+        if blockers:
+            messages.error(request, "Resolve active bookings, payouts, or support tickets before deleting this account.")
+            return redirect("delete_account")
+        if confirmation != "DELETE":
+            messages.error(request, "Type DELETE exactly to confirm account deletion.")
+            return redirect("delete_account")
+        if user.has_usable_password() and not user.check_password(password):
+            messages.error(request, "Password is incorrect.")
+            return redirect("delete_account")
+
+        with transaction.atomic():
+            user_to_delete = user
+            auth_logout(request)
+            user_to_delete.delete()
+        messages.success(request, "Your account has been deleted.")
+        return redirect("home")
+
+    return render(
+        request,
+        "accounts/delete_account.html",
+        {
+            "active_tab": "delete_account",
+            "blockers": blockers,
+            "user_profile": profile,
+            "tutor_profile": Tutor.objects.filter(user=profile).first() if profile.role == UserProfile.ROLE_TUTOR else None,
+        },
     )
 
 

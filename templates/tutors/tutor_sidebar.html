@@ -72,6 +72,9 @@
         </span>
       {% endif %}
     </a>
+    <a href="{% url 'delete_account' %}" {% if active_tab == 'delete_account' %}class="active"{% endif %}>
+      <i class="fa-solid fa-trash-can" style="width:18px;margin-right:8px;"></i>Delete Account
+    </a>
     <a href="{% url 'home' %}" class="tutor-sidebar-back-link">
       <i class="fa-solid fa-arrow-left" style="width:18px;margin-right:8px;"></i>Back to Website
     </a>
