@@ -5253,6 +5253,7 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   font-size: 20px;
   color: var(--blue);
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .tutor-page-heading {
@@ -6183,23 +6184,48 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 }
 
 .tutor-booking-rate {
-  text-align: center;
   padding-bottom: 18px;
   border-bottom: 1px solid var(--line);
   margin-bottom: 18px;
 }
 
+.tutor-booking-rate-head {
+  text-align: center;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin-bottom: 12px;
+}
+
+.tutor-booking-rate-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.tutor-booking-rate-label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
 .tutor-booking-rate strong {
   display: block;
-  font-size: 34px;
+  font-size: 20px;
   font-weight: 800;
   color: var(--blue);
   letter-spacing: -0.04em;
 }
 
-.tutor-booking-rate span {
+.tutor-booking-rate-period {
+  display: block;
+  text-align: center;
   font-size: 13px;
   color: var(--muted);
+  margin-top: 6px;
 }
 
 .tutor-booking-stats {
@@ -10731,10 +10757,10 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 }
 
 .booking-flow-rate-card {
-  display: grid;
-  grid-template-columns: 1fr auto;
-  align-items: end;
-  gap: 12px;
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
   margin-top: 16px;
   border: 1px solid #cfe0ff;
   border-radius: 18px;
@@ -10743,9 +10769,25 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   color: #071127;
 }
 
-.booking-flow-rate-card span,
-.booking-flow-rate-card small {
-  display: block;
+.booking-flow-rate-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+}
+
+.booking-flow-rate-label {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  color: #667795;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.booking-flow-rate-label small {
   color: #667795;
   font-size: 12px;
   font-weight: 800;
@@ -10753,7 +10795,7 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 
 .booking-flow-rate-card strong {
   display: block;
-  margin: 4px 0;
+  margin: 0;
   color: #1d4ed8;
   font-size: 34px;
   font-weight: 950;

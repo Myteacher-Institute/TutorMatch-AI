@@ -157,8 +157,16 @@
         <div class="mtc-admin-card tutor-booking-card">
 
           <div class="tutor-booking-rate">
-            <strong>&#8358;{{ tutor.rate_amount }}</strong>
-            <span>per {{ tutor.rate_period_label|lower }}</span>
+            <div class="tutor-booking-rate-head">Tuition rate</div>
+            <div class="tutor-booking-rate-row">
+              <span class="tutor-booking-rate-label">Online pay</span>
+              <strong>&#8358;{{ tutor.online_class_fee|default:tutor.rate_amount }}</strong>
+            </div>
+            <div class="tutor-booking-rate-row">
+              <span class="tutor-booking-rate-label">Physical pay</span>
+              <strong>&#8358;{{ tutor.physical_class_fee|default:tutor.rate_amount }}</strong>
+            </div>
+            <span class="tutor-booking-rate-period">per {{ tutor.rate_period_label|lower }}</span>
           </div>
 
           <div class="tutor-booking-stats">

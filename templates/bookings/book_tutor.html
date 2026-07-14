@@ -47,9 +47,10 @@
         </div>
 
         <div class="booking-flow-rate-card">
-          <span>Tutor rate</span>
-          <strong id="bookingRatePreview">&#8358;{{ amount|floatformat:0 }}</strong>
-          <small id="bookingRateLabel">per {{ rate_period_label|lower }}</small>
+          <div class="booking-flow-rate-row">
+            <span class="booking-flow-rate-label">Tutor rate <small id="bookingRateLabel">per {{ rate_period_label|lower }}</small></span>
+            <strong id="bookingRatePreview">&#8358;{{ amount|floatformat:0 }}</strong>
+          </div>
         </div>
 
         <div class="booking-flow-mini-grid">
