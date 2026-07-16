@@ -11,7 +11,8 @@ from django.db import transaction
 
 
 def register(request):
-    form = Registration()
+    initial_role = UserProfile.ROLE_TUTOR if request.GET.get("role") == UserProfile.ROLE_TUTOR else UserProfile.ROLE_STUDENT
+    form = Registration(initial={"role_selection": initial_role})
     if request.method == 'POST':
         form = Registration(request.POST)
         if form.is_valid():

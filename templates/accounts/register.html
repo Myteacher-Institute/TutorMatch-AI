@@ -45,10 +45,10 @@
               {% if field.name == 'role_selection' %}
                 <label>{{ field.label }}</label>
                 <div class="role-toggle" id="role-toggle">
-                  <button type="button" class="role-toggle-btn active" data-value="student">Student/Parent</button>
-                  <button type="button" class="role-toggle-btn" data-value="tutor">Tutor</button>
+                  <button type="button" class="role-toggle-btn {% if field.value|default:'student' == 'student' %}active{% endif %}" data-value="student">Student/Parent</button>
+                  <button type="button" class="role-toggle-btn {% if field.value == 'tutor' %}active{% endif %}" data-value="tutor">Tutor</button>
                 </div>
-                <input type="hidden" name="{{ field.name }}" id="{{ field.id_for_label }}" value="student">
+                <input type="hidden" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{{ field.value|default:'student' }}">
               {% elif field.field.choices %}
                 <label for="{{ field.id_for_label }}">
                   {{ field.label }}
@@ -132,6 +132,11 @@
    if (roleToggle) {
      const toggleButtons = roleToggle.querySelectorAll('.role-toggle-btn');
      const hiddenInput = document.getElementById('id_role_selection');
+     const selectedButton = roleToggle.querySelector(`.role-toggle-btn[data-value="${hiddenInput.value || 'student'}"]`);
+     if (selectedButton) {
+       toggleButtons.forEach(b => b.classList.remove('active'));
+       selectedButton.classList.add('active');
+     }
      
      toggleButtons.forEach(btn => {
        btn.addEventListener('click', () => {

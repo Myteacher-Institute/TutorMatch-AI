@@ -5,6 +5,7 @@ from django.shortcuts import render, redirect
 from django.apps import apps
 from accounts.decorators import admin_required
 from tutors.models import Tutor
+from bookings.models import Booking
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Avg, Sum, Count, Q
@@ -29,7 +30,28 @@ def home(request):
         base_featured_tutors
         .order_by("user__created_at", "id")[:3]
     )
-    return render(request, "home.html", {"featured_tutors": featured_tutors})
+    verified_tutors_count = base_featured_tutors.count()
+    completed_lessons_count = Booking.objects.filter(status="completed").count()
+    cities_covered_count = (
+        Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
+        .exclude(location="")
+        .values("location")
+        .distinct()
+        .count()
+    )
+    parents_count = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count()
+
+    return render(
+        request,
+        "home.html",
+        {
+            "featured_tutors": featured_tutors,
+            "verified_tutors_count": verified_tutors_count,
+            "completed_lessons_count": completed_lessons_count,
+            "cities_covered_count": cities_covered_count,
+            "parents_count": parents_count,
+        },
+    )
 
 
 def _available_home_tutors():
