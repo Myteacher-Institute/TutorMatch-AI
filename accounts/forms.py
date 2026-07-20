@@ -6,7 +6,7 @@ from django.conf import settings
 from django.core.validators import RegexValidator
 from django.template import loader
 
-from .models import UserProfile
+from .models import SuccessStory, UserProfile
 from .email_services import send_transactional_email
 
 
@@ -115,3 +115,13 @@ class ZeptoPasswordResetForm(PasswordResetForm):
             reply_to_email=settings.ZEPTOMAIL_REPLY_TO_EMAIL,
             reply_to_name=settings.ZEPTOMAIL_REPLY_TO_NAME,
         )
+
+
+class SuccessStoryForm(forms.ModelForm):
+    class Meta:
+        model = SuccessStory
+        fields = ["title", "story"]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Give your story a short title"}),
+            "story": forms.Textarea(attrs={"placeholder": "Tell the community what changed for you...", "rows": 6}),
+        }
