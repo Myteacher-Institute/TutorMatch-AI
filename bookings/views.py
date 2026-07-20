@@ -298,7 +298,11 @@ def student_confirm_payout(request, installment_id):
         return redirect("student_bookings")
 
     installment.mark_approved()
-    messages.success(request, f"Week {installment.week_number} approved. Tutor payout is now ready for admin release.")
+    installment.mark_released()
+    messages.success(
+        request,
+        f"Week {installment.week_number} confirmed. Tutor payout has been released automatically.",
+    )
     return redirect("student_bookings")
 
 

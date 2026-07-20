@@ -8,7 +8,7 @@ from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
 from .models import Tutor, TutorDocument, Subject
 from bookings.models import Booking
-from payments.models import Payment
+from payments.models import PayoutInstallment
 from reviews.models import Review
 from .forms import TutorProfileForm, TutorDocumentForm
 from .geo_data import NIGERIAN_LGAS, DEFAULT_COUNTRY
@@ -20,8 +20,9 @@ import json
 def tutor_dashboard(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
     bookings_count = Booking.objects.filter(tutor=profile, payments__payment_status="paid").distinct().count()
-    total_earnings = Payment.objects.filter(
-        booking__tutor=profile, payment_status="released"
+    total_earnings = PayoutInstallment.objects.filter(
+        booking__tutor=profile,
+        status=PayoutInstallment.STATUS_RELEASED,
     ).aggregate(total=Sum("tutor_payout"))["total"] or 0
     upcoming_bookings = (
         Booking.objects.filter(
