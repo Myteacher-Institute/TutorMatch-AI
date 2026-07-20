@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}TutorMatch AI{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260720-success-stories">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260720-complaint-modal">
   <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260712">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script>
@@ -98,7 +98,7 @@
     <div class="mtc-shell mtc-footer-grid" style="padding: 0 0 40px;">
       <div class="mtc-footer-about">
         <a href="{% url 'home' %}" class="mtc-footer-brand" style="display: inline-flex; align-items: center; text-decoration: none;">
-          <img src="{% static 'images/logos/photo_2026-07-19_21-48-00.jpg' %}" alt="MyteacherConnect" style="display: block; width: 220px; max-width: 100%; height: auto;">
+          <img src="{% static 'images/logos/myteacherconnect-logo-blue-transparent.png' %}" alt="MyteacherConnect" style="display: block; width: 220px; max-width: 100%; height: auto; filter: brightness(0) invert(1);">
         </a>
         <p style="color: #94a3b8;">Connecting Nigeria's best minds with eager learners through smart AI matching.</p>
         <div class="mtc-socials" aria-label="Social links">
@@ -283,6 +283,7 @@
   <script src="https://unpkg.com/htmx.org@1.9.10"></script>
   <script src="{% static 'js/app-shell.js' %}?v=20260702"></script>
   <script src="{% static 'js/confirm-modal.js' %}?v=20260712"></script>
+  <script src="{% static 'js/complaint-modal.js' %}?v=20260720"></script>
 
   <!-- Floating Voice Mic Widget on all pages -->
   {% include 'components/floating_mic.html' %}
