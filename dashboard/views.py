@@ -367,6 +367,7 @@ def export_weekly_report(request):
     h_style = ParagraphStyle("H", parent=styles["Heading2"], textColor=brand, fontSize=13, spaceBefore=14, spaceAfter=6)
     cell_style = ParagraphStyle("Cell", parent=styles["Normal"], fontSize=9.5, textColor=dark)
     cell_muted = ParagraphStyle("CellM", parent=styles["Normal"], fontSize=9.5, textColor=muted)
+    cell_header = ParagraphStyle("CellH", parent=styles["Normal"], fontSize=9.5, textColor=colors.white, fontName="Helvetica-Bold")
     label_style = ParagraphStyle("Label", parent=styles["Normal"], fontSize=9, textColor=muted, alignment=TA_CENTER)
     value_style = ParagraphStyle("Value", parent=styles["Normal"], fontSize=15, textColor=dark, alignment=TA_CENTER, leading=18)
 
@@ -412,7 +413,7 @@ def export_weekly_report(request):
     elems.append(metric_table)
 
     elems.append(Paragraph("Revenue — Last 7 Days", h_style))
-    rev_data = [[Paragraph("Day", cell_style), Paragraph("Revenue", cell_style)]]
+    rev_data = [[Paragraph("Day", cell_header), Paragraph("Revenue", cell_header)]]
     for day, rev in day_revenue:
         rev_data.append([Paragraph(day, cell_style), Paragraph(naira(rev), cell_style)])
     rev_data.append([Paragraph("Total", cell_style), Paragraph(naira(sum(r for _, r in day_revenue)), cell_style)])
@@ -429,7 +430,7 @@ def export_weekly_report(request):
     elems.append(rev_table)
 
     elems.append(Paragraph("Booking Status", h_style))
-    status_data = [[Paragraph("Status", cell_style), Paragraph("Count", cell_style)]]
+    status_data = [[Paragraph("Status", cell_header), Paragraph("Count", cell_header)]]
     for status in ["completed", "accepted", "pending", "cancelled"]:
         status_data.append([Paragraph(status.title(), cell_style), Paragraph(str(booking_status_counts.get(status, 0)), cell_style)])
     status_table = Table(status_data, colWidths=[120 * mm, 54 * mm])
@@ -445,7 +446,7 @@ def export_weekly_report(request):
 
     elems.append(Paragraph("Top Tutors by Payout", h_style))
     if top_tutors:
-        tutor_data = [[Paragraph("Tutor", cell_style), Paragraph("Sessions", cell_style), Paragraph("Payout", cell_style)]]
+        tutor_data = [[Paragraph("Tutor", cell_header), Paragraph("Sessions", cell_header), Paragraph("Payout", cell_header)]]
         for name, sessions, payout in top_tutors:
             tutor_data.append([Paragraph(name, cell_style), Paragraph(str(sessions), cell_style), Paragraph(naira(payout), cell_style)])
         tutor_table = Table(tutor_data, colWidths=[108 * mm, 33 * mm, 33 * mm])
