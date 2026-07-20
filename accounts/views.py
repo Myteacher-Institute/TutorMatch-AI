@@ -8,6 +8,7 @@ from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+from django.core.paginator import Paginator
 
 
 def success_stories(request):
@@ -23,7 +24,10 @@ def success_stories(request):
             messages.success(request, "Your success story is now part of the community.")
             return redirect("success_stories")
 
-    stories = SuccessStory.objects.select_related("user__profile__tutor_profile").all()
+    stories_qs = SuccessStory.objects.select_related("user__profile__tutor_profile").all()
+    paginator = Paginator(stories_qs, 20)
+    page_number = request.GET.get("page", 1)
+    stories = paginator.get_page(page_number)
     return render(request, "accounts/success_stories.html", {"form": form, "stories": stories})
 
 

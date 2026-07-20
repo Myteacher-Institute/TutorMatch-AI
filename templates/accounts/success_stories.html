@@ -43,7 +43,7 @@
           <span class="eyebrow">From our community</span>
           <h2>Recent stories</h2>
         </div>
-        <span class="stories-count">{{ stories|length }} shared</span>
+        <span class="stories-count">{{ stories.paginator.count }} shared</span>
       </div>
       {% if stories %}
         <div class="stories-grid">
@@ -68,6 +68,30 @@
             </article>
           {% endfor %}
         </div>
+
+        {% if stories.paginator.num_pages > 1 %}
+          <nav class="stories-pagination" aria-label="Success stories pagination">
+            {% if stories.has_previous %}
+              <a href="?page={{ stories.previous_page_number }}" class="story-page-link">&laquo; Prev</a>
+            {% else %}
+              <span class="story-page-link is-disabled">&laquo; Prev</span>
+            {% endif %}
+
+            {% for num in stories.paginator.page_range %}
+              {% if num == stories.number %}
+                <span class="story-page-link is-current">{{ num }}</span>
+              {% else %}
+                <a href="?page={{ num }}" class="story-page-link">{{ num }}</a>
+              {% endif %}
+            {% endfor %}
+
+            {% if stories.has_next %}
+              <a href="?page={{ stories.next_page_number }}" class="story-page-link">Next &raquo;</a>
+            {% else %}
+              <span class="story-page-link is-disabled">Next &raquo;</span>
+            {% endif %}
+          </nav>
+        {% endif %}
       {% else %}
         <div class="stories-empty">
           <span><i class="fa-solid fa-sparkles" aria-hidden="true"></i></span>
