@@ -3,13 +3,14 @@ import logging
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import Registration, Login
-from .models import UserProfile
+from .forms import Registration, Login, SuccessStoryForm
+from .models import SuccessStory, UserProfile
 from .account_emails import send_verification_email, send_welcome_email
 from .email_services import TransactionalEmailError
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
+from django.core.paginator import Paginator
 from django.db import transaction
 from django.views.decorators.http import require_POST
 
@@ -25,6 +26,25 @@ def _email_delivery_error_message(error):
     if "sender" in message.lower() or "from" in message.lower():
         return "The verification email could not be sent because the sender address is not accepted by ZeptoMail. Check the verified sender, then resend the code."
     return "The verification email could not be sent right now. Please try resend in a moment."
+
+
+def success_stories(request):
+    form = SuccessStoryForm()
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect(f"{request.path}?next={request.path}")
+        form = SuccessStoryForm(request.POST)
+        if form.is_valid():
+            success_story = form.save(commit=False)
+            success_story.user = request.user
+            success_story.save()
+            messages.success(request, "Your success story is now part of the community.")
+            return redirect("success_stories")
+
+    stories_qs = SuccessStory.objects.select_related("user__profile__tutor_profile")
+    paginator = Paginator(stories_qs, 20)
+    stories = paginator.get_page(request.GET.get("page", 1))
+    return render(request, "accounts/success_stories.html", {"form": form, "stories": stories})
 
 
 def register(request):
