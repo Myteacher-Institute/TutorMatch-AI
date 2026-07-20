@@ -121,18 +121,6 @@ def checkout(request, booking_id):
         return redirect("student_bookings")
 
     if request.method == "POST":
-        if getattr(settings, "FLUTTERWAVE_ALLOW_DEV_PAYMENT", False):
-            payment = _upsert_booking_payment(
-                booking,
-                status="paid",
-                reference=f"DEV-{booking.id}",
-                transaction_id=f"DEV-{booking.id}",
-            )
-            _activate_platform_managed_payouts(payment)
-            _mark_booking_paid(booking)
-            messages.success(request, "Dev payment completed. Your booking is now active.")
-            return redirect("payment_success")
-
         if not flutterwave_is_configured():
             messages.error(request, "Flutterwave is not configured yet. Add your Flutterwave keys before accepting real payments.")
             return redirect("payment_failed")
@@ -184,7 +172,6 @@ def checkout(request, booking_id):
         "tutor_payout": tutor_payout,
         "tutor_subjects": booking.tutor.subjects.all(),
         "flutterwave_ready": flutterwave_is_configured(),
-        "dev_payment_enabled": bool(getattr(settings, "FLUTTERWAVE_ALLOW_DEV_PAYMENT", False)),
         "payment_status": _payment_status_for_booking(booking),
     }
     return render(request, "payments/checkout.html", template_context)

@@ -132,8 +132,8 @@
 
         <form method="post" class="checkout-flow-form">
           {% csrf_token %}
-          <button type="submit" class="booking-flow-primary checkout-flow-pay-btn" {% if not flutterwave_ready and not dev_payment_enabled %}disabled{% endif %}>
-            {% if flutterwave_ready %}Pay securely now{% elif dev_payment_enabled %}Complete dev payment{% else %}Payment not configured{% endif %}
+          <button type="submit" class="booking-flow-primary checkout-flow-pay-btn" {% if not flutterwave_ready %}disabled{% endif %}>
+            {% if flutterwave_ready %}Pay securely now{% else %}Payment not configured{% endif %}
             <i class="fa-solid fa-lock"></i>
           </button>
           <a href="{% url 'student_bookings' %}" class="booking-flow-secondary checkout-flow-cancel">Pay later</a>
@@ -149,8 +149,6 @@
           <i class="fa-solid fa-shield-halved"></i>
           {% if flutterwave_ready %}
             Secured by Flutterwave. You will be redirected to complete payment safely.
-          {% elif dev_payment_enabled %}
-            Development payment mode is enabled. No real money will be charged.
           {% else %}
             Flutterwave is not configured yet. Add your Flutterwave keys to accept real payments.
           {% endif %}
