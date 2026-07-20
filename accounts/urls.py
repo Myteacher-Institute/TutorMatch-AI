@@ -1,5 +1,6 @@
 from django.urls import path, reverse_lazy
 from django.contrib.auth import views as auth_views
+from .forms import ZeptoPasswordResetForm
 from . import views
 
 urlpatterns = [
@@ -8,6 +9,8 @@ urlpatterns = [
     path("login/", views.login_view, name="login"),
     path("logout/", views.logout_view, name="logout"),
     path("verify/", views.verify_account, name="verify_account"),
+    path("verify-email/<str:token>/", views.verify_email_token, name="verify_email_token"),
+    path("verify/resend/", views.resend_verification_email, name="resend_verification_email"),
     path("dashboard/", views.student_dashboard, name="student_dashboard"),
     path("saved-tutors/", views.saved_tutors, name="saved_tutors"),
     path("delete-account/", views.delete_account, name="delete_account"),
@@ -19,6 +22,7 @@ urlpatterns = [
     path(
         "password-reset/",
         auth_views.PasswordResetView.as_view(
+            form_class=ZeptoPasswordResetForm,
             template_name="registration/password_reset_form.html",
             email_template_name="registration/password_reset_email.html",
             subject_template_name="registration/password_reset_subject.txt",

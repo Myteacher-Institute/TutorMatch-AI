@@ -47,7 +47,8 @@ def find_tutor(request):
 
 def ai_assistant(request, conversation_id=None):
     if conversation_id is None:
-        if request.GET.get("reset") == "1":
+        initial_prompt = request.GET.get("q", "").strip()
+        if request.GET.get("reset") == "1" or initial_prompt:
             conversation = reset_conversation(request)
         else:
             active_id = request.session.get("ai_conversation_id")
@@ -80,7 +81,9 @@ def ai_assistant(request, conversation_id=None):
     request.session["ai_conversation_id"] = str(conversation.id)
 
     initial_prompt = request.GET.get("q", "").strip()
-    start_conversation(conversation, initial_prompt)
+    if start_conversation(conversation, initial_prompt):
+        generate_assistant_reply_only(conversation)
+        conversation.refresh_from_db()
 
     if request.method == "POST":
         message = request.POST.get("message", "").strip()

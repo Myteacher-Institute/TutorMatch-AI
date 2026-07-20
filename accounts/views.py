@@ -1,14 +1,31 @@
-from django.http import HttpResponse
+import logging
+
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import Registration, Login, SuccessStoryForm
 from .models import SuccessStory, UserProfile
+from .account_emails import send_verification_email, send_welcome_email
+from .email_services import TransactionalEmailError
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
-from django.db import transaction
 from django.core.paginator import Paginator
+from django.db import transaction
+from django.views.decorators.http import require_POST
+
+logger = logging.getLogger(__name__)
+
+
+def _email_delivery_error_message(error):
+    message = str(error)
+    if "Credit exhausted" in message or "Resource Limit Exhausted" in message or "LE_102" in message:
+        return "The verification email could not be sent because the ZeptoMail account credit is exhausted. Please top up or switch the sender account, then resend the code."
+    if "401" in message or "Unauthor" in message:
+        return "The verification email could not be sent because ZeptoMail rejected the API token. Check the Send Mail Token, then resend the code."
+    if "sender" in message.lower() or "from" in message.lower():
+        return "The verification email could not be sent because the sender address is not accepted by ZeptoMail. Check the verified sender, then resend the code."
+    return "The verification email could not be sent right now. Please try resend in a moment."
 
 
 def success_stories(request):
@@ -24,10 +41,9 @@ def success_stories(request):
             messages.success(request, "Your success story is now part of the community.")
             return redirect("success_stories")
 
-    stories_qs = SuccessStory.objects.select_related("user__profile__tutor_profile").all()
+    stories_qs = SuccessStory.objects.select_related("user__profile__tutor_profile")
     paginator = Paginator(stories_qs, 20)
-    page_number = request.GET.get("page", 1)
-    stories = paginator.get_page(page_number)
+    stories = paginator.get_page(request.GET.get("page", 1))
     return render(request, "accounts/success_stories.html", {"form": form, "stories": stories})
 
 
@@ -38,10 +54,29 @@ def register(request):
         form = Registration(request.POST)
         if form.is_valid():
             user = form.save()
+            profile, _ = UserProfile.objects.get_or_create(user=user)
+            verification_sent = False
+            try:
+                send_verification_email(request, profile)
+                verification_sent = True
+            except TransactionalEmailError as exc:
+                logger.exception("Failed to send verification email for user %s", user.pk)
+                profile.email_verification_sent_at = None
+                profile.save(update_fields=["email_verification_sent_at"])
+                messages.warning(request, _email_delivery_error_message(exc))
+            except Exception:
+                logger.exception("Failed to send verification email for user %s", user.pk)
+                profile.email_verification_sent_at = None
+                profile.save(update_fields=["email_verification_sent_at"])
+                messages.warning(request, "Account created, but the verification email could not be sent. Use resend on the verification page.")
+            try:
+                send_welcome_email(request, profile)
+            except Exception:
+                logger.exception("Failed to send welcome email for user %s", user.pk)
             auth_login(request, user)
-            if _role_for_user(user) == UserProfile.ROLE_TUTOR:
-                return redirect('tutor_profile')
-            return redirect(_dashboard_for_user(user))
+            if verification_sent:
+                messages.success(request, "Account created. Check your email for your verification code.")
+            return redirect("verify_account")
 
     return render(request, 'accounts/register.html', {'form': form})
 
@@ -56,6 +91,9 @@ def login_view(request):
             next_url = request.GET.get('next') or request.POST.get('next')
             if next_url:
                 return redirect(next_url)
+            profile = getattr(user, "profile", None)
+            if profile and not profile.is_verified:
+                return redirect("verify_account")
             return redirect(_dashboard_for_user(user))
     return render(request, 'accounts/login.html', {'form': forms})
 
@@ -77,14 +115,62 @@ def verify_account(request):
     error = None
     if request.method == 'POST':
         code = request.POST.get('otp', '').strip()
-        if code == '123456' or (code.isdigit() and len(code) == 6):
-            profile.is_verified = True
-            profile.save()
+        if code and code == profile.email_verification_code:
+            profile.mark_email_verified()
+            profile.save(
+                update_fields=[
+                    "is_verified",
+                    "email_verified_at",
+                    "email_verification_code",
+                    "email_verification_token",
+                ]
+            )
+            messages.success(request, "Your email has been verified.")
             return redirect(_dashboard_for_user(request.user))
-        else:
-            error = "Invalid code. Please enter '123456' or any 6-digit number."
+        error = "Invalid verification code. Check your email and try again."
 
-    return render(request, 'accounts/verify.html', {'error': error})
+    return render(request, 'accounts/verify.html', {'error': error, "profile": profile})
+
+
+def verify_email_token(request, token):
+    profile = get_object_or_404(UserProfile, email_verification_token=token, is_verified=False)
+    profile.mark_email_verified()
+    profile.save(
+        update_fields=[
+            "is_verified",
+            "email_verified_at",
+            "email_verification_code",
+            "email_verification_token",
+        ]
+    )
+    if request.user.is_authenticated and request.user == profile.user:
+        messages.success(request, "Your email has been verified.")
+        return redirect(_dashboard_for_user(request.user))
+    messages.success(request, "Email verified. You can now sign in.")
+    return redirect("login")
+
+
+@login_required(login_url='login')
+@require_POST
+def resend_verification_email(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    if profile.is_verified:
+        messages.info(request, "Your email is already verified.")
+        return redirect(_dashboard_for_user(request.user))
+    try:
+        send_verification_email(request, profile)
+        messages.success(request, "A new verification code has been sent to your email.")
+    except TransactionalEmailError as exc:
+        logger.exception("Failed to resend verification email for user %s", request.user.pk)
+        profile.email_verification_sent_at = None
+        profile.save(update_fields=["email_verification_sent_at"])
+        messages.error(request, _email_delivery_error_message(exc))
+    except Exception:
+        logger.exception("Failed to resend verification email for user %s", request.user.pk)
+        profile.email_verification_sent_at = None
+        profile.save(update_fields=["email_verification_sent_at"])
+        messages.error(request, "We could not send the verification email right now. Please try again.")
+    return redirect("verify_account")
 
 
 from .decorators import student_required, _dashboard_for_user, _role_for_user
@@ -92,7 +178,6 @@ from tutors.models import Tutor, SavedTutor
 from django.db.models import Count
 from bookings.models import Booking
 from django.http import JsonResponse
-from django.views.decorators.http import require_POST
 from django.views.decorators.csrf import ensure_csrf_cookie
 from payments.models import PayoutInstallment, SupportTicket
 

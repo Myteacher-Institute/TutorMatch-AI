@@ -104,7 +104,8 @@ def recent_conversations(request, search_query=""):
 def start_conversation(conversation, initial_prompt=""):
     if initial_prompt and not conversation.messages.exists():
         AIMessage.objects.create(conversation=conversation, role=AIMessage.ROLE_USER, content=initial_prompt.strip())
-    return conversation
+        return True
+    return False
 
 
 def handle_user_message(conversation, user_text):
@@ -155,32 +156,57 @@ def generate_assistant_reply_only(conversation):
 
 def _merge_state(conversation):
     previous_state = conversation.state or {}
-    user_text = "\n".join(
-        conversation.messages.filter(role=AIMessage.ROLE_USER).values_list("content", flat=True)
+    user_messages = list(
+        conversation.messages.filter(role=AIMessage.ROLE_USER)
+        .order_by("created_at")
+        .values_list("content", flat=True)
     )
-    latest_intent = extract_search_intent(user_text)
 
-    # Try to get user's profile location if they're authenticated
-    location = latest_intent.get("location") or previous_state.get("location", "")
-    if not location and conversation.user:
+    profile_location = ""
+    if conversation.user:
         try:
             tutor_profile = conversation.user.tutor_profile
             if tutor_profile and tutor_profile.location:
-                location = tutor_profile.location
+                profile_location = tutor_profile.location
         except:
             pass
 
+    return _merge_intent_state(previous_state, user_messages, profile_location)
+
+
+def _merge_intent_state(previous_state, user_messages, profile_location=""):
+    latest_user_text = user_messages[-1] if user_messages else ""
+    conversation_text = "\n".join(user_messages)
+    latest_intent = extract_search_intent(latest_user_text)
+    context_intent = extract_search_intent(conversation_text) if len(user_messages) > 1 else latest_intent
+
+    previous_subject = previous_state.get("subject", "")
+    latest_subject = latest_intent.get("subject", "")
+    subject_changed = bool(
+        latest_subject
+        and previous_subject
+        and latest_subject.lower() != previous_subject.lower()
+    )
+
+    location = (
+        latest_intent.get("location")
+        or previous_state.get("location")
+        or context_intent.get("location", "")
+        or profile_location
+    )
+
     state = {
-        "query_text": user_text,
-        "subject": latest_intent.get("subject") or previous_state.get("subject", ""),
-        "level": latest_intent.get("level") or previous_state.get("level", ""),
+        "query_text": latest_user_text,
+        "conversation_text": conversation_text,
+        "subject": latest_subject or previous_subject,
+        "level": latest_intent.get("level") or ("" if subject_changed else previous_state.get("level", "")),
         "location": location,
-        "schedule": latest_intent.get("schedule") or previous_state.get("schedule", ""),
+        "schedule": latest_intent.get("schedule") or previous_state.get("schedule", "") or context_intent.get("schedule", ""),
         "source": latest_intent.get("source", "fallback"),
     }
     state["missing_fields"] = [field for field in REQUIRED_MATCH_FIELDS if not state.get(field)]
     state["ready_for_tutor_match"] = not state["missing_fields"]
-    state["learning_mode"] = _detect_learning_mode(user_text)
+    state["learning_mode"] = _detect_learning_mode(latest_user_text)
     return state
 
 

@@ -1,0 +1,8 @@
+Welcome to MyteacherConnect, {{ display_name }}.
+
+Your {{ role_label }} account has been created.
+
+Open your dashboard:
+{{ dashboard_url }}
+
+Need help? Contact {{ support_email }}.

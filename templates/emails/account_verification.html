@@ -1,0 +1,48 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Verify your MyteacherConnect account</title>
+  </head>
+  <body style="margin:0; padding:0; background:#f7faff; font-family:Inter, Segoe UI, Arial, sans-serif; color:#0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f7faff; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; background:#ffffff; border-radius:18px; overflow:hidden; border:1px solid #dbeafe;">
+            <tr>
+              <td style="background:#2563eb; padding:28px 32px; color:#ffffff;">
+                <img src="{{ logo_url }}" alt="MyteacherConnect" width="220" style="display:block; max-width:220px; width:100%; height:auto;">
+                <div style="margin-top:8px; font-size:14px; color:#e0efff;">Trusted tutor matching for students, parents, and tutors.</div>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:34px 32px;">
+                <h1 style="margin:0 0 12px; font-size:28px; line-height:1.2; color:#0f172a;">Verify your email</h1>
+                <p style="margin:0 0 24px; color:#5d7290; font-size:15px; line-height:1.7;">Hi {{ display_name }}, welcome to MyteacherConnect. Confirm this email address to secure your {{ role_label }} account.</p>
+
+                <div style="margin:0 0 24px; padding:20px; background:#eff6ff; border-radius:14px; text-align:center;">
+                  <div style="font-size:12px; font-weight:800; letter-spacing:.08em; color:#2563eb; text-transform:uppercase;">Verification Code</div>
+                  <div style="margin-top:8px; font-size:34px; font-weight:900; letter-spacing:.24em; color:#0f172a;">{{ verification_code }}</div>
+                </div>
+
+                <a href="{{ verify_url }}" style="display:block; text-align:center; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:10px; padding:15px 18px; font-weight:900;">Verify Email Address</a>
+
+                <p style="margin:24px 0 0; color:#5d7290; font-size:13px; line-height:1.7;">If the button does not work, copy this link into your browser:<br><a href="{{ verify_url }}" style="color:#2563eb;">{{ verify_url }}</a></p>
+              </td>
+            </tr>
+            <tr>
+              <td style="padding:20px 32px; background:#f8fafc; color:#64748b; font-size:12px; line-height:1.7;">
+                <strong style="color:#0f172a;">MyteacherConnect</strong><br>
+                <a href="{{ site_url }}" style="color:#2563eb; text-decoration:none;">Website</a> &nbsp;|&nbsp;
+                <a href="https://www.facebook.com/" style="color:#2563eb; text-decoration:none;">Facebook</a> &nbsp;|&nbsp;
+                <a href="https://www.instagram.com/" style="color:#2563eb; text-decoration:none;">Instagram</a> &nbsp;|&nbsp;
+                <a href="https://www.linkedin.com/" style="color:#2563eb; text-decoration:none;">LinkedIn</a>
+              </td>
+            </tr>
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
