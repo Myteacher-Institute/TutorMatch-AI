@@ -1,4 +1,6 @@
 from decimal import Decimal
+import logging
+
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import get_object_or_404, redirect, render
@@ -8,6 +10,9 @@ from django.conf import settings
 from bookings.models import Booking
 from .models import Payment
 from .services import create_weekly_payout_schedule
+
+
+logger = logging.getLogger(__name__)
 
 
 def payment_success(request):
@@ -28,6 +33,10 @@ def flutterwave_headers():
         "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY}",
         "Content-Type": "application/json",
     }
+
+
+def flutterwave_is_configured():
+    return bool(settings.FLUTTERWAVE_SECRET_KEY and settings.FLUTTERWAVE_PUBLIC_KEY)
 
 
 def _upsert_booking_payment(
@@ -52,6 +61,13 @@ def _upsert_booking_payment(
         },
     )
     return payment
+
+
+def _payment_status_for_booking(booking):
+    payment = booking.payments.order_by("-created_at").first()
+    if not payment:
+        return "pending"
+    return payment.payment_status
 
 
 def _mark_booking_paid(booking):
@@ -100,16 +116,20 @@ def checkout(request, booking_id):
         student__user=request.user,
     )
 
+    if booking.payments.filter(payment_status__in=["paid", "released"]).exists():
+        messages.info(request, "This booking has already been paid for.")
+        return redirect("student_bookings")
+
     if request.method == "POST":
-        if not settings.FLUTTERWAVE_SECRET_KEY:
+        if not flutterwave_is_configured():
             if getattr(settings, "FLUTTERWAVE_ALLOW_DEV_PAYMENT", False):
-                _upsert_booking_payment(
+                payment = _upsert_booking_payment(
                     booking,
                     status="paid",
                     reference=f"DEV-{booking.id}",
                     transaction_id=f"DEV-{booking.id}",
                 )
-                _activate_platform_managed_payouts(booking.payments.order_by("-created_at").first())
+                _activate_platform_managed_payouts(payment)
                 _mark_booking_paid(booking)
                 messages.success(request, "Dev payment completed. Your booking is now active.")
                 return redirect("payment_success")
@@ -131,7 +151,7 @@ def checkout(request, booking_id):
             "customizations": {
                 "title": "MyteacherConnect Booking",
                 "description": f"Lesson booking #{booking.id}",
-                "logo": request.build_absolute_uri("/static/images/logo.png"),
+                "logo": request.build_absolute_uri("/static/images/logos/myteacherconnect-logo-blue-transparent.png"),
             },
         }
         try:
@@ -139,7 +159,12 @@ def checkout(request, booking_id):
             response = requests.post(FLUTTERWAVE_PAYMENT_URL, json=data, headers=flutterwave_headers(), timeout=20)
             res_data = response.json()
         except requests.RequestException:
+            logger.exception("Flutterwave initialization failed for booking %s", booking.id)
             messages.error(request, "Payment gateway unavailable. Please try again.")
+            return redirect("payment_failed")
+        except ValueError:
+            logger.exception("Flutterwave returned invalid JSON during initialization for booking %s", booking.id)
+            messages.error(request, "Payment gateway returned an invalid response. Please try again.")
             return redirect("payment_failed")
 
         payment_link = (res_data.get("data") or {}).get("link")
@@ -147,7 +172,8 @@ def checkout(request, booking_id):
             return redirect(payment_link)
 
         _upsert_booking_payment(booking, status="failed", reference=tx_ref)
-        messages.error(request, "Payment initialization failed. Please try again.")
+        logger.warning("Flutterwave initialization rejected booking %s: %s", booking.id, res_data)
+        messages.error(request, res_data.get("message") or "Payment initialization failed. Please try again.")
         return redirect("payment_failed")
 
     commission = booking.amount * Decimal('0.15')
@@ -157,8 +183,9 @@ def checkout(request, booking_id):
         "commission": commission,
         "tutor_payout": tutor_payout,
         "tutor_subjects": booking.tutor.subjects.all(),
-        "flutterwave_ready": bool(settings.FLUTTERWAVE_SECRET_KEY),
+        "flutterwave_ready": flutterwave_is_configured(),
         "dev_payment_enabled": bool(getattr(settings, "FLUTTERWAVE_ALLOW_DEV_PAYMENT", False)),
+        "payment_status": _payment_status_for_booking(booking),
     }
     return render(request, "payments/checkout.html", template_context)
 
@@ -186,7 +213,12 @@ def verify_payment(request):
         )
         data = response.json()
     except requests.RequestException:
+        logger.exception("Flutterwave verification request failed for transaction %s", transaction_id)
         messages.error(request, "Payment gateway unavailable. Please try again.")
+        return redirect("payment_failed")
+    except ValueError:
+        logger.exception("Flutterwave returned invalid JSON during verification for transaction %s", transaction_id)
+        messages.error(request, "Payment gateway returned an invalid response. Please try again.")
         return redirect("payment_failed")
 
     payment_data = data.get("data") or {}
@@ -197,21 +229,37 @@ def verify_payment(request):
         and str(payment_data.get("currency", "")).upper() == "NGN"
     ):
         booking_id = meta.get("booking_id")
-        booking = get_object_or_404(Booking, id=booking_id)
+        booking = get_object_or_404(
+            Booking,
+            id=booking_id,
+            student__user=request.user,
+        )
+        payment = booking.payments.order_by("-created_at").first()
+        expected_ref = payment.flutterwave_reference if payment else ""
+        returned_ref = tx_ref or payment_data.get("tx_ref", "")
+        if expected_ref and returned_ref and expected_ref != returned_ref:
+            logger.warning(
+                "Flutterwave reference mismatch for booking %s: expected %s, returned %s",
+                booking.id,
+                expected_ref,
+                returned_ref,
+            )
+            _upsert_booking_payment(booking, status="failed", reference=returned_ref, transaction_id=str(transaction_id))
+            messages.error(request, "Payment reference did not match this booking.")
+            return redirect("payment_failed")
         amount = booking.amount
         if Decimal(str(payment_data.get("amount", "0"))) < amount:
+            _upsert_booking_payment(booking, status="failed", reference=returned_ref, transaction_id=str(transaction_id))
             messages.error(request, "Payment amount did not match the booking amount.")
             return redirect("payment_failed")
-        commission = amount * Decimal('0.15')
-        tutor_payout = amount * Decimal('0.85')
 
-        payment = _upsert_booking_payment(
+        paid_payment = _upsert_booking_payment(
             booking,
             status="paid",
-            reference=tx_ref or payment_data.get("tx_ref", ""),
+            reference=returned_ref,
             transaction_id=str(transaction_id),
         )
-        _activate_platform_managed_payouts(payment)
+        _activate_platform_managed_payouts(paid_payment)
         _mark_booking_paid(booking)
         messages.success(request, "Payment verified successfully.")
         return redirect("payment_success")
@@ -219,7 +267,7 @@ def verify_payment(request):
     if tx_ref:
         booking_id = str(tx_ref).split("-")[1] if str(tx_ref).startswith("BOOKING-") and "-" in str(tx_ref) else None
         if booking_id:
-            booking = Booking.objects.filter(id=booking_id).first()
+            booking = Booking.objects.filter(id=booking_id, student__user=request.user).first()
             if booking:
                 _upsert_booking_payment(booking, status="failed", reference=tx_ref, transaction_id=str(transaction_id))
     messages.error(request, "Payment verification failed.")

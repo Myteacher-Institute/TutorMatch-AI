@@ -32,6 +32,7 @@
     </style>
 
     <form action="{% url 'ai_assistant' %}" class="mtc-search" method="get" >
+      <input type="hidden" name="reset" value="1">
       <span class="mtc-search-icon" aria-hidden="true">
         <svg viewBox="0 0 24 24"><path d="m12 3-1.7 5.2L5 10l5.3 1.8L12 17l1.7-5.2L19 10l-5.3-1.8L12 3Z"/><path d="m5 15-.9 2.6L1.5 18.5l2.6.9L5 22l.9-2.6 2.6-.9-2.6-.9L5 15Z"/></svg>
       </span>
@@ -394,10 +395,47 @@
       } else {
         const recognition = new SpeechRecognition();
         recognition.continuous = false;
-        recognition.lang = 'en-NG'; // Nigerian English context
-        recognition.interimResults = false;
+        recognition.interimResults = true;
+        recognition.maxAlternatives = 1;
+        recognition.lang = 'en-US';
 
         let isListening = false;
+        let submittedVoiceQuery = false;
+        let latestTranscript = '';
+
+        const defaultMicIcon = `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        `;
+
+        const listeningMicIcon = `
+          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+            <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+            <line x1="12" y1="19" x2="12" y2="23"></line>
+            <line x1="8" y1="23" x2="16" y2="23"></line>
+          </svg>
+        `;
+
+        function submitVoiceQuery(transcript) {
+          const query = String(transcript || '').trim();
+          if (!query || submittedVoiceQuery || !searchForm) return;
+          submittedVoiceQuery = true;
+          searchInput.value = query;
+          searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          searchInput.placeholder = 'Opening AI chat...';
+          voiceBtn.disabled = true;
+
+          if (typeof searchForm.requestSubmit === 'function') {
+            searchForm.requestSubmit();
+          } else {
+            searchForm.submit();
+          }
+        }
 
         voiceBtn.addEventListener('click', (e) => {
           e.preventDefault();
@@ -405,6 +443,8 @@
             recognition.stop();
           } else {
             try {
+              submittedVoiceQuery = false;
+              latestTranscript = '';
               recognition.start();
             } catch (err) {
               console.error("Speech recognition start failed:", err);
@@ -415,14 +455,7 @@
         recognition.onstart = () => {
           isListening = true;
           voiceBtn.classList.add('listening');
-          voiceBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="#ef4444" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="23"></line>
-              <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
-          `;
+          voiceBtn.innerHTML = listeningMicIcon;
           searchInput.placeholder = "Listening... Speak your tutor need now";
           searchInput.focus();
         };
@@ -430,33 +463,45 @@
         recognition.onend = () => {
           isListening = false;
           voiceBtn.classList.remove('listening');
-          voiceBtn.innerHTML = `
-            <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
-              <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
-              <line x1="12" y1="19" x2="12" y2="23"></line>
-              <line x1="8" y1="23" x2="16" y2="23"></line>
-            </svg>
-          `;
-          searchInput.placeholder = 'e.g., "I need a Mathematics tutor for SS3 in GRA Port Harcourt."';
+          voiceBtn.innerHTML = defaultMicIcon;
+          if (latestTranscript && !submittedVoiceQuery) {
+            submitVoiceQuery(latestTranscript);
+          } else if (!submittedVoiceQuery) {
+            searchInput.placeholder = 'e.g., "I need a Mathematics tutor for SS3 in GRA Port Harcourt."';
+          }
         };
 
         recognition.onresult = (event) => {
-          const transcript = event.results[0][0].transcript;
-          searchInput.value = transcript;
-          
-          // Auto submit the form after a tiny delay
-          setTimeout(() => {
-            if (searchForm) {
-              searchForm.submit();
+          let interimText = '';
+          let finalText = '';
+
+          for (let i = event.resultIndex; i < event.results.length; i += 1) {
+            const transcript = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+              finalText += transcript + ' ';
+            } else {
+              interimText += transcript + ' ';
             }
-          }, 800);
+          }
+
+          latestTranscript = (finalText || interimText || latestTranscript).trim();
+          if (latestTranscript) {
+            searchInput.value = latestTranscript;
+            searchInput.dispatchEvent(new Event('input', { bubbles: true }));
+          }
+
+          if (finalText.trim()) {
+            submitVoiceQuery(finalText.trim());
+            try { recognition.stop(); } catch (err) {}
+          }
         };
 
         recognition.onerror = (event) => {
           console.error("Speech recognition error:", event.error);
           isListening = false;
           voiceBtn.classList.remove('listening');
+          voiceBtn.disabled = false;
+          voiceBtn.innerHTML = defaultMicIcon;
         };
       }
     }

@@ -15,8 +15,7 @@
       <img src="{% static 'images/Register-image.png' %}" alt="Myteacherconnect login preview">
       <div class="mtc-auth-brand">
         <a href="{% url 'home' %}" class="mtc-auth-brand-link">
-          <span class="mtc-auth-logo-mark"><i class="fa-solid fa-graduation-cap"></i></span>
-          <span>Myteacher<span>Connect</span></span>
+          <img src="{% static 'images/logos/photo_2026-07-19_21-48-00.jpg' %}" alt="MyteacherConnect" style="display: block; width: 240px; max-width: 100%; height: auto;">
         </a>
       </div>
       <div class="mtc-auth-welcome">
@@ -43,7 +42,7 @@
           {% for field in form %}
             <div class="form-group">
               <label for="{{ field.id_for_label }}">
-                {% if field.name == 'username' %}Email Address{% else %}{{ field.label }}{% endif %}
+                {% if field.name == 'username' %}Username or Email Address{% else %}{{ field.label }}{% endif %}
               </label>
 
               {% if field.field.widget.input_type == 'password' %}
@@ -73,7 +72,7 @@
                   name="{{ field.name }}"
                   id="{{ field.id_for_label }}"
                   value="{{ field.value|default_if_none:'' }}"
-                  placeholder="Enter your email"
+                  placeholder="{% if field.name == 'username' %}Enter your username or email{% else %}Enter your email{% endif %}"
                   {% if field.field.required %}required{% endif %}
                 >
               {% endif %}

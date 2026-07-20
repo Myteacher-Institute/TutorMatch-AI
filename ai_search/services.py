@@ -25,6 +25,9 @@ DEFAULT_SUBJECTS = [
     "Chemistry",
     "Biology",
     "Economics",
+    "Django",
+    "FastAPI",
+    "Flask",
     "HTML",
     "CSS",
     "JavaScript",
@@ -127,7 +130,10 @@ def _extract_with_rules(text, base_intent=None):
     normalized = _normalize_text(text)
 
     subject_patterns = [
-        ("python backend", ["python backend", "backend python", "django", "fastapi", "flask"]),
+        ("Django", ["django"]),
+        ("FastAPI", ["fastapi", "fast api"]),
+        ("Flask", ["flask"]),
+        ("Python Backend", ["python backend", "backend python"]),
         ("Python", ["python", "py"]),
         ("C++", ["c++", "cpp"]),
         ("CSS", ["css"]),
@@ -144,10 +150,9 @@ def _extract_with_rules(text, base_intent=None):
         ("WAEC", ["waec"]),
         ("JAMB", ["jamb"]),
     ]
-    for subject, patterns in subject_patterns:
-        if any(_normalize_text(pattern) in normalized for pattern in patterns):
-            intent["subject"] = subject
-            break
+    subject_match = _latest_pattern_match(normalized, subject_patterns)
+    if subject_match:
+        intent["subject"] = subject_match
 
     level_patterns = [
         ("Beginner", ["0 knowledge", "zero knowledge", "complete beginner", "beginner", "no programming"]),
@@ -155,10 +160,9 @@ def _extract_with_rules(text, base_intent=None):
         ("Advanced", ["advanced"]),
         *[(level, [level.lower()]) for level in LEVELS],
     ]
-    for level, patterns in level_patterns:
-        if any(_normalize_text(pattern) in normalized for pattern in patterns):
-            intent["level"] = level
-            break
+    level_match = _latest_pattern_match(normalized, level_patterns)
+    if level_match:
+        intent["level"] = level_match
 
     location_patterns = [
         ("Port Harcourt", ["port harcourt", "ph"]),
@@ -170,10 +174,9 @@ def _extract_with_rules(text, base_intent=None):
         ("Woji", ["woji"]),
         ("Online", ["online", "remote"]),
     ]
-    for location, patterns in location_patterns:
-        if any(_normalize_text(pattern) in normalized for pattern in patterns):
-            intent["location"] = location
-            break
+    location_match = _latest_pattern_match(normalized, location_patterns)
+    if location_match:
+        intent["location"] = location_match
 
     intent["source"] = "rules"
     return intent
@@ -545,8 +548,9 @@ def _skill_terms(value):
     normalized = _normalize_text(value)
     terms = [term for term in normalized.split() if len(term) > 1]
     phrase_map = {
-        "python": ["python", "backend", "django", "flask", "fastapi", "programming", "coding", "web development"],
-        "backend": ["backend", "python", "django", "flask", "fastapi", "web development", "api", "database"],
+        "python": ["python", "programming", "coding"],
+        "backend": ["backend", "api", "database"],
+        "python backend": ["python backend", "backend python", "django", "flask", "fastapi", "api", "database"],
         "web": ["web", "html", "css", "javascript", "frontend", "backend", "web development"],
         "css": ["css", "frontend", "html", "web development"],
         "html": ["html", "css", "frontend", "web development"],
@@ -555,6 +559,9 @@ def _skill_terms(value):
         "c++": ["c++", "cpp", "programming", "coding"],
         "cpp": ["c++", "cpp", "programming", "coding"],
     }
+    if normalized in phrase_map:
+        return {normalized, *phrase_map[normalized]}
+
     expanded = set(terms)
     if normalized:
         expanded.add(normalized)
@@ -602,3 +609,18 @@ def _matches_location(tutor_location, requested_location):
     }
     requested_aliases = aliases.get(requested_text, [requested_text])
     return any(alias in tutor_text for alias in requested_aliases)
+
+
+def _latest_pattern_match(normalized_text, choices):
+    latest = None
+    latest_index = -1
+    for value, patterns in choices:
+        for pattern in patterns:
+            normalized_pattern = _normalize_text(pattern)
+            if not normalized_pattern:
+                continue
+            index = normalized_text.rfind(normalized_pattern)
+            if index > latest_index:
+                latest = value
+                latest_index = index
+    return latest

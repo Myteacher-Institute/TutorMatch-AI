@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>{% block title %}TutorMatch AI{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260713-booking-ui">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260719-payment-hardening">
   <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260712">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.1/css/all.min.css" integrity="sha512-2SwdPD6INVrV/lHTZbO2nodKhrnDdJK9/kg2XD1r9uGqPo1cUbujc+IYdlYdEErWNu69gVcYgdxlmVmzTWnetw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script>
@@ -23,14 +23,8 @@
   {% block site_header %}
   <header class="site-header">
     <nav class="site-nav" aria-label="Primary navigation">
-      <a href="{% url 'home' %}" class="brand mtc-brand" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: #111827;">
-        <div class="brand-mark" style="background: #2563eb; border-radius: 50%; width: 34px; height: 34px; display: grid; place-items: center; color: #ffffff;">
-          <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-            <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
-          </svg>
-        </div>
-        <span style="color: #0f172a; font-weight: 800; font-size: 20px;">Myteacher<span style="color: #2563eb;">Connect</span></span>
+      <a href="{% url 'home' %}" class="brand mtc-brand" style="display: inline-flex; align-items: center; text-decoration: none;">
+        <img src="{% static 'images/logos/myteacherconnect-logo-blue-transparent.png' %}" alt="MyteacherConnect" style="display: block; width: 150px; max-width: 42vw; height: auto;">
       </a>
 
       <button class="mobile-menu-toggle" aria-label="Toggle navigation" aria-expanded="false" id="mobile-menu-btn">
@@ -67,6 +61,7 @@
   {% endblock %}
 
   <main>
+    {% block global_messages %}
     {% if messages %}
       <div class="mtc-shell" style="margin-top: 24px; margin-bottom: 8px;">
         {% for message in messages %}
@@ -94,6 +89,7 @@
         {% endfor %}
       </div>
     {% endif %}
+    {% endblock %}
     {% block content %}{% endblock %}
   </main>
 
@@ -101,14 +97,8 @@
   <footer class="mtc-footer" style="background: #0b0f19; border-top: 1px solid #1e293b; color: #94a3b8; padding: 60px 0 30px;">
     <div class="mtc-shell mtc-footer-grid" style="padding: 0 0 40px;">
       <div class="mtc-footer-about">
-        <a href="{% url 'home' %}" class="mtc-footer-brand" style="display: inline-flex; align-items: center; gap: 8px; font-weight: 700; font-size: 18px; color: #ffffff;">
-          <div style="background: #2563eb; border-radius: 6px; width: 28px; height: 28px; display: grid; place-items: center; color: #ffffff;">
-            <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <path d="M22 10v6M2 10l10-5 10 5-10 5z"></path>
-              <path d="M6 12v5c0 2 2 3 6 3s6-1 6-3v-5"></path>
-            </svg>
-          </div>
-          <span style="color: #ffffff; font-weight: 800;">Myteacher</span>
+        <a href="{% url 'home' %}" class="mtc-footer-brand" style="display: inline-flex; align-items: center; text-decoration: none;">
+          <img src="{% static 'images/logos/photo_2026-07-19_21-48-00.jpg' %}" alt="MyteacherConnect" style="display: block; width: 220px; max-width: 100%; height: auto;">
         </a>
         <p style="color: #94a3b8;">Connecting Nigeria's best minds with eager learners through smart AI matching.</p>
         <div class="mtc-socials" aria-label="Social links">

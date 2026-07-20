@@ -46,6 +46,9 @@
             <h2>{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</h2>
             <p>{{ booking.tutor.subjects.all|join:", "|truncatechars:70 }}</p>
           </div>
+          <span class="checkout-flow-status checkout-flow-status-{{ payment_status }}">
+            {{ payment_status|title }}
+          </span>
         </div>
 
         <div class="checkout-flow-details">
@@ -81,6 +84,27 @@
             <p>{{ booking.lesson_note }}</p>
           </div>
         {% endif %}
+
+        <div class="checkout-flow-protection">
+          <h3><i class="fa-solid fa-shield-halved"></i> Platform protection</h3>
+          <div class="checkout-flow-protection-grid">
+            <div>
+              <strong>1</strong>
+              <span>You pay securely</span>
+              <p>Flutterwave handles card, transfer, and bank payment details.</p>
+            </div>
+            <div>
+              <strong>2</strong>
+              <span>Lesson runs</span>
+              <p>Your booking becomes active after successful payment verification.</p>
+            </div>
+            <div>
+              <strong>3</strong>
+              <span>Payout is released</span>
+              <p>Tutor payouts are released weekly after student confirmation or review.</p>
+            </div>
+          </div>
+        </div>
       </main>
 
       <aside class="checkout-flow-pay-card">
@@ -88,6 +112,14 @@
         <div class="checkout-flow-line">
           <span>Calculated lesson package</span>
           <strong>&#8358;{{ booking.amount|floatformat:0 }}</strong>
+        </div>
+        <div class="checkout-flow-line">
+          <span>Tutor weekly payout pool</span>
+          <strong>&#8358;{{ tutor_payout|floatformat:0 }}</strong>
+        </div>
+        <div class="checkout-flow-line">
+          <span>Platform commission</span>
+          <strong>&#8358;{{ commission|floatformat:0 }}</strong>
         </div>
         <div class="checkout-flow-line muted">
           <span>Platform protection</span>
@@ -101,11 +133,17 @@
         <form method="post" class="checkout-flow-form">
           {% csrf_token %}
           <button type="submit" class="booking-flow-primary checkout-flow-pay-btn" {% if not flutterwave_ready and not dev_payment_enabled %}disabled{% endif %}>
-            {% if flutterwave_ready %}Pay with Flutterwave{% elif dev_payment_enabled %}Complete dev payment{% else %}Payment not configured{% endif %}
+            {% if flutterwave_ready %}Pay securely now{% elif dev_payment_enabled %}Complete dev payment{% else %}Payment not configured{% endif %}
             <i class="fa-solid fa-lock"></i>
           </button>
           <a href="{% url 'student_bookings' %}" class="booking-flow-secondary checkout-flow-cancel">Pay later</a>
         </form>
+
+        <div class="checkout-flow-methods" aria-label="Supported payment methods">
+          <span>Card</span>
+          <span>Bank Transfer</span>
+          <span>USSD</span>
+        </div>
 
         <p class="checkout-flow-secure">
           <i class="fa-solid fa-shield-halved"></i>

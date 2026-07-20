@@ -1,0 +1,11 @@
+Hi {{ display_name }},
+
+Welcome to MyteacherConnect. Use this code to verify your {{ role_label }} account:
+
+{{ verification_code }}
+
+Or verify with this secure link:
+{{ verify_url }}
+
+MyteacherConnect
+{{ site_url }}
