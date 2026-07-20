@@ -200,9 +200,11 @@
                                   <strong>{{ booking.next_payout_installment.get_status_display }}</strong>
                                   {% if booking.next_payout_installment.status == "awaiting_student" %}
                                     <br>Confirm within 4 days or it auto-approves on {{ booking.next_payout_installment.auto_release_at|date:"M j, Y" }}.
+                                  {% elif booking.next_payout_installment.status == "scheduled" and booking.can_confirm_payout_week %}
+                                    <br>Test mode: you can confirm this scheduled week now.
                                   {% endif %}
                                 </div>
-                                {% if booking.next_payout_installment.status == "awaiting_student" %}
+                                {% if booking.can_confirm_payout_week %}
                                   <form method="post" action="{% url 'student_confirm_payout' booking.next_payout_installment.id %}" style="display: inline;">
                                     {% csrf_token %}
                                     <button type="submit" class="mtc-review-button" style="border: 0;">

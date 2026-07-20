@@ -1,5 +1,6 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.conf import settings
 from django.core.paginator import Paginator
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
@@ -120,7 +121,18 @@ def student_bookings(request):
         booking.display_payment_status_label = display_label
         if display_status == "pending":
             pending_payment_count += 1
-        booking.next_payout_installment = next_actionable_installment(booking)
+        booking.next_payout_installment = next_actionable_installment(
+            booking,
+            include_scheduled=settings.PAYOUT_ALLOW_EARLY_STUDENT_CONFIRM,
+        )
+        booking.can_confirm_payout_week = (
+            booking.next_payout_installment
+            and booking.next_payout_installment.status == PayoutInstallment.STATUS_AWAITING_STUDENT
+        ) or (
+            settings.PAYOUT_ALLOW_EARLY_STUDENT_CONFIRM
+            and booking.next_payout_installment
+            and booking.next_payout_installment.status == PayoutInstallment.STATUS_SCHEDULED
+        )
         booking.open_support_ticket = booking.support_tickets.filter(
             status__in=[SupportTicket.STATUS_OPEN, SupportTicket.STATUS_IN_REVIEW]
         ).first()
@@ -181,7 +193,10 @@ def tutor_bookings(request):
         booking.display_payment_status_label = (
             display_payment.get_payment_status_display() if display_payment else "Pending"
         )
-        booking.next_payout_installment = next_actionable_installment(booking)
+        booking.next_payout_installment = next_actionable_installment(
+            booking,
+            include_scheduled=settings.PAYOUT_ALLOW_EARLY_STUDENT_CONFIRM,
+        )
         booking.open_support_ticket = booking.support_tickets.filter(
             status__in=[SupportTicket.STATUS_OPEN, SupportTicket.STATUS_IN_REVIEW]
         ).first()
@@ -273,8 +288,15 @@ def student_confirm_payout(request, installment_id):
         PayoutInstallment.objects.select_related("booking__student"),
         pk=installment_id,
         booking__student=student_profile,
-        status=PayoutInstallment.STATUS_AWAITING_STUDENT,
     )
+    confirmable_statuses = [PayoutInstallment.STATUS_AWAITING_STUDENT]
+    if settings.PAYOUT_ALLOW_EARLY_STUDENT_CONFIRM:
+        confirmable_statuses.append(PayoutInstallment.STATUS_SCHEDULED)
+
+    if installment.status not in confirmable_statuses:
+        messages.error(request, "This weekly payout is not ready for student confirmation.")
+        return redirect("student_bookings")
+
     installment.mark_approved()
     messages.success(request, f"Week {installment.week_number} approved. Tutor payout is now ready for admin release.")
     return redirect("student_bookings")

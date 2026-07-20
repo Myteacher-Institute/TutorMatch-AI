@@ -65,15 +65,19 @@ def sync_due_installments():
     ).update(status=PayoutInstallment.STATUS_AWAITING_STUDENT)
 
 
-def next_actionable_installment(booking):
+def next_actionable_installment(booking, include_scheduled=False):
     sync_due_installments()
+    statuses = [
+        PayoutInstallment.STATUS_AWAITING_STUDENT,
+        PayoutInstallment.STATUS_APPROVED,
+        PayoutInstallment.STATUS_DISPUTED,
+    ]
+    if include_scheduled:
+        statuses.insert(0, PayoutInstallment.STATUS_SCHEDULED)
+
     return (
         booking.payout_installments.filter(
-            status__in=[
-                PayoutInstallment.STATUS_AWAITING_STUDENT,
-                PayoutInstallment.STATUS_APPROVED,
-                PayoutInstallment.STATUS_DISPUTED,
-            ]
+            status__in=statuses
         )
         .order_by("week_number")
         .first()
