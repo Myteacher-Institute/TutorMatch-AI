@@ -2,12 +2,29 @@ from django.http import HttpResponse
 from django.utils import timezone
 from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
-from .forms import Registration, Login
-from .models import UserProfile
+from .forms import Registration, Login, SuccessStoryForm
+from .models import SuccessStory, UserProfile
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
+
+
+def success_stories(request):
+    form = SuccessStoryForm()
+    if request.method == "POST":
+        if not request.user.is_authenticated:
+            return redirect(f"{request.path}?next={request.path}")
+        form = SuccessStoryForm(request.POST)
+        if form.is_valid():
+            success_story = form.save(commit=False)
+            success_story.user = request.user
+            success_story.save()
+            messages.success(request, "Your success story is now part of the community.")
+            return redirect("success_stories")
+
+    stories = SuccessStory.objects.select_related("user__profile__tutor_profile").all()
+    return render(request, "accounts/success_stories.html", {"form": form, "stories": stories})
 
 
 def register(request):

@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
 from django.contrib.auth.models import User
 from django.core.validators import RegexValidator
 
-from .models import UserProfile
+from .models import SuccessStory, UserProfile
 
 
 class Registration(UserCreationForm):
@@ -59,3 +59,13 @@ class Registration(UserCreationForm):
 class Login(AuthenticationForm):
     model = User
     field = ('email', 'password')
+
+
+class SuccessStoryForm(forms.ModelForm):
+    class Meta:
+        model = SuccessStory
+        fields = ["title", "story"]
+        widgets = {
+            "title": forms.TextInput(attrs={"placeholder": "Give your story a short title"}),
+            "story": forms.Textarea(attrs={"placeholder": "Tell the community what changed for you...", "rows": 6}),
+        }

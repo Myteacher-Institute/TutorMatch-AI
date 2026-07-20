@@ -42,6 +42,7 @@
         <div class="nav-links">
           <a href="{% url 'home' %}#search-section">Find Tutors</a>
           <a href="{% url 'home' %}#how-it-works">How it Works</a>
+          <a href="{% url 'success_stories' %}">Success Stories</a>
           <a href="{% url 'register' %}">For Tutors</a>
         </div>
       {% if request.user.is_authenticated %}
@@ -136,7 +137,7 @@
       <div class="mtc-footer-links">
         <h2 style="color: #ffffff;">For Tutors</h2>
         <a href="{% url 'register' %}" style="color: #94a3b8;">Become a Tutor</a>
-        <a href="#" style="color: #94a3b8;">Success Stories</a>
+        <a href="{% url 'success_stories' %}" style="color: #94a3b8;">Success Stories</a>
         <a href="#" style="color: #94a3b8;">Resources</a>
       </div>
       <div class="mtc-footer-links">

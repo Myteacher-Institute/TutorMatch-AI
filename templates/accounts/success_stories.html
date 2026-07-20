@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+
+{% block title %}Success Stories | Myteacher Connect{% endblock %}
+
+{% block content %}
+<section class="stories-hero">
+  <div class="container stories-hero-inner">
+    <span class="eyebrow">Community wins</span>
+    <h1>Success stories that keep learning moving.</h1>
+    <p>Real moments of progress, shared by the Myteacher Connect community.</p>
+  </div>
+</section>
+
+<section class="stories-section">
+  <div class="container stories-layout">
+    <aside class="story-submit-panel">
+      <div class="story-submit-heading">
+        <span class="story-submit-icon"><i class="fa-solid fa-pen"></i></span>
+        <div>
+          <h2>Share your win</h2>
+          <p>Your experience can encourage someone else to take the next step.</p>
+        </div>
+      </div>
+      {% if request.user.is_authenticated %}
+        <form method="post" class="story-form">
+          {% csrf_token %}
+          <label for="{{ form.title.id_for_label }}">Story title</label>
+          {{ form.title }}
+          {% for error in form.title.errors %}<p class="story-field-error">{{ error }}</p>{% endfor %}
+          <label for="{{ form.story.id_for_label }}">Your story</label>
+          {{ form.story }}
+          {% for error in form.story.errors %}<p class="story-field-error">{{ error }}</p>{% endfor %}
+          <button type="submit" class="btn btn-primary story-submit">Post story <i class="fa-solid fa-arrow-right"></i></button>
+        </form>
+      {% else %}
+        <a class="btn btn-primary story-submit" href="{% url 'login' %}?next={% url 'success_stories' %}">Log in to share <i class="fa-solid fa-arrow-right"></i></a>
+      {% endif %}
+    </aside>
+
+    <div class="stories-content">
+      <div class="stories-content-heading">
+        <div>
+          <span class="eyebrow">From our community</span>
+          <h2>Recent stories</h2>
+        </div>
+        <span class="stories-count">{{ stories|length }} shared</span>
+      </div>
+      {% if stories %}
+        <div class="stories-grid">
+          {% for success_story in stories %}
+            <article class="success-story-card">
+              <i class="fa-solid fa-quote-left story-quote" aria-hidden="true"></i>
+              <h3>{{ success_story.title }}</h3>
+              <p>{{ success_story.story|linebreaksbr }}</p>
+              <footer class="story-author">
+                <div class="story-avatar">
+                  {% if success_story.profile_photo %}
+                    <img src="{{ success_story.profile_photo }}" alt="{{ success_story.author_name }}">
+                  {% else %}
+                    <i class="fa-solid fa-user" aria-hidden="true"></i>
+                  {% endif %}
+                </div>
+                <div>
+                  <strong>{{ success_story.author_name }}</strong>
+                  <span>{{ success_story.created_at|date:"M j, Y" }}</span>
+                </div>
+              </footer>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <div class="stories-empty">
+          <span><i class="fa-solid fa-sparkles" aria-hidden="true"></i></span>
+          <h3>The first story starts here.</h3>
+          <p>Share a learning win and give this community something to celebrate.</p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endblock %}
