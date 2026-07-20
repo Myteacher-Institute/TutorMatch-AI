@@ -6,21 +6,22 @@
 {% block content %}
 <section class="booking-flow-page">
   <div class="booking-flow-shell">
-    <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="booking-flow-back">
-      <i class="fa-solid fa-arrow-left"></i>
-      Back to tutor profile
-    </a>
-
-    <div class="booking-flow-hero">
-      <div>
-        <p class="booking-flow-kicker">Step 1 of 3</p>
-        <h1>Choose your lesson time</h1>
-        <p>Send a booking request to the tutor. You will review and pay on the next screen.</p>
-      </div>
+    <div class="booking-flow-topbar">
+      <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="booking-flow-back">
+        <i class="fa-solid fa-arrow-left"></i>
+        Tutor profile
+      </a>
       <div class="booking-flow-steps" aria-label="Booking progress">
         <span class="is-active">Schedule</span>
         <span>Review</span>
         <span>Pay</span>
+      </div>
+    </div>
+
+    <div class="booking-flow-hero">
+      <div>
+        <h1>Book a lesson</h1>
+        <p>Choose a date, time, lesson type, and duration. You will review the total before paying.</p>
       </div>
     </div>
 
@@ -32,36 +33,31 @@
       </div>
     {% endif %}
 
-    <div class="booking-flow-grid">
+    <form method="post" class="booking-flow-grid">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="booking-flow-error">{{ form.non_field_errors }}</div>
+      {% endif %}
+
       <aside class="booking-flow-tutor-card">
-        <div class="booking-flow-tutor-media">
-          {% if tutor.profile_photo %}
-            <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
-          {% else %}
-            <span>{{ tutor.user.user.first_name|first|upper|default:"T" }}{{ tutor.user.user.last_name|first|upper }}</span>
-          {% endif %}
-        </div>
-        <div class="booking-flow-tutor-copy">
-          <h2>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h2>
-          <p><i class="fa-solid fa-location-dot"></i>{{ tutor.location|default:"Location to be confirmed" }}</p>
+        <div class="booking-flow-tutor-row">
+          <div class="booking-flow-tutor-media">
+            {% if tutor.profile_photo %}
+              <img src="{{ tutor.profile_photo }}" alt="{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}">
+            {% else %}
+              <span>{{ tutor.user.user.first_name|first|upper|default:"T" }}{{ tutor.user.user.last_name|first|upper }}</span>
+            {% endif %}
+          </div>
+          <div class="booking-flow-tutor-copy">
+            <h2>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h2>
+            <p><i class="fa-solid fa-location-dot"></i>{{ tutor.location|default:"Location to be confirmed" }}</p>
+          </div>
         </div>
 
         <div class="booking-flow-rate-card">
-          <div class="booking-flow-rate-row">
-            <span class="booking-flow-rate-label">Tutor rate <small id="bookingRateLabel">per {{ rate_period_label|lower }}</small></span>
-            <strong id="bookingRatePreview">&#8358;{{ amount|floatformat:0 }}</strong>
-          </div>
-        </div>
-
-        <div class="booking-flow-mini-grid">
-          <div>
-            <strong>{{ tutor.years_experience|default:"0" }}</strong>
-            <span>Years exp.</span>
-          </div>
-          <div>
-            <strong>{{ tutor.subjects.count }}</strong>
-            <span>Subject{% if tutor.subjects.count != 1 %}s{% endif %}</span>
-          </div>
+          <span class="booking-flow-rate-label">Tutor rate <small id="bookingRateLabel">per {{ rate_period_label|lower }}</small></span>
+          <strong id="bookingRatePreview">&#8358;{{ amount|floatformat:0 }}</strong>
         </div>
 
         <div class="booking-flow-subjects">
@@ -74,92 +70,77 @@
 
         <div class="booking-flow-note-card">
           <i class="fa-solid fa-shield-halved"></i>
-          <p>Payment is handled securely after you confirm the date and time.</p>
+          <p>Payment happens on the next screen through Flutterwave test checkout.</p>
         </div>
       </aside>
 
       <main class="booking-flow-form-card">
         <div class="booking-flow-card-head">
           <h2>Lesson details</h2>
-          <p>Pick a realistic time and include a short note so the tutor can prepare.</p>
+          <p>Pick when the tutor should meet you and add any useful note.</p>
         </div>
 
-        <form method="post" class="booking-flow-form">
-          {% csrf_token %}
-
-          {% if form.non_field_errors %}
-            <div class="booking-flow-error">{{ form.non_field_errors }}</div>
-          {% endif %}
-
-          <div class="booking-flow-field-grid">
-            <label class="booking-flow-field" for="{{ form.booking_date.id_for_label }}">
-              <span>Lesson date</span>
-              {{ form.booking_date }}
-              {% if form.booking_date.errors %}<small>{{ form.booking_date.errors|striptags }}</small>{% endif %}
-            </label>
-
-            <label class="booking-flow-field" for="{{ form.lesson_time.id_for_label }}">
-              <span>Lesson time</span>
-              {{ form.lesson_time }}
-              {% if form.lesson_time.errors %}<small>{{ form.lesson_time.errors|striptags }}</small>{% endif %}
-            </label>
-          </div>
-
-          <div class="booking-flow-field-grid">
-            <label class="booking-flow-field" for="{{ form.duration_value.id_for_label }}">
-              <span>How long do you want to learn?</span>
-              {{ form.duration_value }}
-              {% if form.duration_value.errors %}<small>{{ form.duration_value.errors|striptags }}</small>{% endif %}
-            </label>
-
-            <label class="booking-flow-field" for="{{ form.duration_unit.id_for_label }}">
-              <span>Duration type</span>
-              {{ form.duration_unit }}
-              {% if form.duration_unit.errors %}<small>{{ form.duration_unit.errors|striptags }}</small>{% endif %}
-            </label>
-          </div>
-
-          <div class="booking-flow-class-toggle" id="classTypeToggle">
-            <span class="booking-flow-toggle-label">Class type</span>
-            <button type="button" class="class-toggle-btn is-active" data-class="online" data-rate="{{ online_class_fee }}">
-              <i class="fa-solid fa-globe"></i> Online Class
-            </button>
-            <button type="button" class="class-toggle-btn" data-class="physical" data-rate="{{ physical_class_fee }}">
-              <i class="fa-solid fa-building"></i> Physical Class
-            </button>
-          </div>
-
-          <label class="booking-flow-field" for="{{ form.lesson_note.id_for_label }}">
-            <span>What should the tutor know?</span>
-            {{ form.lesson_note }}
-            {% if form.lesson_note.errors %}<small>{{ form.lesson_note.errors|striptags }}</small>{% endif %}
+        <div class="booking-flow-field-grid">
+          <label class="booking-flow-field" for="{{ form.booking_date.id_for_label }}">
+            <span>Lesson date</span>
+            {{ form.booking_date }}
+            {% if form.booking_date.errors %}<small>{{ form.booking_date.errors|striptags }}</small>{% endif %}
           </label>
 
-          <input type="hidden" name="class_type" id="classTypeInput" value="{{ default_class_type }}">
+          <label class="booking-flow-field" for="{{ form.lesson_time.id_for_label }}">
+            <span>Lesson time</span>
+            {{ form.lesson_time }}
+            {% if form.lesson_time.errors %}<small>{{ form.lesson_time.errors|striptags }}</small>{% endif %}
+          </label>
+        </div>
 
-          <div class="booking-flow-summary-bar">
-            <div>
-              <span>Estimated total</span>
-              <strong id="bookingTotalPreview">&#8358;{{ amount|floatformat:0 }}</strong>
-            </div>
-            <p>
-              Tutor charges &#8358;{{ amount|floatformat:0 }} per {{ rate_period_label|lower }}.
-              Final amount is calculated from your selected duration.
-            </p>
-          </div>
+        <div class="booking-flow-class-toggle" id="classTypeToggle">
+          <span class="booking-flow-toggle-label">Class type</span>
+          <button type="button" class="class-toggle-btn is-active" data-class="online" data-rate="{{ online_class_fee }}">
+            <i class="fa-solid fa-globe"></i> Online
+          </button>
+          <button type="button" class="class-toggle-btn" data-class="physical" data-rate="{{ physical_class_fee }}">
+            <i class="fa-solid fa-building"></i> Physical
+          </button>
+        </div>
 
-          <div class="booking-flow-actions">
-            <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="booking-flow-secondary">Cancel</a>
-            <button type="submit" class="booking-flow-primary">
-              Continue to review
-              <i class="fa-solid fa-arrow-right"></i>
-            </button>
-          </div>
-        </form>
+        <div class="booking-flow-field-grid">
+          <label class="booking-flow-field" for="{{ form.duration_value.id_for_label }}">
+            <span>Duration</span>
+            {{ form.duration_value }}
+            {% if form.duration_value.errors %}<small>{{ form.duration_value.errors|striptags }}</small>{% endif %}
+          </label>
+
+          <label class="booking-flow-field" for="{{ form.duration_unit.id_for_label }}">
+            <span>Duration type</span>
+            {{ form.duration_unit }}
+            {% if form.duration_unit.errors %}<small>{{ form.duration_unit.errors|striptags }}</small>{% endif %}
+          </label>
+        </div>
+
+        <label class="booking-flow-field" for="{{ form.lesson_note.id_for_label }}">
+          <span>Note for tutor</span>
+          {{ form.lesson_note }}
+          {% if form.lesson_note.errors %}<small>{{ form.lesson_note.errors|striptags }}</small>{% endif %}
+        </label>
+
+        <input type="hidden" name="class_type" id="classTypeInput" value="{{ default_class_type }}">
       </main>
-    </div>
+
+      <aside class="booking-flow-summary-card">
+        <span>Total estimate</span>
+        <strong id="bookingTotalPreview">&#8358;{{ amount|floatformat:0 }}</strong>
+        <p>Based on your lesson type and duration. You will confirm this before payment.</p>
+        <button type="submit" class="booking-flow-primary">
+          Continue
+          <i class="fa-solid fa-arrow-right"></i>
+        </button>
+        <a href="{% url 'tutor_detail' tutor_id=tutor.id %}" class="booking-flow-secondary">Cancel</a>
+      </aside>
+    </form>
   </div>
 </section>
+
 <script>
   (function () {
     const baseRate = Number("{{ amount|default:0 }}");
@@ -174,7 +155,7 @@
     const toggleBtns = document.querySelectorAll(".class-toggle-btn");
 
     function formatNaira(value) {
-      return "₦" + Math.max(value, 0).toLocaleString("en-NG", { maximumFractionDigits: 0 });
+      return "\u20a6" + Math.max(value, 0).toLocaleString("en-NG", { maximumFractionDigits: 0 });
     }
 
     function getSelectedRate() {

@@ -69,6 +69,7 @@ def tutor_profile(request):
         subject_names = [s.strip() for s in subjects_input.split(',') if s.strip()]
         subject_objs = []
         for name in subject_names:
+            name = name[:100]
             subject, _ = Subject.objects.get_or_create(subject_name=name)
             subject_objs.append(subject)
         profile.subjects.set(subject_objs)

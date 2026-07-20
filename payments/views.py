@@ -10,6 +10,7 @@ from django.conf import settings
 from bookings.models import Booking
 from .models import Payment
 from .services import create_weekly_payout_schedule
+from .emails import send_payment_success_email, send_payment_failed_email
 
 
 logger = logging.getLogger(__name__)
@@ -248,6 +249,10 @@ def verify_payment(request):
         )
         _activate_platform_managed_payouts(paid_payment)
         _mark_booking_paid(booking)
+        
+        # Send Success Email
+        send_payment_success_email(request, booking)
+        
         messages.success(request, "Payment verified successfully.")
         return redirect("payment_success")
 
@@ -257,6 +262,7 @@ def verify_payment(request):
             booking = Booking.objects.filter(id=booking_id, student__user=request.user).first()
             if booking:
                 _upsert_booking_payment(booking, status="failed", reference=tx_ref, transaction_id=str(transaction_id))
+                send_payment_failed_email(request, booking)
     messages.error(request, "Payment verification failed.")
     return redirect("payment_failed")
 

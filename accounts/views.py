@@ -92,8 +92,9 @@ def login_view(request):
             if next_url:
                 return redirect(next_url)
             profile = getattr(user, "profile", None)
-            if profile and not profile.is_verified:
-                return redirect("verify_account")
+            if not (user.is_superuser or user.is_staff or (profile and profile.role == 'admin')):
+                if profile and not profile.is_verified:
+                    return redirect("verify_account")
             return redirect(_dashboard_for_user(user))
     return render(request, 'accounts/login.html', {'form': forms})
 
@@ -105,6 +106,9 @@ def logout_view(request):
 
 @login_required(login_url='login')
 def verify_account(request):
+    if request.user.is_superuser or request.user.is_staff:
+        return redirect(_dashboard_for_user(request.user))
+        
     profile = getattr(request.user, 'profile', None)
     if not profile:
         profile = UserProfile.objects.create(user=request.user)

@@ -224,15 +224,13 @@ def _generate_assistant_reply(conversation, state, tutors):
         pass
 
     if not os.getenv("GEMINI_API_KEY"):
-        return _generate_fallback_reply(state, tutors)
-    if tutors:
-        return _generate_fallback_reply(state, tutors)
+        return _generate_service_error_reply()
     try:
         return _generate_gemini_reply(conversation, state, tutors)
     except Exception as e:
         logger.error("Gemini assistant response failed: %s", _safe_error_message(e))
         _create_admin_alert(e, conversation, state)
-        return _generate_fallback_reply(state, tutors)
+        return _generate_service_error_reply()
 
 
 def _generate_gemini_reply(conversation, state, tutors):

@@ -12,11 +12,11 @@ class TutorProfileForm(forms.ModelForm):
 
     state = forms.ChoiceField(
         choices=[("", "Select state")] + [(s, s) for s in NIGERIAN_STATES],
-        required=False,
+        required=True,
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
     local_government = forms.CharField(
-        required=False,
+        required=True,
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
     country = forms.ChoiceField(
@@ -24,20 +24,21 @@ class TutorProfileForm(forms.ModelForm):
             (continent, [(c, c) for c in countries])
             for continent, countries in COUNTRIES_BY_CONTINENT.items()
         ]),
-        required=False,
+        required=True,
         initial=DEFAULT_COUNTRY,
         widget=forms.Select(attrs={'class': 'form-control'}),
     )
     subjects_input = forms.CharField(
-        required=False,
+        required=True,
         widget=forms.TextInput(attrs={
             'placeholder': 'e.g. Mathematics, Physics, Chemistry',
             'class': 'tutor-subject-tag-input',
         }),
         help_text='Type a subject and press Enter or comma to add it.',
+        error_messages={'required': 'Please add at least one subject.'}
     )
     years_experience = forms.IntegerField(
-        required=False,
+        required=True,
         min_value=0,
         widget=forms.TextInput(attrs={
             'inputmode': 'numeric',
@@ -64,22 +65,36 @@ class TutorProfileForm(forms.ModelForm):
             'account_number',
         ]
         widgets = {
-            'bio': forms.Textarea(attrs={'rows': 4}),
-            'qualifications': forms.Textarea(attrs={'rows': 4}),
-            'account_name': forms.TextInput(attrs={'placeholder': 'e.g. Samuel Godnews'}),
-            'bank_name': forms.TextInput(attrs={'placeholder': 'e.g. Access Bank'}),
-            'account_number': forms.TextInput(attrs={'placeholder': 'e.g. 0123456789'}),
+            'bio': forms.Textarea(attrs={'rows': 4, 'required': 'required'}),
+            'qualifications': forms.Textarea(attrs={'rows': 4, 'required': 'required'}),
+            'location': forms.TextInput(attrs={'required': 'required'}),
+            'account_name': forms.TextInput(attrs={'placeholder': 'e.g. Samuel Godnews', 'required': 'required'}),
+            'bank_name': forms.TextInput(attrs={'placeholder': 'e.g. Access Bank', 'required': 'required', 'list': 'nigerian-banks'}),
+            'account_number': forms.TextInput(attrs={'placeholder': 'e.g. 0123456789', 'required': 'required'}),
             'online_class_fee': forms.TextInput(attrs={
                 'type': 'text',
                 'inputmode': 'numeric',
                 'pattern': '[0-9]*',
+                'required': 'required'
             }),
             'physical_class_fee': forms.TextInput(attrs={
                 'type': 'text',
                 'inputmode': 'numeric',
                 'pattern': '[0-9]*',
+                'required': 'required'
             }),
         }
+
+    def clean(self):
+        cleaned_data = super().clean()
+        online_fee = cleaned_data.get("online_class_fee", 0)
+        physical_fee = cleaned_data.get("physical_class_fee", 0)
+
+        # Make sure at least one fee is greater than 0
+        if not online_fee and not physical_fee:
+            raise forms.ValidationError("You must set a price greater than 0 for either Online Class Fee or Physical Class Fee.")
+            
+        return cleaned_data
 
 
 class TutorDocumentForm(forms.ModelForm):
