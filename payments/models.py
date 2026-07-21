@@ -144,6 +144,7 @@ class SupportTicket(models.Model):
     reason = models.CharField(max_length=24, choices=REASON_CHOICES, default=REASON_OTHER)
     message = models.TextField()
     evidence_url = models.URLField(blank=True)
+    evidence_image = models.ImageField(upload_to='support_evidence/', blank=True, null=True)
     status = models.CharField(max_length=24, choices=STATUS_CHOICES, default=STATUS_OPEN)
     admin_note = models.TextField(blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

@@ -5,6 +5,7 @@ from django.http import HttpResponse, JsonResponse
 from django.db.models import Count, Q, Value
 from django.db.models.functions import Concat, Coalesce
 from django.core.paginator import Paginator
+from django.core.cache import cache
 from django.contrib.sessions.models import Session
 from django.utils import timezone
 
@@ -149,11 +150,24 @@ def send_message(request, booking_id):
 
         message_content = request.POST.get('message', '').strip()
         if message_content:
-            new_message = ChatMessage.objects.create(
-                session=session,
-                sender=request.user,
-                message=message_content
-            )
+            client_message_id = request.POST.get('client_message_id', '').strip()
+            if client_message_id:
+                cache_key = f"chat-message:{session.id}:{request.user.id}:{client_message_id}"
+                message_id = cache.get(cache_key)
+                new_message = ChatMessage.objects.filter(id=message_id).first() if message_id else None
+                if new_message is None:
+                    new_message = ChatMessage.objects.create(
+                        session=session,
+                        sender=request.user,
+                        message=message_content,
+                    )
+                    cache.set(cache_key, new_message.id, timeout=3600)
+            else:
+                new_message = ChatMessage.objects.create(
+                    session=session,
+                    sender=request.user,
+                    message=message_content,
+                )
             session.save() # Explicitly save the session to update 'updated_at'
             # Render the new message as an HTML fragment
             context = {

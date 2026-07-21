@@ -710,7 +710,12 @@ def support(request):
         "installment",
     )
     if status_filter in valid_statuses:
-        qs = qs.filter(status=status_filter)
+        if status_filter == "resolved":
+            qs = qs.filter(status__in=[SupportTicket.STATUS_RESOLVED, SupportTicket.STATUS_CLOSED])
+        else:
+            qs = qs.filter(status=status_filter)
+    else:
+        qs = qs.exclude(status=SupportTicket.STATUS_CLOSED)
 
     paginator = Paginator(qs.order_by("-created_at"), 10)
     page_obj = paginator.get_page(request.GET.get("page"))

@@ -318,7 +318,7 @@ def student_complain_booking(request, booking_id):
     if installment_id:
         installment = get_object_or_404(PayoutInstallment, pk=installment_id, booking=booking)
 
-    form = SupportTicketForm(request.POST)
+    form = SupportTicketForm(request.POST, request.FILES)
     if not form.is_valid():
         messages.error(request, "Please add a reason and complaint details before submitting.")
         return redirect("student_bookings")
@@ -352,7 +352,7 @@ def tutor_complain_booking(request, booking_id):
     if installment_id:
         installment = get_object_or_404(PayoutInstallment, pk=installment_id, booking=booking)
 
-    form = SupportTicketForm(request.POST)
+    form = SupportTicketForm(request.POST, request.FILES)
     if not form.is_valid():
         messages.error(request, "Please add a reason and complaint details before submitting.")
         return redirect("tutor_bookings")
