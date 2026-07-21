@@ -46,7 +46,7 @@ class BookingForm(forms.ModelForm):
 class SupportTicketForm(forms.ModelForm):
     class Meta:
         model = SupportTicket
-        fields = ["reason", "message", "evidence_url"]
+        fields = ["reason", "message", "evidence_url", "evidence_image"]
         widgets = {
             "reason": forms.Select(),
             "message": forms.Textarea(attrs={
@@ -55,6 +55,9 @@ class SupportTicketForm(forms.ModelForm):
             }),
             "evidence_url": forms.URLInput(attrs={
                 "placeholder": "Optional evidence link: screenshot, recording, document, or meeting link",
+            }),
+            "evidence_image": forms.FileInput(attrs={
+                "accept": "image/*",
             }),
         }
 

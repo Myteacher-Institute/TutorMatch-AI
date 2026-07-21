@@ -87,6 +87,26 @@ class ChatViewsTests(TestCase):
         )
         self.assertContains(response, "Hello tutor")
 
+    def test_send_message_with_same_submission_id_creates_once(self):
+        self.client.login(username="student", password="pass12345")
+        payload = {
+            "message": "Send only once",
+            "client_message_id": "f0dd8e6e-9166-41c3-b0be-df9914dd9aa1",
+        }
+
+        self.client.post(reverse("chat:send_message", args=[self.booking.id]), payload)
+        response = self.client.post(reverse("chat:send_message", args=[self.booking.id]), payload)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            ChatMessage.objects.filter(
+                session__booking=self.booking,
+                sender=self.student_user,
+                message=payload["message"],
+            ).count(),
+            1,
+        )
+
     def test_get_new_messages_returns_only_new_messages_and_marks_read(self):
         session = ChatSession.objects.create(
             booking=self.booking,

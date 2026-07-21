@@ -213,27 +213,48 @@
                                   </form>
                                 {% endif %}
                               {% endif %}
-                              <details style="flex-basis: 100%; max-width: 360px;">
-                                <summary class="mtc-review-button" style="cursor: pointer; display: inline-flex; background: #fff7ed; color: #c2410c;">
-                                  <i class="fa-solid fa-headset"></i> Complaint
-                                </summary>
-                                <form method="post" action="{% url 'student_complain_booking' booking.id %}" style="margin-top: 8px; display: grid; gap: 8px;">
+                              <button type="button" class="mtc-review-button" data-complaint-trigger="student-complaint-{{ booking.id }}" style="border: 0; cursor: pointer; display: inline-flex; background: #fff7ed; color: #c2410c;">
+                                <i class="fa-solid fa-headset"></i> Complaint
+                              </button>
+                              <div class="mtc-complaint-overlay" id="student-complaint-{{ booking.id }}" data-complaint-modal hidden>
+                                <section class="mtc-complaint-modal" role="dialog" aria-modal="true" aria-labelledby="student-complaint-title-{{ booking.id }}">
+                                  <div class="mtc-complaint-modal-header">
+                                    <div>
+                                      <h2 id="student-complaint-title-{{ booking.id }}">Submit a complaint</h2>
+                                      <p>Tell support what happened with this lesson.</p>
+                                    </div>
+                                    <button type="button" class="mtc-complaint-close" data-complaint-close aria-label="Close complaint form">&times;</button>
+                                  </div>
+                                  <form method="post" action="{% url 'student_complain_booking' booking.id %}" class="mtc-complaint-form" enctype="multipart/form-data">
                                   {% csrf_token %}
                                   {% if booking.next_payout_installment %}
                                     <input type="hidden" name="installment_id" value="{{ booking.next_payout_installment.id }}">
                                   {% endif %}
-                                  <select name="reason" required style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
+                                  <label>Reason
+                                  <select name="reason" required>
                                     <option value="quality">Teaching quality</option>
                                     <option value="attendance">Attendance or lateness</option>
                                     <option value="payment">Payment issue</option>
                                     <option value="safety">Safety concern</option>
                                     <option value="other">Other</option>
                                   </select>
-                                  <textarea name="message" rows="3" minlength="10" required placeholder="Explain what happened. Support will review before payout is released." style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;"></textarea>
-                                  <input type="url" name="evidence_url" placeholder="Optional evidence link" style="padding: 8px; border: 1px solid #cbd5e1; border-radius: 8px;">
-                                  <button type="submit" class="btn btn-primary" style="padding: 6px 10px; border-radius: 8px; font-size: 12px;">Send to support</button>
-                                </form>
-                              </details>
+                                  </label>
+                                  <label>Complaint details
+                                  <textarea name="message" rows="4" minlength="10" required placeholder="Explain what happened. Support will review before payout is released."></textarea>
+                                  </label>
+                                  <label>Evidence link <span>(optional)</span>
+                                  <input type="url" name="evidence_url" placeholder="https://example.com/evidence">
+                                  </label>
+                                  <label>Upload image <span>(optional)</span>
+                                  <input type="file" name="evidence_image" accept="image/*">
+                                  </label>
+                                  <div class="mtc-complaint-actions">
+                                    <button type="button" class="mtc-complaint-cancel" data-complaint-close>Cancel</button>
+                                    <button type="submit" class="btn btn-primary">Send to support</button>
+                                  </div>
+                                  </form>
+                                </section>
+                              </div>
                               {% if booking.open_support_ticket %}
                                 <span class="mtc-pending-payment-badge" style="background: #fef3c7; color: #92400e;">
                                   Support: {{ booking.open_support_ticket.get_status_display }}

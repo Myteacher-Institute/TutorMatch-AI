@@ -110,6 +110,7 @@
               method="post"
               class="composer-inner-card">
           {% csrf_token %}
+          <input type="hidden" name="client_message_id" id="chat-client-message-id">
           <div class="composer-input-row">
             <textarea class="composer-textarea" name="message" id="chat-message-input" rows="1" placeholder="Message {{ other_party.first_name|default:'here' }}..." autocomplete="off" required></textarea>
             <button type="submit" class="composer-send-btn" id="chat-send-button" disabled title="Send message" aria-label="Send message">
@@ -128,9 +129,17 @@
   const messageThread = document.getElementById('messages-thread-inner');
   const messageForm = document.getElementById('chat-message-form');
   const messageInput = document.getElementById('chat-message-input');
+  const clientMessageIdInput = document.getElementById('chat-client-message-id');
   const sendButton = document.getElementById('chat-send-button');
   const messagesLoader = document.getElementById('messages-loader');
   const pollBaseUrl = "{% url 'chat:get_new_messages' booking.id 0 %}";
+
+  function newClientMessageId() {
+    if (window.crypto && typeof window.crypto.randomUUID === 'function') {
+      return window.crypto.randomUUID();
+    }
+    return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+  }
 
   function scrollToBottom() {
     messagesDisplay.scrollTop = messagesDisplay.scrollHeight;
@@ -149,15 +158,31 @@
   }
 
   function appendMessages(html) {
-    if (!html.trim()) {
-      return;
+    if (!html.trim()) return;
+
+    const template = document.createElement('template');
+    template.innerHTML = html.trim();
+    const messages = [...template.content.querySelectorAll('[data-message-id]')];
+    let appended = false;
+
+    messages.forEach((message) => {
+      const messageId = message.dataset.messageId;
+      if (!messageThread.querySelector(`[data-message-id="${messageId}"]`)) {
+        messageThread.appendChild(message);
+        appended = true;
+      }
+    });
+
+    if (appended) {
+      updateLastMessageIdAttribute();
+      scrollToBottom();
     }
-    messageThread.insertAdjacentHTML('beforeend', html);
-    updateLastMessageIdAttribute();
-    scrollToBottom();
   }
 
+  let isPolling = false;
   async function fetchNewMessages() {
+    if (isPolling) return;
+    isPolling = true;
     const lastMessageId = messagesDisplay.dataset.lastMessageId || 0;
     const url = pollBaseUrl.replace('/0/', `/${lastMessageId}/`);
 
@@ -172,6 +197,7 @@
         appendMessages(await response.text());
       }
     } finally {
+      isPolling = false;
       messagesLoader.style.display = 'none';
     }
   }
@@ -201,13 +227,18 @@
     }
   });
 
+  let isSending = false;
   messageForm.addEventListener('submit', async (event) => {
     event.preventDefault();
 
-    if (!messageInput.value.trim()) {
+    if (isSending || !messageInput.value.trim()) {
       return;
     }
 
+    isSending = true;
+    if (!clientMessageIdInput.value) {
+      clientMessageIdInput.value = newClientMessageId();
+    }
     sendButton.disabled = true;
 
     try {
@@ -221,10 +252,12 @@
       if (response.ok) {
         appendMessages(await response.text());
         messageForm.reset();
+        clientMessageIdInput.value = '';
         messageInput.style.height = 'auto';
         messageInput.focus();
       }
     } finally {
+      isSending = false;
       sendButton.disabled = !messageInput.value.trim();
     }
   });
