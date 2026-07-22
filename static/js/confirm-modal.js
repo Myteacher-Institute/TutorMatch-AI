@@ -11,6 +11,7 @@
 
   var pendingForm = null;
   var pendingHref = null;
+  var pendingCallback = null;
 
   function showModal(message, opts) {
     opts = opts || {};
@@ -25,6 +26,8 @@
       overlay.classList.remove("is-danger");
     }
 
+    pendingCallback = opts.onConfirm || null;
+
     overlay.hidden = false;
     document.body.style.overflow = "hidden";
     okBtn.focus();
@@ -35,10 +38,13 @@
     document.body.style.overflow = "";
     pendingForm = null;
     pendingHref = null;
+    pendingCallback = null;
   }
 
   okBtn.addEventListener("click", function () {
-    if (pendingForm) {
+    if (pendingCallback) {
+      pendingCallback();
+    } else if (pendingForm) {
       pendingForm.submit();
     } else if (pendingHref) {
       window.location.href = pendingHref;

@@ -31,6 +31,7 @@ def _assistant_context(request, conversation):
     return {
         "conversation": conversation,
         "chat_messages": chat_messages,
+        "user_msg_count": chat_messages.filter(role="user").count(),
         "latest_tutors": latest_tutors,
         "suggested_prompts": assistant_suggestions(),
         "recent_conversations": recent_conversations(request, request.GET.get("chat_search", "")),
@@ -93,6 +94,13 @@ def ai_assistant(request, conversation_id=None):
         nav_path = detect_navigation_intent(message)
         if nav_path:
             return redirect(nav_path)
+
+        if not request.user.is_authenticated and not generate_only and message:
+            if conversation.messages.filter(role="user").count() >= 5:
+                from django.http import JsonResponse
+                if _is_ajax(request):
+                    return JsonResponse({"error": "guest_limit_reached"}, status=403)
+                return redirect('login')
 
         if generate_only:
             generate_assistant_reply_only(conversation)

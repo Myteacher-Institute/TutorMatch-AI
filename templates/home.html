@@ -8,40 +8,70 @@
   <div class="mtc-shell mtc-hero-inner">
     <p class="mtc-pill">#1 Tutoring Platform in Nigeria</p>
     <h1>Find Verified Home Tutors<br>in Nigeria <span>Anywhere</span></h1>
-    <p class="mtc-hero-copy" id="search-section">Use AI to instantly connect with trusted Mathematics, English, Science, Coding, WAEC and JAMB tutors near you.</p>
+    <p class="mtc-hero-copy" id="search-section">Use AI to instantly connect with trusted Mathematics, English, Science,
+      Coding, WAEC and JAMB tutors near you.</p>
 
     <style>
       @keyframes micPulse {
-        0% { transform: scale(1); opacity: 0.8; }
-        100% { transform: scale(1.25); opacity: 1; }
+        0% {
+          transform: scale(1);
+          opacity: 0.8;
+        }
+
+        100% {
+          transform: scale(1.25);
+          opacity: 1;
+        }
       }
+
       @keyframes formShake {
-        0%, 100% { transform: translateX(0); }
-        20%, 60% { transform: translateX(-8px); }
-        40%, 80% { transform: translateX(8px); }
+
+        0%,
+        100% {
+          transform: translateX(0);
+        }
+
+        20%,
+        60% {
+          transform: translateX(-8px);
+        }
+
+        40%,
+        80% {
+          transform: translateX(8px);
+        }
       }
+
       .voice-search-btn svg {
         transition: all 0.2s ease;
       }
+
       .voice-search-btn.listening svg {
         animation: micPulse 0.8s infinite alternate;
       }
+
       .form-shake {
         animation: formShake 0.4s ease-in-out;
       }
     </style>
 
-    <form action="{% url 'ai_assistant' %}" class="mtc-search" method="get" >
+    <form action="{% url 'ai_assistant' %}" class="mtc-search" method="get">
       <input type="hidden" name="reset" value="1">
       <span class="mtc-search-icon" aria-hidden="true">
-        <svg viewBox="0 0 24 24"><path d="m12 3-1.7 5.2L5 10l5.3 1.8L12 17l1.7-5.2L19 10l-5.3-1.8L12 3Z"/><path d="m5 15-.9 2.6L1.5 18.5l2.6.9L5 22l.9-2.6 2.6-.9-2.6-.9L5 15Z"/></svg>
+        <svg viewBox="0 0 24 24">
+          <path d="m12 3-1.7 5.2L5 10l5.3 1.8L12 17l1.7-5.2L19 10l-5.3-1.8L12 3Z" />
+          <path d="m5 15-.9 2.6L1.5 18.5l2.6.9L5 22l.9-2.6 2.6-.9-2.6-.9L5 15Z" />
+        </svg>
       </span>
       <label for="home-search" class="sr-only">Find tutor</label>
-      <input id="home-search" name="q" placeholder='e.g., "I need a Mathematics tutor for SS3 in GRA Port Harcourt."' value="{{ request.GET.q|default:'' }}">
-      
+      <input id="home-search" name="q" placeholder='e.g., "I need a Mathematics tutor for SS3 in GRA Port Harcourt."'
+        value="{{ request.GET.q|default:'' }}">
+
       <!-- Voice Search Mic Button -->
-      <button type="button" id="voice-search-btn" class="voice-search-btn" title="Search with voice" style="background: none; border: none; padding: 0 12px; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; outline: none;">
-        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <button type="button" id="voice-search-btn" class="voice-search-btn" title="Search with voice"
+        style="background: none; border: none; padding: 0 12px; cursor: pointer; color: var(--muted); display: flex; align-items: center; justify-content: center; outline: none;">
+        <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"
+          stroke-linecap="round" stroke-linejoin="round">
           <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
           <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
           <line x1="12" y1="19" x2="12" y2="23"></line>
@@ -49,7 +79,7 @@
         </svg>
       </button>
 
-      <button type="submit">Ask AI  <span aria-hidden="true">→</span></button>
+      <button type="submit">Ask AI <span aria-hidden="true">→</span></button>
     </form>
 
     <div class="mtc-try">
@@ -73,21 +103,32 @@
     <div class="mtc-stats">
       <div>
         <span class="mtc-stat-icon">
-          <svg viewBox="0 0 24 24"><path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z"/><path d="M4 21a8 8 0 0 1 13.6-5.7"/><path d="m18 15 1.2 2.5 2.8.5-2 2 .5 2.8-2.5-1.4-2.5 1.4.5-2.8-2-2 2.8-.5L18 15Z"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M16 11a4 4 0 1 0-8 0 4 4 0 0 0 8 0Z" />
+            <path d="M4 21a8 8 0 0 1 13.6-5.7" />
+            <path d="m18 15 1.2 2.5 2.8.5-2 2 .5 2.8-2.5-1.4-2.5 1.4.5-2.8-2-2 2.8-.5L18 15Z" />
+          </svg>
         </span>
         <strong>{{ verified_tutors_count|default:0 }}{% if verified_tutors_count %}+{% endif %}</strong>
         <small>Verified Tutors</small>
       </div>
       <div>
         <span class="mtc-stat-icon">
-          <svg viewBox="0 0 24 24"><path d="M7 3v3M17 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/><path d="m9 14 2 2 4-5"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M7 3v3M17 3v3M4 8h16M6 5h12a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z" />
+            <path d="m9 14 2 2 4-5" />
+          </svg>
         </span>
         <strong>{{ completed_lessons_count|default:0 }}{% if completed_lessons_count %}+{% endif %}</strong>
         <small>Lessons Completed</small>
       </div>
       <div>
         <span class="mtc-stat-icon">
-          <svg viewBox="0 0 24 24"><path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11Z"/><path d="M12 10h.01"/><path d="M8 18V9l4-2 4 2v9"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M12 21s7-4.4 7-11a7 7 0 1 0-14 0c0 6.6 7 11 7 11Z" />
+            <path d="M12 10h.01" />
+            <path d="M8 18V9l4-2 4 2v9" />
+          </svg>
         </span>
         <strong>{{ cities_covered_count|default:0 }}{% if cities_covered_count %}+{% endif %}</strong>
         <small>Cities Covered</small>
@@ -99,27 +140,38 @@
 <section class="mtc-how" id="how-it-works">
   <div class="mtc-shell">
     <div class="mtc-section-title">
-      <h2 >How It Works</h2>
+      <h2>How It Works</h2>
       <p>Get connected with a professional tutor in three simple steps.</p>
     </div>
     <div class="mtc-steps">
       <article>
         <span>
-          <svg viewBox="0 0 24 24"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M12 20h9" />
+            <path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5Z" />
+          </svg>
         </span>
         <h3>1. Describe Your Need</h3>
         <p>Tell our AI exactly what subject, level, and location you need help with.</p>
       </article>
       <article>
         <span>
-          <svg viewBox="0 0 24 24"><path d="M9 7h6v4H9z"/><path d="M5 11h14v8H5z"/><path d="M9 15h.01M12 15h.01M15 15h.01M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M9 7h6v4H9z" />
+            <path d="M5 11h14v8H5z" />
+            <path d="M9 15h.01M12 15h.01M15 15h.01M8 11V7a4 4 0 0 1 8 0v4" />
+          </svg>
         </span>
         <h3>2. AI Finds Tutors</h3>
         <p>Our algorithm matches you with the best-rated tutors available near you instantly.</p>
       </article>
       <article>
         <span>
-          <svg viewBox="0 0 24 24"><path d="M12 6 4 10l8 4 8-4-8-4Z"/><path d="M4 14l8 4 8-4"/><path d="M12 14v7"/></svg>
+          <svg viewBox="0 0 24 24">
+            <path d="M12 6 4 10l8 4 8-4-8-4Z" />
+            <path d="M4 14l8 4 8-4" />
+            <path d="M12 14v7" />
+          </svg>
         </span>
         <h3>3. Book and Learn</h3>
         <p>Review profiles, chat with tutors, and start your first lesson at your convenience.</p>
@@ -149,8 +201,9 @@
           </div>
           {% endif %}
           <span style="display: inline-flex; align-items: center; gap: 4px;">
-            <svg viewBox="0 0 24 24" width="12" height="12" fill="#fbbf24" style="display: inline-block; vertical-align: middle;">
-              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/>
+            <svg viewBox="0 0 24 24" width="12" height="12" fill="#fbbf24"
+              style="display: inline-block; vertical-align: middle;">
+              <path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z" />
             </svg>
             {% if tutor.avg_rating %}{{ tutor.avg_rating|floatformat:1 }}{% else %}New{% endif %}
           </span>
@@ -186,7 +239,8 @@
 <section class="mtc-trust">
   <div class="mtc-shell mtc-trust-grid">
     <div class="mtc-trust-photo">
-      <img src="{% static 'images/Tutor reading with children.png' %}" alt="Tutor reading with children">
+      <img src="https://ik.imagekit.io/gryyh4va8/Tutor%20reading%20with%20children.png"
+        alt="Tutor reading with children">
       <span class="mtc-trust-blur" aria-hidden="true"></span>
     </div>
     <div>
@@ -194,7 +248,10 @@
       <div class="mtc-trust-list">
         <article>
           <span class="green">
-            <svg viewBox="0 0 24 24"><path d="M12 3 5 6v5c0 4.5 2.9 8.6 7 10 4.1-1.4 7-5.5 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-5"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="M12 3 5 6v5c0 4.5 2.9 8.6 7 10 4.1-1.4 7-5.5 7-10V6l-7-3Z" />
+              <path d="m9 12 2 2 4-5" />
+            </svg>
           </span>
           <div>
             <h3>Verified Tutors</h3>
@@ -203,16 +260,23 @@
         </article>
         <article>
           <span class="blue">
-            <svg viewBox="0 0 24 24"><path d="M3 6h18v12H3z"/><path d="M3 10h18"/><path d="M7 15h4"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="M3 6h18v12H3z" />
+              <path d="M3 10h18" />
+              <path d="M7 15h4" />
+            </svg>
           </span>
           <div>
             <h3>Secure Payments</h3>
-            <p>We manage payments on-platform and release tutor payouts weekly after student confirmation or support review.</p>
+            <p>We manage payments on-platform and release tutor payouts weekly after student confirmation or support
+              review.</p>
           </div>
         </article>
         <article>
           <span class="purple">
-            <svg viewBox="0 0 24 24"><path d="m13 2-8 12h6l-1 8 8-12h-6l1-8Z"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="m13 2-8 12h6l-1 8 8-12h-6l1-8Z" />
+            </svg>
           </span>
           <div>
             <h3>AI Matching</h3>
@@ -221,7 +285,9 @@
         </article>
         <article>
           <span class="orange">
-            <svg viewBox="0 0 24 24"><path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3Z"/></svg>
+            <svg viewBox="0 0 24 24">
+              <path d="m12 3 2.7 5.5 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.8 1-6.1-4.4-4.3 6.1-.9L12 3Z" />
+            </svg>
           </span>
           <div>
             <h3>Trusted Reviews</h3>
@@ -244,9 +310,11 @@
         <!-- Testimonial 1 -->
         <article>
           <div class="mtc-stars">★★★★★</div>
-          <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching really worked for us!"</p>
+          <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching
+            really worked for us!"</p>
           <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Mrs. Funmi Balogun">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
+              alt="Mrs. Funmi Balogun">
             <div>
               <strong>Mrs. Funmi Balogun</strong>
               <span>Lagos Parent</span>
@@ -256,9 +324,11 @@
         <!-- Testimonial 2 -->
         <article>
           <div class="mtc-stars">★★★★★</div>
-          <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is incredibly transparent."</p>
+          <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is
+            incredibly transparent."</p>
           <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80" alt="Mr. Emeka Obi">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80"
+              alt="Mr. Emeka Obi">
             <div>
               <strong>Mr. Emeka Obi</strong>
               <span>Math Tutor, Abuja</span>
@@ -268,9 +338,11 @@
         <!-- Testimonial 3 -->
         <article>
           <div class="mtc-stars">★★★★★</div>
-          <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic websites in months."</p>
+          <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic
+            websites in months."</p>
           <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80" alt="Dr. Amina Yusuf">
+            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80"
+              alt="Dr. Amina Yusuf">
             <div>
               <strong>Dr. Amina Yusuf</strong>
               <span>Kano Parent</span>
@@ -281,9 +353,11 @@
         <!-- Duplicated for Infinite Scroll Loop -->
         <article>
           <div class="mtc-stars">★★★★★</div>
-          <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching really worked for us!"</p>
+          <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching
+            really worked for us!"</p>
           <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80" alt="Mrs. Funmi Balogun">
+            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
+              alt="Mrs. Funmi Balogun">
             <div>
               <strong>Mrs. Funmi Balogun</strong>
               <span>Lagos Parent</span>
@@ -292,9 +366,11 @@
         </article>
         <article>
           <div class="mtc-stars">★★★★★</div>
-          <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is incredibly transparent."</p>
+          <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is
+            incredibly transparent."</p>
           <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80" alt="Mr. Emeka Obi">
+            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80"
+              alt="Mr. Emeka Obi">
             <div>
               <strong>Mr. Emeka Obi</strong>
               <span>Math Tutor, Abuja</span>
@@ -303,9 +379,11 @@
         </article>
         <article>
           <div class="mtc-stars">★★★★★</div>
-          <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic websites in months."</p>
+          <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic
+            websites in months."</p>
           <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80" alt="Dr. Amina Yusuf">
+            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80"
+              alt="Dr. Amina Yusuf">
             <div>
               <strong>Dr. Amina Yusuf</strong>
               <span>Kano Parent</span>
@@ -340,7 +418,7 @@
       searchForm.addEventListener('submit', (e) => {
         if (!searchInput.value.trim()) {
           e.preventDefault();
-          
+
           // Style or create error message inline
           let errorDiv = document.getElementById('home-search-error');
           if (!errorDiv) {
@@ -365,10 +443,10 @@
             `;
             searchForm.parentNode.insertBefore(errorDiv, searchForm.nextSibling);
           }
-          
+
           searchInput.focus();
           searchInput.style.outline = '2px solid #ef4444';
-          
+
           // Shake effect
           searchForm.classList.add('form-shake');
           setTimeout(() => {
@@ -492,7 +570,7 @@
 
           if (finalText.trim()) {
             submitVoiceQuery(finalText.trim());
-            try { recognition.stop(); } catch (err) {}
+            try { recognition.stop(); } catch (err) { }
           }
         };
 
@@ -508,5 +586,3 @@
   });
 </script>
 {% endblock %}
-
-

@@ -1245,7 +1245,12 @@
                 </button>
               </div>
             </form>
-            <div class="composer-disclaimer">Myteacher AI can make mistakes. Verify important info.</div>
+            <div class="composer-disclaimer">
+              Myteacher AI can make mistakes. Verify important info.
+              {% if not request.user.is_authenticated %}
+                &bull; <span class="guest-limit-text" style="font-weight: 500; {% if user_msg_count >= 5 %}color: #ef4444;{% endif %}">Free messages used: <span class="guest-msg-count">{{ user_msg_count|default:"0" }}</span>/5</span>
+              {% endif %}
+            </div>
           </div>
         </div>
 
@@ -1325,7 +1330,12 @@
               </button>
             </div>
           </form>
-          <div class="composer-disclaimer">Myteacher AI can make mistakes. Verify important info.</div>
+          <div class="composer-disclaimer">
+            Myteacher AI can make mistakes. Verify important info.
+            {% if not request.user.is_authenticated %}
+              &bull; <span class="guest-limit-text" style="font-weight: 500; {% if user_msg_count >= 5 %}color: #ef4444;{% endif %}">Free messages used: <span class="guest-msg-count">{{ user_msg_count|default:"0" }}</span>/5</span>
+            {% endif %}
+          </div>
         </div>
       {% endif %}
     </div>
@@ -1380,6 +1390,26 @@
     if (!textarea) return;
     const userMessage = textarea.value.trim();
     if (!userMessage) return;
+    
+    // Guest limit check
+    const isGuest = {% if request.user.is_authenticated %}false{% else %}true{% endif %};
+    const userMsgCount = document.querySelectorAll('.user-msg').length;
+    if (isGuest && userMsgCount >= 5) {
+      if (typeof window.mtcConfirm !== 'undefined') {
+        window.mtcConfirm("You have reached the free guest limit of 5 messages. Please log in to continue.", {
+            title: "Sign in required",
+            confirmLabel: "Log in",
+            onConfirm: function() {
+              window.location.href = "/login/?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+            }
+        });
+      } else {
+        alert("You have reached the free guest limit of 5 messages. Please log in to continue.");
+        window.location.href = "/login/?next=" + encodeURIComponent(window.location.pathname + window.location.search);
+      }
+      return;
+    }
+    
     isGenerating = true;
 
     // Capture FormData first before disabling fields!

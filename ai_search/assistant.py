@@ -129,11 +129,20 @@ def generate_assistant_reply_only(conversation):
         if last_msg and last_msg.role == AIMessage.ROLE_ASSISTANT:
             return last_msg
 
-        state = _merge_state(locked_conv)
-        tutors = _recommend_tutors(state)
-        assistant_text = _generate_assistant_reply(locked_conv, state, tutors)
-        if not (assistant_text or "").strip():
-            assistant_text = _generate_fallback_reply(state, tutors)
+        import os
+        from dotenv import load_dotenv
+        load_dotenv(override=True)
+        
+        if not os.getenv("GEMINI_API_KEY"):
+            state = {}
+            tutors = []
+            assistant_text = "AI not available at the moment thank you"
+        else:
+            state = _merge_state(locked_conv)
+            tutors = _recommend_tutors(state)
+            assistant_text = _generate_assistant_reply(locked_conv, state, tutors)
+            if not (assistant_text or "").strip():
+                assistant_text = _generate_fallback_reply(state, tutors)
 
         # 2. Post-API check: if another concurrent request already created the assistant message, skip
         last_msg = locked_conv.messages.order_by("created_at").last()
@@ -389,11 +398,7 @@ def detect_navigation_intent(text):
 
 def _generate_service_error_reply():
     """Return a friendly message when AI service fails."""
-    return (
-        "I'm experiencing a temporary issue connecting to the AI service. "
-        "Please try again in a moment. If the problem continues, our team has been notified. "
-        "In the meantime, I can still help you search for tutors if you tell me the subject, level, and location."
-    )
+    return "AI not available at the moment thank you"
 
 
 def _safe_error_message(error):
