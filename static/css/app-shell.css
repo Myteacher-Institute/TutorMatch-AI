@@ -1344,14 +1344,16 @@ html.dark .chat-conversation .chat-msg-row.assistant-msg .msg-text-bubble {
 
 @media (max-width: 390px) {
   .chat-app.student-workspace .mtc-shell {
-    margin-left: -3px;
+    width: 100%;
+    max-width: 100%;
+    margin: 0;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
   }
-}
 
-@media (max-width: 360px) {
-  .chat-app.student-workspace .mtc-shell {
-    max-width:94%;
-    margin-left: -12px;
+  .chat-app.student-workspace .chat-view-viewport {
+    padding-left: 0;
+    padding-right: 0;
   }
 }
 
