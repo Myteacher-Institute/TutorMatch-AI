@@ -1372,6 +1372,7 @@
     textarea.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' && !e.shiftKey) {
         e.preventDefault();
+        e.stopPropagation();
         if (textarea.value.trim().length > 0) {
           const form = textarea.closest('form');
           if (form.requestSubmit) {

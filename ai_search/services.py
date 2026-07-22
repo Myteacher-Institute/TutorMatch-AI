@@ -104,6 +104,8 @@ def extract_search_intent(prompt):
         "level": "",
         "location": "",
         "schedule": "",
+        "mode": "",
+        "wants_more": False,
         "source": "gemini",
     }
     if not text:
@@ -118,6 +120,8 @@ def extract_search_intent(prompt):
             "level": rule_intent.get("level") or gemini_intent.get("level", ""),
             "location": rule_intent.get("location") or gemini_intent.get("location", ""),
             "schedule": gemini_intent.get("schedule", "") or rule_intent.get("schedule", ""),
+            "mode": rule_intent.get("mode") or gemini_intent.get("mode", ""),
+            "wants_more": rule_intent.get("wants_more", False) or gemini_intent.get("wants_more", False),
             "source": "rules+gemini" if rule_intent.get("subject") or rule_intent.get("location") else gemini_intent.get("source", "gemini"),
         }
     except Exception:
@@ -177,6 +181,16 @@ def _extract_with_rules(text, base_intent=None):
     location_match = _latest_pattern_match(normalized, location_patterns)
     if location_match:
         intent["location"] = location_match
+
+    mode_patterns = [
+        ("Online", ["online", "remote", "virtual", "zoom"]),
+        ("Home", ["home", "physical", "in-person", "in person"]),
+    ]
+    mode_match = _latest_pattern_match(normalized, mode_patterns)
+    if mode_match:
+        intent["mode"] = mode_match
+
+    intent["wants_more"] = any(word in normalized for word in ["more", "other", "another", "different", "next"])
 
     intent["source"] = "rules"
     return intent
@@ -290,7 +304,7 @@ def _extract_with_gemini(prompt):
     system_instruction = (
         "Extract tutor search intent from a Nigerian tutoring marketplace prompt. "
         "The subject can be an academic subject, exam, course, or tech skill such as Python, C++, CSS, HTML, or coding. "
-        "Return only JSON with string keys: subject, level, location, schedule. "
+        "Return only JSON with string keys: subject, level, location, schedule, mode (e.g. 'Online' or 'Home'), and a boolean key: wants_more (true if user asks for more or other options). "
         "Use an empty string when a value is missing."
     )
 
@@ -358,6 +372,8 @@ def _extract_with_gemini(prompt):
         "level": _clean_choice(data.get("level"), LEVELS),
         "location": _clean_choice(data.get("location"), _known_locations()),
         "schedule": str(data.get("schedule") or "").strip(),
+        "mode": str(data.get("mode") or "").strip(),
+        "wants_more": bool(data.get("wants_more", False)),
         "source": "gemini",
     }
 

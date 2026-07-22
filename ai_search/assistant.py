@@ -25,6 +25,7 @@ Your job:
 - Do not offer a structured online curriculum as the main next step while the user is trying to find a tutor. Mention learning paths only after tutor options are shown or if the user explicitly asks for curriculum/course guidance.
 - Be concise, friendly, and practical. Use Nigerian context where helpful.
 - When the user has not provided a topic yet, ask: "What subject, course, or skill do you want help in finding the right tutor? For example Mathematics, Python, C++, CSS, HTML, WAEC, or JAMB."
+- If the user asks for more tutor suggestions and has already seen several batches (tutor_page >= 3), output exactly: NAVIGATE: /tutors/
 
 SPECIAL COMMANDS (respond only with "NAVIGATE: /path" when user asks):
 - If user asks "take me to tutors", "go to find tutors", "show me tutors page" → respond with: NAVIGATE: /tutors/
@@ -35,7 +36,7 @@ SPECIAL COMMANDS (respond only with "NAVIGATE: /path" when user asks):
 """
 
 
-REQUIRED_MATCH_FIELDS = ["subject", "location"]
+REQUIRED_MATCH_FIELDS = ["subject", "location", "mode"]
 
 
 def get_or_create_conversation(request, conversation_id=None):
@@ -204,6 +205,13 @@ def _merge_intent_state(previous_state, user_messages, profile_location=""):
         or profile_location
     )
 
+    tutor_page = previous_state.get("tutor_page", 0)
+    if latest_intent.get("wants_more", False):
+        tutor_page += 1
+    
+    if subject_changed:
+        tutor_page = 0
+
     state = {
         "query_text": latest_user_text,
         "conversation_text": conversation_text,
@@ -211,6 +219,8 @@ def _merge_intent_state(previous_state, user_messages, profile_location=""):
         "level": latest_intent.get("level") or ("" if subject_changed else previous_state.get("level", "")),
         "location": location,
         "schedule": latest_intent.get("schedule") or previous_state.get("schedule", "") or context_intent.get("schedule", ""),
+        "mode": latest_intent.get("mode") or previous_state.get("mode", "") or context_intent.get("mode", ""),
+        "tutor_page": tutor_page,
         "source": latest_intent.get("source", "fallback"),
     }
     state["missing_fields"] = [field for field in REQUIRED_MATCH_FIELDS if not state.get(field)]
@@ -220,9 +230,11 @@ def _merge_intent_state(previous_state, user_messages, profile_location=""):
 
 
 def _recommend_tutors(state):
-    if not state.get("subject"):
+    if not state.get("ready_for_tutor_match"):
         return []
-    return search_tutors(state, {})[:5]
+    page = state.get("tutor_page", 0)
+    offset = page * 2
+    return search_tutors(state, {})[offset : offset + 2]
 
 
 def _generate_assistant_reply(conversation, state, tutors):
@@ -260,7 +272,7 @@ def _generate_gemini_reply(conversation, state, tutors):
         f"{json.dumps(tutors[:5], ensure_ascii=True)}\n\n"
         "If required details are missing, ask the next best question. "
         "If tutor matches exist, recommend them by name and why they fit, and invite the user to view or book a tutor. "
-        "If no tutor matches exist, ask to broaden the tutor search. Do not pivot to an online curriculum unless the user asks for one."
+        "If ready_for_tutor_match is true but the available tutor matches list is empty, it means we have no tutors for that subject right now. In this case, politely inform the user that no current tutor is offering it. Then, proactively suggest related subjects or alternative skills they might want to learn instead, based on what they originally asked for (e.g., if they asked for Python, suggest other programming languages; if Math, suggest other related subjects). Do not just say 'not found'."
     )
 
     contents = []
