@@ -64,6 +64,7 @@ html.dark {
 /* Full Screen Container */
 .chat-app {
   height: 100vh;
+  height: 100svh;
   width: 100%;
   display: grid;
   grid-template-columns: 260px minmax(0, 1fr);
@@ -88,6 +89,7 @@ html.dark {
 /* Left Sidebar Styling */
 .sidebar-container {
   height: 100vh;
+  height: 100svh; /* svh = small viewport height: never cut off by mobile browser chrome */
   background: var(--bg-sidebar);
   border-right: 1px solid var(--border-color);
   display: flex;
@@ -188,7 +190,7 @@ html.dark {
 .sidebar-scroll {
   flex: 1;
   overflow-y: auto;
-  padding: 10px 6px;
+  padding: 4px 6px;
 }
 
 .sidebar-section-title {
@@ -196,7 +198,7 @@ html.dark {
   font-weight: 600;
   text-transform: uppercase;
   color: var(--text-muted);
-  padding: 12px 10px 6px;
+  padding: 4px 10px 4px;
   letter-spacing: 0.05em;
 }
 
@@ -213,7 +215,7 @@ html.dark {
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 10px;
+  padding: 6px 10px;
   border-radius: 6px;
   color: var(--text-primary);
   font-size: 13px;
@@ -328,11 +330,12 @@ html.dark {
 /* Bottom Controls */
 .sidebar-footer {
   border-top: 1px solid var(--border-color);
-  padding: 10px;
+  padding: 6px 10px 5px;
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 5px;
   background: var(--bg-sidebar);
+  margin-top: -20px;
 }
 
 .theme-selector-bar {
@@ -421,6 +424,7 @@ html.dark {
 /* Main App Container */
 .chat-pane {
   height: 100vh;
+  height: 100svh;
   display: grid;
   grid-template-rows: 56px minmax(0, 1fr);
   background: var(--bg-main);
@@ -975,16 +979,18 @@ html.dark {
 .tutor-btn-primary:hover {
   opacity: 0.9;
 }
-
 /* Bottom Input Composer Area */
 .composer-footer-wrap {
   padding: 10px 24px 22px;
+  margin-top: -12px;
   background: linear-gradient(
     180deg,
     rgba(255, 255, 255, 0),
     var(--bg-main) 20%
   );
-  z-index: 30;
+  z-index: 100;
+  position: relative;
+} z-index: 30;
 }
 
 .composer-inner-card {
@@ -1074,6 +1080,7 @@ html.dark {
      ============================================================ */
 .chat-app > .mtc-admin-sidebar {
   height: 100vh;
+  height: 100svh;
   border-radius: 0;
   border: 0;
   border-right: 1px solid var(--border-color);
@@ -1178,6 +1185,7 @@ html.dark .chat-conversation .chat-msg-row.assistant-msg .msg-text-bubble {
   left: 0;
   width: 100vw;
   height: 100vh;
+  height: 100svh;
   background: rgba(0, 0, 0, 0.4);
   z-index: 45;
 }
@@ -1211,6 +1219,8 @@ html.dark .chat-conversation .chat-msg-row.assistant-msg .msg-text-bubble {
     top: 0;
     left: 0;
     width: 280px;
+    height: 100vh;
+    height: 100svh;
     transform: translateX(-100%);
     visibility: hidden;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
@@ -1261,6 +1271,8 @@ html.dark .chat-conversation .chat-msg-row.assistant-msg .msg-text-bubble {
     top: 0;
     left: 0;
     width: 280px;
+    height: 100vh;
+    height: 100svh;
     transform: translateX(-100%);
     visibility: hidden;
     box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);

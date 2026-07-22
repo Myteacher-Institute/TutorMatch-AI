@@ -120,11 +120,11 @@
                               {{ booking.next_payout_installment.get_status_display }}
                             </span>
                           {% endif %}
-                          <button type="button" class="mtc-tutor-bookings-btn mtc-tutor-bookings-reject" data-complaint-trigger="tutor-complaint-{{ booking.id }}">
-                            <i class="fa-solid fa-headset"></i>Complaint
+                          <button type="button" class="mtc-review-button" data-complaint-trigger="tutor-complaint-{{ booking.id }}" style="border: 0 !important; cursor: pointer; display: inline-flex !important; align-items: center; gap: 6px; background: #fff7ed !important; color: #c2410c !important;">
+                            <i class="fa-solid fa-headset"></i> Complaint
                           </button>
                           <div class="mtc-complaint-overlay" id="tutor-complaint-{{ booking.id }}" data-complaint-modal hidden>
-                            <section class="mtc-complaint-modal" role="dialog" aria-modal="true" aria-labelledby="tutor-complaint-title-{{ booking.id }}">
+                            <section class="mtc-complaint-modal" role="dialog" aria-modal="true" aria-labelledby="tutor-complaint-title-{{ booking.id }}" style="width:min(100%,520px);box-sizing:border-box;">
                               <div class="mtc-complaint-modal-header">
                                 <div>
                                   <h2 id="tutor-complaint-title-{{ booking.id }}">Submit a complaint</h2>
@@ -132,13 +132,13 @@
                                 </div>
                                 <button type="button" class="mtc-complaint-close" data-complaint-close aria-label="Close complaint form">&times;</button>
                               </div>
-                              <form method="post" action="{% url 'tutor_complain_booking' booking.id %}" class="mtc-complaint-form" enctype="multipart/form-data">
+                              <form method="post" action="{% url 'tutor_complain_booking' booking.id %}" class="mtc-complaint-form" enctype="multipart/form-data" style="display:grid;gap:16px;width:100%;box-sizing:border-box;">
                               {% csrf_token %}
                               {% if booking.next_payout_installment %}
                                 <input type="hidden" name="installment_id" value="{{ booking.next_payout_installment.id }}">
                               {% endif %}
-                              <label>Reason
-                              <select name="reason" required>
+                              <label style="display:grid;gap:7px;width:100%;">Reason
+                              <select name="reason" required style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;">
                                 <option value="attendance">Attendance or lateness</option>
                                 <option value="payment">Payment or payout</option>
                                 <option value="quality">Lesson disagreement</option>
@@ -146,15 +146,15 @@
                                 <option value="other">Other</option>
                               </select>
                               </label>
-                              <label>Complaint details
-                              <textarea name="message" rows="4" minlength="10" required placeholder="Explain what happened. Include lesson notes, attendance, chat, or meeting proof."></textarea>
+                              <label style="display:grid;gap:7px;width:100%;">Complaint details
+                              <textarea name="message" rows="4" minlength="10" required placeholder="Explain what happened. Include lesson notes, attendance, chat, or meeting proof." style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;resize:vertical;"></textarea>
                               </label>
-                               <label>Evidence link <span>(optional)</span>
-                               <input type="url" name="evidence_url" placeholder="https://example.com/evidence">
-                               </label>
-                              <div class="mtc-complaint-actions">
-                                <button type="button" class="mtc-complaint-cancel" data-complaint-close>Cancel</button>
-                                <button type="submit" class="mtc-tutor-bookings-btn mtc-tutor-bookings-accept">Send to support</button>
+                              <label style="display:grid;gap:7px;width:100%;">Evidence link <span>(optional)</span>
+                              <input type="url" name="evidence_url" placeholder="https://example.com/evidence" style="width:100%;box-sizing:border-box;padding:10px 12px;border:1px solid #cbd5e1;border-radius:8px;font:inherit;">
+                              </label>
+                              <div style="display:flex;flex-direction:column;gap:8px;width:100%;">
+                                <button type="submit" class="btn btn-primary" style="width:100%;box-sizing:border-box;justify-content:center;">Send to support</button>
+                                <button type="button" class="mtc-complaint-cancel" data-complaint-close style="width:100%;box-sizing:border-box;">Cancel</button>
                               </div>
                               </form>
                             </section>

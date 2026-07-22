@@ -4017,7 +4017,7 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   isolation: isolate;
 }
 
-.mtc-auth-sidebar img {
+.mtc-auth-sidebar img:not(.mtc-auth-logo-img) {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -4026,6 +4026,12 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   opacity: 0.34;
   filter: saturate(1.15) contrast(1.04);
   z-index: -2;
+}
+
+.mtc-auth-logo-img {
+  opacity: 1 !important;
+  position: relative !important;
+  z-index: 10 !important;
 }
 
 .mtc-auth-sidebar::before,
@@ -9665,8 +9671,8 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   display: grid;
   place-items: center;
   padding: 20px;
-  background: rgba(15, 23, 42, 0.58);
-  backdrop-filter: blur(3px);
+  background: rgba(15, 23, 42, 0.25);
+  backdrop-filter: blur(8px);
 }
 
 .mtc-complaint-overlay[hidden] {
@@ -9683,6 +9689,7 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   background: #ffffff;
   box-shadow: 0 24px 60px rgba(15, 23, 42, 0.3);
   animation: mtc-confirm-pop 0.2s ease-out;
+  box-sizing: border-box;
 }
 
 .mtc-complaint-modal-header {
@@ -9720,6 +9727,16 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 .mtc-complaint-form {
   display: grid;
   gap: 16px;
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
+}
+
+.mtc-complaint-modal section,
+.mtc-complaint-modal form {
+  width: 100%;
+  box-sizing: border-box;
+  min-width: 0;
 }
 
 .mtc-complaint-form label {
@@ -9753,12 +9770,25 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
 
 .mtc-complaint-actions {
   display: flex;
-  justify-content: flex-end;
-  gap: 10px;
+  flex-direction: column;
+  gap: 8px;
+  width: 100%;
+}
+
+.mtc-complaint-actions .btn,
+.mtc-complaint-actions button {
+  width: 100% !important;
+  box-sizing: border-box;
+  text-align: center;
+  justify-content: center;
+  display: flex;
+  align-items: center;
 }
 
 .mtc-complaint-cancel {
-  padding: 8px 14px;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 10px 14px;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;

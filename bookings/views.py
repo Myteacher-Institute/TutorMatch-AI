@@ -354,7 +354,10 @@ def tutor_complain_booking(request, booking_id):
 
     form = SupportTicketForm(request.POST, request.FILES)
     if not form.is_valid():
-        messages.error(request, "Please add a reason and complaint details before submitting.")
+        error_detail = "; ".join(
+            f"{field}: {', '.join(errs)}" for field, errs in form.errors.items()
+        )
+        messages.error(request, f"Could not submit complaint — {error_detail}")
         return redirect("tutor_bookings")
 
     ticket = form.save(commit=False)

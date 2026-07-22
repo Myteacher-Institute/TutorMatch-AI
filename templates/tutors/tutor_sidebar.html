@@ -4,6 +4,16 @@
       display: none !important;
     }
   }
+
+  /* Logout link: desktop hidden, mobile only */
+  .tutor-sidebar-mobile-logout {
+    display: none;
+  }
+  @media (max-width: 900px) {
+    .tutor-sidebar-mobile-logout {
+      display: flex;
+    }
+  }
 </style>
 <aside class="mtc-admin-sidebar tutor-sidebar">
   <button class="tutor-hamburger" id="tutor-sidebar-toggle" aria-label="Toggle sidebar">
@@ -77,6 +87,9 @@
     </a>
     <a href="{% url 'home' %}" class="tutor-sidebar-back-link">
       <i class="fa-solid fa-arrow-left" style="width:18px;margin-right:8px;"></i>Back to Website
+    </a>
+    <a href="{% url 'logout' %}" class="tutor-sidebar-back-link tutor-sidebar-mobile-logout">
+      <i class="fa-solid fa-right-from-bracket" style="width:18px;margin-right:8px;"></i>Log Out
     </a>
   </nav>
 </aside>
