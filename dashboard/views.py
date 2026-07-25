@@ -945,3 +945,22 @@ def Termsofservice(request):
 
 def privacy_policy(request):
     return render(request, "privacy_policy.html")
+
+
+@admin_required
+def homepage_stats(request):
+    from accounts.models import HomepageStatsSetting
+    config = HomepageStatsSetting.load()
+    if request.method == "POST":
+        config.verified_tutors_offset = int(request.POST.get("verified_tutors_offset", 678))
+        config.lessons_completed_offset = int(request.POST.get("lessons_completed_offset", 5000))
+        config.cities_covered_offset = int(request.POST.get("cities_covered_offset", 793))
+        config.save()
+        messages.success(request, "Homepage stats starting values updated successfully.")
+        return redirect("admin_homepage_stats")
+
+    return render(
+        request,
+        "dashboard/homepage_stats.html",
+        {"config": config}
+    )

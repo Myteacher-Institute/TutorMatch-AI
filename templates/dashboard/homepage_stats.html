@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block title %}Homepage Stats | Myteacherconnect{% endblock %}
+
+{% block content %}
+<style>
+  .mtc-admin-stats-form {
+    padding: 30px;
+    background: #ffffff;
+    border-radius: 18px;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.07);
+    border: 1px solid #e2e8f0;
+  }
+
+  .mtc-stats-group {
+    margin-bottom: 24px;
+  }
+
+  .mtc-stats-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 15px;
+  }
+
+  .mtc-stats-group input {
+    width: 100%;
+    max-width: 400px;
+    padding: 12px 16px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 16px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .mtc-stats-group input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+  }
+
+  .mtc-stats-group p {
+    margin-top: 6px;
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  .mtc-stats-actions {
+    margin-top: 30px;
+    padding-top: 20px;
+    border-top: 1px solid #f1f5f9;
+  }
+
+  .mtc-stats-actions button {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    background: #2563eb;
+    color: #ffffff;
+    border: none;
+    border-radius: 10px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+
+  .mtc-stats-actions button:hover {
+    background: #1d4ed8;
+  }
+</style>
+
+<div class="mtc-shell admin-dashboard-light" style="padding: 40px 0 80px;">
+  <section class="mtc-admin-layout">
+    {% include "dashboard/_admin_nav.html" %}
+    <div class="mtc-admin-content">
+      <div class="mtc-homepage-admin-hero" style="background: linear-gradient(135deg, #1e3a8a, #3b82f6); padding: 30px; border-radius: 18px; color: #ffffff; margin-bottom: 30px;">
+        <div>
+          <h1 style="color: #fff; margin: 0 0 8px; font-size: 28px;">Stats Configuration</h1>
+          <p style="margin: 0; opacity: 0.9;">Control the starting values for the counters shown on the website's homepage.</p>
+        </div>
+      </div>
+
+      {% if messages %}
+        {% for message in messages %}
+          <div class="alert {% if message.tags %}alert-{{ message.tags }}{% endif %}" style="padding: 15px; margin-bottom: 20px; border-radius: 10px; background: #dcfce7; color: #166534; border: 1px solid #bbf7d0;">
+            {{ message }}
+          </div>
+        {% endfor %}
+      {% endif %}
+
+      <div class="mtc-admin-stats-form">
+        <form method="post">
+          {% csrf_token %}
+          
+          <div class="mtc-stats-group">
+            <label for="verified_tutors_offset">Verified Tutors Offset</label>
+            <input type="number" id="verified_tutors_offset" name="verified_tutors_offset" value="{{ config.verified_tutors_offset }}" min="0" required>
+            <p>The homepage will display this number + the actual number of verified tutors in the system.</p>
+          </div>
+
+          <div class="mtc-stats-group">
+            <label for="lessons_completed_offset">Lessons Completed Offset</label>
+            <input type="number" id="lessons_completed_offset" name="lessons_completed_offset" value="{{ config.lessons_completed_offset }}" min="0" required>
+            <p>The homepage will display this number + the actual completed bookings on the platform.</p>
+          </div>
+
+          <div class="mtc-stats-group">
+            <label for="cities_covered_offset">Cities Covered Offset</label>
+            <input type="number" id="cities_covered_offset" name="cities_covered_offset" value="{{ config.cities_covered_offset }}" min="0" required>
+            <p>The homepage will display this number + the actual unique tutor locations.</p>
+          </div>
+
+          <div class="mtc-stats-actions">
+            <button type="submit">
+              <i class="fa-solid fa-floppy-disk"></i> Save Configuration
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</div>
+{% endblock %}
