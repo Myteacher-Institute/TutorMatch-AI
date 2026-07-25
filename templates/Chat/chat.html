@@ -5,6 +5,20 @@
 
 {% block content %}
 <style>
+  /* Hide send label and tighten button to icon-only when space is tight */
+  @media (max-width: 500px) {
+    .chat-send-btn {
+      padding: 10px 12px;
+      gap: 0;
+    }
+    .chat-send-label {
+      display: none;
+    }
+    .message-input-area {
+      margin-top: -12px;
+    }
+  }
+
   .messages-display {
     display: flex;
     flex-direction: column;
@@ -133,9 +147,9 @@
           {% csrf_token %}
           <input type="hidden" name="client_message_id" id="chat-client-message-id">
           <input type="text" name="message" id="chat-message-input" placeholder="Type your message..." autocomplete="off" required style="flex: 1; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 24px; font-size: 15px; outline: none; transition: border-color 0.2s ease;" onfocus="this.style.borderColor='#2563eb'" onblur="this.style.borderColor='#cbd5e1'">
-            <button type="submit" style="background: #2563eb; color: #ffffff; border: none; border-radius: 24px; padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s ease;">
-              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
-              Send
+            <button type="submit" class="chat-send-btn" style="background: #2563eb; color: #ffffff; border: none; border-radius: 24px; padding: 10px 20px; font-size: 15px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s ease; white-space: nowrap; flex-shrink: 0; min-width: 0;">
+              <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+              <span class="chat-send-label">Send</span>
             </button>
           </form>
         </div>
