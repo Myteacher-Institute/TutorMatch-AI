@@ -56,3 +56,37 @@ class SuccessStory(models.Model):
         profile = getattr(self.user, "profile", None)
         tutor = getattr(profile, "tutor_profile", None) if profile else None
         return tutor.profile_photo if tutor and tutor.profile_photo else ""
+
+
+class HomepageStatsSetting(models.Model):
+    verified_tutors_offset = models.IntegerField(
+        default=678,
+        help_text="Starting count for Verified Tutors"
+    )
+    lessons_completed_offset = models.IntegerField(
+        default=5000,
+        help_text="Starting count for Lessons Completed"
+    )
+    cities_covered_offset = models.IntegerField(
+        default=793,
+        help_text="Starting count for Cities Covered"
+    )
+
+    class Meta:
+        verbose_name = "Homepage Stats Setting"
+        verbose_name_plural = "Homepage Stats Settings"
+
+    def __str__(self):
+        return "Homepage Stats Configuration"
+
+    def save(self, *args, **kwargs):
+        # Enforce singleton pattern (only one instance can exist in the DB)
+        self.pk = 1
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def load(cls):
+        # Load the configuration or return a default model instance
+        obj, created = cls.objects.get_or_create(pk=1)
+        return obj
+

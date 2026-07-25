@@ -30,16 +30,28 @@ def home(request):
         base_featured_tutors
         .order_by("user__created_at", "id")[:3]
     )
-    verified_tutors_count = base_featured_tutors.count()
-    completed_lessons_count = Booking.objects.filter(status="completed").count()
+    try:
+        from accounts.models import HomepageStatsSetting
+        config = HomepageStatsSetting.load()
+        vt_offset = config.verified_tutors_offset
+        lc_offset = config.lessons_completed_offset
+        cc_offset = config.cities_covered_offset
+    except Exception:
+        vt_offset = 678
+        lc_offset = 5000
+        cc_offset = 793
+
+    verified_tutors_count = base_featured_tutors.count() + vt_offset
+    completed_lessons_count = Booking.objects.filter(status="completed").count() + lc_offset
     cities_covered_count = (
         Tutor.objects.filter(is_publicly_visible=True, verification_status="approved")
         .exclude(location="")
         .values("location")
         .distinct()
         .count()
-    )
+    ) + cc_offset
     parents_count = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count()
+
 
     return render(
         request,
