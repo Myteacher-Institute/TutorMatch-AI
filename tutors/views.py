@@ -6,24 +6,22 @@ from django.utils import timezone
 from django.http import Http404
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
-from .models import Tutor, TutorDocument, Subject
+from .models import Tutor, TutorDocument, Subject, CourseOffer
 from bookings.models import Booking
 from payments.models import PayoutInstallment
 from reviews.models import Review
-from .forms import TutorProfileForm, TutorDocumentForm
-from .geo_data import NIGERIAN_LGAS, DEFAULT_COUNTRY
+from .forms import TutorPersonalProfileForm, TutorPayoutForm, TutorDocumentForm, CourseOfferForm
+from .geo_data import NIGERIAN_LGAS, DEFAULT_COUNTRY, WORLD_SUBDIVISIONS
 from django.views.decorators.csrf import ensure_csrf_cookie
 import json
+
 
 
 @tutor_required
 def tutor_dashboard(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
     bookings_count = Booking.objects.filter(tutor=profile, payments__payment_status="paid").distinct().count()
-    total_earnings = PayoutInstallment.objects.filter(
-        booking__tutor=profile,
-        status=PayoutInstallment.STATUS_RELEASED,
-    ).aggregate(total=Sum("tutor_payout"))["total"] or 0
+    teaching_services = CourseOffer.objects.filter(tutor=profile)
     upcoming_bookings = (
         Booking.objects.filter(
             tutor=profile,
@@ -35,12 +33,17 @@ def tutor_dashboard(request):
         .distinct()
         .order_by("booking_date", "lesson_time")
     )
-    return render(request, 'tutors/dashboard.html', 
-                  {'profile': profile, 
-                   'bookings_count': bookings_count,
-                   'total_earnings': total_earnings,
-                   'upcoming_bookings': upcoming_bookings,
-                   'active_tab': 'dashboard'})
+    return render(request, 'tutors/dashboard.html', {
+        'profile': profile,
+        'bookings_count': bookings_count,
+        'teaching_services': teaching_services,
+        'current_balance': profile.current_balance,
+        'pending_earnings': profile.pending_earnings,
+        'total_paid_out': profile.total_paid_out,
+        'next_payout_date': profile.next_payout_date,
+        'upcoming_bookings': upcoming_bookings,
+        'active_tab': 'dashboard',
+    })
 
 
 @tutor_required
@@ -48,11 +51,9 @@ def tutor_profile(request):
     profile, created = Tutor.objects.get_or_create(user=request.user.profile)
     
     if request.method == 'POST':
-        form = TutorProfileForm(request.POST, request.FILES, instance=profile)
+        form = TutorPersonalProfileForm(request.POST, request.FILES, instance=profile)
     else:
-        form = TutorProfileForm(instance=profile)
-        existing_subjects = profile.subjects.values_list('subject_name', flat=True)
-        form.fields['subjects_input'].initial = ', '.join(existing_subjects)
+        form = TutorPersonalProfileForm(instance=profile)
 
     if form.is_valid():
         profile = form.save(commit=False)
@@ -65,23 +66,52 @@ def tutor_profile(request):
             profile.profile_photo = upload_file_in_memory(photo, folder="/tutor_photos")
 
         profile.save()
-        subjects_input = form.cleaned_data.get('subjects_input', '')
-        subject_names = [s.strip() for s in subjects_input.split(',') if s.strip()]
-        subject_objs = []
-        for name in subject_names:
-            name = name[:100]
-            subject, _ = Subject.objects.get_or_create(subject_name=name)
-            subject_objs.append(subject)
-        profile.subjects.set(subject_objs)
-        messages.success(request, 'Profile updated successfully.')
+        
+        subjects_input = form.cleaned_data.get('subjects_input')
+        if subjects_input:
+            from .models import Subject
+            subject_names = [s.strip() for s in subjects_input.split(',') if s.strip()]
+            profile.subjects.clear()
+            for name in subject_names:
+                subj, _ = Subject.objects.get_or_create(subject_name=name)
+                profile.subjects.add(subj)
+
+        messages.success(request, 'Personal profile updated successfully.')
         return redirect('tutor_dashboard')
+    else:
+        # If the form is not valid and method is POST, show the errors
+        if request.method == 'POST':
+            for field, errors in form.errors.items():
+                for error in errors:
+                    messages.error(request, f"{form.fields[field].label if field in form.fields and form.fields[field].label else field}: {error}")
+
 
     return render(request, 'tutors/profile_form.html', {
         'form': form,
         'profile': profile,
         'active_tab': 'profile',
+        'world_subdivisions_json': json.dumps(WORLD_SUBDIVISIONS),
         'lgas_json': json.dumps(NIGERIAN_LGAS),
         'default_country': DEFAULT_COUNTRY,
+    })
+
+
+@tutor_required
+def tutor_payout_settings(request):
+    profile, created = Tutor.objects.get_or_create(user=request.user.profile)
+    if request.method == 'POST':
+        form = TutorPayoutForm(request.POST, instance=profile)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Payout settings updated successfully.')
+            return redirect('tutor_payout_settings')
+    else:
+        form = TutorPayoutForm(instance=profile)
+
+    return render(request, 'tutors/payout_settings.html', {
+        'form': form,
+        'profile': profile,
+        'active_tab': 'payout',
     })
 
 
@@ -210,9 +240,155 @@ def tutor_detail(request, tutor_id):
         if not is_owner:
             raise Http404("No Tutor matches the given query.")
 
+    from tutors.models import CourseOffer
+    course_offers = CourseOffer.objects.filter(tutor=tutor, is_active=True).select_related("subject")
+
     reviews_list = Review.objects.filter(tutor=tutor).select_related("student__user").order_by("-created_at")
     paginator = Paginator(reviews_list, 5)
     page_number = request.GET.get("page")
     reviews = paginator.get_page(page_number)
-    return render(request, 'tutors/tutor_detail.html', {'tutor': tutor, 'reviews': reviews})
+    return render(request, 'tutors/tutor_detail.html', {
+        'tutor': tutor,
+        'reviews': reviews,
+        'course_offers': course_offers,
+    })
+
+
+# ==========================================
+# TUTOR COURSE OFFER MANAGEMENT VIEWS
+# ==========================================
+
+@tutor_required
+def course_offer_list(request):
+    profile, _ = Tutor.objects.get_or_create(user=request.user.profile)
+    offers = CourseOffer.objects.filter(tutor=profile).select_related("subject")
+    return render(request, 'tutors/course_offer_manage.html', {
+        'profile': profile,
+        'offers': offers,
+        'active_tab': 'offers',
+    })
+
+
+@tutor_required
+def course_offer_create(request):
+    profile, _ = Tutor.objects.get_or_create(user=request.user.profile)
+    if request.method == 'POST':
+        form = CourseOfferForm(request.POST, request.FILES)
+        if form.is_valid():
+            offer = form.save(commit=False)
+            offer.tutor = profile
+            offer.save()
+            messages.success(request, f'Course "{offer.title}" created successfully!')
+            return redirect('course_offer_list')
+    else:
+        form = CourseOfferForm()
+
+    return render(request, 'tutors/course_offer_form.html', {
+        'form': form,
+        'profile': profile,
+        'is_edit': False,
+        'active_tab': 'offers',
+    })
+
+
+@tutor_required
+def course_offer_edit(request, offer_id):
+    profile, _ = Tutor.objects.get_or_create(user=request.user.profile)
+    offer = get_object_or_404(CourseOffer, id=offer_id, tutor=profile)
+    
+    if request.method == 'POST':
+        form = CourseOfferForm(request.POST, request.FILES, instance=offer)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Course "{offer.title}" updated successfully!')
+            return redirect('course_offer_list')
+    else:
+        form = CourseOfferForm(instance=offer)
+
+    return render(request, 'tutors/course_offer_form.html', {
+        'form': form,
+        'offer': offer,
+        'profile': profile,
+        'is_edit': True,
+        'active_tab': 'offers',
+    })
+
+
+@tutor_required
+def course_offer_delete(request, offer_id):
+    profile, _ = Tutor.objects.get_or_create(user=request.user.profile)
+    offer = get_object_or_404(CourseOffer, id=offer_id, tutor=profile)
+    if request.method == 'POST':
+        offer.delete()
+        messages.success(request, f'Course "{offer.title}" deleted.')
+    return redirect('course_offer_list')
+
+
+# ==========================================
+# PUBLIC COURSE MARKETPLACE VIEWS
+# ==========================================
+
+def course_list(request):
+    subject_id = request.GET.get('subject')
+    mode_filter = request.GET.get('mode')
+    search_query = request.GET.get('q', '').strip()
+    currency_filter = request.GET.get('currency')
+    sort_by = request.GET.get('sort', 'newest')
+
+    offers_qs = CourseOffer.objects.filter(is_active=True, tutor__verification_status="approved", tutor__is_publicly_visible=True).select_related('tutor__user__user', 'subject')
+
+    if subject_id:
+        offers_qs = offers_qs.filter(subject_id=subject_id)
+    if mode_filter:
+        offers_qs = offers_qs.filter(delivery_mode=mode_filter)
+    if currency_filter:
+        offers_qs = offers_qs.filter(currency=currency_filter)
+    if search_query:
+        offers_qs = offers_qs.filter(
+            Q(title__icontains=search_query) |
+            Q(description__icontains=search_query) |
+            Q(subject__subject_name__icontains=search_query) |
+            Q(tutor__user__user__first_name__icontains=search_query) |
+            Q(tutor__user__user__last_name__icontains=search_query)
+        )
+
+    if sort_by == 'price_low':
+        offers_qs = offers_qs.order_by('daily_rate')
+    elif sort_by == 'price_high':
+        offers_qs = offers_qs.order_by('-daily_rate')
+    else:
+        offers_qs = offers_qs.order_by('-created_at')
+
+    paginator = Paginator(offers_qs, 9)
+    page_number = request.GET.get('page')
+    offers = paginator.get_page(page_number)
+
+    subjects = Subject.objects.filter(course_offers__is_active=True).distinct()
+
+    return render(request, 'courses/course_list.html', {
+        'offers': offers,
+        'page_obj': offers,
+        'subjects': subjects,
+        'selected_subject': subject_id,
+        'selected_mode': mode_filter,
+        'selected_currency': currency_filter,
+        'search_query': search_query,
+        'sort_by': sort_by,
+    })
+
+
+def course_detail(request, offer_id):
+    offer = get_object_or_404(
+        CourseOffer.objects.select_related('tutor__user__user', 'subject'),
+        id=offer_id,
+    )
+    tutor = offer.tutor
+    reviews = Review.objects.filter(tutor=tutor).select_related('student__user').order_by('-created_at')[:5]
+
+    return render(request, 'courses/course_detail.html', {
+        'offer': offer,
+        'tutor': tutor,
+        'reviews': reviews,
+    })
+
 

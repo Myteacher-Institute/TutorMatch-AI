@@ -165,7 +165,106 @@ class Command(BaseCommand):
             trent.subjects.set([subjects["English"], subjects["Economics"]])
             trent.user.is_verified = True
             trent.user.save()
-            self.stdout.write("  Updated existing tutor Trent Baakers to approved and assigned subjects.")
+        # Seed Course Offers
+        self.stdout.write("Seeding Course Offers...")
+        from tutors.models import CourseOffer
+
+        courses_to_seed = [
+            {
+                "tutor_email": "tutor1@example.com",
+                "title": "Python Programming for Absolute Beginners (3 Months)",
+                "subject_name": "Coding",
+                "cover_image": "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&q=80",
+                "daily_rate": 3500,
+                "days_per_week": 2,
+                "duration_months": 3,
+                "currency": "NGN",
+                "delivery_mode": "online",
+                "online_platform": "google_meet",
+                "schedule_days_times": "Mondays & Wednesdays, 4:00 PM - 6:00 PM (WAT)",
+                "description": "Comprehensive 3-month course covering Python syntax, data structures, object-oriented programming, and building real-world automation scripts.",
+                "rules": "1. 80% attendance required for completion certificate.\n2. Assignments must be submitted before Sunday midnight.",
+                "requirements": "Laptop with Windows 10/11 or macOS, internet connection, VS Code installed.",
+            },
+            {
+                "tutor_email": "tutor2@example.com",
+                "title": "WAEC & JAMB Mathematics Intensive (2 Months)",
+                "subject_name": "Mathematics",
+                "cover_image": "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80",
+                "daily_rate": 2500,
+                "days_per_week": 3,
+                "duration_months": 2,
+                "currency": "NGN",
+                "delivery_mode": "home",
+                "physical_location": "Student Home Location (Port Harcourt & Environs)",
+                "schedule_days_times": "Tuesdays, Thursdays & Saturdays, 5:00 PM - 7:00 PM",
+                "description": "Master essential WAEC & JAMB mathematics topics including Algebra, Trigonometry, Calculus, and past question walkthroughs with a proven 95%+ pass rate.",
+                "rules": "1. Punctuality is essential.\n2. Formula notebook required for all sessions.",
+                "requirements": "WAEC/JAMB past questions book, scientific calculator, exercise book.",
+            },
+            {
+                "tutor_email": "tutor3@example.com",
+                "title": "C++ Systems & Game Algorithm Foundations (1 Month)",
+                "subject_name": "Programming",
+                "cover_image": "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80",
+                "daily_rate": 4000,
+                "days_per_week": 2,
+                "duration_months": 1,
+                "currency": "NGN",
+                "delivery_mode": "online",
+                "online_platform": "zoom",
+                "schedule_days_times": "Saturdays & Sundays, 2:00 PM - 4:00 PM",
+                "description": "Learn low-level memory management, pointers, object-oriented principles, and algorithm design using modern C++20.",
+                "rules": "1. Active participation during coding exercises.\n2. Respectful communication in chat.",
+                "requirements": "PC with GCC / Clang / MSVC compiler installed.",
+            },
+            {
+                "tutor_email": "tutor1@example.com",
+                "title": "Modern Web Development: HTML, CSS & JavaScript (2 Months)",
+                "subject_name": "HTML",
+                "cover_image": "https://images.unsplash.com/photo-1507238691740-187a5b1d37b8?auto=format&fit=crop&w=800&q=80",
+                "daily_rate": 3000,
+                "days_per_week": 2,
+                "duration_months": 2,
+                "currency": "NGN",
+                "delivery_mode": "online",
+                "online_platform": "google_meet",
+                "schedule_days_times": "Tuesdays & Thursdays, 6:00 PM - 8:00 PM",
+                "description": "Build modern, responsive websites from scratch using HTML5, CSS3, Flexbox, Grid, and interactive JavaScript.",
+                "rules": "1. Weekly project submissions.",
+                "requirements": "Computer with Chrome browser & VS Code.",
+            },
+        ]
+
+        for c_data in courses_to_seed:
+            t_profile = user_profiles.get(c_data["tutor_email"])
+            if not t_profile or not hasattr(t_profile, "tutor_profile"):
+                continue
+            tutor = t_profile.tutor_profile
+            sub = subjects.get(c_data["subject_name"])
+
+            offer, created = CourseOffer.objects.get_or_create(
+                tutor=tutor,
+                title=c_data["title"],
+                defaults={
+                    "subject": sub,
+                    "cover_image": c_data["cover_image"],
+                    "daily_rate": c_data["daily_rate"],
+                    "days_per_week": c_data["days_per_week"],
+                    "duration_months": c_data["duration_months"],
+                    "currency": c_data["currency"],
+                    "delivery_mode": c_data["delivery_mode"],
+                    "online_platform": c_data.get("online_platform", "google_meet"),
+                    "physical_location": c_data.get("physical_location", ""),
+                    "schedule_days_times": c_data["schedule_days_times"],
+                    "description": c_data["description"],
+                    "rules": c_data.get("rules", ""),
+                    "requirements": c_data.get("requirements", ""),
+                    "is_active": True,
+                }
+            )
+            if created:
+                self.stdout.write(f"  Created course offer: {offer.title}")
 
         self.stdout.write(self.style.SUCCESS("Database seeding completed successfully! All seeded users have password: password123"))
 

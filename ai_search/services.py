@@ -200,6 +200,7 @@ def search_tutors(intent, filters=None):
     filters = filters or {}
     subject = filters.get("subject") or intent.get("subject")
     location = filters.get("location") or intent.get("location")
+    mode = intent.get("mode", "").strip()
     min_price = filters.get("min_price")
     max_price = filters.get("max_price")
     min_experience = filters.get("min_experience")
@@ -209,22 +210,60 @@ def search_tutors(intent, filters=None):
         tutors = list(SAMPLE_TUTORS)
 
     query_text = intent.get("query_text", "").strip()
-    has_filters = bool(subject or location or min_price is not None or max_price is not None or min_experience is not None)
+    has_filters = bool(subject or location or mode or min_price is not None or max_price is not None or min_experience is not None)
 
-    # If the user searched for something, we must verify if there's any match
     matched_any = False
 
     if subject:
-        tutors = [tutor for tutor in tutors if _matches_subject(tutor, subject)]
+        filtered_tutors = []
+        for tutor in tutors:
+            if _matches_subject(tutor, subject):
+                t_copy = dict(tutor)
+                # Keep matching course offers for this subject
+                matching_offers = [
+                    o for o in tutor.get("course_offers", [])
+                    if _normalize_text(subject) in _normalize_text(f"{o.get('title')} {o.get('subject')}")
+                    or any(_normalize_text(term) in _normalize_text(f"{o.get('title')} {o.get('subject')}") for term in _skill_terms(subject))
+                ]
+                t_copy["matching_course_offers"] = matching_offers if matching_offers else tutor.get("course_offers", [])
+                filtered_tutors.append(t_copy)
+        tutors = filtered_tutors
         matched_any = True
 
-    if location and location != "Port Harcourt":
-        tutors = [tutor for tutor in tutors if _matches_location(tutor["location"], location)]
+    if mode:
+        mode_lower = mode.lower()
+        filtered_by_mode = []
+        for tutor in tutors:
+            offers = tutor.get("matching_course_offers") or tutor.get("course_offers", [])
+            if "online" in mode_lower or "remote" in mode_lower:
+                online_offers = [o for o in offers if o.get("mode_code") == "online"]
+                if online_offers:
+                    t_copy = dict(tutor)
+                    t_copy["matching_course_offers"] = online_offers
+                    filtered_by_mode.append(t_copy)
+                elif "online" in tutor.get("bio", "").lower() or not offers:
+                    filtered_by_mode.append(tutor)
+            elif "home" in mode_lower or "physical" in mode_lower:
+                home_offers = [o for o in offers if o.get("mode_code") in ["home", "office"]]
+                if home_offers:
+                    t_copy = dict(tutor)
+                    t_copy["matching_course_offers"] = home_offers
+                    filtered_by_mode.append(t_copy)
+                elif "home" in tutor.get("bio", "").lower() or not offers:
+                    filtered_by_mode.append(tutor)
+        if filtered_by_mode:
+            tutors = filtered_by_mode
         matched_any = True
+
+    # If location specified and not online-only mode
+    if location and not ("online" in mode.lower()):
+        location_matches = [tutor for tutor in tutors if _matches_location(tutor["location"], location)]
+        if location_matches:
+            tutors = location_matches
+            matched_any = True
 
     level = intent.get("level")
     if level and level in LEVELS:
-        # Match against bio or specialist if tutor level matches
         tutors = [tutor for tutor in tutors if _contains_text(tutor.get("level", ""), level) or _contains_text(tutor.get("bio", ""), level)]
         matched_any = True
 
@@ -237,17 +276,13 @@ def search_tutors(intent, filters=None):
     if min_experience is not None:
         tutors = [tutor for tutor in tutors if tutor["experience"] >= min_experience]
 
-    # If query text was provided, but didn't match any subject, location, or level,
-    # check if it matches a tutor's name. Otherwise, it's a completely unmatched query!
     if query_text and not matched_any:
         name_matches = [tutor for tutor in tutors if _matches_query(tutor, query_text)]
         if name_matches:
             tutors = name_matches
         else:
-            # No name, subject, location, or level matches found for this query text
             return []
 
-    # If no query text and no filters are present, we return empty
     if not query_text and not has_filters:
         return []
 
@@ -381,29 +416,65 @@ def _extract_with_gemini(prompt):
 def _load_database_tutors():
     try:
         Tutor = apps.get_model("tutors", "Tutor")
+        CourseOffer = apps.get_model("tutors", "CourseOffer")
         if not hasattr(Tutor, "objects"):
             return []
 
-        queryset = _filter_verified_tutors(Tutor, Tutor.objects.all())
+        queryset = _filter_verified_tutors(Tutor, Tutor.objects.all().prefetch_related("course_offers", "subjects"))
         tutors = []
 
         for tutor in queryset[:50]:
+            offers = []
+            if hasattr(tutor, "course_offers"):
+                for offer in tutor.course_offers.filter(is_active=True):
+                    cover_img = ""
+                    if hasattr(offer, "cover_image_url") and offer.cover_image_url:
+                        cover_img = offer.cover_image_url
+                    elif hasattr(offer, "cover_image_file") and offer.cover_image_file:
+                        try:
+                            cover_img = offer.cover_image_file.url
+                        except Exception:
+                            cover_img = ""
+
+                    offers.append({
+                        "id": offer.pk,
+                        "title": offer.title,
+                        "subject": offer.subject.subject_name if getattr(offer, "subject", None) else "",
+                        "delivery_mode": offer.get_delivery_mode_display() if hasattr(offer, "get_delivery_mode_display") else "Class",
+                        "mode_code": getattr(offer, "delivery_mode", "online"),
+                        "total_price": float(getattr(offer, "total_course_price", 0)),
+                        "price_display": f"{getattr(offer, 'currency_symbol', '₦')}{getattr(offer, 'total_course_price', 0):,.0f}",
+                        "daily_rate_display": f"{getattr(offer, 'currency_symbol', '₦')}{getattr(offer, 'daily_rate', 0):,.0f}/day",
+                        "duration_weeks": getattr(offer, "duration_weeks", 4),
+                        "days_per_week": getattr(offer, "days_per_week", 2),
+                        "duration_display": f"{getattr(offer, 'duration_weeks', 4)} wk(s) ({getattr(offer, 'days_per_week', 2)} days/wk)",
+                        "cover_image": cover_img,
+                    })
+
+            subjects_list = _tutor_subjects(tutor)
+            for o in offers:
+                if o["subject"] and o["subject"] not in subjects_list:
+                    subjects_list.append(o["subject"])
+                if o["title"] and o["title"] not in subjects_list:
+                    subjects_list.append(o["title"])
+
             tutors.append(
                 {
                     "id": tutor.pk,
                     "name": _tutor_name(tutor),
                     "subject": _tutor_subject(tutor),
-                    "subjects": _tutor_subjects(tutor),
+                    "subjects": subjects_list,
                     "specialist": _tutor_specialist(tutor),
                     "level": _field_value(tutor, "level", "All levels"),
                     "location": _field_value(tutor, "location", "Port Harcourt"),
-                    "rate": int(_field_value(tutor, "rate_amount", _field_value(tutor, "hourly_rate", 0)) or 0),
-                    "rate_period": _field_value(tutor, "rate_period", "weekly"),
+                    "rate": int(offers[0]["total_price"]) if offers else int(_field_value(tutor, "rate_amount", 0) or 0),
+                    "rate_period": "course",
                     "experience": int(_field_value(tutor, "years_experience", 0) or 0),
                     "rating": float(_field_value(tutor, "rating", 4.8) or 4.8),
                     "verified": _is_verified_tutor(tutor),
-                    "bio": _field_value(tutor, "bio", "Verified tutor available for home lessons."),
+                    "bio": _field_value(tutor, "bio", "Verified tutor available for home & online lessons."),
                     "photo": _photo_url(tutor),
+                    "course_offers": offers,
                 }
             )
         return tutors

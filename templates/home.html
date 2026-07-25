@@ -8,8 +8,7 @@
   <div class="mtc-shell mtc-hero-inner">
     <p class="mtc-pill">#1 Tutoring Platform in Nigeria</p>
     <h1>Find Verified Home Tutors<br>in Nigeria <span>Anywhere</span></h1>
-    <p class="mtc-hero-copy" id="search-section">Use AI to instantly connect with trusted Mathematics, English, Science,
-      Coding, WAEC and JAMB tutors near you.</p>
+    <p class="mtc-hero-copy" id="search-section">Use AI to instantly connect with trusted tutors in Mathematics, English, Science, and Digital Skills near you.</p>
 
     <style>
       @keyframes micPulse {
@@ -214,13 +213,12 @@
               <h3>{{ tutor.user.user.get_full_name|default:tutor.user.user.username }}</h3>
               <p>{% if tutor.years_experience %}{{ tutor.years_experience }} yr{% if tutor.years_experience != 1 %}s{% endif %} experience{% else %}Verified Tutor{% endif %}</p>
             </div>
-            <strong>₦{{ tutor.rate_amount }}<small>/{{ tutor.rate_period_label|lower }}</small></strong>
           </div>
           <div class="mtc-tags">
             {% for subject in tutor.subjects.all|slice:":3" %}
-            <span>{{ subject.subject_name }}</span>
+              <span>{{ subject.subject_name }}</span>
             {% empty %}
-            <span>General tutoring</span>
+              <span>General Tutoring</span>
             {% endfor %}
           </div>
           <a href="{% url 'tutor_detail' tutor.id %}" class="mtc-profile-btn">View Profile</a>

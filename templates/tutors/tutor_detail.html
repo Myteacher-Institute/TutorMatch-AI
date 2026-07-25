@@ -2,11 +2,12 @@
 {% block title %}{{ tutor.user.user.get_full_name }} — TutorMatch AI{% endblock %}
 
 {% block content %}
+{% load humanize %}
 
 <!-- Back bar -->
 <div style="background:#fff;border-bottom:1px solid var(--line);padding:14px 0;">
   <div class="mtc-shell">
-    <a href="{% url 'tutor_list' %}" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#475569;">
+    <a href="{% url 'tutor_list' %}" style="display:inline-flex;align-items:center;gap:8px;font-size:14px;font-weight:700;color:#475569;text-decoration:none;">
       <i class="fa-solid fa-arrow-left" style="color:var(--blue);"></i>Back to Tutors
     </a>
   </div>
@@ -16,7 +17,7 @@
   <div class="mtc-shell">
     <div class="tutor-detail-layout">
 
-      <!-- LEFT: Profile -->
+      <!-- LEFT: Profile & Course Offers -->
       <div class="tutor-detail-main">
 
         <!-- Profile Header -->
@@ -36,11 +37,11 @@
             <div class="tutor-detail-profile-info">
               <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;">
                 <h1 style="margin:0;font-size:clamp(22px,4vw,30px);color:#12182c;font-weight:700;">{{ tutor.user.user.get_full_name }}</h1>
-                  {% if tutor.is_verified %}
-                    <span class="verified-badge tutor-verified-badge">
-                      <i class="fa-solid fa-circle-check" style="margin-right:4px; color: #ffffff;"></i>Verified
-                    </span>
-                  {% endif %}
+                {% if tutor.is_verified %}
+                  <span class="verified-badge tutor-verified-badge">
+                    <i class="fa-solid fa-circle-check" style="margin-right:4px; color: #ffffff;"></i>Verified
+                  </span>
+                {% endif %}
               </div>
 
               <div class="tutor-detail-meta-row">
@@ -61,6 +62,73 @@
           </div>
         </div>
 
+        <!-- TEACHING SERVICES (COURSES OFFERED) SECTION -->
+        <div class="mtc-admin-card" style="margin-top:24px;padding:28px;">
+          <h2 style="margin:0 0 18px;font-size:20px;color:#0f172a;font-weight:800;display:flex;align-items:center;gap:10px;">
+            <i class="fa-solid fa-layer-group text-primary"></i>Teaching Services &amp; Courses Offered
+          </h2>
+
+          {% if course_offers %}
+            <div style="display:grid;grid-template-columns:1fr;gap:20px;">
+              {% for offer in course_offers %}
+                <div style="background:#ffffff;border:1px solid #e2e8f0;border-radius:18px;padding:22px;display:flex;gap:20px;align-items:center;flex-wrap:wrap;box-shadow:0 4px 14px rgba(0,0,0,0.03);">
+                  
+                  <!-- Course Banner Thumbnail -->
+                  <div style="width:140px;height:110px;border-radius:14px;background:#0f172a;overflow:hidden;flex-shrink:0;">
+                    {% if offer.cover_image_url %}
+                      <img src="{{ offer.cover_image_url }}" alt="{{ offer.title }}" style="width:100%;height:100%;object-fit:cover;">
+                    {% else %}
+                      <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ffffff;">
+                        <i class="fa-solid fa-book-open fa-2x" style="opacity:0.3;"></i>
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <!-- Course Content Info -->
+                  <div style="flex:1;min-width:240px;">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px;">
+                      <span style="font-size:11px;font-weight:800;color:#2563eb;text-transform:uppercase;letter-spacing:0.5px;">{{ offer.category|default:"Course" }}</span>
+                      <span class="badge bg-light text-dark border" style="font-size:11px;font-weight:700;">{{ offer.get_level_display }}</span>
+                      <span class="badge bg-primary-subtle text-primary border" style="font-size:11px;font-weight:700;">{{ offer.get_delivery_mode_display }}</span>
+                    </div>
+
+                    <h3 style="font-size:18px;font-weight:800;color:#0f172a;margin:0 0 6px 0;">
+                      <a href="{% url 'course_detail' offer_id=offer.id %}" style="color:#0f172a;text-decoration:none;">{{ offer.title }}</a>
+                    </h3>
+
+                    <div style="font-size:13px;color:#475569;display:flex;align-items:center;gap:16px;flex-wrap:wrap;margin-top:6px;">
+                      <span style="display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock text-primary"></i> <span><strong>Duration:</strong> {{ offer.duration_months }} Month{% if offer.duration_months != 1 %}s{% endif %}</span></span>
+                      <span style="display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-calendar-days text-primary"></i> <span><strong>Sessions:</strong> {{ offer.sessions_per_week }} per week ({{ offer.hours_per_session }} hrs/session)</span></span>
+                      <span style="display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-user-group text-primary"></i> <span><strong>Max Students:</strong> {{ offer.max_students }}</span></span>
+                      <span style="display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-bolt text-primary"></i> <span><strong>Start Date:</strong> Flexible</span></span>
+                    </div>
+                  </div>
+
+                  <!-- Pricing & CTA -->
+                  <div style="text-align:right;min-width:180px;border-left:1px solid #f1f5f9;padding-left:18px;">
+                    <div style="font-size:12px;color:#64748b;font-weight:700;text-transform:uppercase;">Monthly Fee</div>
+                    <div style="font-size:22px;font-weight:900;color:#2563eb;margin-bottom:2px;">
+                      {{ offer.currency_symbol }}{{ offer.monthly_fee|intcomma }}<span style="font-size:12px;color:#64748b;font-weight:600;">/mo</span>
+                    </div>
+                    <div style="font-size:12px;color:#64748b;margin-bottom:10px;">
+                      Total Course Fee: <strong>{{ offer.currency_symbol }}{{ offer.total_course_fee|intcomma }}</strong>
+                    </div>
+                    <a href="{% url 'course_detail' offer_id=offer.id %}" class="btn btn-primary rounded-pill fw-bold px-4 py-2" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;display:inline-flex;align-items:center;gap:6px;font-size:13.5px;">
+                      <span>Pay Month 1 ({{ offer.currency_symbol }}{{ offer.monthly_fee|intcomma }})</span> <i class="fa-solid fa-arrow-right"></i>
+                    </a>
+                  </div>
+
+                </div>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div style="background:#f8fafc;border:2px dashed #cbd5e1;border-radius:16px;padding:36px;text-align:center;">
+              <i class="fa-solid fa-graduation-cap fa-3x text-muted mb-2" style="opacity:0.3;"></i>
+              <p style="color:#64748b;margin:0;font-size:14px;">This tutor has not published any active teaching services yet.</p>
+            </div>
+          {% endif %}
+        </div>
+
         <!-- Bio -->
         {% if tutor.bio %}
           <div class="mtc-admin-card" style="margin-top:20px;">
@@ -77,10 +145,7 @@
           </div>
         {% endif %}
 
-      </div>
-
-      <!-- Reviews -->
-      <div class="tutor-detail-reviews">
+        <!-- Reviews -->
         <div class="mtc-admin-card" style="margin-top:20px;">
           <h2 style="margin:0 0 14px;font-size:18px;color:#12182c;"><i class="fa-solid fa-star" style="color:#fbbf24;margin-right:8px;"></i>Reviews</h2>
           {% if reviews %}
@@ -152,39 +217,45 @@
 
       </div>
 
-      <!-- RIGHT: Booking Sidebar -->
+      <!-- RIGHT: COURSE ENROLLMENT SIDEBAR -->
       <div class="tutor-detail-sidebar">
         <div class="mtc-admin-card tutor-booking-card">
 
-          <div class="tutor-booking-rate">
-            <div class="tutor-booking-rate-head">Tuition rate</div>
-            <div class="tutor-booking-rate-row">
-              <span class="tutor-booking-rate-label">Online pay</span>
-              <strong>&#8358;{{ tutor.online_class_fee|default:tutor.rate_amount }}</strong>
-            </div>
-            <div class="tutor-booking-rate-row">
-              <span class="tutor-booking-rate-label">Physical pay</span>
-              <strong>&#8358;{{ tutor.physical_class_fee|default:tutor.rate_amount }}</strong>
-            </div>
-            <span class="tutor-booking-rate-period">per {{ tutor.rate_period_label|lower }}</span>
+          <div style="border-bottom:1px solid #e2e8f0;padding-bottom:16px;margin-bottom:16px;">
+            <h3 style="font-size:16px;font-weight:800;color:#0f172a;margin-bottom:4px;display:flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-graduation-cap text-primary"></i>Course Enrollment
+            </h3>
+            <p style="font-size:12.5px;color:#64748b;margin:0;line-height:1.4;">
+              Students enroll in structured course offers created by this tutor.
+            </p>
           </div>
 
-          <div class="tutor-booking-stats">
+          <div class="tutor-booking-stats" style="margin-bottom:16px;">
             <div class="tutor-booking-stat">
               <strong>{{ tutor.years_experience }}</strong>
               <span>Yrs exp.</span>
             </div>
             <div class="tutor-booking-stat">
-              <strong>{{ tutor.subjects.count }}</strong>
-              <span>Subject{% if tutor.subjects.count != 1 %}s{% endif %}</span>
+              <strong>{{ course_offers.count }}</strong>
+              <span>Course Offer{% if course_offers.count != 1 %}s{% endif %}</span>
             </div>
           </div>
 
-          <!-- Book button — hidden when the viewer is a tutor -->
-          {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
-          <a href="{% url 'book_tutor' tutor_id=tutor.id %}" class="btn btn-primary tutor-book-btn">
-            <i class="fa-solid fa-calendar-plus" style="margin-right:8px;"></i>Book a Session
-          </a>
+          <!-- Course Offers Quick Buttons -->
+          {% if course_offers %}
+            <div style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px;">
+              <span style="font-size:11px;font-weight:700;color:#64748b;text-transform:uppercase;">Select a course to enroll:</span>
+              {% for offer in course_offers %}
+                <a href="{% url 'course_detail' offer_id=offer.id %}" class="btn btn-outline-primary w-100 text-start rounded-3 p-2 fw-semibold" style="font-size:13px;display:flex;align-items:center;justify-content:space-between;">
+                  <span class="text-truncate me-2">{{ offer.title }}</span>
+                  <strong style="color:#0f172a;flex-shrink:0;">{{ offer.currency_symbol }}{{ offer.daily_rate|intcomma }}/day</strong>
+                </a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="alert alert-light border rounded-3 p-3 text-center mb-3" style="font-size:12.5px;color:#64748b;">
+              No active course offers published yet.
+            </div>
           {% endif %}
 
           {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
@@ -193,14 +264,14 @@
             class="btn btn-ghost save-tutor-btn {% if tutor.id in saved_tutor_ids %}is-saved{% endif %}"
             data-tutor-id="{{ tutor.id }}"
             onclick="toggleSaveTutor(this)"
-            style="width:100%;border:1px solid var(--line);border-radius:10px;margin-top:10px;font-weight:700;background:#fff;color:#475569;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;"
+            style="width:100%;border:1px solid var(--line);border-radius:10px;margin-top:4px;font-weight:700;background:#fff;color:#475569;display:flex;align-items:center;justify-content:center;gap:8px;cursor:pointer;"
           >
             <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
             <span class="save-tutor-label">{% if tutor.id in saved_tutor_ids %}Saved{% else %}Save Tutor{% endif %}</span>
           </button>
           {% endif %}
 
-          <p class="tutor-booking-note">Booking handled by the sessions module.</p>
+          <p class="tutor-booking-note" style="margin-top:12px;">Enrollment handled via structured course offers.</p>
 
           <!-- Address -->
           <div class="tutor-booking-address">
@@ -245,5 +316,3 @@
   </div>
 </div>
 {% endblock %}
-
-

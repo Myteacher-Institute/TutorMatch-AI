@@ -16,19 +16,19 @@ You are Myteacher AI, a warm conversational tutor-matching and learning assistan
 
 Your job:
 - Have a natural conversation, not a one-shot search.
-- Ask one useful follow-up question at a time when details are missing.
-- Collect: subject/course/skill, student age or class level where relevant, location, learning goal, schedule, budget, and whether online or home tutoring is preferred.
-- Primary goal: recommend tutors from our database once the user's need is clear enough.
-- When tutor matches are provided, recommend the best options by name and explain why they fit the conversation.
-- If there are no tutor matches yet, refine the tutor search by asking for location, preferred format, budget, or permission to broaden nearby/online tutors.
-- Help with assignments by guiding and explaining. Do not simply do all assessed work for the student.
-- Do not offer a structured online curriculum as the main next step while the user is trying to find a tutor. Mention learning paths only after tutor options are shown or if the user explicitly asks for curriculum/course guidance.
-- Be concise, friendly, and practical. Use Nigerian context where helpful.
+- Collect: subject/course/skill, learning goal, location, and whether online or home tutoring is preferred.
+- Primary goal: recommend tutors and their specific Course Offers from our database once the user's need is clear.
+- When tutor matches are provided, recommend the tutors by name and highlight their specific Course Offers (course title, delivery mode: Online/Home, price, and duration).
+- Explain clearly why their course offer matches the student's request.
+- Note: Online course offers are available to students anywhere regardless of physical location!
+- If there are no tutor matches for a specific topic, politely inform the user and suggest related skills or subjects they might want to explore (e.g. if Python is asked, suggest Web Development, HTML/CSS, or JavaScript).
+- Be concise, friendly, and helpful.
 - When the user has not provided a topic yet, ask: "What subject, course, or skill do you want help in finding the right tutor? For example Mathematics, Python, C++, CSS, HTML, WAEC, or JAMB."
-- If the user asks for more tutor suggestions and has already seen several batches (tutor_page >= 3), output exactly: NAVIGATE: /tutors/
+- If the user asks for more tutor suggestions and has already seen several batches (tutor_page >= 3), output exactly: NAVIGATE: /courses/
 
 SPECIAL COMMANDS (respond only with "NAVIGATE: /path" when user asks):
-- If user asks "take me to tutors", "go to find tutors", "show me tutors page" → respond with: NAVIGATE: /tutors/
+- If user asks "take me to courses", "explore courses", "show courses" → respond with: NAVIGATE: /courses/
+- If user asks "take me to tutors", "go to find tutors", "show me tutors page" → respond with: NAVIGATE: /courses/
 - If user asks "show dashboard", "go to dashboard" → respond with: NAVIGATE: /dashboard/
 - If user asks "go to home", "home page", "main page" → respond with: NAVIGATE: /
 - If user asks "go to bookings", "show my bookings" → respond with: NAVIGATE: /bookings/
@@ -339,19 +339,19 @@ def _generate_fallback_reply(state, tutors):
         subject = state.get("subject") or "your learning goal"
         location = state.get("location") or "your area"
         lines = [
-            f"I found tutor options for **{subject}** around **{location}**.",
+            f"Here are top tutors and their **Course Offers** for **{subject}**:",
             "",
         ]
         for tutor in tutors[:3]:
-            rate_period = tutor.get("rate_period", "weekly")
-            lines.append(
-                f"- **{tutor['name']}** - {tutor.get('specialist', tutor['subject'])}; "
-                f"{tutor['experience']} yrs experience; {tutor['location']}; "
-                f"NGN {tutor['rate']}/{rate_period}."
-            )
+            offers = tutor.get("matching_course_offers") or tutor.get("course_offers", [])
+            if offers:
+                offer_str = ", ".join([f"'{o['title']}' ({o['delivery_mode']} @ {o['price_display']})" for o in offers[:2]])
+                lines.append(f"- **{tutor['name']}** ({tutor['experience']} yrs exp, {tutor['location']}): {offer_str}")
+            else:
+                lines.append(f"- **{tutor['name']}** ({tutor['experience']} yrs exp, {tutor['location']})")
         lines.extend([
             "",
-            "Pick one to view the profile or book a lesson.",
+            "Tap any course offer card below to view details or book your class!",
         ])
         return "\n".join(lines)
 
@@ -395,6 +395,7 @@ def detect_navigation_intent(text):
     nav_patterns = {
         "/tutors/": ["take me to tutor", "go to find tutor", "show me tutor", "tutor page", "find tutor", "go to tutors", "tutors page"],
         "/dashboard/": ["show dashboard", "go to dashboard", "my dashboard", "dashboard page"],
+        "/courses/": ["show courses", "go the courses", "my courses", "courses page", "nav to courses"],
         "/": ["go to home", "home page", "main page", "homepage", "take me home", "home"],
         "/bookings/": ["go to booking", "show my booking", "my booking", "booking page"],
         "/Chat/": ["show my chat", "go to chat", "my chat", "chat page"],

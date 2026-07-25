@@ -25,20 +25,26 @@ def payout_period_count(booking):
 
 def create_weekly_payout_schedule(payment):
     booking = payment.booking
-    weeks = payout_period_count(booking)
-    weekly_amount = (payment.amount / Decimal(weeks)).quantize(Decimal("0.01"))
-    scheduled_total = Decimal("0.00")
+    if PayoutInstallment.objects.filter(booking=booking).exists():
+        return
+
+    if booking.course_offer:
+        offer = booking.course_offer
+        weeks = offer.total_weeks
+        weekly_amount = offer.weekly_student_cost
+        weekly_commission = offer.platform_commission_per_class * Decimal(offer.days_per_week)
+        weekly_tutor_payout = offer.weekly_tutor_payout
+    else:
+        weeks = payout_period_count(booking)
+        weekly_amount = (payment.amount / Decimal(weeks)).quantize(Decimal("0.01"))
+        weekly_commission = (payment.commission / Decimal(weeks)).quantize(Decimal("0.01"))
+        weekly_tutor_payout = (payment.tutor_payout / Decimal(weeks)).quantize(Decimal("0.01"))
+
+    base_date = booking.booking_date or booking.created_at.date() if booking.created_at else timezone.localdate()
 
     with transaction.atomic():
-        if PayoutInstallment.objects.filter(booking=booking).exists():
-            return
-
         for week_number in range(1, weeks + 1):
-            is_last = week_number == weeks
-            amount = payment.amount - scheduled_total if is_last else weekly_amount
-            scheduled_total += amount
-
-            period_start = booking.booking_date + timedelta(days=(week_number - 1) * 7)
+            period_start = base_date + timedelta(days=(week_number - 1) * 7)
             period_end = period_start + timedelta(days=6)
             auto_release_at = timezone.make_aware(
                 timezone.datetime.combine(period_end, timezone.datetime.max.time())
@@ -50,9 +56,9 @@ def create_weekly_payout_schedule(payment):
                 week_number=week_number,
                 period_start=period_start,
                 period_end=period_end,
-                amount=amount,
-                commission=Decimal("0.00"),
-                tutor_payout=Decimal("0.00"),
+                amount=weekly_amount,
+                commission=weekly_commission,
+                tutor_payout=weekly_tutor_payout,
                 auto_release_at=auto_release_at,
             )
 

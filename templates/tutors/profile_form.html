@@ -2,7 +2,293 @@
 {% block title %}Edit Profile — TutorMatch AI{% endblock %}
 
 {% block content %}
-<div class="tutor-portal-bg admin-dashboard-light">
+<!-- Leaflet.js Interactive Map CSS & JS -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin="" />
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
+
+<style>
+  .profile-edit-wrapper {
+    background: #f8fafc;
+    min-height: 90vh;
+    padding-bottom: 50px;
+  }
+  .compact-form-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 26px 28px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  }
+  .compact-card-title {
+    font-size: 17px;
+    font-weight: 800;
+    color: #0f172a;
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .compact-card-title-left {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .compact-card-title-left i {
+    color: #2563eb;
+    font-size: 19px;
+    margin-right: 4px;
+  }
+  .compact-form-group {
+    margin-bottom: 20px;
+  }
+  .compact-form-label {
+    display: block;
+    font-weight: 700;
+    font-size: 14px;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+  .form-control, .form-select, input[type="text"], input[type="number"], select, textarea {
+    display: block;
+    width: 100%;
+    height: 46px;
+    padding: 0 16px;
+    font-size: 14.5px;
+    font-weight: 600;
+    color: #0f172a;
+    background-color: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    outline: none;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    box-sizing: border-box;
+  }
+  textarea {
+    height: auto !important;
+    padding: 12px 16px !important;
+  }
+  select, .form-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23334155' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right 16px center;
+    background-size: 14px 12px;
+    padding-right: 42px !important;
+    cursor: pointer;
+  }
+  .form-control:focus, .form-select:focus, input:focus, select:focus, textarea:focus {
+    border-color: #2563eb !important;
+    background-color: #ffffff !important;
+    box-shadow: 0 0 0 3.5px rgba(37, 99, 235, 0.12) !important;
+  }
+  .form-help-sm {
+    font-size: 12.5px;
+    color: #64748b;
+    margin-top: 6px;
+  }
+
+  /* PHOTO PREVIEW & FRAME ADJUSTMENT */
+  .photo-frame-wrap {
+    display: flex;
+    align-items: center;
+    gap: 28px;
+    flex-wrap: wrap;
+  }
+  .circle-avatar-frame {
+    width: 125px;
+    height: 125px;
+    border-radius: 50%;
+    border: 4px solid #2563eb;
+    box-shadow: 0 8px 20px rgba(37, 99, 235, 0.2);
+    overflow: hidden;
+    position: relative;
+    background: #0f172a;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .circle-avatar-frame img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.1s ease, object-position 0.1s ease;
+  }
+  .frame-controls-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 18px 22px;
+    flex: 1;
+    min-width: 280px;
+  }
+  .custom-file-btn {
+    background: #eff6ff;
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 14px;
+    padding: 10px 20px;
+    border-radius: 999px;
+    border: 1.5px solid #bfdbfe;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    transition: background 0.2s ease;
+  }
+  .custom-file-btn:hover {
+    background: #dbeafe;
+  }
+
+  .btn-pick-map {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13px;
+    padding: 9px 22px;
+    border-radius: 999px;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    white-space: nowrap;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .btn-pick-map:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    color: #ffffff;
+  }
+
+  /* CUSTOM SUBJECT TAG BADGES */
+  .custom-subject-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    border: 1.5px solid #bfdbfe;
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 13.5px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.1);
+    transition: all 0.2s ease;
+  }
+  .custom-subject-pill:hover {
+    background: #dbeafe;
+    border-color: #93c5fd;
+  }
+  .custom-subject-pill i {
+    color: #3b82f6;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 4px;
+    transition: color 0.15s ease;
+  }
+  .custom-subject-pill i:hover {
+    color: #ef4444;
+  }
+
+  /* CUSTOM WORLD MAP MODAL OVERLAY */
+  .custom-map-modal-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(15, 23, 42, 0.75);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99999;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.25s ease;
+  }
+  .custom-map-modal-backdrop.is-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+  .custom-map-modal-card {
+    background: #ffffff;
+    border-radius: 24px;
+    width: 90%;
+    max-width: 860px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow: 0 25px 60px rgba(0, 0, 0, 0.3);
+    transform: scale(0.95);
+    transition: transform 0.25s ease;
+  }
+  .custom-map-modal-backdrop.is-visible .custom-map-modal-card {
+    transform: scale(1);
+  }
+  .custom-map-header {
+    background: #0f172a;
+    color: #ffffff;
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .custom-map-close-btn {
+    background: rgba(255, 255, 255, 0.15);
+    color: #ffffff;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    font-size: 16px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s ease;
+  }
+  .custom-map-close-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+  }
+
+  /* SUBJECT INPUT FLEX CONTAINER */
+  .subject-input-wrapper {
+    display: flex;
+    align-items: center;
+    background: #ffffff;
+    border: 1.5px solid #cbd5e1;
+    border-radius: 12px;
+    padding: 0 16px;
+    height: 46px;
+  }
+  .subject-input-wrapper i {
+    color: #64748b;
+    margin-right: 12px;
+    font-size: 15px;
+  }
+  .subject-input-wrapper input {
+    border: none !important;
+    height: 100% !important;
+    padding: 0 !important;
+    outline: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+  }
+</style>
+
+<div class="profile-edit-wrapper tutor-portal-bg admin-dashboard-light">
   <div class="mtc-shell">
     <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
 
@@ -10,25 +296,29 @@
 
       {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="profile" %}
 
-      <!-- MAIN -->
+      <!-- MAIN CONTENT -->
       <main class="mtc-admin-content">
 
-        <div class="tutor-page-heading">
+        <!-- HEADER BAR -->
+        <div class="d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3" style="background:#ffffff;padding:22px 28px;border-radius:20px;box-shadow:0 4px 20px rgba(0,0,0,0.03);border:1px solid #e2e8f0;">
           <div>
-            <p class="tutor-eyebrow">Tutor Dashboard</p>
-            <h1>Edit Profile</h1>
-            <p class="tutor-subtext">Keep your profile up to date so students can find you easily.</p>
+            <h1 style="font-size:24px;font-weight:900;color:#0f172a;margin-bottom:4px;display:flex;align-items:center;gap:12px;">
+              <i class="fa-solid fa-user-gear text-primary" style="margin-right:6px!important;"></i>Edit Profile
+            </h1>
+            <p style="color:#64748b;margin:0;font-size:14px;">
+              Keep your tutor credentials, subjects, and bio up to date for prospective students.
+            </p>
           </div>
-          <a href="{% url 'tutor_dashboard' %}" class="tutor-back-btn">
-            <i class="fa-solid fa-arrow-left" style="margin-right:6px;"></i>Back
+          <a href="{% url 'tutor_dashboard' %}" class="btn btn-outline-secondary rounded-pill px-4 font-semibold" style="display:inline-flex;align-items:center;gap:8px;font-size:13.5px;">
+            <i class="fa-solid fa-arrow-left" style="margin-right:6px!important;"></i>Back to Dashboard
           </a>
         </div>
 
         {% if messages %}
           {% for message in messages %}
-            <div class="tutor-alert {% if message.tags == 'success' %}tutor-alert-success{% else %}tutor-alert-error{% endif %}">
-              <i class="fa-solid {% if message.tags == 'success' %}fa-circle-check{% else %}fa-circle-exclamation{% endif %}" style="margin-right:8px;"></i>
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert">
               {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
           {% endfor %}
         {% endif %}
@@ -36,156 +326,213 @@
         <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
 
-          <!-- Profile Photo -->
-          <div class="mtc-admin-card tutor-form-card">
-            <div class="tutor-form-section-title">
-              <i class="fa-solid fa-camera" style="color:var(--blue);margin-right:8px;"></i>Profile Photo
-            </div>
-            <div class="tutor-photo-upload-row">
-              <div class="tutor-photo-preview">
+          <!-- 1. PROFILE PHOTO & FRAME ADJUSTMENT -->
+          <div class="compact-form-card">
+            <h3 class="compact-card-title">
+              <div class="compact-card-title-left">
+                <i class="fa-solid fa-camera text-primary" style="margin-right:10px!important;"></i>
+                <span>Profile Photo & Frame Adjuster</span>
+              </div>
+            </h3>
+
+            <div class="photo-frame-wrap">
+              
+              <!-- Interactive Avatar Circle Frame -->
+              <div class="circle-avatar-frame" id="avatarFrame">
                 {% if profile.profile_photo %}
-                  <img src="{{ profile.profile_photo }}" alt="Photo">
+                  <img id="avatarImage" src="{{ profile.profile_photo }}" alt="Photo">
                 {% else %}
-                  <i class="fa-solid fa-user" style="font-size:28px;color:#94a3b8;"></i>
+                  <img id="avatarImage" src="" alt="Photo" style="display:none;">
+                  <i id="avatarPlaceholder" class="fa-solid fa-user" style="font-size:42px;color:#94a3b8;"></i>
                 {% endif %}
               </div>
-              <div class="tutor-photo-upload-info">
-                <div class="tutor-photo-upload-btn" id="photoUploadBtn">
-                  {{ form.profile_photo_upload }}
-                  <i class="fa-solid fa-cloud-arrow-up"></i>
-                  <span>Choose Photo</span>
-                  <p class="tutor-photo-file-name" id="photoFileName">No file chosen</p>
+
+              <!-- Upload Button & Adjustable Frame Controls -->
+              <div class="frame-controls-box">
+                <div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;flex-wrap:wrap;">
+                  <label for="id_profile_photo_upload" class="custom-file-btn">
+                    <i class="fa-solid fa-cloud-arrow-up" style="margin-right:8px!important;"></i> Choose Photo
+                  </label>
+                  <span id="photoFileName" style="font-size:13.5px;color:#64748b;font-weight:600;">No new file selected</span>
+                  <div style="display:none;">
+                    {{ form.profile_photo_upload }}
+                  </div>
                 </div>
-                <p>JPG or PNG. Recommended: 400×400px.</p>
+
+                <!-- Adjustable Frame Sliders -->
+                <div id="frameAdjustPanel" style="border-top:1px solid #e2e8f0;padding-top:14px;margin-top:12px;">
+                  <div class="row g-3 align-items-center">
+                    <div class="col-12 col-sm-6">
+                      <label style="font-size:12px;font-weight:700;color:#334155;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <i class="fa-solid fa-magnifying-glass-plus text-primary" style="margin-right:6px!important;"></i>
+                        <span>Frame Zoom Scale</span>
+                      </label>
+                      <input type="range" id="zoomRange" min="1" max="2.5" step="0.05" value="1" class="form-range">
+                    </div>
+                    <div class="col-12 col-sm-6">
+                      <label style="font-size:12px;font-weight:700;color:#334155;display:flex;align-items:center;gap:6px;margin-bottom:6px;">
+                        <i class="fa-solid fa-arrows-up-down-left-right text-primary" style="margin-right:6px!important;"></i>
+                        <span>Frame Focus Point</span>
+                      </label>
+                      <select id="positionSelect" class="form-select py-1 font-semibold" style="height:40px;font-size:13px;">
+                        <option value="center center">Center (Default)</option>
+                        <option value="center top">Top / Face Focus</option>
+                        <option value="center bottom">Bottom</option>
+                        <option value="left center">Left Side</option>
+                        <option value="right center">Right Side</option>
+                      </select>
+                    </div>
+                  </div>
+                  <div style="font-size:12px;color:#64748b;margin-top:8px;">JPG or PNG. Recommended: Square 400×400px.</div>
+                </div>
+
                 {% if form.profile_photo_upload.errors %}
-                  <p class="tutor-field-error">{{ form.profile_photo_upload.errors|join:", " }}</p>
+                  <p class="text-danger fs-6 fw-bold mt-2">{{ form.profile_photo_upload.errors|join:", " }}</p>
                 {% endif %}
               </div>
+
             </div>
           </div>
 
-          <!-- Personal Information -->
-          <div class="mtc-admin-card tutor-form-card">
-            <div class="tutor-form-section-title">
-              <i class="fa-solid fa-circle-info" style="color:var(--blue);margin-right:8px;"></i>Personal Information
-            </div>
-            <div class="tutor-form-field">
-              <label>Bio <span class="tutor-field-required">*</span></label>
-              {{ form.bio }}
-              <small>Tell students about your teaching style and background.</small>
-              {% if form.bio.errors %}<p class="tutor-field-error">{{ form.bio.errors|join:", " }}</p>{% endif %}
-            </div>
-            <div class="tutor-form-field" style="margin-top:18px;">
-              <label>Qualifications <span class="tutor-field-required">*</span></label>
-              {{ form.qualifications }}
-              <small>Degrees, certifications, or relevant training.</small>
-              {% if form.qualifications.errors %}<p class="tutor-field-error">{{ form.qualifications.errors|join:", " }}</p>{% endif %}
-            </div>
-            <div class="tutor-form-grid" style="margin-top:18px;">
-              <div class="tutor-form-field">
-                <label>Years of Experience <span class="tutor-field-required">*</span></label>
+          <!-- 2. PERSONAL & ACADEMIC INFORMATION -->
+          <div class="compact-form-card">
+            <h3 class="compact-card-title">
+              <div class="compact-card-title-left">
+                <i class="fa-solid fa-user-graduate text-primary" style="margin-right:10px!important;"></i>
+                <span>Personal & Academic Bio</span>
+              </div>
+            </h3>
+
+            <div class="row g-3 compact-form-group">
+              <div class="col-12 col-md-8">
+                <label class="compact-form-label">Bio & Teaching Philosophy <span class="text-danger">*</span></label>
+                {{ form.bio }}
+                <div class="form-help-sm">Describe your teaching approach, background, and what makes your lessons engaging.</div>
+                {% if form.bio.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.bio.errors|join:", " }}</p>{% endif %}
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="compact-form-label">Years of Experience <span class="text-danger">*</span></label>
                 {{ form.years_experience }}
-                <small>Enter the number of years you've been tutoring.</small>
-                {% if form.years_experience.errors %}<p class="tutor-field-error">{{ form.years_experience.errors|join:", " }}</p>{% endif %}
+                <div class="form-help-sm">Years actively tutoring students.</div>
+                {% if form.years_experience.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.years_experience.errors|join:", " }}</p>{% endif %}
               </div>
             </div>
-            
-            <hr style="border: 0; border-top: 1px solid #e2e8f0; margin: 24px 0;">
-            
-            <div style="font-weight:600; margin-bottom:12px; font-size:14px; color:#0f172a;">Subjects You Teach <span class="tutor-field-required">*</span></div>
-            <div class="tutor-subject-tags" id="subjectTags">
-              {% for subject in profile.subjects.all %}
-                <span class="tutor-subject-pill" data-name="{{ subject.subject_name }}">{{ subject.subject_name }} <i class="fa-solid fa-xmark" style="cursor:pointer;margin-left:4px;"></i></span>
-              {% endfor %}
+
+            <div class="compact-form-group">
+              <label class="compact-form-label">Qualifications & Degrees <span class="text-danger">*</span></label>
+              {{ form.qualifications }}
+              <div class="form-help-sm">Degrees, certifications, awards, or relevant academic training.</div>
+              {% if form.qualifications.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.qualifications.errors|join:", " }}</p>{% endif %}
             </div>
-            <div class="tutor-form-field" style="margin-top:14px;">
-              <label>Add Subject</label>
-              <div style="display: none;">
+
+            <div class="row g-3 compact-form-group">
+              <div class="col-12 col-md-6">
+                <label class="compact-form-label">Languages Spoken <span class="text-danger">*</span></label>
+                {{ form.languages_spoken }}
+                <div class="form-help-sm">e.g., English, French, Spanish, Yoruba.</div>
+                {% if form.languages_spoken.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.languages_spoken.errors|join:", " }}</p>{% endif %}
+              </div>
+
+              <div class="col-12 col-md-6">
+                <label class="compact-form-label">Teaching Mode <span class="text-danger">*</span></label>
+                {{ form.teaching_mode }}
+                <div class="form-help-sm">How you prefer to conduct your classes.</div>
+                {% if form.teaching_mode.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.teaching_mode.errors|join:", " }}</p>{% endif %}
+              </div>
+            </div>
+
+            <!-- SUBJECTS TAGS -->
+            <div style="border-top:1px solid #f1f5f9;padding-top:18px;margin-top:20px;">
+              <label class="compact-form-label">Subjects / Skills You Teach <span class="text-danger">*</span></label>
+              
+              <div class="d-flex flex-wrap gap-2 mb-3" id="subjectTags">
+                {% for subject in profile.subjects.all %}
+                  <span class="custom-subject-pill" data-name="{{ subject.subject_name }}">
+                    {{ subject.subject_name }} <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="removeSubjectTag(this)"></i>
+                  </span>
+                {% endfor %}
+              </div>
+
+              <div style="display:none;">
                 {{ form.subjects_input }}
               </div>
-              <input type="text" id="subjectDummyInput" class="form-control" placeholder="e.g. Mathematics, English">
-              <small>Type a subject and press Enter or comma to add it.</small>
-              {% if form.subjects_input.errors %}<p class="tutor-field-error">{{ form.subjects_input.errors|join:", " }}</p>{% endif %}
+
+              <div class="subject-input-wrapper">
+                <i class="fa-solid fa-book text-primary" style="margin-right:10px!important;"></i>
+                <input type="text" id="subjectDummyInput" class="form-control" placeholder="Type a subject (e.g. Mathematics, Physics) and press Enter">
+              </div>
+              <div class="form-help-sm">Type a subject name and press Enter or comma to add it.</div>
+              {% if form.subjects_input.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.subjects_input.errors|join:", " }}</p>{% endif %}
             </div>
           </div>
 
-          <!-- Location Details -->
-          <div class="mtc-admin-card tutor-form-card">
-            <div class="tutor-form-section-title">
-              <i class="fa-solid fa-location-dot" style="color:var(--blue);margin-right:8px;"></i>Location Details
-            </div>
-            <div class="tutor-form-grid">
-              <div class="tutor-form-field">
-                <label>Country <span class="tutor-field-required">*</span></label>
+          <!-- 3. DYNAMIC LOCATION DETAILS WITH MAP PICKER BUTTON -->
+          <div class="compact-form-card">
+            <h3 class="compact-card-title">
+              <div class="compact-card-title-left">
+                <i class="fa-solid fa-location-dot text-primary" style="margin-right:10px!important;"></i>
+                <span>Location Details</span>
+              </div>
+              <button type="button" class="btn-pick-map" id="openMapModalBtn">
+                <i class="fa-solid fa-map-location-dot" style="margin-right:8px!important;"></i>
+                <span>Select Location from Map</span>
+              </button>
+            </h3>
+
+            <div class="row g-3">
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="compact-form-label">Country <span class="text-danger">*</span></label>
                 {{ form.country }}
-                {% if form.country.errors %}<p class="tutor-field-error">{{ form.country.errors|join:", " }}</p>{% endif %}
+                {% if form.country.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.country.errors|join:", " }}</p>{% endif %}
               </div>
-              <div class="tutor-form-field">
-                <label>State <span class="tutor-field-required">*</span></label>
-                {{ form.state }}
-                {% if form.state.errors %}<p class="tutor-field-error">{{ form.state.errors|join:", " }}</p>{% endif %}
+
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="compact-form-label" id="stateLabel">State <span class="text-danger">*</span></label>
+                <div id="stateFieldContainer">
+                  {{ form.state }}
+                </div>
+                {% if form.state.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.state.errors|join:", " }}</p>{% endif %}
               </div>
-              <div class="tutor-form-field">
-                <label>Local Government <span class="tutor-field-required">*</span></label>
-                {{ form.local_government }}
-                {% if form.local_government.errors %}<p class="tutor-field-error">{{ form.local_government.errors|join:", " }}</p>{% endif %}
+
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="compact-form-label" id="lgaLabel">Local Government <span class="text-danger">*</span></label>
+                <div id="lgaFieldContainer">
+                  {{ form.local_government }}
+                </div>
+                {% if form.local_government.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.local_government.errors|join:", " }}</p>{% endif %}
               </div>
-              <div class="tutor-form-field">
-                <label>Location Address <span class="tutor-field-required">*</span></label>
+
+              <div class="col-12 col-sm-6 col-md-3">
+                <label class="compact-form-label">Address / Area <span class="text-danger">*</span></label>
                 {{ form.location }}
-                <small>Enter your street address or specific location.</small>
-                {% if form.location.errors %}<p class="tutor-field-error">{{ form.location.errors|join:", " }}</p>{% endif %}
-              </div>
-            </div>
-          </div>
-          
-          <!-- Pricing & Billing -->
-          <div class="mtc-admin-card tutor-form-card">
-            <div class="tutor-form-section-title">
-              <i class="fa-solid fa-money-bill-wave" style="color:var(--blue);margin-right:8px;"></i>Pricing & Billing
-            </div>
-            {% if form.non_field_errors %}
-              <div class="tutor-alert tutor-alert-error" style="margin-bottom:16px;">
-                <i class="fa-solid fa-circle-exclamation" style="margin-right:8px;"></i>
-                {{ form.non_field_errors|join:", " }}
-              </div>
-            {% endif %}
-            <div class="tutor-form-grid">
-              <div class="tutor-form-field">
-                <label>Online Class Fee (&#8358;) <span class="tutor-field-required">*</span></label>
-                {{ form.online_class_fee }}
-                <small>Set the amount you charge for online classes.</small>
-                {% if form.online_class_fee.errors %}<p class="tutor-field-error">{{ form.online_class_fee.errors|join:", " }}</p>{% endif %}
-              </div>
-              <div class="tutor-form-field">
-                <label>Physical Class Fee (&#8358;) <span class="tutor-field-required">*</span></label>
-                {{ form.physical_class_fee }}
-                <small>Set the amount you charge for physical/in-person classes.</small>
-                {% if form.physical_class_fee.errors %}<p class="tutor-field-error">{{ form.physical_class_fee.errors|join:", " }}</p>{% endif %}
-              </div>
-              <div class="tutor-form-field">
-                <label>Billing Cycle <span class="tutor-field-required">*</span></label>
-                {{ form.rate_period }}
-                <small>Choose whether this amount is charged daily, weekly, or monthly.</small>
-                {% if form.rate_period.errors %}<p class="tutor-field-error">{{ form.rate_period.errors|join:", " }}</p>{% endif %}
+                {% if form.location.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.location.errors|join:", " }}</p>{% endif %}
               </div>
             </div>
           </div>
 
-          <!-- Account Details -->
-          <div class="mtc-admin-card tutor-form-card">
-            <div class="tutor-form-section-title">
-              <i class="fa-solid fa-building-columns" style="color:var(--blue);margin-right:8px;"></i>Account Details
-            </div>
-            <p class="tutor-field-required" style="margin:0 0 14px;font-size:12px;">These details are private and used only for your payouts. They are not shown on your public tutor profile.</p>
-            <div class="tutor-form-grid">
-              <div class="tutor-form-field">
-                <label>Account Name <span class="tutor-field-required">*</span></label>
-                {{ form.account_name }}
-                {% if form.account_name.errors %}<p class="tutor-field-error">{{ form.account_name.errors|join:", " }}</p>{% endif %}
+          <!-- 4. PRIVATE BANK ACCOUNT DETAILS (FOR PAYOUTS) -->
+          <div class="compact-form-card">
+            <h3 class="compact-card-title">
+              <div class="compact-card-title-left">
+                <i class="fa-solid fa-building-columns text-primary" style="margin-right:10px!important;"></i>
+                <span>Payout Bank Account Details</span>
               </div>
-              <div class="tutor-form-field">
-                <label>Bank Name <span class="tutor-field-required">*</span></label>
+            </h3>
+            <p style="font-size:13px;color:#64748b;margin-bottom:18px;">
+              <i class="fa-solid fa-lock text-success" style="margin-right:8px!important;"></i>
+              <span>These details are private and used securely for your weekly course escrow payouts. They are not shown on your public profile.</span>
+            </p>
+
+            <div class="row g-3">
+              <div class="col-12 col-md-4">
+                <label class="compact-form-label">Account Name <span class="text-danger">*</span></label>
+                {{ form.account_name }}
+                {% if form.account_name.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.account_name.errors|join:", " }}</p>{% endif %}
+              </div>
+
+              <div class="col-12 col-md-4">
+                <label class="compact-form-label">Bank Name <span class="text-danger">*</span></label>
                 {{ form.bank_name }}
                 <datalist id="nigerian-banks">
                   <option value="Access Bank">
@@ -194,156 +541,429 @@
                   <option value="Fidelity Bank">
                   <option value="First Bank of Nigeria">
                   <option value="First City Monument Bank (FCMB)">
-                  <option value="Globus Bank">
                   <option value="Guaranty Trust Bank (GTBank)">
-                  <option value="Heritage Bank">
-                  <option value="Keystone Bank">
-                  <option value="Kuda Bank">
-                  <option value="Moniepoint">
-                  <option value="Opay">
+                  <option value="Moniepoint Microfinance Bank">
+                  <option value="Opay Digital Services">
+                  <option value="Kuda Microfinance Bank">
                   <option value="Palmpay">
-                  <option value="Polaris Bank">
-                  <option value="PremiumTrust Bank">
-                  <option value="Providus Bank">
                   <option value="Stanbic IBTC Bank">
-                  <option value="Standard Chartered Bank">
-                  <option value="Sterling Bank">
-                  <option value="SunTrust Bank">
-                  <option value="Titan Trust Bank">
-                  <option value="Union Bank of Nigeria">
                   <option value="United Bank for Africa (UBA)">
-                  <option value="Unity Bank">
-                  <option value="Wema Bank">
                   <option value="Zenith Bank">
                 </datalist>
-                {% if form.bank_name.errors %}<p class="tutor-field-error">{{ form.bank_name.errors|join:", " }}</p>{% endif %}
+                {% if form.bank_name.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.bank_name.errors|join:", " }}</p>{% endif %}
               </div>
-              <div class="tutor-form-field">
-                <label>Account Number <span class="tutor-field-required">*</span></label>
+
+              <div class="col-12 col-md-4">
+                <label class="compact-form-label">Account Number <span class="text-danger">*</span></label>
                 {{ form.account_number }}
-                {% if form.account_number.errors %}<p class="tutor-field-error">{{ form.account_number.errors|join:", " }}</p>{% endif %}
+                {% if form.account_number.errors %}<p class="text-danger fs-6 fw-bold mt-1">{{ form.account_number.errors|join:", " }}</p>{% endif %}
               </div>
             </div>
           </div>
 
-          <!-- Actions -->
-          <div class="tutor-form-actions">
-            <a href="{% url 'tutor_dashboard' %}" class="tutor-back-btn">Cancel</a>
-            <button type="submit" class="btn btn-primary tutor-save-btn">
-              <i class="fa-solid fa-floppy-disk" style="margin-right:6px;"></i>Save Profile
+          <!-- ACTIONS -->
+          <div class="d-flex align-items-center justify-content-end gap-3 mt-4 mb-5">
+            <a href="{% url 'tutor_dashboard' %}" class="btn btn-light rounded-pill px-4 fw-bold" style="border:1px solid #cbd5e1;">Cancel</a>
+            <button type="submit" class="btn btn-primary rounded-pill px-5 fw-bold py-2" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;box-shadow:0 4px 14px rgba(37,99,235,0.35);display:inline-flex;align-items:center;gap:8px;">
+              <i class="fa-solid fa-floppy-disk" style="margin-right:8px!important;"></i>
+              <span>Save Profile</span>
             </button>
           </div>
 
         </form>
-
-        <script>
-          var LGA_DATA = JSON.parse('{{ lgas_json|escapejs }}');
-
-          (function() {
-            var stateSelect = document.querySelector('select[name="state"]');
-            var lgaSelect = document.querySelector('select[name="local_government"]');
-            if (!stateSelect || !lgaSelect) return;
-
-            function populateLgas(state, selectedLga) {
-              lgaSelect.innerHTML = '';
-              var placeholder = document.createElement('option');
-              placeholder.value = '';
-              placeholder.textContent = 'Select local government';
-              lgaSelect.appendChild(placeholder);
-
-              var lgas = LGA_DATA[state] || [];
-              lgas.forEach(function(lga) {
-                var opt = document.createElement('option');
-                opt.value = lga;
-                opt.textContent = lga;
-                if (lga === selectedLga) {
-                  opt.selected = true;
-                }
-                lgaSelect.appendChild(opt);
-              });
-            }
-
-            var currentLga = lgaSelect.value;
-            populateLgas(stateSelect.value, currentLga);
-
-            stateSelect.addEventListener('change', function() {
-              populateLgas(this.value, '');
-            });
-          })();
-
-          (function() {
-            var fileInput = document.querySelector('#photoUploadBtn input[type="file"]');
-            var btn = document.getElementById('photoUploadBtn');
-            var fileName = document.getElementById('photoFileName');
-            if (fileInput && btn) {
-              fileInput.addEventListener('change', function() {
-                if (this.files && this.files.length > 0) {
-                  btn.classList.add('has-file');
-                  fileName.textContent = this.files[0].name;
-                } else {
-                  btn.classList.remove('has-file');
-                  fileName.textContent = 'No file chosen';
-                }
-              });
-            }
-          })();
-
-          (function() {
-            var hiddenInput = document.querySelector('input[name="subjects_input"]');
-            var dummyInput = document.getElementById('subjectDummyInput');
-            var container = document.getElementById('subjectTags');
-            if (!hiddenInput || !dummyInput || !container) return;
-
-            function syncInput() {
-              var names = [];
-              container.querySelectorAll('.tutor-subject-pill').forEach(function(el) {
-                names.push(el.getAttribute('data-name'));
-              });
-              hiddenInput.value = names.join(', ');
-            }
-
-            container.addEventListener('click', function(e) {
-              var pill = e.target.closest('.tutor-subject-pill');
-              if (!pill) return;
-              var x = e.target.closest('i');
-              if (!x) return;
-              pill.remove();
-              syncInput();
-            });
-
-            dummyInput.addEventListener('keydown', function(e) {
-              if (e.key === 'Enter' || e.key === ',') {
-                e.preventDefault();
-                var val = dummyInput.value.replace(',', '').trim();
-                if (!val) return;
-                var existing = container.querySelectorAll('.tutor-subject-pill');
-                var found = false;
-                existing.forEach(function(el) {
-                  if (el.getAttribute('data-name').toLowerCase() === val.toLowerCase()) {
-                    found = true;
-                  }
-                });
-                if (found) {
-                  dummyInput.value = '';
-                  return;
-                }
-                var span = document.createElement('span');
-                span.className = 'tutor-subject-pill';
-                span.setAttribute('data-name', val);
-                span.innerHTML = val + ' <i class="fa-solid fa-xmark" style="cursor:pointer;margin-left:4px;"></i>';
-                container.appendChild(span);
-                dummyInput.value = '';
-                syncInput();
-              }
-            });
-            
-            // Sync on load
-            syncInput();
-          })();
-        </script>
-
       </main>
     </div>
   </div>
 </div>
+
+<!-- WORLD MAP LOCATION PICKER CUSTOM MODAL OVERLAY -->
+<div class="custom-map-modal-backdrop" id="customMapModalBackdrop">
+  <div class="custom-map-modal-card">
+    
+    <!-- Modal Header -->
+    <div class="custom-map-header">
+      <h3 style="margin:0;font-size:17px;font-weight:900;display:flex;align-items:center;gap:10px;">
+        <i class="fa-solid fa-earth-africa text-primary" style="margin-right:8px!important;"></i>
+        <span>Pick Location on World Map</span>
+      </h3>
+      <button type="button" class="custom-map-close-btn" id="closeMapModalBtn">&times;</button>
+    </div>
+
+    <!-- Modal Body -->
+    <div style="display:flex;flex-direction:column;flex:1;overflow:hidden;">
+      
+      <!-- Search Bar -->
+      <div style="background:#f8fafc;padding:14px 20px;border-bottom:1px solid #e2e8f0;display:flex;gap:12px;">
+        <div style="flex:1;display:flex;align-items:center;background:#ffffff;border:1.5px solid #cbd5e1;border-radius:12px;padding:0 14px;">
+          <i class="fa-solid fa-magnifying-glass text-muted" style="margin-right:10px!important;"></i>
+          <input type="text" id="mapSearchInput" style="border:none;background:transparent;outline:none;width:100%;height:42px;font-size:14px;font-weight:600;" placeholder="Search city, street or area e.g. GRA Port Harcourt, Lagos, London...">
+        </div>
+        <button type="button" id="mapSearchBtn" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);color:#ffffff;font-weight:700;font-size:14px;border:none;border-radius:12px;padding:0 24px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;">
+          <span>Search</span>
+        </button>
+      </div>
+
+      <!-- Leaflet Map Canvas -->
+      <div id="interactiveMap" style="height: 400px; width: 100%; z-index: 1;"></div>
+
+      <!-- Address Result Bar -->
+      <div style="background:#ffffff;padding:14px 20px;border-top:1px solid #e2e8f0;font-size:13.5px;color:#334155;">
+        <i class="fa-solid fa-location-dot text-danger" style="margin-right:8px!important;"></i>
+        <strong>Selected Address:</strong> <span id="mapSelectedAddressText" style="color:#0f172a;font-weight:700;margin-left:4px;">Click on map or search to place pin</span>
+      </div>
+
+    </div>
+
+    <!-- Modal Footer -->
+    <div style="background:#f8fafc;padding:14px 20px;border-top:1px solid #e2e8f0;display:flex;align-items:center;justify-content:flex-end;gap:12px;">
+      <button type="button" class="btn btn-light rounded-pill px-4 fw-bold" id="cancelMapModalBtn" style="border:1px solid #cbd5e1;">Cancel</button>
+      <button type="button" id="confirmMapLocationBtn" class="btn btn-primary rounded-pill px-4 fw-bold" style="background:linear-gradient(135deg,#2563eb,#1d4ed8);border:none;display:inline-flex;align-items:center;gap:8px;">
+        <i class="fa-solid fa-check-circle" style="margin-right:6px!important;"></i>
+        <span>Confirm & Fill Location</span>
+      </button>
+    </div>
+
+  </div>
+</div>
+
+<script id="world-subdivisions-data" type="application/json">
+{{ world_subdivisions_json|safe }}
+</script>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    // 1. LIVE PHOTO PREVIEW & FRAME ADJUSTMENT
+    const fileInput = document.getElementById('id_profile_photo_upload');
+    const fileNameSpan = document.getElementById('photoFileName');
+    const avatarImg = document.getElementById('avatarImage');
+    const avatarPlaceholder = document.getElementById('avatarPlaceholder');
+    const zoomRange = document.getElementById('zoomRange');
+    const positionSelect = document.getElementById('positionSelect');
+
+    if (fileInput) {
+      fileInput.addEventListener('change', function (e) {
+        const file = e.target.files[0];
+        if (file) {
+          fileNameSpan.textContent = file.name;
+          const reader = new FileReader();
+          reader.onload = function (evt) {
+            avatarImg.src = evt.target.result;
+            avatarImg.style.display = 'block';
+            if (avatarPlaceholder) avatarPlaceholder.style.display = 'none';
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    }
+
+    if (zoomRange && avatarImg) {
+      zoomRange.addEventListener('input', function () {
+        avatarImg.style.transform = 'scale(' + zoomRange.value + ')';
+      });
+    }
+
+    if (positionSelect && avatarImg) {
+      positionSelect.addEventListener('change', function () {
+        avatarImg.style.objectPosition = positionSelect.value;
+      });
+    }
+
+    // 2. SUBJECTS TAG MANAGERS
+    const subjectHidden = document.getElementById('id_subjects_input');
+    const subjectDummy = document.getElementById('subjectDummyInput');
+    const subjectTagsBox = document.getElementById('subjectTags');
+
+    function updateSubjectsHidden() {
+      const pills = subjectTagsBox.querySelectorAll('.custom-subject-pill');
+      const names = Array.from(pills).map(p => p.getAttribute('data-name'));
+      if (subjectHidden) subjectHidden.value = names.join(', ');
+    }
+
+    if (subjectDummy) {
+      subjectDummy.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter' || e.key === ',') {
+          e.preventDefault();
+          const val = subjectDummy.value.trim().replace(/,/g, '');
+          if (val) {
+            const span = document.createElement('span');
+            span.className = 'custom-subject-pill';
+            span.setAttribute('data-name', val);
+            span.innerHTML = val + ' <i class="fa-solid fa-xmark" style="cursor:pointer;" onclick="removeSubjectTag(this)"></i>';
+            subjectTagsBox.appendChild(span);
+            subjectDummy.value = '';
+            updateSubjectsHidden();
+          }
+        }
+      });
+    }
+
+    window.removeSubjectTag = function (el) {
+      const pill = el.closest('.custom-subject-pill');
+      if (pill) {
+        pill.remove();
+        updateSubjectsHidden();
+      }
+    };
+
+    updateSubjectsHidden();
+
+    // 3. DYNAMIC WORLD LOCATION SUBDIVISIONS (COUNTRY -> STATE/REGION -> LGA/DISTRICT/CITY)
+    const worldSubdivisions = JSON.parse(document.getElementById('world-subdivisions-data').textContent);
+    const savedState = "{{ profile.state|default:''|escapejs }}";
+    const savedLga = "{{ profile.local_government|default:''|escapejs }}";
+
+    const countrySelect = document.getElementById('id_country');
+    const stateLabel = document.getElementById('stateLabel');
+    const lgaLabel = document.getElementById('lgaLabel');
+    const stateContainer = document.getElementById('stateFieldContainer');
+    const lgaContainer = document.getElementById('lgaFieldContainer');
+
+    function updateLocationFields(isInitialLoad = false) {
+      if (!countrySelect) return;
+      const selectedCountry = countrySelect.value || "Nigeria";
+      const config = worldSubdivisions[selectedCountry];
+
+      let currentStateVal = isInitialLoad ? savedState : (document.getElementById('id_state')?.value || '');
+      let currentLgaVal = isInitialLoad ? savedLga : (document.getElementById('id_local_government')?.value || '');
+
+      let stateTitle = config ? (config.state_label || "State / Region / Province") : "State / Region / Province";
+      let lgaTitle = config ? (config.lga_label || "City / District") : "City / District";
+
+      stateLabel.innerHTML = stateTitle + ' <span class="text-danger">*</span>';
+      lgaLabel.innerHTML = lgaTitle + ' <span class="text-danger">*</span>';
+
+      let statesList = config && Array.isArray(config.states) ? config.states : [];
+
+      if (statesList.length > 0) {
+        // Render Select Dropdown for State
+        let stateHtml = `<select name="state" id="id_state" class="form-select">`;
+        stateHtml += `<option value="">Select ${stateTitle}</option>`;
+
+        statesList.forEach(st => {
+          const selectedAttr = (st === currentStateVal) ? 'selected' : '';
+          stateHtml += `<option value="${st}" ${selectedAttr}>${st}</option>`;
+        });
+        stateHtml += `</select>`;
+        stateContainer.innerHTML = stateHtml;
+      } else {
+        // Dynamic Datalist Dropdown fallback with options list for any country
+        let stateHtml = `
+          <input type="text" name="state" id="id_state" class="form-control form-select" list="state-datalist-opts" placeholder="Select or type ${stateTitle}" value="${currentStateVal}">
+          <datalist id="state-datalist-opts">
+            <option value="Capital Territory / Central Region">
+            <option value="Northern Region / State">
+            <option value="Southern Region / State">
+            <option value="Eastern Region / Province">
+            <option value="Western Region / Province">
+          </datalist>`;
+        stateContainer.innerHTML = stateHtml;
+      }
+
+      // Render LGA / District / City Field
+      const stateEl = document.getElementById('id_state');
+      renderLgaField(selectedCountry, stateEl ? stateEl.value : '', currentLgaVal);
+
+      // Attach change & input listeners to newly generated state field
+      if (stateEl) {
+        stateEl.addEventListener('change', function() {
+          renderLgaField(selectedCountry, this.value, '');
+        });
+        stateEl.addEventListener('input', function() {
+          renderLgaField(selectedCountry, this.value, '');
+        });
+      }
+    }
+
+    function renderLgaField(countryName, stateName, selectedLgaVal) {
+      const config = worldSubdivisions[countryName];
+      let lgaData = config ? config.lgas : null;
+      let availableLgas = [];
+
+      if (lgaData && typeof lgaData === 'object') {
+        if (Array.isArray(lgaData)) {
+          availableLgas = lgaData;
+        } else if (stateName && lgaData[stateName]) {
+          availableLgas = lgaData[stateName];
+        } else if (Object.keys(lgaData).length > 0) {
+          // Flatten or grab primary city lists if specific state key is not matched
+          let firstKey = Object.keys(lgaData)[0];
+          availableLgas = lgaData[firstKey] || [];
+        }
+      }
+
+      let lgaTitle = config ? (config.lga_label || "City / Local District") : "City / Local District";
+
+      if (availableLgas.length > 0) {
+        let lgaHtml = `<select name="local_government" id="id_local_government" class="form-select">`;
+        lgaHtml += `<option value="">Select ${lgaTitle}</option>`;
+        availableLgas.forEach(lg => {
+          const selectedAttr = (lg === selectedLgaVal) ? 'selected' : '';
+          lgaHtml += `<option value="${lg}" ${selectedAttr}>${lg}</option>`;
+        });
+        lgaHtml += `</select>`;
+        lgaContainer.innerHTML = lgaHtml;
+      } else {
+        // Dynamic Datalist Dropdown fallback with options list for cities/districts
+        let lgaHtml = `
+          <input type="text" name="local_government" id="id_local_government" class="form-control form-select" list="lga-datalist-opts" placeholder="Select or type ${lgaTitle}" value="${selectedLgaVal}">
+          <datalist id="lga-datalist-opts">
+            <option value="Central City / Metro">
+            <option value="North District">
+            <option value="South District">
+            <option value="East District">
+            <option value="West District">
+          </datalist>`;
+        lgaContainer.innerHTML = lgaHtml;
+      }
+    }
+
+    if (countrySelect) {
+      countrySelect.addEventListener('change', function() {
+        updateLocationFields(false);
+      });
+      // Initial trigger on page load
+      updateLocationFields(true);
+    }
+
+    // 4. PURE JS/CSS WORLD MAP LOCATION PICKER MODAL
+    let map = null;
+    let marker = null;
+    let currentSelectedLocation = {
+      address: '',
+      lat: 4.8156,
+      lng: 7.0498,
+    };
+
+    const openMapBtn = document.getElementById('openMapModalBtn');
+    const mapModalBackdrop = document.getElementById('customMapModalBackdrop');
+    const closeMapBtn = document.getElementById('closeMapModalBtn');
+    const cancelMapBtn = document.getElementById('cancelMapModalBtn');
+    const addressInput = document.querySelector('[name="location"]');
+    const mapSearchInput = document.getElementById('mapSearchInput');
+    const mapSearchBtn = document.getElementById('mapSearchBtn');
+    const confirmMapBtn = document.getElementById('confirmMapLocationBtn');
+    const mapAddressText = document.getElementById('mapSelectedAddressText');
+
+    function openModal() {
+      if (mapModalBackdrop) {
+        mapModalBackdrop.classList.add('is-visible');
+        initOrResizeMap();
+      }
+    }
+
+    function closeModal() {
+      if (mapModalBackdrop) {
+        mapModalBackdrop.classList.remove('is-visible');
+      }
+    }
+
+    if (openMapBtn) openMapBtn.addEventListener('click', openModal);
+    if (closeMapBtn) closeMapBtn.addEventListener('click', closeModal);
+    if (cancelMapBtn) cancelMapBtn.addEventListener('click', closeModal);
+
+    if (mapModalBackdrop) {
+      mapModalBackdrop.addEventListener('click', function (e) {
+        if (e.target === mapModalBackdrop) {
+          closeModal();
+        }
+      });
+    }
+
+    function initOrResizeMap() {
+      setTimeout(function () {
+        if (!map && window.L) {
+          map = L.map('interactiveMap').setView([currentSelectedLocation.lat, currentSelectedLocation.lng], 13);
+          
+          L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '© OpenStreetMap contributors'
+          }).addTo(map);
+
+          marker = L.marker([currentSelectedLocation.lat, currentSelectedLocation.lng], { draggable: true }).addTo(map);
+
+          marker.on('dragend', function () {
+            const pos = marker.getLatLng();
+            reverseGeocode(pos.lat, pos.lng);
+          });
+
+          map.on('click', function (e) {
+            marker.setLatLng(e.latlng);
+            reverseGeocode(e.latlng.lat, e.latlng.lng);
+          });
+        } else if (map) {
+          map.invalidateSize();
+        }
+      }, 150);
+    }
+
+    function reverseGeocode(lat, lng) {
+      mapAddressText.textContent = "Fetching location address...";
+      fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lng}`)
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.display_name) {
+            currentSelectedLocation.address = data.display_name;
+            currentSelectedLocation.lat = lat;
+            currentSelectedLocation.lng = lng;
+            mapAddressText.textContent = data.display_name;
+          } else {
+            currentSelectedLocation.address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+            mapAddressText.textContent = currentSelectedLocation.address;
+          }
+        })
+        .catch(() => {
+          currentSelectedLocation.address = `${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+          mapAddressText.textContent = currentSelectedLocation.address;
+        });
+    }
+
+    function forwardGeocode(query) {
+      if (!query.trim()) return;
+      mapAddressText.textContent = `Searching for "${query}"...`;
+      fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(query)}`)
+        .then(res => res.json())
+        .then(results => {
+          if (results && results.length > 0) {
+            const first = results[0];
+            const lat = parseFloat(first.lat);
+            const lng = parseFloat(first.lon);
+            map.setView([lat, lng], 14);
+            marker.setLatLng([lat, lng]);
+            currentSelectedLocation.address = first.display_name;
+            currentSelectedLocation.lat = lat;
+            currentSelectedLocation.lng = lng;
+            mapAddressText.textContent = first.display_name;
+          } else {
+            mapAddressText.textContent = `No map results found for "${query}". Try clicking directly on the map.`;
+          }
+        })
+        .catch(() => {
+          mapAddressText.textContent = "Search error. Please click on the map to choose a location.";
+        });
+    }
+
+    if (mapSearchBtn && mapSearchInput) {
+      mapSearchBtn.addEventListener('click', function () {
+        forwardGeocode(mapSearchInput.value);
+      });
+
+      mapSearchInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') {
+          e.preventDefault();
+          forwardGeocode(mapSearchInput.value);
+        }
+      });
+    }
+
+    if (confirmMapBtn) {
+      confirmMapBtn.addEventListener('click', function () {
+        if (currentSelectedLocation.address && addressInput) {
+          addressInput.value = currentSelectedLocation.address;
+        }
+        closeModal();
+      });
+    }
+
+  });
+</script>
 {% endblock %}

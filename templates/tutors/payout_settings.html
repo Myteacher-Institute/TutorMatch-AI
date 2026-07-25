@@ -1,0 +1,133 @@
+{% extends "base.html" %}
+{% block title %}Payout Settings — TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="tutor-portal-bg admin-dashboard-light">
+  <div class="mtc-shell">
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+    <div class="mtc-admin-layout">
+
+      {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="payout" %}
+
+      <main class="mtc-admin-content">
+
+        <!-- Top Header Bar -->
+        <div class="donezo-topbar">
+          <div class="donezo-topbar-left">
+            <h1>Payout Settings <i class="fa-solid fa-wallet text-primary" style="margin-left:6px; font-size:22px;"></i></h1>
+            <p>Configure where and when your earnings are disbursed via direct bank transfer or wallet.</p>
+          </div>
+          <div class="donezo-topbar-right">
+            <a href="{% url 'tutor_dashboard' %}" class="donezo-btn-secondary">
+              <i class="fa-solid fa-arrow-left"></i>Back to Dashboard
+            </a>
+          </div>
+        </div>
+
+        <div class="donezo-main-grid">
+
+          <!-- Left Column: Form Card -->
+          <div style="grid-column: span 2;">
+            <div class="donezo-card" style="padding:32px;">
+              
+              <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:24px; padding-bottom:18px; border-bottom:1px solid #f1f5f9;">
+                <div>
+                  <h2 style="font-size:18px; font-weight:800; color:#0f172a; margin:0 0 4px;">
+                    <i class="fa-solid fa-building-columns" style="color:#2563eb; margin-right:8px;"></i>Bank Account Details
+                  </h2>
+                  <p style="font-size:13px; color:#64748b; margin:0;">Standard payouts occur on the 5th of every month upon lesson completion.</p>
+                </div>
+                <span class="donezo-metric-badge donezo-badge-blue" style="font-size:12px;">
+                  <i class="fa-solid fa-shield-halved"></i> 256-Bit Encrypted
+                </span>
+              </div>
+
+              <form method="post">
+                {% csrf_token %}
+
+                <div style="display:grid; gap:22px;">
+
+                  <!-- Payout Method -->
+                  <div>
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:8px;">
+                      Payout Method
+                    </label>
+                    <div style="position:relative;">
+                      {{ form.payout_method }}
+                    </div>
+                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">
+                      Select your preferred channel to receive automated tutor disbursements.
+                    </small>
+                  </div>
+
+                  <!-- Bank Name & Account Number (2 Column Grid) -->
+                  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px;">
+                    <div>
+                      <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:8px;">
+                        Bank Name
+                      </label>
+                      {{ form.bank_name }}
+                      <datalist id="nigerian-banks">
+                        <option value="Access Bank">
+                        <option value="First Bank of Nigeria">
+                        <option value="GTBank (Guaranty Trust Bank)">
+                        <option value="Kuda Bank">
+                        <option value="OPay">
+                        <option value="Palmpay">
+                        <option value="Stanbic IBTC Bank">
+                        <option value="United Bank for Africa (UBA)">
+                        <option value="Zenith Bank">
+                      </datalist>
+                    </div>
+
+                    <div>
+                      <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:8px;">
+                        Account Number (NUBAN)
+                      </label>
+                      {{ form.account_number }}
+                    </div>
+                  </div>
+
+                  <!-- Account Name -->
+                  <div>
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:8px;">
+                      Account Holder Full Name
+                    </label>
+                    {{ form.account_name }}
+                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">
+                      Must match the official account name registered with your financial institution.
+                    </small>
+                  </div>
+
+                  <!-- Preferred Payout Schedule -->
+                  <div>
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:8px;">
+                      Preferred Payout Schedule
+                    </label>
+                    {{ form.payout_schedule }}
+                    <small style="color:#2563eb; font-weight:600; font-size:12px; margin-top:6px; display:block;">
+                      <i class="fa-solid fa-circle-info" style="margin-right:4px;"></i> Standard payouts are automatically processed on the 5th of every month.
+                    </small>
+                  </div>
+
+                  <!-- Save Button -->
+                  <div style="margin-top:10px; padding-top:18px; border-top:1px solid #f1f5f9; display:flex; justify-content:flex-end;">
+                    <button type="submit" class="donezo-btn-primary" style="padding:12px 28px; font-size:14px; cursor:pointer;">
+                      <i class="fa-solid fa-floppy-disk"></i>Save Payout Settings
+                    </button>
+                  </div>
+
+                </div>
+
+              </form>
+
+            </div>
+          </div>
+
+        </div>
+      </main>
+
+    </div>
+  </div>
+</div>
+{% endblock %}

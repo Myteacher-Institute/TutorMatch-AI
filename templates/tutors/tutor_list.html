@@ -73,12 +73,12 @@
     padding: 0 16px 0 42px;
   }
   .tutor-toolbar input[type="number"] {
-    flex: 0 0 116px;
-    padding: 0 12px;
+    flex: 0 0 130px;
+    padding: 0 14px;
   }
   .tutor-toolbar select {
-    flex: 0 0 136px;
-    padding: 0 34px 0 12px;
+    flex: 0 0 145px;
+    padding: 0 30px 0 12px;
   }
   .tutor-toolbar input:focus,
   .tutor-toolbar select:focus {
@@ -527,8 +527,6 @@
                 <i class="{% if tutor.id in saved_tutor_ids %}fa-solid{% else %}fa-regular{% endif %} fa-bookmark"></i>
               </button>
               {% endif %}
-
-              <div class="tutor-rate-pill">&#8358;{{ tutor.rate_amount }}/{{ tutor.rate_period_label|lower }}</div>
             </div>
 
             <div class="tutor-card-content">

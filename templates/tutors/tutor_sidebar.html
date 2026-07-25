@@ -6,9 +6,17 @@
   }
 </style>
 <aside class="mtc-admin-sidebar tutor-sidebar">
-  <button class="tutor-hamburger" id="tutor-sidebar-toggle" aria-label="Toggle sidebar">
+  <!-- Mobile Hamburger -->
+  <button class="tutor-hamburger" id="tutor-sidebar-toggle" aria-label="Toggle mobile sidebar">
     <i class="fa-solid fa-bars"></i>
   </button>
+
+  <!-- Desktop Seam Collapse Toggle Button -->
+  <button class="tutor-desktop-toggle" id="tutor-desktop-toggle" aria-label="Toggle sidebar collapse" title="Collapse / Expand sidebar">
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+
+  <!-- Profile Card at Top -->
   <div class="tutor-sidebar-profile">
     <div class="tutor-avatar-ring">
       {% if profile.profile_photo %}
@@ -27,71 +35,116 @@
     </div>
     <div class="tutor-sidebar-info">
       <strong>{{ profile.user.user.get_full_name }}</strong>
-      <span>Tutor portal</span>
+      <span>Tutor Portal</span>
     </div>
     <div class="tutor-sidebar-status">
       {% if profile.verification_status == 'approved' %}
-        <span class="tutor-verified-tag">
+        <span class="tutor-verified-tag" title="Verified Tutor">
           <i class="fa-solid fa-circle-check"></i>
         </span>
       {% elif profile.verification_status == 'rejected' %}
-        <span class="mtc-status-pill mtc-status-cancelled">
-          <i class="fa-solid fa-circle-xmark" style="margin-right:5px;"></i>Rejected
+        <span class="mtc-status-pill mtc-status-cancelled" title="Verification Rejected">
+          <i class="fa-solid fa-circle-xmark"></i><span class="status-label">Rejected</span>
         </span>
       {% else %}
-        <span class="mtc-status-pill mtc-status-pending">
-          <i class="fa-solid fa-clock" style="margin-right:5px;"></i>
+        <span class="mtc-status-pill mtc-status-pending" title="Verification Pending">
+          <i class="fa-solid fa-clock"></i><span class="status-label">Pending</span>
         </span>
       {% endif %}
     </div>
   </div>
 
-  <nav class="mtc-admin-nav" style="margin-top:12px;">
-    <a href="{% url 'tutor_dashboard' %}" {% if active_tab == 'dashboard' %}class="active"{% endif %}>
-      <i class="fa-solid fa-house-circle-check" style="width:18px;margin-right:8px;"></i>Dashboard
+  <!-- Menu Navigation -->
+  <div class="tutor-nav-section-title">MENU</div>
+  <nav class="mtc-admin-nav">
+    <a href="{% url 'tutor_dashboard' %}" title="Dashboard" {% if active_tab == 'dashboard' %}class="active"{% endif %}>
+      <i class="fa-solid fa-grip nav-icon"></i><span class="nav-label">Dashboard</span>
     </a>
-    <a href="{% url 'tutor_profile' %}" {% if active_tab == 'profile' %}class="active"{% endif %}>
-      <i class="fa-solid fa-user-pen" style="width:18px;margin-right:8px;"></i>Edit Profile
+    <a href="{% url 'course_offer_list' %}" title="Teaching Services" {% if active_tab == 'offers' %}class="active"{% endif %}>
+      <i class="fa-solid fa-layer-group nav-icon"></i><span class="nav-label">Teaching Services</span>
     </a>
-    <a href="{% url 'tutor_verification' %}" {% if active_tab == 'verification' %}class="active"{% endif %}>
-      <i class="fa-solid fa-shield-halved" style="width:18px;margin-right:8px;"></i>Verification
-    </a>
-    <a href="{% url 'tutor_bookings' %}" {% if active_tab == 'bookings' %}class="active"{% endif %}>
-      <i class="fa-solid fa-receipt" style="width:18px;margin-right:8px;"></i>Bookings
+    <a href="{% url 'tutor_bookings' %}" title="Bookings" {% if active_tab == 'bookings' %}class="active"{% endif %}>
+      <i class="fa-solid fa-receipt nav-icon"></i><span class="nav-label">Bookings</span>
       {% if pending_bookings_count %}
-        <span style="margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:#dc2626;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">
+        <span class="nav-badge nav-badge-danger" title="{{ pending_bookings_count }} Pending Bookings">
           {{ pending_bookings_count }}
         </span>
       {% endif %}
     </a>
-    <a href="{% url 'chat:tutor_chat_list' %}" {% if active_tab == 'chats' %}class="active"{% endif %}>
-      <i class="fa-solid fa-comments" style="width:18px;margin-right:8px;"></i>Chats
+    <a href="{% url 'chat:tutor_chat_list' %}" title="Chats" {% if active_tab == 'chats' %}class="active"{% endif %}>
+      <i class="fa-solid fa-comments nav-icon"></i><span class="nav-label">Chats</span>
       {% if chat_unread_count %}
-        <span style="margin-left:auto;min-width:22px;height:22px;padding:0 7px;border-radius:999px;background:#16a34a;color:#ffffff;display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;">
+        <span class="nav-badge nav-badge-success" title="{{ chat_unread_count }} Unread Chats">
           {{ chat_unread_count }}
         </span>
       {% endif %}
     </a>
-    <a href="{% url 'delete_account' %}" {% if active_tab == 'delete_account' %}class="active"{% endif %}>
-      <i class="fa-solid fa-trash-can" style="width:18px;margin-right:8px;"></i>Delete Account
+  </nav>
+
+  <div class="tutor-nav-section-title" style="margin-top:20px;">ACCOUNT</div>
+  <nav class="mtc-admin-nav">
+    <a href="{% url 'tutor_profile' %}" title="Personal Profile" {% if active_tab == 'profile' %}class="active"{% endif %}>
+      <i class="fa-solid fa-user nav-icon"></i><span class="nav-label">Personal Profile</span>
     </a>
-    <a href="{% url 'home' %}" class="tutor-sidebar-back-link">
-      <i class="fa-solid fa-arrow-left" style="width:18px;margin-right:8px;"></i>Back to Website
+    <a href="{% url 'tutor_payout_settings' %}" title="Payout Settings" {% if active_tab == 'payout' %}class="active"{% endif %}>
+      <i class="fa-solid fa-wallet nav-icon"></i><span class="nav-label">Payout Settings</span>
     </a>
+    <a href="{% url 'tutor_verification' %}" title="Verification" {% if active_tab == 'verification' %}class="active"{% endif %}>
+      <i class="fa-solid fa-shield-halved nav-icon"></i><span class="nav-label">Verification</span>
+    </a>
+    <a href="{% url 'delete_account' %}" title="Delete Account" {% if active_tab == 'delete_account' %}class="active"{% endif %}>
+      <i class="fa-solid fa-trash-can nav-icon"></i><span class="nav-label">Delete Account</span>
+    </a>
+    <a href="{% url 'home' %}" title="Back to Website" class="tutor-sidebar-back-link">
+      <i class="fa-solid fa-arrow-left nav-icon"></i><span class="nav-label">Back to Website</span>
+    </a>
+
+    <!-- Donezo Sidebar Promo Badge Card -->
+    <div class="donezo-sidebar-badge">
+      <div style="display:flex; align-items:center; gap:10px; margin-bottom:8px;">
+        <div style="width:32px; height:32px; border-radius:10px; background:rgba(37,99,235,0.2); color:#38bdf8; display:grid; place-items:center; font-size:14px; flex-shrink:0;">
+          <i class="fa-solid fa-crown"></i>
+        </div>
+        <strong style="font-size:12.5px; color:#ffffff; line-height:1.2;">TutorMatch Pro</strong>
+      </div>
+      <p style="font-size:11px; color:#94a3b8; margin:0 0 12px; line-height:1.35;">Get 0% platform commission &amp; priority student match.</p>
+      <a href="#" class="donezo-btn-primary" style="padding:7px 12px; font-size:11.5px; width:100%; justify-content:center;">Upgrade to Pro</a>
+    </div>
   </nav>
 </aside>
 <script>
+(function () {
   const toggle = document.getElementById('tutor-sidebar-toggle');
+  const desktopToggle = document.getElementById('tutor-desktop-toggle');
   const overlay = document.getElementById('tutor-sidebar-overlay');
   const sidebar = document.querySelector('.tutor-sidebar');
+  const layout = sidebar ? sidebar.closest('.mtc-admin-layout') : null;
 
-  toggle.addEventListener('click', function () {
-    sidebar.classList.toggle('tutor-sidebar-open');
-    overlay.classList.toggle('tutor-sidebar-overlay-open');
-  });
+  // Restore collapsed state from localStorage
+  if (localStorage.getItem('tutor_sidebar_collapsed') === 'true') {
+    if (layout) layout.classList.add('sidebar-collapsed');
+    if (sidebar) sidebar.classList.add('is-collapsed');
+  }
 
-  overlay.addEventListener('click', function () {
-    sidebar.classList.remove('tutor-sidebar-open');
-    overlay.classList.remove('tutor-sidebar-overlay-open');
-  });
+  if (desktopToggle && layout && sidebar) {
+    desktopToggle.addEventListener('click', function (e) {
+      e.preventDefault();
+      const isCollapsed = layout.classList.toggle('sidebar-collapsed');
+      sidebar.classList.toggle('is-collapsed', isCollapsed);
+      localStorage.setItem('tutor_sidebar_collapsed', isCollapsed ? 'true' : 'false');
+    });
+  }
+
+  if (toggle && sidebar && overlay) {
+    toggle.addEventListener('click', function () {
+      sidebar.classList.toggle('tutor-sidebar-open');
+      overlay.classList.toggle('tutor-sidebar-overlay-open');
+    });
+
+    overlay.addEventListener('click', function () {
+      sidebar.classList.remove('tutor-sidebar-open');
+      overlay.classList.remove('tutor-sidebar-overlay-open');
+    });
+  }
+})();
 </script>

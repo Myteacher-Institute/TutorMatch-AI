@@ -1,54 +1,24 @@
-import uuid
+import cloudinary
+import cloudinary.uploader
 from django.conf import settings
-
-try:
-    from imagekitio import ImageKit
-    IMAGEKIT_AVAILABLE = True
-except ImportError:
-    IMAGEKIT_AVAILABLE = False
-    ImageKit = None
-
-
-def get_imagekit_client():
-    if not IMAGEKIT_AVAILABLE:
-        return None
-    private_key = getattr(settings, "IMAGEKIT_PRIVATE_KEY", "")
-    if not private_key:
-        return None
-    return ImageKit(private_key=private_key)
-
-
-def upload_to_imagekit(file_data, filename, folder="/tutormatch"):
-    imagekit = get_imagekit_client()
-    if imagekit is None:
-        raise ValueError("ImageKit is not configured. Please set IMAGEKIT_PRIVATE_KEY.")
-
-    safe_filename = filename.replace(" ", "_")
-    unique_filename = f"{uuid.uuid4()}_{safe_filename}"
-
-    return imagekit.files.upload(
-        file=file_data,
-        file_name=unique_filename,
-        folder=folder,
-        use_unique_file_name=False,
-    )
-
 
 def upload_file_in_memory(file_obj, folder="/tutormatch"):
     if file_obj is None:
         return None
 
-    file_data = file_obj.read()
-    original_filename = file_obj.name
-    if hasattr(file_obj, "seek"):
-        file_obj.seek(0)
-
-    response = upload_to_imagekit(file_data, original_filename, folder)
-
-    if response:
-        return response.url
-    return None
-
+    try:
+        if hasattr(file_obj, "seek"):
+            file_obj.seek(0)
+            
+        response = cloudinary.uploader.upload(
+            file_obj,
+            folder=folder,
+            resource_type="auto"
+        )
+        return response.get("secure_url")
+    except Exception as e:
+        print(f"Cloudinary upload error: {e}")
+        return None
 
 ALLOWED_EXTENSIONS = {
     "jpg", "jpeg", "png", "gif", "webp", "bmp", "svg",
@@ -56,7 +26,6 @@ ALLOWED_EXTENSIONS = {
 }
 
 MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB
-
 
 def validate_file(file_obj):
     if not file_obj:
@@ -70,3 +39,7 @@ def validate_file(file_obj):
         return False, "File too large (max 10MB)"
 
     return True, None
+
+def validate_image(file_obj):
+    return validate_file(file_obj)
+

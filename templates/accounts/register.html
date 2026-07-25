@@ -19,10 +19,9 @@
         </a>
       </div>
       <div class="mtc-auth-welcome">
-        <h2>Start Learning</h2>
-        <p>Connect with verified tutors, compare the right match for your goals, and book trusted sessions that fit your schedule.</p>
+        <h2 id="auth-welcome-heading">Welcome to Myteacherconnect.</h2>
+        <p id="auth-welcome-subtext">Connect with verified tutors, compare the right match for your goals, and book trusted sessions that fit your schedule.</p>
       </div>
-      <div class="mtc-auth-url">www.myteacherconnect.com</div>
     </aside>
 
     <div class="mtc-auth-form-wrapper">
@@ -128,13 +127,30 @@
    }
 
    const roleToggle = document.getElementById('role-toggle');
+   const welcomeSubtext = document.getElementById('auth-welcome-subtext');
+   const studentSubtext = "Connect with verified tutors, compare the right match for your goals, and book trusted sessions that fit your schedule.";
+   const tutorSubtext = "Are you a qualified tutor in digital skills, Mathematics, English and exam preparation? Then apply here";
+
+   function updateAuthSubtext(role) {
+     if (welcomeSubtext) {
+       if (role === 'tutor') {
+         welcomeSubtext.textContent = tutorSubtext;
+       } else {
+         welcomeSubtext.textContent = studentSubtext;
+       }
+     }
+   }
+
    if (roleToggle) {
      const toggleButtons = roleToggle.querySelectorAll('.role-toggle-btn');
      const hiddenInput = document.getElementById('id_role_selection');
-     const selectedButton = roleToggle.querySelector(`.role-toggle-btn[data-value="${hiddenInput.value || 'student'}"]`);
+     const initialRole = hiddenInput.value || 'student';
+     
+     const selectedButton = roleToggle.querySelector(`.role-toggle-btn[data-value="${initialRole}"]`);
      if (selectedButton) {
        toggleButtons.forEach(b => b.classList.remove('active'));
        selectedButton.classList.add('active');
+       updateAuthSubtext(initialRole);
      }
      
      toggleButtons.forEach(btn => {
@@ -142,6 +158,7 @@
          toggleButtons.forEach(b => b.classList.remove('active'));
          btn.classList.add('active');
          hiddenInput.value = btn.dataset.value;
+         updateAuthSubtext(btn.dataset.value);
        });
      });
    }

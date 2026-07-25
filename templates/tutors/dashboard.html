@@ -3,6 +3,7 @@
 
 {% block content %}
 {% load humanize %}
+
 <div class="tutor-portal-bg admin-dashboard-light">
   <div class="mtc-shell">
 
@@ -12,172 +13,270 @@
 
       {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="dashboard" %}
 
-      <!-- MAIN -->
+      <!-- MAIN CONTENT -->
       <main class="mtc-admin-content">
 
-          <!-- Hero Banner -->
-          <div class="tutor-hero-banner mtc-dashboard-hero">
-           
-            <div class="tutor-hero-left">
-             <div>
-               <p class="tutor-eyebrow">Tutor Dashboard</p>
-               <h1 style="color: #e8f3ff;">Welcome, {{ profile.user.user.first_name }}</h1>
-              
-             </div>
-           
-              <p class="tutor-hero-label">
-              
-              </p>
-              <h2>Manage your subjects,<br>sessions &amp; verification.</h2>
-              <a href="{% url 'tutor_profile' %}" class="tutor-hero-cta">
-                <i class="fa-solid fa-pen-to-square" style="margin-right:6px;"></i>Complete Your Profile
-              </a>
+        <!-- Donezo Topbar Header -->
+        <div class="donezo-topbar">
+          <div class="donezo-topbar-left">
+            <div style="display:flex; align-items:center; gap:10px; margin-bottom:4px;">
+              <h1 style="margin:0;">Welcome back, {{ profile.user.user.first_name }} <i class="fa-solid fa-hand-wave text-warning" style="margin-left:4px; font-size:20px;"></i></h1>
+              {% if profile.verification_status == 'approved' %}
+                <span class="donezo-metric-badge donezo-badge-blue" style="font-size:11px; padding:3px 10px;"><i class="fa-solid fa-circle-check"></i> Verified Tutor</span>
+              {% else %}
+                <span class="donezo-metric-badge donezo-badge-amber" style="font-size:11px; padding:3px 10px;"><i class="fa-solid fa-clock"></i> Verification Pending</span>
+              {% endif %}
             </div>
-            <div class="tutor-hero-stats">
-             
-              <div class="tutor-stat-chip">
-                <strong>{{ profile.subjects.count }}</strong>
-                <span>Subject{% if profile.subjects.count != 1 %}s{% endif %}</span>
-              </div>
-              <div class="tutor-stat-chip">
-                <strong>{{ profile.years_experience }}</strong>
-                <span>Yrs Exp.</span>
-              </div>
-              <div class="tutor-stat-chip">
-                {% if profile.verification_status == 'approved' %}
-                  <strong><i class="fa-solid fa-circle-check" style="color:#4ade80;"></i></strong>
-                  <span>Verified</span>
-                {% elif profile.verification_status == 'rejected' %}
-                  <strong><i class="fa-solid fa-circle-xmark" style="color:#fca5a5;"></i></strong>
-                  <span>Rejected</span>
-                {% else %}
-                  <strong><i class="fa-solid fa-clock" style="color:#fbbf24;"></i></strong>
-                  <span>Pending</span>
-                {% endif %}
-              </div>
+            <p style="margin:0;">Plan, manage, and track your teaching services, bookings &amp; payouts effortlessly.</p>
+          </div>
+          <div class="donezo-topbar-right" style="display:flex; align-items:center; gap:12px;">
+            <div class="donezo-search-box">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input type="text" placeholder="Search services or bookings...">
             </div>
-
-            <a href="{% url 'tutor_detail' tutor_id=profile.id %}" class="tutor-hero-top-btn">
-              <i class="fa-solid fa-eye" style="margin-right:6px;"></i>View Public Profile
+            <a href="{% url 'course_offer_create' %}" class="donezo-btn-primary">
+              <i class="fa-solid fa-plus"></i>Add Service
             </a>
-          </div>
-
-        <!-- Metric Cards -->
-        <div class="mtc-admin-metrics-grid" style="margin-top:28px;">
-          <div class="mtc-admin-metric-card tutor-metric-blue" style="border-left:4px solid var(--blue); display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
-            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-book-open" style="margin-right:6px;"></i>Subjects</span>
-            <strong>{{ profile.subjects.count }}</strong>
-         
-          </div>
-          <div class="mtc-admin-metric-card tutor-metric-green" style="border-left:4px solid #16a34a; display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
-            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-briefcase" style="margin-right:6px;"></i>Experience</span>
-            <strong>{{ profile.years_experience }}yr{% if profile.years_experience != 1 %}s{% endif %}</strong>
-            
-          </div>
-          <div class="mtc-admin-metric-card tutor-metric-purple" style="border-left:4px solid red ; display:flex;align-items:center;justify-content:space-between; flex-direction:column;">
-            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-calendar-check" style="margin-right:6px;"></i>Bookings</span> 
-         
-            <strong>{{ bookings_count|default:"0" }}</strong>
-          
-          </div>
-          <div class="mtc-admin-metric-card tutor-metric-yellow" style="border-left:4px solid var(--yellow); display:flex;align-items:center;justify-content:space-between; flex-direction:column;">  
-            <span style="font-size:clamp(12px, 2vw, 16px);font-weight:800;"><i class="fa-solid fa-coins" style="margin-right:6px;"></i>Earnings</span>
-            <strong>{% if total_earnings %}&#8358;{{ total_earnings|intcomma }}{% else %}&#8358;0{% endif %}</strong>
-          
+            <a href="{% url 'tutor_detail' tutor_id=profile.id %}" class="donezo-btn-secondary">
+              <i class="fa-solid fa-arrow-up-right-from-square"></i>Public Profile
+            </a>
           </div>
         </div>
 
-        <!-- Bottom Grid -->
-        <div class="tutor-bottom-grid">
-
-          <!-- Upcoming Lessons -->
-          <div class="mtc-admin-card">
-            <div class="tutor-card-head">
-              <h2><i class="fa-solid fa-calendar-days" style="color:var(--blue);margin-right:8px;"></i>Upcoming Lessons</h2>
+        <!-- 1. TOP METRIC CARDS GRID (4 Side-by-Side Cards) -->
+        <div class="donezo-metrics-grid">
+          
+          <!-- Card 1: Current Balance -->
+          <div class="donezo-metric-card hero-card">
+            <div class="donezo-metric-header">
+              <span class="donezo-metric-title">Current Balance</span>
+              <div class="donezo-metric-icon-btn">
+                <i class="fa-solid fa-wallet"></i>
+              </div>
             </div>
-            {% if upcoming_bookings %}
-              <div class="mtc-dashboard-recent-bookings">
-                {% for booking in upcoming_bookings %}
-                <div class="mtc-dashboard-booking-row">
-                  <div class="mtc-student-bookings-tutor">
-                    <span>
-                      {% if booking.student.user.first_name %}{{ booking.student.user.first_name|slice:":1" }}{% else %}S{% endif %}
-                    </span>
-                    <div>
-                      <strong>{{ booking.student.user.get_full_name|default:booking.student.user.username }}</strong>
-                      <small>₦{{ booking.amount }} — {{ booking.lesson_time|time:"g:i A" }}</small>
-                    </div>
-                  </div>
-                  <div class="mtc-dashboard-booking-meta">
-                    <span class="mtc-status-pill mtc-status-{{ booking.status }}">
-                      {{ booking.get_status_display }}
-                    </span>
-                    <small>{{ booking.booking_date|date:"M j, Y" }}</small>
-                  </div>
-                </div>
-                {% endfor %}
-              </div>
-            {% else %}
-              <div class="tutor-empty-state">
-                <div class="tutor-empty-icon"><i class="fa-regular fa-calendar-xmark"></i></div>
-                <p>No upcoming lessons yet.</p>
-                <small>Once students book you, sessions will appear here.</small>
-              </div>
-            {% endif %}
+            <div class="donezo-metric-value">
+              &#8358;{{ current_balance|intcomma }}
+            </div>
+            <span class="donezo-metric-badge" style="background:rgba(255,255,255,0.2); color:#ffffff;">
+              <i class="fa-solid fa-circle-check"></i> Available for withdrawal
+            </span>
           </div>
 
-          <div style="display:grid;gap:20px;">
-
-            <!-- Verification -->
-            <div class="mtc-admin-card">
-              <div class="tutor-card-head">
-                <h2><i class="fa-solid fa-shield-halved" style="color:var(--blue);margin-right:8px;"></i>Verification</h2>
-                {% if profile.verification_status == 'approved' %}
-                  <span class="tutor-status-green">
-                    <i class="fa-solid fa-circle-check" style="margin-right:4px;"></i>Approved
-                  </span>
-                {% elif profile.verification_status == 'rejected' %}
-                  <span class="tutor-status-red">
-                    <i class="fa-solid fa-circle-xmark" style="margin-right:4px;"></i>Rejected
-                  </span>
-                {% else %}
-                  <span class="tutor-status-yellow">
-                    <i class="fa-solid fa-clock" style="margin-right:4px;"></i>Pending
-                  </span>
-                {% endif %}
+          <!-- Card 2: Pending Earnings -->
+          <div class="donezo-metric-card">
+            <div class="donezo-metric-header">
+              <span class="donezo-metric-title">Pending Earnings</span>
+              <div class="donezo-metric-icon-btn">
+                <i class="fa-solid fa-clock-rotate-left"></i>
               </div>
-              <p class="tutor-card-desc">
-                {% if profile.verification_status == 'approved' %}
-                  <i class="fa-solid fa-circle-check" style="color:#16a34a;margin-right:4px;"></i>Your account is verified. You appear in public listings.
-                {% elif profile.verification_status == 'rejected' %}
-                  <i class="fa-solid fa-triangle-exclamation" style="color:#dc2626;margin-right:4px;"></i>Documents rejected. Please re-upload.
-                {% else %}
-                  <i class="fa-solid fa-clock" style="color:#d97706;margin-right:4px;"></i>Upload documents to get verified and appear in search results.
-                {% endif %}
-              </p>
-              <a href="{% url 'tutor_verification' %}" class="tutor-card-link">
-                Manage documents <i class="fa-solid fa-arrow-right" style="margin-left:4px;"></i>
-              </a>
             </div>
+            <div class="donezo-metric-value">
+              &#8358;{{ pending_earnings|intcomma }}
+            </div>
+            <span class="donezo-metric-badge donezo-badge-amber">
+              <i class="fa-solid fa-clock"></i> In escrow / upcoming
+            </span>
+          </div>
 
-            <!-- Subjects -->
-            <div class="mtc-admin-card">
-              <div class="tutor-card-head">
-                <h2><i class="fa-solid fa-book-open" style="color:var(--blue);margin-right:8px;"></i>Subjects You Teach</h2>
-                <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Edit</a>
+          <!-- Card 3: Next Payout -->
+          <div class="donezo-metric-card">
+            <div class="donezo-metric-header">
+              <span class="donezo-metric-title">Next Payout</span>
+              <div class="donezo-metric-icon-btn">
+                <i class="fa-solid fa-calendar-day"></i>
               </div>
-              {% if profile.subjects.all %}
-                <div class="tutor-subject-tags">
-                  {% for subject in profile.subjects.all %}
-                    <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
+            </div>
+            <div class="donezo-metric-value">
+              {{ next_payout_date|date:"j F Y" }}
+            </div>
+            <span class="donezo-metric-badge donezo-badge-purple">
+              <i class="fa-solid fa-arrows-rotate"></i> {{ profile.get_payout_schedule_display|default:"Monthly Schedule" }}
+            </span>
+          </div>
+
+          <!-- Card 4: Total Paid Out -->
+          <div class="donezo-metric-card">
+            <div class="donezo-metric-header">
+              <span class="donezo-metric-title">Total Paid Out</span>
+              <div class="donezo-metric-icon-btn">
+                <i class="fa-solid fa-building-columns"></i>
+              </div>
+            </div>
+            <div class="donezo-metric-value">
+              &#8358;{{ total_paid_out|intcomma }}
+            </div>
+            <span class="donezo-metric-badge donezo-badge-blue">
+              <i class="fa-solid fa-chart-line"></i> Lifetime earnings paid
+            </span>
+          </div>
+
+        </div>
+
+        <!-- 2. MAIN 2-COLUMN SIDE-BY-SIDE GRID LAYOUT -->
+        <div class="donezo-main-grid">
+
+          <!-- LEFT COLUMN (Teaching Services & Upcoming Lessons) -->
+          <div>
+
+            <!-- Teaching Services Card -->
+            <div class="donezo-card">
+              <div class="donezo-card-header" style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 class="donezo-card-title">
+                  <i class="fa-solid fa-layer-group" style="color:#2563eb;"></i>Teaching Services
+                </h2>
+                <a href="{% url 'course_offer_create' %}" class="donezo-btn-secondary" style="padding:6px 14px; font-size:12.5px;">
+                  <i class="fa-solid fa-plus"></i>Add Service
+                </a>
+              </div>
+
+              {% if teaching_services %}
+                <div>
+                  {% for service in teaching_services %}
+                    <div class="donezo-service-item" style="padding:12px 0; border-bottom:1px solid #f1f5f9;">
+                      <div style="display:flex; align-items:center; gap:14px;">
+                        <div style="width:42px; height:42px; border-radius:12px; background:#eff6ff; border:1px solid #dbeafe; display:grid; place-items:center; color:#2563eb; font-size:16px; flex-shrink:0;">
+                          <i class="fa-solid fa-book-open"></i>
+                        </div>
+                        <div>
+                          <strong style="font-size:14.5px; color:#0f172a; display:block; line-height:1.2;">{{ service.title }}</strong>
+                          <span style="font-size:12px; color:#64748b; margin-top:2px; display:block;">
+                            {{ service.category }} &bull; {{ service.get_level_display }} &bull; {{ service.get_delivery_mode_display }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div style="text-align:right;">
+                        <strong style="font-size:15px; color:#2563eb; display:block;">&#8358;{{ service.monthly_fee|intcomma }}/mo</strong>
+                        <a href="{% url 'course_offer_edit' offer_id=service.id %}" style="font-size:12px; font-weight:700; color:#2563eb; text-decoration:none; margin-top:2px; display:inline-block;">Edit Service &rarr;</a>
+                      </div>
+                    </div>
                   {% endfor %}
                 </div>
               {% else %}
-                <p class="tutor-card-desc">No subjects added yet. <a href="{% url 'tutor_profile' %}" class="tutor-card-link">Add some &#8594;</a></p>
+                <div style="text-align:center; padding:36px 20px; background:#f8fafc; border:2px dashed #cbd5e1; border-radius:16px;">
+                  <i class="fa-solid fa-layer-group fa-2x" style="color:#cbd5e1; margin-bottom:8px;"></i>
+                  <p style="color:#64748b; font-size:13.5px; margin:0 0 10px;">No teaching services added yet.</p>
+                  <a href="{% url 'course_offer_create' %}" class="donezo-btn-primary" style="padding:8px 16px; font-size:13px;">+ Create Service</a>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Upcoming Lessons Card -->
+            <div class="donezo-card">
+              <div class="donezo-card-header">
+                <h2 class="donezo-card-title">
+                  <i class="fa-solid fa-calendar-days" style="color:#2563eb;"></i>Upcoming Lessons
+                </h2>
+              </div>
+
+              {% if upcoming_bookings %}
+                <div>
+                  {% for booking in upcoming_bookings %}
+                    <div class="donezo-service-item" style="padding:12px 0; border-bottom:1px solid #f1f5f9;">
+                      <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:40px; height:40px; border-radius:50%; background:#eff6ff; color:#2563eb; font-weight:800; display:grid; place-items:center; font-size:14px; border:2px solid #dbeafe;">
+                          {% if booking.student.user.first_name %}{{ booking.student.user.first_name|slice:":1" }}{% else %}S{% endif %}
+                        </div>
+                        <div>
+                          <strong style="font-size:14.5px; color:#0f172a; display:block;">{{ booking.student.user.get_full_name|default:booking.student.user.username }}</strong>
+                          <small style="color:#64748b; font-size:12px;">&#8358;{{ booking.amount }} &bull; {{ booking.lesson_time|time:"g:i A" }}</small>
+                        </div>
+                      </div>
+                      <div style="text-align:right;">
+                        <span class="donezo-metric-badge donezo-badge-blue" style="font-size:11px;">{{ booking.get_status_display }}</span>
+                        <small style="color:#64748b; font-size:11.5px; display:block; margin-top:4px;">{{ booking.booking_date|date:"M j, Y" }}</small>
+                      </div>
+                    </div>
+                  {% endfor %}
+                </div>
+              {% else %}
+                <div style="text-align:center; padding:32px 20px; background:#f8fafc; border:1px solid #f1f5f9; border-radius:16px;">
+                  <i class="fa-regular fa-calendar-xmark fa-2x" style="color:#cbd5e1; margin-bottom:8px;"></i>
+                  <p style="color:#64748b; font-size:13.5px; margin:0;">No upcoming lessons scheduled yet.</p>
+                </div>
               {% endif %}
             </div>
 
           </div>
+
+          <!-- RIGHT COLUMN (Payout Account & Profile Verification) -->
+          <div>
+
+            <!-- Payout Settings Overview Card -->
+            <div class="donezo-card">
+              <div class="donezo-card-header" style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 class="donezo-card-title">
+                  <i class="fa-solid fa-wallet" style="color:#8b5cf6;"></i>Payout Account
+                </h2>
+                <a href="{% url 'tutor_payout_settings' %}" style="font-size:12.5px; font-weight:700; color:#2563eb; text-decoration:none;">Edit &rarr;</a>
+              </div>
+
+              {% if profile.bank_name and profile.account_number %}
+                <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:16px; padding:18px;">
+                  <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
+                    <div style="width:36px; height:36px; border-radius:10px; background:#f3e8ff; color:#6b21a8; display:grid; place-items:center; font-size:16px;">
+                      <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <div>
+                      <strong style="font-size:15px; color:#0f172a; display:block;">{{ profile.bank_name }}</strong>
+                      <span style="font-size:12px; color:#64748b;">Verified Bank Account</span>
+                    </div>
+                  </div>
+                  <div style="font-size:13.5px; color:#475569; padding-top:12px; border-top:1px solid #e2e8f0;">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                      <span style="color:#64748b;">Account Name:</span>
+                      <strong>{{ profile.account_name }}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between; margin-bottom:6px;">
+                      <span style="color:#64748b;">Account No:</span>
+                      <strong>{{ profile.account_number }}</strong>
+                    </div>
+                    <div style="display:flex; justify-content:space-between;">
+                      <span style="color:#64748b;">Schedule:</span>
+                      <strong style="color:#2563eb;">{{ profile.get_payout_schedule_display|default:"Monthly Schedule" }}</strong>
+                    </div>
+                  </div>
+                </div>
+              {% else %}
+                <div style="background:#f8fafc; border:2px dashed #cbd5e1; border-radius:16px; padding:28px 20px; text-align:center;">
+                  <p style="color:#64748b; font-size:13.5px; margin:0 0 12px;">No payout account configured.</p>
+                  <a href="{% url 'tutor_payout_settings' %}" class="donezo-btn-secondary" style="padding:8px 16px; font-size:13px;">Set Up Bank Payout &rarr;</a>
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Profile Verification Card -->
+            <div class="donezo-card">
+              <div class="donezo-card-header" style="display:flex; align-items:center; justify-content:space-between;">
+                <h2 class="donezo-card-title">
+                  <i class="fa-solid fa-shield-halved" style="color:#2563eb;"></i>Profile Verification
+                </h2>
+                {% if profile.verification_status == 'approved' %}
+                  <span class="donezo-metric-badge donezo-badge-blue" style="font-size:11px;"><i class="fa-solid fa-circle-check"></i> Verified</span>
+                {% elif profile.verification_status == 'rejected' %}
+                  <span class="donezo-metric-badge" style="background:#fee2e2; color:#dc2626; font-size:11px;"><i class="fa-solid fa-circle-xmark"></i> Rejected</span>
+                {% else %}
+                  <span class="donezo-metric-badge donezo-badge-amber" style="font-size:11px;"><i class="fa-solid fa-clock"></i> Pending</span>
+                {% endif %}
+              </div>
+
+              <p style="font-size:13.5px; color:#64748b; line-height:1.5; margin-bottom:16px;">
+                {% if profile.verification_status == 'approved' %}
+                  Your profile and documents are fully verified. You appear at the top of public tutor search listings.
+                {% elif profile.verification_status == 'rejected' %}
+                  Your documents were rejected. Please re-upload valid government ID or certificates.
+                {% else %}
+                  Upload your government ID or credentials to complete verification and unlock public listings.
+                {% endif %}
+              </p>
+
+              <a href="{% url 'tutor_verification' %}" class="donezo-btn-secondary" style="width:100%; justify-content:center; padding:10px; font-size:13.5px;">
+                Manage Documents &rarr;
+              </a>
+            </div>
+
+          </div>
+
         </div>
 
       </main>

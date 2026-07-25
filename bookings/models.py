@@ -22,8 +22,9 @@ Duration_CHOICES = [
 class Booking (models.Model):
     student = models.ForeignKey("accounts.UserProfile", on_delete=models.CASCADE, related_name="student_bookings")
     tutor = models.ForeignKey("tutors.Tutor", on_delete=models.CASCADE, related_name="tutor_bookings")
-    booking_date = models.DateField()
-    lesson_time = models.TimeField()
+    course_offer = models.ForeignKey("tutors.CourseOffer", on_delete=models.SET_NULL, null=True, blank=True, related_name="enrollments")
+    booking_date = models.DateField(null=True, blank=True)
+    lesson_time = models.TimeField(null=True, blank=True)
     lesson_note = models.TextField(blank=True)
     duration_value = models.PositiveIntegerField(default=1)
     duration_unit = models.CharField(max_length=20, choices=Duration_CHOICES, default="weeks")
@@ -32,6 +33,8 @@ class Booking (models.Model):
     class_type = models.CharField(max_length=20, choices=[("online", "Online Class"), ("physical", "Physical Class")], default="online")
     status = models.CharField(max_length=20, choices= Booking_CHOICES, default="pending")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
+    weeks_total = models.PositiveSmallIntegerField(default=4)
+    weeks_completed = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
     
     def __str__(self):

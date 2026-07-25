@@ -36,6 +36,33 @@ def book_tutor(request, tutor_id):
     )
     student_profile = _profile_for_user(request.user)
 
+    course_offer_id = request.GET.get("course_offer_id") or request.POST.get("course_offer_id")
+    if course_offer_id:
+        from tutors.models import CourseOffer
+        course_offer = get_object_or_404(CourseOffer, pk=course_offer_id, is_active=True)
+        existing = Booking.objects.filter(
+            student=student_profile,
+            tutor=tutor,
+            course_offer=course_offer,
+            status="pending",
+        ).first()
+        if existing:
+            return redirect("payment_checkout", booking_id=existing.id)
+
+        booking = Booking.objects.create(
+            student=student_profile,
+            tutor=tutor,
+            course_offer=course_offer,
+            amount=course_offer.total_course_price,
+            rate_amount=course_offer.daily_rate,
+            rate_period="daily",
+            class_type=course_offer.delivery_mode,
+            weeks_total=course_offer.total_weeks,
+            status="pending",
+        )
+        messages.success(request, f"Course enrollment created for '{course_offer.title}'. Proceed to payment.")
+        return redirect("payment_checkout", booking_id=booking.id)
+
     if request.method == "POST":
         form = BookingForm(request.POST)
         class_type = request.POST.get("class_type", "online")

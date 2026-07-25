@@ -1,0 +1,138 @@
+{% extends "base.html" %}
+{% block title %}Teaching Services — TutorMatch AI{% endblock %}
+
+{% block content %}
+{% load humanize %}
+
+<div class="tutor-portal-bg admin-dashboard-light">
+  <div class="mtc-shell">
+
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+
+    <div class="mtc-admin-layout">
+
+      {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="offers" %}
+
+      <!-- MAIN CONTENT -->
+      <main class="mtc-admin-content">
+
+        <!-- DONEZO TOPBAR HEADER -->
+        <div class="donezo-topbar">
+          <div class="donezo-topbar-left">
+            <h1>Teaching Services &amp; Courses Offered <i class="fa-solid fa-layer-group text-primary" style="margin-left:6px; font-size:22px;"></i></h1>
+            <p>Set up your monthly fees, duration, class schedules, and course offerings for students to enroll in.</p>
+          </div>
+          <div class="donezo-topbar-right">
+            <a href="{% url 'course_offer_create' %}" class="donezo-btn-primary">
+              <i class="fa-solid fa-plus"></i>Create New Service
+            </a>
+          </div>
+        </div>
+
+        {% if messages %}
+          {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show rounded-4 shadow-sm mb-4" role="alert" style="border-radius:16px;">
+              {{ message }}
+              <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+          {% endfor %}
+        {% endif %}
+
+        {% if offers %}
+          <div class="row g-4">
+            {% for offer in offers %}
+              <div class="col-12 col-md-6 col-lg-4">
+                <div class="donezo-card h-100 p-0 overflow-hidden d-flex flex-column" style="transition:transform 0.2s ease, box-shadow 0.2s ease;">
+                  
+                  <!-- Course Cover Photo -->
+                  <div style="height:170px; background:#f1f5f9; position:relative; overflow:hidden;">
+                    {% if offer.cover_image_url %}
+                      <img src="{{ offer.cover_image_url }}" alt="{{ offer.title }}" style="width:100%; height:100%; object-fit:cover;">
+                    {% else %}
+                      <div class="d-flex align-items-center justify-content-center h-100" style="background:linear-gradient(135deg,#0f172a,#1e293b); color:#ffffff;">
+                        <i class="fa-solid fa-book-open fa-3x" style="opacity:0.3;"></i>
+                      </div>
+                    {% endif %}
+                    
+                    <span class="donezo-metric-badge donezo-badge-blue position-absolute" style="top:12px; left:12px; font-size:11px; z-index:2;">
+                      <i class="fa-solid fa-graduation-cap me-1"></i>{{ offer.get_delivery_mode_display }}
+                    </span>
+                    <span class="donezo-metric-badge {% if offer.is_active %}donezo-badge-blue{% else %}donezo-badge-amber{% endif %} position-absolute" style="top:12px; right:12px; font-size:11px; z-index:2;">
+                      {% if offer.is_active %}Active{% else %}Draft{% endif %}
+                    </span>
+                  </div>
+
+                  <!-- Course Body -->
+                  <div class="p-4 d-flex flex-column flex-grow-1">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:6px;">
+                      <span style="font-size:11px; font-weight:800; color:#2563eb; text-transform:uppercase; letter-spacing:0.5px;">
+                        {{ offer.category|default:"Digital Skills" }}
+                      </span>
+                      <span style="font-size:11px; font-weight:700; color:#64748b; background:#f1f5f9; padding:2px 8px; border-radius:6px;">
+                        {{ offer.get_level_display }}
+                      </span>
+                    </div>
+
+                    <h2 style="font-size:17px; font-weight:800; color:#0f172a; margin:0 0 10px; line-height:1.3;" class="text-truncate-2">
+                      {{ offer.title }}
+                    </h2>
+
+                    <div style="display:flex; align-items:center; gap:16px; font-size:13px; color:#64748b; margin-bottom:16px;">
+                      <div><i class="fa-solid fa-clock text-primary me-1"></i>{{ offer.duration_months }} Month{% if offer.duration_months > 1 %}s{% endif %}</div>
+                      <div><i class="fa-solid fa-calendar-days text-primary me-1"></i>{{ offer.sessions_per_week }} Sessions/wk</div>
+                    </div>
+
+                    <!-- Price Card Box -->
+                    <div style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:14px; padding:14px; margin-top:auto; margin-bottom:16px;">
+                      <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:4px;">
+                        <span style="font-size:12px; font-weight:600; color:#64748b;">Monthly Fee:</span>
+                        <strong style="font-size:18px; font-weight:900; color:#2563eb;">{{ offer.currency_symbol }}{{ offer.monthly_fee|intcomma }}/mo</strong>
+                      </div>
+                      <div style="display:flex; align-items:center; justify-content:space-between; font-size:11px; color:#64748b;">
+                        <span>Total: {{ offer.currency_symbol }}{{ offer.total_course_price|intcomma }}</span>
+                        <span>Max {{ offer.max_students }} Students</span>
+                      </div>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="display:flex; gap:8px;">
+                      <a href="{% url 'course_offer_edit' offer_id=offer.id %}" class="donezo-btn-secondary" style="flex:1; justify-content:center; padding:8px 12px; font-size:13px;">
+                        <i class="fa-solid fa-pen"></i>Edit
+                      </a>
+                      <a href="{% url 'course_detail' offer_id=offer.id %}" target="_blank" class="donezo-btn-secondary" style="flex:1; justify-content:center; padding:8px 12px; font-size:13px;">
+                        <i class="fa-solid fa-eye"></i>Preview
+                      </a>
+                      <form action="{% url 'course_offer_delete' offer_id=offer.id %}" method="POST" onsubmit="return confirm('Are you sure you want to delete this course offer?');">
+                        {% csrf_token %}
+                        <button type="submit" class="donezo-btn-secondary" title="Delete Course" style="padding:8px 12px; color:#ef4444; border-color:#fecaca;">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+
+                  </div>
+
+                </div>
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div class="donezo-card" style="text-align:center; padding:60px 24px; max-width:600px; margin:20px auto;">
+            <div style="margin-bottom:16px;">
+              <i class="fa-solid fa-layer-group" style="font-size:48px; color:#2563eb; opacity:0.3;"></i>
+            </div>
+            <h3 style="font-size:22px; font-weight:900; color:#0f172a; margin-bottom:8px;">No Teaching Services Yet</h3>
+            <p style="color:#64748b; font-size:14px; line-height:1.6; margin-bottom:24px;">
+              Create your first teaching service or course with custom monthly fees, duration, class schedule, and max students.
+            </p>
+            <a href="{% url 'course_offer_create' %}" class="donezo-btn-primary" style="display:inline-flex; padding:12px 28px;">
+              <i class="fa-solid fa-plus"></i>Create Teaching Service
+            </a>
+          </div>
+        {% endif %}
+
+      </main>
+    </div>
+  </div>
+</div>
+{% endblock %}

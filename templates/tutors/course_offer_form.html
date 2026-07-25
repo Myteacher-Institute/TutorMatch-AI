@@ -1,0 +1,361 @@
+{% extends "base.html" %}
+{% block title %}{% if is_edit %}Edit Teaching Service{% else %}Create New Teaching Service{% endif %} — TutorMatch AI{% endblock %}
+
+{% block content %}
+<div class="tutor-portal-bg admin-dashboard-light">
+  <div class="mtc-shell">
+
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+
+    <div class="mtc-admin-layout">
+
+      {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="offers" %}
+
+      <!-- MAIN CONTENT -->
+      <main class="mtc-admin-content">
+
+        <!-- DONEZO TOPBAR HEADER -->
+        <div class="donezo-topbar">
+          <div class="donezo-topbar-left">
+            <h1>{% if is_edit %}Edit Teaching Service{% else %}Create New Teaching Service{% endif %} <i class="fa-solid fa-layer-group text-primary" style="margin-left:6px; font-size:22px;"></i></h1>
+            <p>Set up your monthly fees, duration, class schedule, teaching mode, and course syllabus.</p>
+          </div>
+          <div class="donezo-topbar-right">
+            <a href="{% url 'course_offer_list' %}" class="donezo-btn-secondary">
+              <i class="fa-solid fa-arrow-left"></i>Back to Services
+            </a>
+          </div>
+        </div>
+
+        {% if form.errors %}
+          <div class="alert alert-danger rounded-4 shadow-sm mb-4" style="border-radius:16px;">
+            <h5 class="fw-bold fs-6 mb-1" style="display:flex;align-items:center;gap:8px;"><i class="fa-solid fa-triangle-exclamation"></i>Please correct the errors below:</h5>
+            <ul class="mb-0 ps-3">
+              {% for field, errors in form.errors.items %}
+                {% for error in errors %}
+                  <li><strong>{{ field|capfirst }}:</strong> {{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+
+        <form method="POST" enctype="multipart/form-data" class="needs-validation" novalidate>
+          {% csrf_token %}
+
+          <div class="row g-4">
+            
+            <!-- LEFT COLUMN: SIDE-BY-SIDE FORM INPUTS -->
+            <div class="col-12 col-lg-8">
+              
+              <!-- CARD 1: BASIC COURSE & CATEGORY INFO -->
+              <div class="donezo-card">
+                <div class="donezo-card-header">
+                  <h2 class="donezo-card-title">
+                    <i class="fa-solid fa-book-bookmark" style="color:#2563eb;"></i>1. Service Details &amp; Category
+                  </h2>
+                </div>
+
+                <!-- Row 1: Course Title (col-7) & Subject Category (col-5) SIDE BY SIDE -->
+                <div class="row g-3 mb-3">
+                  <div class="col-12 col-md-7">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Course / Subject Title <span class="text-danger">*</span>
+                    </label>
+                    {{ form.title }}
+                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">e.g. Graphics Design, Mathematics, UI/UX Design</small>
+                  </div>
+                  <div class="col-12 col-md-5">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Category <span class="text-danger">*</span>
+                    </label>
+                    {{ form.category }}
+                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">e.g. Digital Skills, Academics, Tech</small>
+                  </div>
+                </div>
+
+                <!-- Row 2: Level, Teaching Mode, Currency SIDE BY SIDE -->
+                <div class="row g-3">
+                  <div class="col-12 col-md-4">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Target Level <span class="text-danger">*</span>
+                    </label>
+                    {{ form.level }}
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Teaching Mode <span class="text-danger">*</span>
+                    </label>
+                    {{ form.delivery_mode }}
+                  </div>
+                  <div class="col-12 col-md-4">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Currency <span class="text-danger">*</span>
+                    </label>
+                    {{ form.currency }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- CARD 2: MONTHLY PRICING & SESSION PARAMETERS -->
+              <div class="donezo-card">
+                <div class="donezo-card-header">
+                  <h2 class="donezo-card-title">
+                    <i class="fa-solid fa-calculator" style="color:#2563eb;"></i>2. Monthly Pricing &amp; Sessions
+                  </h2>
+                </div>
+
+                <!-- Row 1: 4 COLUMNS SIDE BY SIDE (Monthly Fee, Duration, Sessions/Wk, Hours/Session) -->
+                <div class="row g-3 mb-3">
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Monthly Fee (&#8358;) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.monthly_fee }}
+                    <small style="color:#64748b; font-size:11.5px; margin-top:4px; display:block;">Amount per month</small>
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Duration (Months) <span class="text-danger">*</span>
+                    </label>
+                    {{ form.duration_months }}
+                    <small style="color:#64748b; font-size:11.5px; margin-top:4px; display:block;">e.g. 1, 2, 3, 6</small>
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Sessions / Week <span class="text-danger">*</span>
+                    </label>
+                    {{ form.sessions_per_week }}
+                    <small style="color:#64748b; font-size:11.5px; margin-top:4px; display:block;">Times taught weekly</small>
+                  </div>
+                  <div class="col-12 col-sm-6 col-md-3">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Hours / Session <span class="text-danger">*</span>
+                    </label>
+                    {{ form.hours_per_session }}
+                    <small style="color:#64748b; font-size:11.5px; margin-top:4px; display:block;">Length per session</small>
+                  </div>
+                </div>
+
+                <!-- Row 2: Max Students & Schedule Days SIDE BY SIDE -->
+                <div class="row g-3 mb-3">
+                  <div class="col-12 col-md-4">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Maximum Students <span class="text-danger">*</span>
+                    </label>
+                    {{ form.max_students }}
+                    <small style="color:#64748b; font-size:11.5px; margin-top:4px; display:block;">1 (Private) or 5, 10, 20</small>
+                  </div>
+                  <div class="col-12 col-md-8">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Schedule Days &amp; Time Slot
+                    </label>
+                    {{ form.schedule_days_times }}
+                    <small style="color:#64748b; font-size:11.5px; margin-top:4px; display:block;">e.g. "Mondays &amp; Wednesdays, 4:00 PM - 6:00 PM (WAT)"</small>
+                  </div>
+                </div>
+
+                <!-- Row 3: Online Platform / Physical Venue SIDE BY SIDE -->
+                <div class="row g-3">
+                  <div class="col-12 col-md-6" id="online-platform-group">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Online Meeting Platform
+                    </label>
+                    {{ form.online_platform }}
+                  </div>
+                  <div class="col-12 col-md-6" id="physical-location-group">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Physical Location / Address
+                    </label>
+                    {{ form.physical_location }}
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- CARD 3: BANNER IMAGE & SYLLABUS -->
+              <div class="donezo-card">
+                <div class="donezo-card-header">
+                  <h2 class="donezo-card-title">
+                    <i class="fa-solid fa-image" style="color:#2563eb;"></i>3. Cover Banner &amp; Syllabus Description
+                  </h2>
+                </div>
+
+                <!-- Cover Image Upload & URL SIDE BY SIDE -->
+                <div class="row g-3 mb-3">
+                  <div class="col-12 col-md-6">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Upload Banner Image File
+                    </label>
+                    {{ form.cover_image_file }}
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Or Paste Cover Image URL
+                    </label>
+                    {{ form.cover_image }}
+                  </div>
+                </div>
+
+                <!-- Course Description (Full Width) -->
+                <div class="mb-3">
+                  <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                    Course Outline &amp; Description <span class="text-danger">*</span>
+                  </label>
+                  {{ form.description }}
+                  <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">Describe what students will learn, syllabus topics, and course objectives.</small>
+                </div>
+
+                <!-- Prerequisites & Class Rules SIDE BY SIDE -->
+                <div class="row g-3">
+                  <div class="col-12 col-md-6">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Student Prerequisites &amp; Requirements
+                    </label>
+                    {{ form.requirements }}
+                  </div>
+                  <div class="col-12 col-md-6">
+                    <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
+                      Class Rules &amp; Conduct Policy
+                    </label>
+                    {{ form.rules }}
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+            <!-- RIGHT COLUMN: STICKY DONEZO LIVE CALCULATOR SIDEBAR -->
+            <div class="col-12 col-lg-4">
+              <div style="position:sticky; top:90px; background:#0f172a; color:#ffffff; border-radius:24px; padding:28px; box-shadow:0 16px 36px rgba(15,23,42,0.15);">
+                
+                <div style="border-bottom:1px solid rgba(255,255,255,0.1); padding-bottom:16px; margin-bottom:20px;">
+                  <span style="font-size:11px; font-weight:800; color:#38bdf8; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:4px;">
+                    <i class="fa-solid fa-chart-line" style="margin-right:4px;"></i>Monthly Fee Breakdown
+                  </span>
+                  <h4 style="font-size:20px; font-weight:900; color:#ffffff; margin:0;">Live Pricing Summary</h4>
+                </div>
+
+                <div class="calc-stat-row">
+                  <label>Monthly Fee:</label>
+                  <strong id="calc-monthly-fee">&#8358;25,000</strong>
+                </div>
+
+                <div class="calc-stat-row">
+                  <label>Course Duration:</label>
+                  <strong id="calc-duration">1 Month</strong>
+                </div>
+
+                <div class="calc-stat-row">
+                  <label>Sessions Schedule:</label>
+                  <strong id="calc-sessions">3 sessions/wk</strong>
+                </div>
+
+                <div class="calc-stat-row">
+                  <label>Max Capacity:</label>
+                  <strong id="calc-max-students">5 Students</strong>
+                </div>
+
+                <!-- SIDE-BY-SIDE CARDS FOR TOTAL FEE & NET PAYOUT -->
+                <div class="calc-side-by-side-grid" style="margin:20px 0;">
+                  
+                  <div style="background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:16px; padding:16px;">
+                    <div style="font-size:10.5px; color:#94a3b8; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Total Course Fee</div>
+                    <div style="font-size:22px; font-weight:900; color:#38bdf8;" id="calc-total-price">&#8358;25,000</div>
+                    <div style="font-size:11px; color:#cbd5e1; margin-top:4px;">Student total fee</div>
+                  </div>
+
+                  <div style="background:rgba(37,99,235,0.2); border:1px solid rgba(37,99,235,0.3); border-radius:16px; padding:16px;">
+                    <div style="font-size:10.5px; color:#93c5fd; font-weight:700; text-transform:uppercase; margin-bottom:4px;">Monthly Payout</div>
+                    <div style="font-size:20px; font-weight:900; color:#ffffff;" id="calc-monthly-payout">&#8358;25,000 / mo</div>
+                    <div style="font-size:11px; color:#bfdbfe; margin-top:4px;">Automated escrow</div>
+                  </div>
+
+                </div>
+
+                <button type="submit" class="donezo-btn-primary" style="width:100%; justify-content:center; padding:14px 28px; font-size:15px; cursor:pointer;">
+                  <i class="fa-solid fa-circle-check"></i>{% if is_edit %}Save Changes{% else %}Publish Teaching Service{% endif %}
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+
+        </form>
+
+      </main>
+    </div>
+  </div>
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+    const monthlyFeeInput = document.querySelector('[name="monthly_fee"]');
+    const durationMonthsInput = document.querySelector('[name="duration_months"]');
+    const sessionsPerWeekInput = document.querySelector('[name="sessions_per_week"]');
+    const hoursPerSessionInput = document.querySelector('[name="hours_per_session"]');
+    const maxStudentsInput = document.querySelector('[name="max_students"]');
+    const currencySelect = document.querySelector('[name="currency"]');
+    const deliveryModeSelect = document.querySelector('[name="delivery_mode"]');
+
+    const calcMonthlyFee = document.getElementById('calc-monthly-fee');
+    const calcDuration = document.getElementById('calc-duration');
+    const calcSessions = document.getElementById('calc-sessions');
+    const calcMaxStudents = document.getElementById('calc-max-students');
+    const calcTotalPrice = document.getElementById('calc-total-price');
+    const calcMonthlyPayout = document.getElementById('calc-monthly-payout');
+
+    const onlinePlatformGroup = document.getElementById('online-platform-group');
+    const physicalLocationGroup = document.getElementById('physical-location-group');
+
+    function toggleDeliveryModeFields() {
+      if (!deliveryModeSelect) return;
+      const val = deliveryModeSelect.value;
+      if (val === 'online') {
+        if (onlinePlatformGroup) onlinePlatformGroup.style.display = 'block';
+        if (physicalLocationGroup) physicalLocationGroup.style.display = 'none';
+      } else if (val === 'physical') {
+        if (onlinePlatformGroup) onlinePlatformGroup.style.display = 'none';
+        if (physicalLocationGroup) physicalLocationGroup.style.display = 'block';
+      } else {
+        if (onlinePlatformGroup) onlinePlatformGroup.style.display = 'block';
+        if (physicalLocationGroup) physicalLocationGroup.style.display = 'block';
+      }
+    }
+
+    function updateCalculator() {
+      const monthlyFee = parseFloat(monthlyFeeInput ? monthlyFeeInput.value : 0) || 0;
+      const durationMonths = parseInt(durationMonthsInput ? durationMonthsInput.value : 1) || 1;
+      const sessionsPerWeek = parseInt(sessionsPerWeekInput ? sessionsPerWeekInput.value : 0) || 0;
+      const hoursPerSession = parseInt(hoursPerSessionInput ? hoursPerSessionInput.value : 0) || 0;
+      const maxStudents = parseInt(maxStudentsInput ? maxStudentsInput.value : 0) || 0;
+      const currency = currencySelect ? currencySelect.value : 'NGN';
+
+      const symbolMap = { 'NGN': '₦', 'USD': '$', 'GBP': '£', 'EUR': '€' };
+      const symbol = symbolMap[currency] || '₦';
+
+      const totalPrice = monthlyFee * durationMonths;
+
+      if (calcMonthlyFee) calcMonthlyFee.textContent = symbol + monthlyFee.toLocaleString('en-US', { minimumFractionDigits: 0 });
+      if (calcDuration) calcDuration.textContent = durationMonths + (durationMonths === 1 ? ' Month' : ' Months');
+      if (calcSessions) calcSessions.textContent = sessionsPerWeek + ' sessions/wk (' + hoursPerSession + 'h/session)';
+      if (calcMaxStudents) calcMaxStudents.textContent = maxStudents + (maxStudents === 1 ? ' Student (Private)' : ' Students');
+      if (calcTotalPrice) calcTotalPrice.textContent = symbol + totalPrice.toLocaleString('en-US', { minimumFractionDigits: 0 });
+      if (calcMonthlyPayout) calcMonthlyPayout.textContent = symbol + monthlyFee.toLocaleString('en-US', { minimumFractionDigits: 0 }) + ' / mo';
+    }
+
+    if (monthlyFeeInput) monthlyFeeInput.addEventListener('input', updateCalculator);
+    if (durationMonthsInput) durationMonthsInput.addEventListener('input', updateCalculator);
+    if (sessionsPerWeekInput) sessionsPerWeekInput.addEventListener('input', updateCalculator);
+    if (hoursPerSessionInput) hoursPerSessionInput.addEventListener('input', updateCalculator);
+    if (maxStudentsInput) maxStudentsInput.addEventListener('input', updateCalculator);
+    if (currencySelect) currencySelect.addEventListener('change', updateCalculator);
+    if (deliveryModeSelect) deliveryModeSelect.addEventListener('change', toggleDeliveryModeFields);
+
+    toggleDeliveryModeFields();
+    updateCalculator();
+  });
+</script>
+{% endblock %}

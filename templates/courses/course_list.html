@@ -1,0 +1,427 @@
+{% extends "base.html" %}
+{% block title %}Explore Courses & Lesson Offers — TutorMatch AI{% endblock %}
+
+{% block content %}
+{% load humanize %}
+<style>
+  .course-market-wrapper {
+    background: #f8fafc;
+    min-height: 92vh;
+    padding-top: 40px;
+    padding-bottom: 70px;
+  }
+  .course-hero-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 16px;
+    border-radius: 999px;
+    background: #e0e7ff;
+    color: #3730a3;
+    font-weight: 700;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 16px;
+  }
+  .course-search-box {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    max-width: 860px;
+    margin: 0 auto 50px auto;
+  }
+  .course-search-flex {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+  }
+  .course-search-input-wrap {
+    flex: 2;
+    min-width: 240px;
+    display: flex;
+    align-items: center;
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 8px 16px;
+  }
+  .course-search-input-wrap input {
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+    font-weight: 500;
+    color: #0f172a;
+    padding-left: 10px;
+  }
+  .course-select-wrap {
+    flex: 1;
+    min-width: 150px;
+  }
+  .course-select-wrap select {
+    background: #f8fafc;
+    border: 1px solid #cbd5e1;
+    border-radius: 14px;
+    padding: 11px 14px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0f172a;
+    width: 100%;
+    outline: none;
+    cursor: pointer;
+  }
+  .course-btn-submit {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 15px;
+    border: none;
+    border-radius: 14px;
+    padding: 11px 24px;
+    cursor: pointer;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .course-btn-submit:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(37, 99, 235, 0.4);
+  }
+  
+  /* GRID LAYOUT FOR 3 CARDS PER ROW */
+  .course-grid-container {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 28px;
+  }
+  @media (max-width: 1024px) {
+    .course-grid-container {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 640px) {
+    .course-grid-container {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  .course-card-item {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.02);
+  }
+  .course-card-item:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 16px 36px rgba(0, 0, 0, 0.08);
+  }
+  .course-card-banner {
+    height: 200px;
+    background: #0f172a;
+    position: relative;
+    overflow: hidden;
+  }
+  .course-card-img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.4s ease;
+  }
+  .course-card-item:hover .course-card-img {
+    transform: scale(1.05);
+  }
+  .course-badge-mode {
+    position: absolute;
+    top: 14px;
+    left: 14px;
+    background: rgba(15, 23, 42, 0.85);
+    backdrop-filter: blur(6px);
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 700;
+  }
+  .course-badge-price {
+    position: absolute;
+    top: 14px;
+    right: 14px;
+    background: #2563eb;
+    color: #ffffff;
+    padding: 6px 14px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 800;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  }
+  .course-card-body {
+    padding: 22px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+  }
+  .tutor-author-bar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .tutor-author-photo {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #ffffff;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+  .tutor-author-placeholder {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: #2563eb;
+    color: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 15px;
+  }
+  .course-subject-tag {
+    font-size: 11px;
+    font-weight: 800;
+    color: #2563eb;
+    text-transform: uppercase;
+    letter-spacing: 0.6px;
+    margin-bottom: 4px;
+    display: block;
+  }
+  .course-title-text {
+    color: #0f172a;
+    font-weight: 800;
+    font-size: 18px;
+    line-height: 1.4;
+    text-decoration: none;
+    margin-bottom: 8px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .course-title-text:hover {
+    color: #2563eb;
+  }
+  .course-desc-paragraph {
+    color: #64748b;
+    font-size: 13px;
+    line-height: 1.6;
+    margin-bottom: 16px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  .course-schedule-chip {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    padding: 10px 14px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #475569;
+    font-weight: 600;
+    margin-bottom: 18px;
+  }
+  .course-card-footer-bar {
+    padding-top: 16px;
+    border-top: 1px solid #f1f5f9;
+    margin-top: auto;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .course-enroll-button {
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #ffffff;
+    font-weight: 700;
+    font-size: 13.5px;
+    padding: 9px 20px;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.25);
+    transition: background 0.2s ease, transform 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .course-enroll-button:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.35);
+    color: #ffffff;
+  }
+</style>
+
+<div class="course-market-wrapper">
+  <div class="mtc-shell">
+
+    <!-- HERO SEARCH HEADER -->
+    <div class="text-center" style="max-width:720px;margin:0 auto 40px auto;">
+      <div class="course-hero-badge">
+        <i class="fa-solid fa-graduation-cap"></i>Course & Lesson Marketplace
+      </div>
+      <h1 style="font-size:38px;font-weight:900;color:#0f172a;letter-spacing:-0.5px;margin-bottom:12px;line-height:1.2;">
+        Find & Enroll in Structured Courses from Top Tutors
+      </h1>
+      <p style="color:#64748b;font-size:16px;line-height:1.6;margin-bottom:32px;">
+        Browse verified course offerings with custom daily rates, schedules, delivery formats, and structured outlines.
+      </p>
+
+      <!-- FILTER & SEARCH BAR CARD -->
+      <form method="GET" class="course-search-box">
+        <div class="course-search-flex">
+          <div class="course-search-input-wrap">
+            <i class="fa-solid fa-magnifying-glass" style="color:#94a3b8;"></i>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search Python, Maths, WAEC...">
+          </div>
+          <div class="course-select-wrap">
+            <select name="subject">
+              <option value="">All Subjects</option>
+              {% for sub in subjects %}
+                <option value="{{ sub.id }}" {% if selected_subject == sub.id|stringformat:"s" %}selected{% endif %}>{{ sub.subject_name }}</option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="course-select-wrap">
+            <select name="mode">
+              <option value="">All Formats</option>
+              <option value="online" {% if selected_mode == 'online' %}selected{% endif %}>Online</option>
+              <option value="home" {% if selected_mode == 'home' %}selected{% endif %}>Home Lesson</option>
+              <option value="office" {% if selected_mode == 'office' %}selected{% endif %}>Tutor Studio</option>
+            </select>
+          </div>
+          <div>
+            <button type="submit" class="course-btn-submit">
+              Search
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- COURSE GRID -->
+    {% if offers %}
+      <div class="course-grid-container">
+        {% for offer in offers %}
+          <div class="course-card-item">
+            
+            <!-- Cover Banner -->
+            <div class="course-card-banner">
+              {% if offer.cover_image_url %}
+                <img src="{{ offer.cover_image_url }}" alt="{{ offer.title }}" class="course-card-img">
+              {% else %}
+                <div class="d-flex align-items-center justify-content-center h-100" style="color:#ffffff;">
+                  <i class="fa-solid fa-book-open fa-3x" style="opacity:0.3;"></i>
+                </div>
+              {% endif %}
+
+              <span class="course-badge-mode">
+                <i class="fa-solid {% if offer.delivery_mode == 'online' %}fa-laptop-code{% else %}fa-house-user{% endif %} me-1"></i>
+                {{ offer.get_delivery_mode_display }}
+              </span>
+              
+              <span class="course-badge-price">
+                {{ offer.currency_symbol }}{{ offer.daily_rate|intcomma }}/day
+              </span>
+            </div>
+
+            <!-- Content -->
+            <div class="course-card-body">
+              
+              <!-- Tutor Author Row -->
+              <div class="tutor-author-bar">
+                {% if offer.tutor.profile_photo %}
+                  <img src="{{ offer.tutor.profile_photo }}" alt="{{ offer.tutor.get_full_name }}" class="tutor-author-photo">
+                {% else %}
+                  <div class="tutor-author-placeholder">
+                    {{ offer.tutor.first_name|first|upper }}
+                  </div>
+                {% endif %}
+                <div>
+                  <strong style="font-size:14px;color:#0f172a;display:block;">{{ offer.tutor.get_full_name }}</strong>
+                  <span style="font-size:12px;color:#64748b;"><i class="fa-solid fa-location-dot me-1 text-primary"></i>{{ offer.tutor.location|default:"Nigeria" }}</span>
+                </div>
+              </div>
+
+              {% if offer.subject %}
+                <span class="course-subject-tag">
+                  {{ offer.subject.subject_name }}
+                </span>
+              {% endif %}
+
+              <a href="{% url 'course_detail' offer_id=offer.id %}" class="course-title-text">{{ offer.title }}</a>
+              <p class="course-desc-paragraph">{{ offer.description }}</p>
+
+              <!-- Schedule Chip -->
+              <div class="course-schedule-chip">
+                <div style="display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-clock text-primary"></i> <span>{{ offer.duration_months }} Month{% if offer.duration_months > 1 %}s{% endif %} ({{ offer.total_classes }} classes)</span></div>
+                <div style="display:inline-flex;align-items:center;gap:6px;"><i class="fa-solid fa-calendar-days text-primary"></i> <span>{{ offer.days_per_week }} days/wk</span></div>
+              </div>
+
+              <!-- Footer -->
+              <div class="course-card-footer-bar">
+                <div>
+                  <span style="font-size:11px;color:#64748b;display:block;font-weight:600;text-transform:uppercase;">Total Course Fee</span>
+                  <strong style="font-size:20px;font-weight:900;color:#0f172a;">{{ offer.currency_symbol }}{{ offer.total_course_price|intcomma }}</strong>
+                </div>
+                <a href="{% url 'course_detail' offer_id=offer.id %}" class="course-enroll-button">
+                  View & Enroll <i class="fa-solid fa-arrow-right"></i>
+                </a>
+              </div>
+
+            </div>
+
+          </div>
+        {% endfor %}
+      </div>
+
+      <!-- PAGINATION -->
+      {% if page_obj.has_other_pages %}
+        <div style="display:flex;justify-content:center;margin-top:40px;">
+          <div style="display:flex;gap:8px;align-items:center;">
+            {% if page_obj.has_previous %}
+              <a class="btn btn-light rounded-pill px-3 fw-bold" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&subject={{ selected_subject }}&mode={{ selected_mode }}">Previous</a>
+            {% endif %}
+            {% for num in page_obj.paginator.page_range %}
+              <a class="btn {% if page_obj.number == num %}btn-primary{% else %}btn-light{% endif %} rounded-circle fw-bold" style="width:38px;height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;" href="?page={{ num }}&q={{ search_query }}&subject={{ selected_subject }}&mode={{ selected_mode }}">{{ num }}</a>
+            {% endfor %}
+            {% if page_obj.has_next %}
+              <a class="btn btn-light rounded-pill px-3 fw-bold" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&subject={{ selected_subject }}&mode={{ selected_mode }}">Next</a>
+            {% endif %}
+          </div>
+        </div>
+      {% endif %}
+
+    {% else %}
+      <div style="background:#ffffff;border:2px dashed #cbd5e1;border-radius:24px;padding:60px 24px;text-align:center;max-width:600px;margin:30px auto;">
+        <div class="mb-3">
+          <i class="fa-solid fa-graduation-cap fa-4x text-muted" style="opacity:0.3;"></i>
+        </div>
+        <h3 style="font-size:22px;font-weight:800;color:#0f172a;margin-bottom:8px;">No Course Offers Found</h3>
+        <p style="color:#64748b;margin-bottom:24px;">Try clearing your search query or selecting a different subject category.</p>
+        <a href="{% url 'course_list' %}" class="btn btn-outline-primary rounded-pill px-4 fw-bold">View All Courses</a>
+      </div>
+    {% endif %}
+
+  </div>
+</div>
+{% endblock %}
