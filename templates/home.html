@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load static %}
+{% load static humanize %}
 
 {% block title %}Myteacherconnect | Find Verified Home Tutors{% endblock %}
 
@@ -97,7 +97,7 @@
           <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=80&q=80" alt="">
           <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=80&q=80" alt="">
         </div>
-        <span>Joined by {{ parents_count|default:0 }} parent{{ parents_count|default:0|pluralize }}</span>
+        <span>Joined by {{ parents_count|default:1500|intcomma }}+ parents</span>
       </div>
     </div>
 

@@ -71,6 +71,10 @@ class HomepageStatsSetting(models.Model):
         default=793,
         help_text="Starting count for Cities Covered"
     )
+    parents_joined_offset = models.IntegerField(
+        default=1500,
+        help_text="Starting count for Parents Joined"
+    )
 
     class Meta:
         verbose_name = "Homepage Stats Setting"

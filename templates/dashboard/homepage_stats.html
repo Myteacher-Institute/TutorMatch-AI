@@ -113,6 +113,12 @@
             <p>The homepage will display this number + the actual unique tutor locations.</p>
           </div>
 
+          <div class="mtc-stats-group">
+            <label for="parents_joined_offset">Parents Joined Offset</label>
+            <input type="number" id="parents_joined_offset" name="parents_joined_offset" value="{{ config.parents_joined_offset|default:1500 }}" min="0" required>
+            <p>The homepage will display this number + the actual parent/student accounts registered.</p>
+          </div>
+
           <div class="mtc-stats-actions">
             <button type="submit">
               <i class="fa-solid fa-floppy-disk"></i> Save Configuration

@@ -36,10 +36,12 @@ def home(request):
         vt_offset = config.verified_tutors_offset
         lc_offset = config.lessons_completed_offset
         cc_offset = config.cities_covered_offset
+        pj_offset = getattr(config, "parents_joined_offset", 1500)
     except Exception:
         vt_offset = 678
         lc_offset = 5000
         cc_offset = 793
+        pj_offset = 1500
 
     verified_tutors_count = base_featured_tutors.count() + vt_offset
     completed_lessons_count = Booking.objects.filter(status="completed").count() + lc_offset
@@ -50,7 +52,7 @@ def home(request):
         .distinct()
         .count()
     ) + cc_offset
-    parents_count = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count()
+    parents_count = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count() + pj_offset
 
 
     return render(
@@ -955,6 +957,7 @@ def homepage_stats(request):
         config.verified_tutors_offset = int(request.POST.get("verified_tutors_offset", 678))
         config.lessons_completed_offset = int(request.POST.get("lessons_completed_offset", 5000))
         config.cities_covered_offset = int(request.POST.get("cities_covered_offset", 793))
+        config.parents_joined_offset = int(request.POST.get("parents_joined_offset", 1500))
         config.save()
         messages.success(request, "Homepage stats starting values updated successfully.")
         return redirect("admin_homepage_stats")
