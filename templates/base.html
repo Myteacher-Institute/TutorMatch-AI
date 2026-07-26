@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="https://ik.imagekit.io/gryyh4va8/photo_2026-07-19_21-50-22.jpg">
   <title>{% block title %}TutorMatch AI{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260726-pro-course-admin-v6">
-  <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260726-pro-course-admin-v6">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260726-pro-mobile-card-v8">
+  <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260726-pro-mobile-card-v8">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script>
     (function () {
@@ -35,10 +35,34 @@
 
       <div class="nav-container" id="nav-container">
         <div class="nav-links">
-          <a href="{% url 'course_list' %}">Explore Courses</a>
-          <a href="{% url 'home' %}#search-section">Find Tutors</a>
-          <a href="{% url 'home' %}#how-it-works">How it Works</a>
-          <a href="{% url 'register' %}">For Tutors</a>
+          <a href="{% url 'course_list' %}">
+            <span>
+              <span class="nav-link-icon-badge"><i class="fa-solid fa-graduation-cap"></i></span>
+              Explore Courses
+            </span>
+            <i class="fa-solid fa-chevron-right text-muted mobile-nav-arrow" style="font-size: 11px; opacity: 0.5;"></i>
+          </a>
+          <a href="{% url 'home' %}#search-section">
+            <span>
+              <span class="nav-link-icon-badge"><i class="fa-solid fa-magnifying-glass"></i></span>
+              Find Tutors
+            </span>
+            <i class="fa-solid fa-chevron-right text-muted mobile-nav-arrow" style="font-size: 11px; opacity: 0.5;"></i>
+          </a>
+          <a href="{% url 'home' %}#how-it-works">
+            <span>
+              <span class="nav-link-icon-badge"><i class="fa-solid fa-circle-info"></i></span>
+              How it Works
+            </span>
+            <i class="fa-solid fa-chevron-right text-muted mobile-nav-arrow" style="font-size: 11px; opacity: 0.5;"></i>
+          </a>
+          <a href="{% url 'register' %}">
+            <span>
+              <span class="nav-link-icon-badge"><i class="fa-solid fa-chalkboard-user"></i></span>
+              For Tutors
+            </span>
+            <i class="fa-solid fa-chevron-right text-muted mobile-nav-arrow" style="font-size: 11px; opacity: 0.5;"></i>
+          </a>
         </div>
       {% if request.user.is_authenticated %}
         <div class="nav-actions">
