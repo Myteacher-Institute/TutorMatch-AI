@@ -245,6 +245,25 @@
         <img src="https://res.cloudinary.com/cvp2quxz/image/upload/v1785029145/photo_2026-07-26_02-21-50_cmghne.jpg" alt="Why Parents Trust Myteacher 3" class="mtc-trust-slide">
       </div>
       <span class="mtc-trust-blur" aria-hidden="true"></span>
+      <script>
+        (function() {
+          function runTrustSlider() {
+            var slides = document.querySelectorAll('.mtc-trust-slide');
+            if (!slides || slides.length <= 1) return;
+            var current = 0;
+            setInterval(function() {
+              slides[current].classList.remove('active');
+              current = (current + 1) % slides.length;
+              slides[current].classList.add('active');
+            }, 3000);
+          }
+          if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', runTrustSlider);
+          } else {
+            runTrustSlider();
+          }
+        })();
+      </script>
     </div>
     <div>
       <h2>Why Parents Trust <span>Myteacher</span></h2>
