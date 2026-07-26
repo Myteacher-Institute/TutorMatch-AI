@@ -15,6 +15,30 @@
   </div>
 </div>
 
+<!-- Voice Assistant Prompt Modal (10-Second Auto Trigger on Mobile/Web) -->
+<div id="voice-prompt-modal" class="voice-prompt-modal-overlay" hidden>
+  <div class="voice-prompt-modal-card">
+    <div class="voice-prompt-icon-badge">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+        <path d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+        <line x1="12" y1="19" x2="12" y2="23"></line>
+        <line x1="8" y1="23" x2="16" y2="23"></line>
+      </svg>
+    </div>
+    <h3>Enable Hands-Free Voice AI</h3>
+    <p>Navigate pages, search for tutors, and dictate forms using your voice!</p>
+    <div class="voice-prompt-actions">
+      <button type="button" id="voice-prompt-enable-btn" class="voice-prompt-btn-primary">
+        <i class="fa-solid fa-microphone"></i> Enable Voice Assistant
+      </button>
+      <button type="button" id="voice-prompt-dismiss-btn" class="voice-prompt-btn-ghost">
+        Maybe Later
+      </button>
+    </div>
+  </div>
+</div>
+
 <script>
 (function () {
   const widget = document.getElementById('floating-mic-widget');
@@ -23,8 +47,35 @@
   const transcriptBox = document.getElementById('floating-mic-transcript');
   const statusText = document.getElementById('floating-mic-status');
   const transcriptText = document.getElementById('floating-mic-text');
+  const voiceModal = document.getElementById('voice-prompt-modal');
+  const enableVoiceBtn = document.getElementById('voice-prompt-enable-btn');
+  const dismissVoiceBtn = document.getElementById('voice-prompt-dismiss-btn');
 
   if (!widget || !btn || !indicator || !transcriptBox || !statusText || !transcriptText) return;
+
+  // 10-Second Auto Voice Permission Popup Trigger
+  setTimeout(function () {
+    try {
+      if (!localStorage.getItem('voice_prompt_dismissed') && voiceModal) {
+        voiceModal.hidden = false;
+      }
+    } catch (e) {}
+  }, 10000);
+
+  if (dismissVoiceBtn) {
+    dismissVoiceBtn.addEventListener('click', function () {
+      if (voiceModal) voiceModal.hidden = true;
+      try { localStorage.setItem('voice_prompt_dismissed', 'true'); } catch (e) {}
+    });
+  }
+
+  if (enableVoiceBtn) {
+    enableVoiceBtn.addEventListener('click', function () {
+      if (voiceModal) voiceModal.hidden = true;
+      try { localStorage.setItem('voice_prompt_dismissed', 'true'); } catch (e) {}
+      startRecognition();
+    });
+  }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const SILENCE_DURATION = 650;
@@ -90,6 +141,10 @@
     btn.classList.toggle('recording', recording);
     btn.setAttribute('aria-pressed', recording ? 'true' : 'false');
     indicator.hidden = !recording;
+    const searchMicBtn = document.getElementById('voice-search-btn');
+    if (searchMicBtn) {
+      searchMicBtn.classList.toggle('recording', recording);
+    }
   }
 
   function resetTranscriptState() {
@@ -102,6 +157,8 @@
 
   function getActiveTextTarget() {
     if (isTextTarget(document.activeElement)) return document.activeElement;
+    const homeSearch = document.getElementById('home-search');
+    if (homeSearch) return homeSearch;
     if (lastTextTarget && document.contains(lastTextTarget) && !lastTextTarget.disabled && !lastTextTarget.readOnly) {
       return lastTextTarget;
     }
@@ -254,7 +311,8 @@
 
     const instance = new SpeechRecognition();
     instance.lang = 'en-US';
-    instance.continuous = true;
+    const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    instance.continuous = !isMobileDevice;
     instance.interimResults = true;
     instance.maxAlternatives = 1;
 
@@ -349,6 +407,9 @@
     clearTimeout(silenceTimeout);
     if (recognition && isRecording) recognition.stop();
   }
+
+  // Expose globally so search form buttons can trigger voice recognition directly
+  window.startVoiceRecognition = startRecognition;
 
   btn.addEventListener('click', function (event) {
     event.preventDefault();
@@ -572,13 +633,131 @@
 }
 
 @media (max-width: 768px) {
+  #floating-mic-widget,
+  .floating-mic-widget {
+    display: none !important;
+  }
   .floating-mic-btn {
     width: 44px;
     height: 44px;
   }
-
   .floating-mic-transcript {
     max-width: min(260px, calc(100vw - 28px));
   }
 }
+
+/* Glassmorphic 10-Second Voice Prompt Modal Styles */
+.voice-prompt-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 100000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  animation: modalFadeIn 0.3s ease;
+}
+
+.voice-prompt-modal-overlay[hidden] {
+  display: none !important;
+}
+
+.voice-prompt-modal-card {
+  background: #ffffff;
+  border-radius: 24px;
+  max-width: 380px;
+  width: 100%;
+  padding: 28px 24px;
+  text-align: center;
+  box-shadow: 0 25px 60px rgba(15, 23, 42, 0.28);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  animation: modalSlideUp 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.voice-prompt-icon-badge {
+  width: 64px;
+  height: 64px;
+  border-radius: 20px;
+  background: #eff6ff;
+  color: #2563eb;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 16px;
+  box-shadow: 0 8px 20px rgba(37, 99, 235, 0.15);
+}
+
+.voice-prompt-modal-card h3 {
+  font-size: 20px;
+  font-weight: 800;
+  color: #0f172a;
+  margin-bottom: 8px;
+}
+
+.voice-prompt-modal-card p {
+  font-size: 14px;
+  color: #475569;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.voice-prompt-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.voice-prompt-btn-primary {
+  width: 100%;
+  padding: 13px 20px;
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.voice-prompt-btn-primary:hover {
+  background: #1d4ed8;
+  transform: translateY(-1px);
+}
+
+.voice-prompt-btn-ghost {
+  width: 100%;
+  padding: 11px 20px;
+  background: transparent;
+  color: #64748b;
+  border: none;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.2s ease;
+}
+
+.voice-prompt-btn-ghost:hover {
+  color: #0f172a;
+}
+
+@keyframes modalFadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes modalSlideUp {
+  from { opacity: 0; transform: translateY(20px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
 </style>
+
