@@ -6,8 +6,8 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="icon" href="https://ik.imagekit.io/gryyh4va8/photo_2026-07-19_21-50-22.jpg">
   <title>{% block title %}TutorMatch AI{% endblock %}</title>
-  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260726-pro-mobile-card-v8">
-  <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260726-pro-mobile-card-v8">
+  <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260726-pro-3sec-trust-slider-v12">
+  <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260726-pro-3sec-trust-slider-v12">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <script>
     (function () {
@@ -186,6 +186,26 @@
 
   <script>
     document.addEventListener('DOMContentLoaded', () => {
+      // Rotating Auth Sidebar Images
+      const authSlides = document.querySelectorAll('.mtc-auth-slide');
+      if (authSlides.length > 1) {
+        let currentAuthSlide = 0;
+        setInterval(() => {
+          authSlides[currentAuthSlide].classList.remove('active');
+          currentAuthSlide = (currentAuthSlide + 1) % authSlides.length;
+          authSlides[currentAuthSlide].classList.add('active');
+        }, 4500);
+      // Rotating Trust Section Images
+      const trustSlides = document.querySelectorAll('.mtc-trust-slide');
+      if (trustSlides.length > 1) {
+        let currentTrustSlide = 0;
+        setInterval(() => {
+          trustSlides[currentTrustSlide].classList.remove('active');
+          currentTrustSlide = (currentTrustSlide + 1) % trustSlides.length;
+          trustSlides[currentTrustSlide].classList.add('active');
+        }, 3000);
+      }
+
       const mobileBtn = document.getElementById('mobile-menu-btn');
       const navContainer = document.getElementById('nav-container');
       const navOverlay = document.getElementById('nav-overlay');

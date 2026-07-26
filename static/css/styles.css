@@ -1923,32 +1923,42 @@ img {
   position: relative;
   overflow: hidden;
   border-radius: 18px;
+  height: 445px;
+  min-height: 445px;
   box-shadow:
     0 34px 45px rgba(15, 23, 42, 0.17),
     -26px 0 55px rgba(229, 242, 255, 0.9),
     26px 28px 56px rgba(229, 242, 255, 0.9);
 }
 
-.mtc-trust-photo::before,
-.mtc-trust-photo::after {
-  content: "";
+.mtc-trust-slider {
   position: absolute;
   inset: 0;
-  pointer-events: none;
-  z-index: 1;
+  width: 100%;
+  height: 100%;
+  border-radius: 18px;
+  overflow: hidden;
+  z-index: 0;
 }
 
-.mtc-trust-photo::before {
-  background:
-    linear-gradient(90deg, rgba(243, 249, 255, 0.78) 0%, rgba(243, 249, 255, 0.42) 18%, rgba(243, 249, 255, 0.08) 42%, rgba(243, 249, 255, 0) 62%),
-    radial-gradient(circle at 50% 3%, rgba(255, 249, 225, 0.64) 0%, rgba(255, 249, 225, 0.26) 24%, rgba(255, 249, 225, 0) 45%);
+.mtc-trust-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  border-radius: 18px;
+  opacity: 0;
+  transition: opacity 1s ease-in-out, transform 4s ease-out;
+  transform: scale(1.05);
 }
 
-.mtc-trust-photo::after {
-  display: none;
+.mtc-trust-slide.active {
+  opacity: 1;
+  transform: scale(1);
 }
 
-.mtc-trust-photo img {
+.mtc-trust-photo img:not(.mtc-trust-slide) {
   position: relative;
   z-index: 0;
   box-shadow: none;
@@ -2453,8 +2463,9 @@ img {
     align-items: flex-start;
   }
 
-  .mtc-trust-photo img {
-    height: 330px;
+  .mtc-trust-photo {
+    height: 330px !important;
+    min-height: 330px !important;
   }
 
   .mtc-final-card {
@@ -4181,7 +4192,33 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
   isolation: isolate;
 }
 
-.mtc-auth-sidebar img:not(.mtc-auth-logo-img) {
+.mtc-auth-slider {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  overflow: hidden;
+}
+
+.mtc-auth-slide {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  filter: saturate(1.15) contrast(1.04);
+  transition: opacity 1.2s ease-in-out, transform 6s ease-out;
+  transform: scale(1.06);
+}
+
+.mtc-auth-slide.active {
+  opacity: 0.38;
+  transform: scale(1);
+}
+
+.mtc-auth-sidebar img:not(.mtc-auth-logo-img):not(.mtc-auth-slide) {
   position: absolute;
   inset: 0;
   width: 100%;
@@ -4761,11 +4798,14 @@ html.dark .admin-dashboard-light .mtc-admin-content .mtc-admin-hero p {
     min-height: 100svh;
   }
   .mtc-auth-sidebar {
-    display: block;
-    min-height: 260px;
+    display: none !important;
   }
   .mtc-auth-form-wrapper {
-    padding: 34px 26px;
+    padding: 24px 20px !important;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
   }
   .mtc-auth-form-card {
     padding: 0;

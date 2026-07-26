@@ -12,7 +12,11 @@
 
   <div class="mtc-auth-container">
     <aside class="mtc-auth-sidebar">
-      <img src="{% static 'images/Register-image.png' %}" alt="Myteacherconnect sign up preview">
+      <div class="mtc-auth-slider">
+        <img src="https://res.cloudinary.com/cvp2quxz/image/upload/v1785029145/photo_2026-07-26_02-21-25_iz9m27.jpg" alt="Myteacherconnect preview 1" class="mtc-auth-slide active">
+        <img src="https://res.cloudinary.com/cvp2quxz/image/upload/v1785029145/photo_2026-07-26_02-19-23_oc9bjf.jpg" alt="Myteacherconnect preview 2" class="mtc-auth-slide">
+        <img src="https://res.cloudinary.com/cvp2quxz/image/upload/v1785029145/photo_2026-07-26_02-21-50_cmghne.jpg" alt="Myteacherconnect preview 3" class="mtc-auth-slide">
+      </div>
       <div class="mtc-auth-brand">
         <a href="{% url 'home' %}" class="mtc-auth-brand-link">
           <img src="{% static 'images/logos/myteacherconnect-logo-blue-transparent.png' %}" alt="MyteacherConnect" class="mtc-auth-logo-img" style="display: block !important; width: 240px; max-width: 100%; height: auto; filter: brightness(0) invert(1) drop-shadow(0 2px 8px rgba(0, 0, 0, 0.4)); position: relative !important; z-index: 10 !important; opacity: 1 !important;">
