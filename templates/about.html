@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}About | Myteacherconnect{% endblock %}
+{% block title %}About Us — Nigeria's Trusted Tutor Marketplace | Myteacherconnect{% endblock %}
+{% block meta_description %}Learn about Myteacherconnect, Nigeria's leading AI-powered tutoring platform connecting families with background-checked private home & online tutors.{% endblock %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "About Myteacherconnect",
+  "url": "{{ CANONICAL_URL }}",
+  "description": "Myteacherconnect helps parents and students instantly connect with verified, professional home tutors in Nigeria."
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="mtc-page-hero">

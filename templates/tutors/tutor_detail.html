@@ -1,5 +1,56 @@
 {% extends "base.html" %}
-{% block title %}{{ tutor.user.user.get_full_name }} — TutorMatch AI{% endblock %}
+{% block title %}{{ tutor.user.user.get_full_name }} — Verified Tutor in {{ tutor.location|default:"Nigeria" }} | MyteacherConnect{% endblock %}
+{% block meta_description %}Book {{ tutor.user.user.get_full_name }}, a verified home and online tutor in {{ tutor.location|default:"Nigeria" }} with {{ tutor.years_experience }} years experience in {% for s in tutor.subjects.all %}{{ s.subject_name }}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endblock %}
+
+{% if tutor.profile_photo %}
+{% block og_image %}{{ tutor.profile_photo }}{% endblock %}
+{% block twitter_image %}{{ tutor.profile_photo }}{% endblock %}
+{% endif %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "Person",
+      "@id": "{{ CANONICAL_URL }}#person",
+      "name": "{{ tutor.user.user.get_full_name }}",
+      "jobTitle": "Private Tutor",
+      {% if tutor.profile_photo %}
+      "image": "{{ tutor.profile_photo }}",
+      {% endif %}
+      "description": "{{ tutor.bio|escapejs|default:'Verified home and online tutor on MyteacherConnect.' }}",
+      "address": {
+        "@type": "PostalAddress",
+        "addressLocality": "{{ tutor.location|default:'Nigeria' }}",
+        "addressCountry": "NG"
+      }
+    },
+    {
+      "@type": "Service",
+      "@id": "{{ CANONICAL_URL }}#service",
+      "name": "Tutoring by {{ tutor.user.user.get_full_name }}",
+      "provider": {
+        "@id": "{{ CANONICAL_URL }}#person"
+      },
+      "areaServed": "Nigeria",
+      "offers": {
+        "@type": "Offer",
+        "priceCurrency": "NGN",
+        "price": "{{ tutor.hourly_rate|default:0 }}",
+        "priceSpecification": {
+          "@type": "UnitPriceSpecification",
+          "price": "{{ tutor.hourly_rate|default:0 }}",
+          "priceCurrency": "NGN",
+          "unitText": "HOUR"
+        }
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 {% load humanize %}

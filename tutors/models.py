@@ -97,6 +97,10 @@ class Tutor(models.Model):
     is_home_featured = models.BooleanField(default=False)
     home_featured_order = models.PositiveSmallIntegerField(default=0)
 
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("tutor_detail", kwargs={"tutor_id": self.pk})
+
     # Payout Settings
     payout_method = models.CharField(
         max_length=30,
@@ -369,4 +373,8 @@ class CourseOffer(models.Model):
     @property
     def total_tutor_payout(self):
         return self.weekly_tutor_payout * Decimal(self.total_weeks)
+
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("course_detail", kwargs={"offer_id": self.pk})
 

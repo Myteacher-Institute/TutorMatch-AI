@@ -4,11 +4,44 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ DEFAULT_SEO_TITLE }}{% endblock %}</title>
+
+  <!-- SEO Meta Tags -->
+  <meta name="description" content="{% block meta_description %}{{ DEFAULT_SEO_DESCRIPTION }}{% endblock %}">
+  <meta name="keywords" content="{% block meta_keywords %}home tutors Nigeria, find private tutors Lagos, Abuja tutors, WAEC JAMB tutors, online math tutor Nigeria, hire home tutor{% endblock %}">
+  <meta name="robots" content="{% block meta_robots %}index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1{% endblock %}">
+  <meta name="author" content="MyteacherConnect">
+  <link rel="canonical" href="{% block canonical_url %}{{ CANONICAL_URL }}{% endblock %}">
+  
+  {% if GOOGLE_SITE_VERIFICATION %}
+  <meta name="google-site-verification" content="{{ GOOGLE_SITE_VERIFICATION }}">
+  {% endif %}
+
+  <!-- Open Graph / Social Sharing -->
+  <meta property="og:site_name" content="MyteacherConnect">
+  <meta property="og:type" content="{% block og_type %}website{% endblock %}">
+  <meta property="og:url" content="{% block og_url %}{{ CANONICAL_URL }}{% endblock %}">
+  <meta property="og:title" content="{% block og_title %}{% block title_og %}{{ DEFAULT_SEO_TITLE }}{% endblock %}{% endblock %}">
+  <meta property="og:description" content="{% block og_description %}{{ DEFAULT_SEO_DESCRIPTION }}{% endblock %}">
+  <meta property="og:image" content="{% block og_image %}{{ DEFAULT_SEO_IMAGE }}{% endblock %}">
+  <meta property="og:locale" content="en_NG">
+
+  <!-- Twitter Cards -->
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:site" content="@MyteacherConn">
+  <meta name="twitter:title" content="{% block twitter_title %}{{ DEFAULT_SEO_TITLE }}{% endblock %}">
+  <meta name="twitter:description" content="{% block twitter_description %}{{ DEFAULT_SEO_DESCRIPTION }}{% endblock %}">
+  <meta name="twitter:image" content="{% block twitter_image %}{{ DEFAULT_SEO_IMAGE }}{% endblock %}">
+
+  <!-- Icons & Styling -->
   <link rel="icon" href="https://ik.imagekit.io/gryyh4va8/photo_2026-07-19_21-50-22.jpg">
-  <title>{% block title %}TutorMatch AI{% endblock %}</title>
+  <link rel="apple-touch-icon" href="https://ik.imagekit.io/gryyh4va8/photo_2026-07-19_21-50-22.jpg">
   <link rel="stylesheet" href="{% static 'css/styles.css' %}?v=20260726-pro-guaranteed-trust-slider-v13">
   <link rel="stylesheet" href="{% static 'css/app-shell.css' %}?v=20260726-pro-guaranteed-trust-slider-v13">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+  {% block schema_markup %}{% endblock %}
+
   <script>
     (function () {
       try {

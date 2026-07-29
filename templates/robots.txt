@@ -1,0 +1,18 @@
+User-agent: *
+Allow: /
+Allow: /tutors/
+Allow: /courses/
+Allow: /about/
+Allow: /contact/
+Allow: /terms-of-service/
+Allow: /privacy-policy/
+
+Disallow: /admin/
+Disallow: /admin-dashboard/
+Disallow: /tutor/
+Disallow: /student/
+Disallow: /chat/
+Disallow: /bookings/
+Disallow: /payments/
+
+Sitemap: {{ SITE_URL }}/sitemap.xml

@@ -1,6 +1,19 @@
 {% extends "base.html" %}
 
-{% block title %}Contact | Myteacherconnect{% endblock %}
+{% block title %}Contact Support & Sales — Myteacherconnect{% endblock %}
+{% block meta_description %}Get in touch with Myteacherconnect support, tutor onboarding team, and customer service. We are here to help parents and tutors in Nigeria.{% endblock %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact Myteacherconnect",
+  "url": "{{ CANONICAL_URL }}",
+  "description": "Have questions about tutor onboarding, booking a lesson, or pricing? Reach out to Myteacherconnect support team."
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="mtc-page-hero">

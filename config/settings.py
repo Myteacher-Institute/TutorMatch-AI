@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.humanize",
+    "django.contrib.sitemaps",
     "accounts",
     "tutors",
     "ai_search",
@@ -74,6 +75,7 @@ TEMPLATES = [
                 "dashboard.context_processors.admin_badges",
                 "tutors.context_processors.saved_tutor_ids",
                 "tutors.context_processors.tutor_badges",
+                "config.context_processors.seo_context",
             ],
         },
     },
@@ -81,6 +83,8 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
+SITE_URL = os.getenv("SITE_URL", "https://myteacherconnect.com")
+GOOGLE_SITE_VERIFICATION = os.getenv("GOOGLE_SITE_VERIFICATION", "")
 
 DATABASE_URL = os.getenv("DATABASE_URL")
 

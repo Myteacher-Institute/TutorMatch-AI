@@ -1,7 +1,52 @@
 {% extends "base.html" %}
 {% load static humanize %}
 
-{% block title %}Myteacherconnect | Find Verified Home Tutors{% endblock %}
+{% block title %}Myteacherconnect | Find Verified Home & Online Tutors in Nigeria{% endblock %}
+{% block meta_description %}Find and hire background-checked private home and online tutors in Lagos, Abuja, Port Harcourt, and across Nigeria. AI-powered matching for Mathematics, English, Sciences, WAEC/JAMB & coding.{% endblock %}
+{% block meta_keywords %}home tutors Nigeria, find tutor Lagos, Abuja home lesson teacher, WAEC JAMB tutor, online math teacher Nigeria, hire private tutor{% endblock %}
+
+{% block schema_markup %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "EducationalOrganization",
+      "@id": "{{ SITE_URL }}/#organization",
+      "name": "MyteacherConnect",
+      "url": "{{ SITE_URL }}",
+      "logo": "{{ DEFAULT_SEO_IMAGE }}",
+      "sameAs": [
+        "https://twitter.com/MyteacherConn"
+      ],
+      "description": "Nigeria's #1 AI-powered tutoring platform connecting students with verified background-checked home and online tutors.",
+      "address": {
+        "@type": "PostalAddress",
+        "addressCountry": "NG"
+      }
+    },
+    {
+      "@type": "WebSite",
+      "@id": "{{ SITE_URL }}/#website",
+      "url": "{{ SITE_URL }}",
+      "name": "MyteacherConnect",
+      "description": "Find Verified Home Tutors in Nigeria Anywhere",
+      "publisher": {
+        "@id": "{{ SITE_URL }}/#organization"
+      },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": {
+          "@type": "EntryPoint",
+          "urlTemplate": "{{ SITE_URL }}/tutors/?q={search_term_string}"
+        },
+        "query-input": "required name=search_term_string"
+      }
+    }
+  ]
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <section class="mtc-hero">
