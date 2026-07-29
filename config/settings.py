@@ -83,7 +83,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "config.wsgi.application"
 
-SITE_URL = os.getenv("SITE_URL", "https://myteacherconnect.com")
+SITE_URL = os.getenv("SITE_URL", "https://myteacherconnect.org")
 GOOGLE_SITE_VERIFICATION = os.getenv("GOOGLE_SITE_VERIFICATION", "")
 
 DATABASE_URL = os.getenv("DATABASE_URL")

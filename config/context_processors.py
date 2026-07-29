@@ -6,7 +6,7 @@ def seo_context(request):
     Global SEO context processor supplying site URL, canonical URL,
     Google Search Console verification tag, and social share metadata.
     """
-    site_url = os.getenv("SITE_URL", "https://myteacherconnect.com").rstrip("/")
+    site_url = os.getenv("SITE_URL", "https://myteacherconnect.org").rstrip("/")
     google_verification = os.getenv("GOOGLE_SITE_VERIFICATION", "")
 
     if request:
