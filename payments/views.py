@@ -28,64 +28,10 @@ FLUTTERWAVE_PAYMENT_URL = "https://api.flutterwave.com/v3/payments"
 FLUTTERWAVE_VERIFY_URL = "https://api.flutterwave.com/v3/transactions/{transaction_id}/verify"
 FLUTTERWAVE_REFUND_URL = "https://api.flutterwave.com/v3/transactions/{transaction_id}/refund"
 
-_v4_token_cache = {
-    "token": None,
-    "expires_at": 0,
-}
-
-
-def get_flutterwave_v4_access_token():
-    """Fetch or return cached OAuth 2.0 access token for Flutterwave v4 API."""
-    import time
-    now = time.time()
-    if _v4_token_cache["token"] and _v4_token_cache["expires_at"] > now + 30:
-        return _v4_token_cache["token"]
-
-    client_id = (getattr(settings, "FLUTTERWAVE_CLIENT_ID", "") or settings.FLUTTERWAVE_SECRET_KEY).strip()
-    client_secret = (getattr(settings, "FLUTTERWAVE_CLIENT_SECRET", "") or settings.FLUTTERWAVE_PUBLIC_KEY).strip()
-
-    if not client_id or not client_secret:
-        logger.error("Flutterwave v4 credentials missing (Client ID / Client Secret).")
-        return None
-
-    url = "https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token"
-    payload = {
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "grant_type": "client_credentials",
-    }
-    headers = {"Content-Type": "application/x-www-form-urlencoded"}
-
-    try:
-        response = requests.post(url, data=payload, headers=headers, timeout=15)
-        data = response.json()
-        token = data.get("access_token")
-        if token:
-            expires_in = int(data.get("expires_in", 600))
-            _v4_token_cache["token"] = token
-            _v4_token_cache["expires_at"] = now + expires_in
-            return token
-        else:
-            _v4_token_cache["token"] = None
-            _v4_token_cache["expires_at"] = 0
-            logger.error("Failed to obtain Flutterwave v4 token: %s", data)
-            return None
-    except Exception as e:
-        _v4_token_cache["token"] = None
-        _v4_token_cache["expires_at"] = 0
-        logger.exception("Error obtaining Flutterwave v4 access token: %s", e)
-        return None
-
 
 def flutterwave_headers():
-    secret_key = getattr(settings, "FLUTTERWAVE_SECRET_KEY", "").strip()
-    if secret_key.startswith("FLWSECK_"):
-        auth_token = secret_key
-    else:
-        auth_token = get_flutterwave_v4_access_token() or secret_key
-
     return {
-        "Authorization": f"Bearer {auth_token}",
+        "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY.strip()}",
         "Content-Type": "application/json",
     }
 
@@ -95,24 +41,26 @@ def flutterwave_is_configured():
 
 
 def flutterwave_configuration_error():
-    """Return a safe, actionable configuration error for V3 or V4 integration."""
+    """Return a safe, actionable configuration error for Flutterwave Hosted Checkout integration."""
     secret_key = getattr(settings, "FLUTTERWAVE_SECRET_KEY", "").strip()
     public_key = getattr(settings, "FLUTTERWAVE_PUBLIC_KEY", "").strip()
-    client_id = (getattr(settings, "FLUTTERWAVE_CLIENT_ID", "") or secret_key).strip()
-    client_secret = (getattr(settings, "FLUTTERWAVE_CLIENT_SECRET", "") or public_key).strip()
 
-    if not client_id or not client_secret:
-        return "Flutterwave is not configured. Add your Flutterwave keys to .env."
+    if not secret_key or not public_key:
+        return "Flutterwave is not configured. Add FLUTTERWAVE_SECRET_KEY and FLUTTERWAVE_PUBLIC_KEY to your .env file."
 
-    if secret_key.startswith("FLWSECK_"):
-        if not public_key.startswith("FLWPUBK_"):
-            return "Flutterwave V3 checkout requires a public key beginning with FLWPUBK_."
-        return ""
+    if not secret_key.startswith("FLWSECK_"):
+        return (
+            "Flutterwave hosted checkout requires your standard Secret Key starting with FLWSECK_ "
+            "(e.g., FLWSECK_LIVE-...). Copy it from Flutterwave Dashboard > Settings > API Keys."
+        )
 
-    if client_id and client_secret:
-        return ""
+    if not public_key.startswith("FLWPUBK_"):
+        return (
+            "Flutterwave hosted checkout requires your standard Public Key starting with FLWPUBK_ "
+            "(e.g., FLWPUBK_LIVE-...). Copy it from Flutterwave Dashboard > Settings > API Keys."
+        )
 
-    return "Flutterwave configuration invalid."
+    return ""
 
 
 def _upsert_booking_payment(
