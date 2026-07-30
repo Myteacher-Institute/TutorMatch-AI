@@ -66,9 +66,13 @@ def get_flutterwave_v4_access_token():
             _v4_token_cache["expires_at"] = now + expires_in
             return token
         else:
+            _v4_token_cache["token"] = None
+            _v4_token_cache["expires_at"] = 0
             logger.error("Failed to obtain Flutterwave v4 token: %s", data)
             return None
     except Exception as e:
+        _v4_token_cache["token"] = None
+        _v4_token_cache["expires_at"] = 0
         logger.exception("Error obtaining Flutterwave v4 access token: %s", e)
         return None
 
