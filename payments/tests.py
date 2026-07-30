@@ -11,6 +11,7 @@ from bookings.models import Booking
 from tutors.models import Tutor
 
 from .models import Payment, PayoutInstallment
+from .views import flutterwave_configuration_error, flutterwave_is_configured
 
 
 class FakeFlutterwaveResponse:
@@ -82,6 +83,20 @@ class PaymentVerificationTests(TestCase):
                 "meta": {"booking_id": booking_id or self.booking.id},
             },
         }
+
+    def test_v3_credentials_are_accepted(self):
+        self.assertTrue(flutterwave_is_configured())
+        self.assertEqual(flutterwave_configuration_error(), "")
+
+    @override_settings(
+        FLUTTERWAVE_SECRET_KEY="v4-client-id",
+        FLUTTERWAVE_PUBLIC_KEY="v4-client-secret",
+        FLUTTERWAVE_CLIENT_ID="v4-client-id",
+        FLUTTERWAVE_CLIENT_SECRET="v4-client-secret",
+    )
+    def test_v4_credentials_are_accepted(self):
+        self.assertTrue(flutterwave_is_configured())
+        self.assertEqual(flutterwave_configuration_error(), "")
 
     def test_verify_payment_marks_booking_paid_when_reference_matches(self):
         self.client.login(username="student", password="pass12345")

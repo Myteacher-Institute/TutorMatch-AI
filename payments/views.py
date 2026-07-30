@@ -28,16 +28,87 @@ FLUTTERWAVE_PAYMENT_URL = "https://api.flutterwave.com/v3/payments"
 FLUTTERWAVE_VERIFY_URL = "https://api.flutterwave.com/v3/transactions/{transaction_id}/verify"
 FLUTTERWAVE_REFUND_URL = "https://api.flutterwave.com/v3/transactions/{transaction_id}/refund"
 
+_v4_token_cache = {
+    "token": None,
+    "expires_at": 0,
+}
+
+
+def get_flutterwave_v4_access_token():
+    """Fetch or return cached OAuth 2.0 access token for Flutterwave v4 API."""
+    import time
+    now = time.time()
+    if _v4_token_cache["token"] and _v4_token_cache["expires_at"] > now + 30:
+        return _v4_token_cache["token"]
+
+    client_id = (getattr(settings, "FLUTTERWAVE_CLIENT_ID", "") or settings.FLUTTERWAVE_SECRET_KEY).strip()
+    client_secret = (getattr(settings, "FLUTTERWAVE_CLIENT_SECRET", "") or settings.FLUTTERWAVE_PUBLIC_KEY).strip()
+
+    if not client_id or not client_secret:
+        logger.error("Flutterwave v4 credentials missing (Client ID / Client Secret).")
+        return None
+
+    url = "https://idp.flutterwave.com/realms/flutterwave/protocol/openid-connect/token"
+    payload = {
+        "client_id": client_id,
+        "client_secret": client_secret,
+        "grant_type": "client_credentials",
+    }
+    headers = {"Content-Type": "application/x-www-form-urlencoded"}
+
+    try:
+        response = requests.post(url, data=payload, headers=headers, timeout=15)
+        data = response.json()
+        token = data.get("access_token")
+        if token:
+            expires_in = int(data.get("expires_in", 600))
+            _v4_token_cache["token"] = token
+            _v4_token_cache["expires_at"] = now + expires_in
+            return token
+        else:
+            logger.error("Failed to obtain Flutterwave v4 token: %s", data)
+            return None
+    except Exception as e:
+        logger.exception("Error obtaining Flutterwave v4 access token: %s", e)
+        return None
+
 
 def flutterwave_headers():
+    secret_key = getattr(settings, "FLUTTERWAVE_SECRET_KEY", "").strip()
+    if secret_key.startswith("FLWSECK_"):
+        auth_token = secret_key
+    else:
+        auth_token = get_flutterwave_v4_access_token() or secret_key
+
     return {
-        "Authorization": f"Bearer {settings.FLUTTERWAVE_SECRET_KEY}",
+        "Authorization": f"Bearer {auth_token}",
         "Content-Type": "application/json",
     }
 
 
 def flutterwave_is_configured():
-    return bool(settings.FLUTTERWAVE_SECRET_KEY and settings.FLUTTERWAVE_PUBLIC_KEY)
+    return not flutterwave_configuration_error()
+
+
+def flutterwave_configuration_error():
+    """Return a safe, actionable configuration error for V3 or V4 integration."""
+    secret_key = getattr(settings, "FLUTTERWAVE_SECRET_KEY", "").strip()
+    public_key = getattr(settings, "FLUTTERWAVE_PUBLIC_KEY", "").strip()
+    client_id = (getattr(settings, "FLUTTERWAVE_CLIENT_ID", "") or secret_key).strip()
+    client_secret = (getattr(settings, "FLUTTERWAVE_CLIENT_SECRET", "") or public_key).strip()
+
+    if not client_id or not client_secret:
+        return "Flutterwave is not configured. Add your Flutterwave keys to .env."
+
+    if secret_key.startswith("FLWSECK_"):
+        if not public_key.startswith("FLWPUBK_"):
+            return "Flutterwave V3 checkout requires a public key beginning with FLWPUBK_."
+        return ""
+
+    if client_id and client_secret:
+        return ""
+
+    return "Flutterwave configuration invalid."
 
 
 def _upsert_booking_payment(
@@ -123,7 +194,7 @@ def checkout(request, booking_id):
 
     if request.method == "POST":
         if not flutterwave_is_configured():
-            messages.error(request, "Flutterwave is not configured yet. Add your Flutterwave keys before accepting real payments.")
+            messages.error(request, flutterwave_configuration_error())
             return redirect("payment_failed")
 
         tx_ref = f"BOOKING-{booking.id}-{timezone_now_ref()}"
@@ -189,8 +260,8 @@ def verify_payment(request):
     if not transaction_id:
         messages.error(request, "Missing payment reference.")
         return redirect("payment_failed")
-    if not settings.FLUTTERWAVE_SECRET_KEY:
-        messages.error(request, "Flutterwave is not configured.")
+    if not flutterwave_is_configured():
+        messages.error(request, flutterwave_configuration_error())
         return redirect("payment_failed")
 
     try:
