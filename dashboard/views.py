@@ -1,7 +1,11 @@
+import logging
+import json
 from accounts.models import UserProfile
+from django.conf import settings
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
+from django.urls import reverse
 from django.views.decorators.http import require_POST
 from django.apps import apps
 from accounts.decorators import admin_required
@@ -10,9 +14,11 @@ from bookings.models import Booking
 from django.utils import timezone
 from datetime import timedelta
 from django.db.models import Avg, Sum, Count, Q
-import json
 from payments.models import PayoutInstallment, SupportTicket
 from payments.services import sync_due_installments
+
+logger = logging.getLogger(__name__)
+
 
 
 def home(request):
@@ -533,6 +539,11 @@ def verifications(request):
                         tutor_email = profile.user.email
                         tutor_name = profile.user.get_full_name() or profile.user.username
                         subject = "Action Required: Complete Your Tutor Profile on MyteacherConnect"
+                        try:
+                            profile_url = request.build_absolute_uri(reverse("tutor_profile"))
+                        except Exception:
+                            site_url = getattr(settings, "SITE_URL", "https://myteacherconnect.org").rstrip("/")
+                            profile_url = f"{site_url}/tutor/profile/"
                         html_body = f"""
                             <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
                               <h2 style="color: #2563eb;">Complete Your Tutor Profile</h2>
@@ -541,11 +552,11 @@ def verifications(request):
                               <ul style="background: #f8fafc; padding: 16px 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
                                 {''.join(f'<li style="margin-bottom: 6px; font-weight: bold;">{item}</li>' for item in missing_items)}
                               </ul>
-                              <p><a href="https://myteacherconnect.org/tutors/profile/" style="background: #2563eb; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Update Profile Now</a></p>
+                              <p><a href="{profile_url}" style="background: #2563eb; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Update Profile Now</a></p>
                               <p>Thank you,<br><strong>MyteacherConnect Admin Team</strong></p>
                             </div>
                         """
-                        text_body = f"Hello {tutor_name},\n\nPlease complete the following missing items on your MyteacherConnect tutor profile:{missing_text}\n\nLink: https://myteacherconnect.org/tutors/profile/\n\nThank you,\nMyteacherConnect Admin Team"
+                        text_body = f"Hello {tutor_name},\n\nPlease complete the following missing items on your MyteacherConnect tutor profile:{missing_text}\n\nLink: {profile_url}\n\nThank you,\nMyteacherConnect Admin Team"
                         try:
                             from accounts.email_services import send_transactional_email
                             send_transactional_email(

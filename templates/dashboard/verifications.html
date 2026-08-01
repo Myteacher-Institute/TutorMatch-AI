@@ -129,10 +129,14 @@
 
                 <!-- Email Tutor Button -->
                 {% if tutor.missing_profile_fields %}
-                  <a href="mailto:{{ tutor.user.user.email }}?subject=Action%20Required:%20Complete%20Your%20Tutor%20Profile%20on%20MyteacherConnect&body=Hello%20{{ tutor.user.user.first_name|default:tutor.user.user.username }},%0A%0AWe%20reviewed%20your%20tutor%20application%20on%20MyteacherConnect.%20To%20complete%20your%20verification,%20please%20log%20in%20and%20update%20the%20following%20missing%20details:%0A%0A-%20{{ tutor.missing_profile_fields|join:'%0A-%20' }}%0A%0ALink:%20https://myteacherconnect.org/tutors/profile/%0A%0AThank%20you,%0AMyteacherConnect%20Team" 
-                     class="btn" style="width: 100%; border: 1px solid #fdba74; background: #fff7ed; color: #c2410c; border-radius: 8px; font-weight: 700; font-size: 12px; padding: 8px 12px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
-                    <i class="fa-solid fa-envelope"></i> Email Incomplete Info
-                  </a>
+                  <form method="post" style="width: 100%;">
+                    {% csrf_token %}
+                    <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
+                    <input type="hidden" name="action" value="send_missing_email">
+                    <button type="submit" class="btn" style="width: 100%; border: 1px solid #fdba74; background: #fff7ed; color: #c2410c; border-radius: 8px; font-weight: 700; font-size: 12px; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                      <i class="fa-solid fa-paper-plane"></i> Email Incomplete Info
+                    </button>
+                  </form>
                 {% else %}
                   <a href="mailto:{{ tutor.user.user.email }}?subject=Update%20regarding%20your%20Tutor%20Application%20on%20MyteacherConnect" 
                      class="btn" style="width: 100%; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 8px; font-weight: 600; font-size: 12px; padding: 8px 12px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">

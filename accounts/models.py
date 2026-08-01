@@ -152,17 +152,19 @@ class HomepageStatsSetting(models.Model):
         if not self.youtube_video_url:
             return ""
         url = str(self.youtube_video_url).strip()
-        if "embed/" in url:
-            return url
         video_id = ""
         if "v=" in url:
             video_id = url.split("v=")[1].split("&")[0]
         elif "youtu.be/" in url:
             video_id = url.split("youtu.be/")[1].split("?")[0]
+        elif "embed/" in url:
+            video_id = url.split("embed/")[1].split("?")[0]
         elif "shorts/" in url:
             video_id = url.split("shorts/")[1].split("?")[0]
+        else:
+            video_id = url
         if video_id:
-            return f"https://www.youtube-nocookie.com/embed/{video_id}?rel=0"
+            return f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute=1&rel=0"
         return url
 
     class Meta:
