@@ -266,5 +266,36 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f"  Created course offer: {offer.title}")
 
+        # Seed initial success stories if empty
+        from accounts.models import SuccessStory
+        if SuccessStory.objects.count() == 0:
+            user = User.objects.filter(is_superuser=True).first() or User.objects.first()
+            if user:
+                initial_stories = [
+                    {
+                        "title": "JAMB Score Improvement",
+                        "story": "My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching really worked for us!",
+                        "rating": 5,
+                    },
+                    {
+                        "title": "Steady Stream of Serious Students",
+                        "story": "As a tutor, this platform has provided me with a steady stream of serious students. The payment system is incredibly transparent.",
+                        "rating": 5,
+                    },
+                    {
+                        "title": "Exceptional Coding Tutor for Kids",
+                        "story": "The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic websites in months.",
+                        "rating": 5,
+                    },
+                ]
+                for s in initial_stories:
+                    SuccessStory.objects.create(
+                        user=user,
+                        title=s["title"],
+                        story=s["story"],
+                        rating=s["rating"],
+                    )
+                self.stdout.write("  Created initial success stories.")
+
         self.stdout.write(self.style.SUCCESS("Database seeding completed successfully! All seeded users have password: password123"))
 
