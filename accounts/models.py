@@ -87,6 +87,7 @@ class SuccessStory(models.Model):
         help_text="Rating out of 5 stars"
     )
     story = models.TextField(max_length=1200)
+    is_hidden = models.BooleanField(default=False, help_text="Hide story from public view")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

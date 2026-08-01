@@ -42,7 +42,7 @@ def success_stories(request):
             messages.success(request, "Your success story is now part of the community.")
             return redirect("success_stories")
 
-    stories_qs = SuccessStory.objects.select_related("user__profile__tutor_profile")
+    stories_qs = SuccessStory.objects.filter(is_hidden=False).select_related("user__profile__tutor_profile")
     paginator = Paginator(stories_qs, 20)
     stories = paginator.get_page(request.GET.get("page", 1))
     return render(request, "accounts/success_stories.html", {"form": form, "stories": stories})

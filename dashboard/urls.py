@@ -15,6 +15,9 @@ urlpatterns = [
     path("admin-dashboard/support/", views.support, name="admin_support"),
     path("admin-dashboard/revenue/", views.revenue, name="admin_revenue"),
     path("admin-dashboard/homepage-stats/", views.homepage_stats, name="admin_homepage_stats"),
+    path("admin-dashboard/success-stories/", views.admin_success_stories, name="admin_success_stories"),
+    path("admin-dashboard/success-stories/<int:story_id>/toggle-hide/", views.toggle_hide_success_story, name="admin_toggle_hide_success_story"),
+    path("admin-dashboard/success-stories/<int:story_id>/delete/", views.delete_success_story, name="admin_delete_success_story"),
     path("terms-of-service/", views.Termsofservice, name="terms_of_service"),
     path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
 ]

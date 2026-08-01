@@ -1,7 +1,8 @@
 from accounts.models import UserProfile
 from django.contrib import messages
 from django.core.paginator import Paginator
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.http import require_POST
 from django.apps import apps
 from accounts.decorators import admin_required
 from tutors.models import Tutor
@@ -56,7 +57,8 @@ def home(request):
 
     from accounts.models import SuccessStory
     success_stories = list(
-        SuccessStory.objects.select_related("user__profile__tutor_profile")
+        SuccessStory.objects.filter(is_hidden=False)
+        .select_related("user__profile__tutor_profile")
         .order_by("-created_at")[:6]
     )
 
@@ -1068,3 +1070,68 @@ def homepage_stats(request):
         "dashboard/homepage_stats.html",
         {"config": config}
     )
+
+
+@admin_required
+def admin_success_stories(request):
+    from accounts.models import SuccessStory
+    stories_qs = SuccessStory.objects.select_related("user__profile__tutor_profile").order_by("-created_at")
+
+    total_count = stories_qs.count()
+    visible_count = stories_qs.filter(is_hidden=False).count()
+    hidden_count = stories_qs.filter(is_hidden=True).count()
+
+    status_filter = request.GET.get("status", "all")
+    if status_filter == "visible":
+        stories_qs = stories_qs.filter(is_hidden=False)
+    elif status_filter == "hidden":
+        stories_qs = stories_qs.filter(is_hidden=True)
+
+    search_query = request.GET.get("q", "").strip()
+    if search_query:
+        stories_qs = stories_qs.filter(
+            Q(title__icontains=search_query)
+            | Q(story__icontains=search_query)
+            | Q(user__username__icontains=search_query)
+            | Q(user__first_name__icontains=search_query)
+            | Q(user__last_name__icontains=search_query)
+        )
+
+    paginator = Paginator(stories_qs, 15)
+    page_obj = paginator.get_page(request.GET.get("page", 1))
+
+    context = {
+        "stories": page_obj,
+        "total_count": total_count,
+        "visible_count": visible_count,
+        "hidden_count": hidden_count,
+        "status_filter": status_filter,
+        "search_query": search_query,
+    }
+    return render(request, "dashboard/success_stories.html", context)
+
+
+@admin_required
+@require_POST
+def toggle_hide_success_story(request, story_id):
+    from accounts.models import SuccessStory
+    story = get_object_or_404(SuccessStory, id=story_id)
+    story.is_hidden = not story.is_hidden
+    story.save(update_fields=["is_hidden"])
+    if story.is_hidden:
+        messages.success(request, f'Success story "{story.title}" is now hidden from public view.')
+    else:
+        messages.success(request, f'Success story "{story.title}" is now visible on the homepage and stories page.')
+    return redirect("admin_success_stories")
+
+
+@admin_required
+@require_POST
+def delete_success_story(request, story_id):
+    from accounts.models import SuccessStory
+    story = get_object_or_404(SuccessStory, id=story_id)
+    title = story.title
+    story.delete()
+    messages.success(request, f'Success story "{title}" was permanently deleted.')
+    return redirect("admin_success_stories")
+
