@@ -148,10 +148,19 @@ class HomepageStatsSetting(models.Model):
     )
 
     @property
+    def is_direct_video(self):
+        if not self.youtube_video_url:
+            return False
+        url = str(self.youtube_video_url).strip().lower()
+        return any(ext in url for ext in [".mp4", ".webm", ".ogg", ".mov", ".m4v"])
+
+    @property
     def youtube_embed_url(self):
         if not self.youtube_video_url:
             return ""
         url = str(self.youtube_video_url).strip()
+        if self.is_direct_video:
+            return url
         video_id = ""
         if "v=" in url:
             video_id = url.split("v=")[1].split("&")[0]
@@ -164,7 +173,7 @@ class HomepageStatsSetting(models.Model):
         else:
             video_id = url
         if video_id:
-            return f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute=1&rel=0"
+            return f"https://www.youtube.com/embed/{video_id}?autoplay=1&mute=1&rel=0&enablejsapi=1"
         return url
 
     class Meta:
