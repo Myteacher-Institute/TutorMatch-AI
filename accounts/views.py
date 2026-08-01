@@ -1,4 +1,5 @@
 import logging
+from decimal import Decimal
 
 from django.utils import timezone
 from datetime import timedelta
@@ -55,27 +56,20 @@ def register(request):
         if form.is_valid():
             user = form.save()
             profile, _ = UserProfile.objects.get_or_create(user=user)
-            verification_sent = False
+            profile.is_verified = False
+            profile.email_verified_at = None
+            profile.save(update_fields=["is_verified", "email_verified_at"])
             try:
                 send_verification_email(request, profile)
-                verification_sent = True
             except TransactionalEmailError as exc:
-                logger.exception("Failed to send verification email for user %s", user.pk)
-                profile.email_verification_sent_at = None
-                profile.save(update_fields=["email_verification_sent_at"])
+                logger.exception("Failed to send verification email during registration for user %s", user.pk)
                 messages.warning(request, _email_delivery_error_message(exc))
             except Exception:
-                logger.exception("Failed to send verification email for user %s", user.pk)
-                profile.email_verification_sent_at = None
-                profile.save(update_fields=["email_verification_sent_at"])
-                messages.warning(request, "Account created, but the verification email could not be sent. Use resend on the verification page.")
-            try:
-                send_welcome_email(request, profile)
-            except Exception:
-                logger.exception("Failed to send welcome email for user %s", user.pk)
+                logger.exception("Failed to send verification email during registration for user %s", user.pk)
+                messages.warning(request, "Account created, but we could not send the verification code right now. You can resend it from the verification page.")
+
             auth_login(request, user)
-            if verification_sent:
-                messages.success(request, "Account created. Check your email for your verification code.")
+            messages.success(request, "Account created successfully! Please check your email for the 6-digit verification code.")
             return redirect("verify_account")
 
     return render(request, 'accounts/register.html', {'form': form})
@@ -91,10 +85,6 @@ def login_view(request):
             next_url = request.GET.get('next') or request.POST.get('next')
             if next_url:
                 return redirect(next_url)
-            profile = getattr(user, "profile", None)
-            if not (user.is_superuser or user.is_staff or (profile and profile.role == 'admin')):
-                if profile and not profile.is_verified:
-                    return redirect("verify_account")
             return redirect(_dashboard_for_user(user))
     return render(request, 'accounts/login.html', {'form': forms})
 
@@ -189,6 +179,7 @@ from payments.models import PayoutInstallment, SupportTicket
 @student_required
 @ensure_csrf_cookie
 def student_dashboard(request):
+    Booking.cleanup_expired_pending()
     student_profile, _ = UserProfile.objects.get_or_create(user=request.user)
     recent_bookings = (
         Booking.objects.filter(student=student_profile)
@@ -225,6 +216,12 @@ def student_dashboard(request):
         .annotate(review_count=Count("tutor_reviews"))
         .order_by("-years_experience", "rate_amount")[:4]
     )
+    due_satisfaction_installment = PayoutInstallment.objects.filter(
+        booking__student=student_profile,
+        status__in=[PayoutInstallment.STATUS_AWAITING_STUDENT, PayoutInstallment.STATUS_SCHEDULED],
+        period_end__lte=timezone.localdate(),
+    ).select_related("booking__tutor__user__user", "booking__course_offer").first()
+
     return render(
         request,
         'accounts/dashboard.html',
@@ -236,6 +233,8 @@ def student_dashboard(request):
             "completed_lessons_count": completed_lessons_count,
             "cancelled_lessons_count": cancelled_lessons_count,
             "weekly_booking_count": weekly_booking_count,
+            "due_satisfaction_installment": due_satisfaction_installment,
+            "wallet_balance": getattr(student_profile, "wallet_balance", Decimal("0.00")),
             "active_tab": "dashboard",
         },
     )
@@ -376,5 +375,50 @@ def toggle_save_tutor(request, tutor_id):
             {"saved": False, "message": "Tutor removed from saved list."}
         )
     return JsonResponse({"saved": True, "message": "Tutor saved."})
+
+
+@login_required(login_url='login')
+@require_POST
+def update_account_details(request):
+    profile, _ = UserProfile.objects.get_or_create(user=request.user)
+    profile.process_pending_account_details()
+
+    if not profile.can_update_account_details:
+        next_date = profile.next_allowed_account_details_update
+        date_str = next_date.strftime("%B %d, %Y") if next_date else "90 days"
+        messages.error(request, f"Account details can only be changed once every 3 months (90 days). Next allowed update: {date_str}.")
+        return redirect(request.META.get("HTTP_REFERER") or _dashboard_for_user(request.user))
+
+    full_name = request.POST.get("full_name", "").strip()
+    username = request.POST.get("username", "").strip()
+    email = request.POST.get("email", "").strip()
+    phone_number = request.POST.get("phone_number", "").strip()
+
+    if not full_name or not username or not email:
+        messages.error(request, "Full name, username, and email address are required.")
+        return redirect(request.META.get("HTTP_REFERER") or _dashboard_for_user(request.user))
+
+    if username.lower() != request.user.username.lower() and User.objects.filter(username__iexact=username).exclude(pk=request.user.pk).exists():
+        messages.error(request, f"Username '{username}' is already taken by another user.")
+        return redirect(request.META.get("HTTP_REFERER") or _dashboard_for_user(request.user))
+
+    if email.lower() != request.user.email.lower() and User.objects.filter(email__iexact=email).exclude(pk=request.user.pk).exists():
+        messages.error(request, f"Email address '{email}' is already registered to another user.")
+        return redirect(request.META.get("HTTP_REFERER") or _dashboard_for_user(request.user))
+
+    effective_at = timezone.now() + timedelta(days=4)
+    profile.pending_account_details_update = {
+        "full_name": full_name,
+        "username": username,
+        "email": email,
+        "phone_number": phone_number,
+    }
+    profile.pending_update_effective_at = effective_at
+    profile.last_account_details_update = timezone.now()
+    profile.save(update_fields=["pending_account_details_update", "pending_update_effective_at", "last_account_details_update"])
+
+    date_formatted = effective_at.strftime("%B %d, %Y at %I:%M %p")
+    messages.success(request, f"Account details update requested! Your requested changes will automatically take effect in 4 days on {date_formatted}.")
+    return redirect(request.META.get("HTTP_REFERER") or _dashboard_for_user(request.user))
 
 

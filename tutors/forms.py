@@ -12,11 +12,11 @@ class TutorPersonalProfileForm(forms.ModelForm):
     subjects_input = forms.CharField(required=False)
 
     state = forms.CharField(
-        required=True,
+        required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_state'}),
     )
     local_government = forms.CharField(
-        required=True,
+        required=False,
         widget=forms.TextInput(attrs={'class': 'form-control', 'id': 'id_local_government'}),
     )
     country = forms.ChoiceField(
@@ -24,12 +24,12 @@ class TutorPersonalProfileForm(forms.ModelForm):
             (continent, [(c, c) for c in countries])
             for continent, countries in COUNTRIES_BY_CONTINENT.items()
         ]),
-        required=True,
+        required=False,
         initial=DEFAULT_COUNTRY,
         widget=forms.Select(attrs={'class': 'form-control', 'id': 'id_country'}),
     )
     years_experience = forms.IntegerField(
-        required=True,
+        required=False,
         min_value=0,
         widget=forms.TextInput(attrs={
             'inputmode': 'numeric',

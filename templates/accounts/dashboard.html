@@ -62,6 +62,76 @@ TutorMatch AI{% endblock %} {% block content %}
     <!-- Scrollable Dashboard Viewport (keeps the dashboard hero) -->
     <div class="chat-view-viewport" style="overflow-y: auto; display: block;">
 
+      {% if due_satisfaction_installment %}
+      <!-- 30-Day Satisfaction Check Alert Banner & Modal -->
+      <div style="background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%); border: 2px solid #3b82f6; border-radius: 16px; padding: 20px; margin: 16px 12px; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; box-shadow: 0 10px 25px rgba(59, 130, 246, 0.15);">
+        <div style="display: flex; align-items: center; gap: 14px; min-width: 0;">
+          <div style="width: 46px; height: 46px; border-radius: 50%; background: #2563eb; color: #fff; display: grid; place-items: center; font-size: 20px; flex-shrink: 0;">
+            <i class="fa-solid fa-clock-rotate-left"></i>
+          </div>
+          <div>
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: #1d4ed8; font-weight: 800;">30-Day Satisfaction Milestone Due</div>
+            <h3 style="margin: 2px 0 4px; font-size: 16px; color: #0f172a; font-weight: 800;">
+              Month {{ due_satisfaction_installment.week_number }} Confirmation for {{ due_satisfaction_installment.booking.course_offer.title|default:"Tutoring Package" }}
+            </h3>
+            <p style="margin: 0; font-size: 13px; color: #475569;">
+              Tutor: <strong>{{ due_satisfaction_installment.booking.tutor.get_full_name }}</strong> &bull; Have lessons for Month {{ due_satisfaction_installment.week_number }} been conducted to your satisfaction?
+            </p>
+          </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; flex-shrink: 0;">
+          <form method="post" action="{% url 'student_confirm_payout' due_satisfaction_installment.id %}" style="display: inline-block;">
+            {% csrf_token %}
+            <button type="submit" style="background: #16a34a; color: #fff; border: none; font-size: 13px; font-weight: 700; padding: 10px 18px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 8px; box-shadow: 0 4px 12px rgba(22, 163, 74, 0.25);">
+              <i class="fa-solid fa-circle-check"></i> Confirm Satisfaction
+            </button>
+          </form>
+
+          <button type="button" onclick="document.getElementById('complaintModal').style.display='flex'" style="background: #ffffff; color: #dc2626; border: 1px solid #fca5a5; font-size: 13px; font-weight: 700; padding: 9px 16px; border-radius: 10px; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-triangle-exclamation"></i> Report Issue
+          </button>
+        </div>
+      </div>
+
+      <!-- Complaint Modal Popup -->
+      <div id="complaintModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 99999; align-items: center; justify-content: center; padding: 16px;">
+        <div style="background: #ffffff; width: 100%; max-width: 500px; border-radius: 20px; padding: 28px; box-shadow: 0 20px 50px rgba(0,0,0,0.25); position: relative;">
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 16px;">
+            <h3 style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 800; display: flex; align-items: center; gap: 10px;">
+              <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i> Report Dissatisfaction
+            </h3>
+            <button type="button" onclick="document.getElementById('complaintModal').style.display='none'" style="background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer;">&times;</button>
+          </div>
+
+          <form method="post" action="{% url 'student_complain_booking' due_satisfaction_installment.booking.id %}" enctype="multipart/form-data">
+            {% csrf_token %}
+            <input type="hidden" name="installment_id" value="{{ due_satisfaction_installment.id }}">
+            
+            <div style="margin-bottom: 14px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Reason for Complaint</label>
+              <select name="reason" style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; color: #0f172a;">
+                <option value="quality">Poor Teaching Quality</option>
+                <option value="attendance">Tutor Absent / Late</option>
+                <option value="safety">Safety / Conduct Concern</option>
+                <option value="other">Other Issue</option>
+              </select>
+            </div>
+
+            <div style="margin-bottom: 18px;">
+              <label style="display: block; font-size: 13px; font-weight: 700; color: #334155; margin-bottom: 6px;">Explain Details of What Happened</label>
+              <textarea name="message" rows="4" required placeholder="Please describe clearly what promises or lessons were missed..." style="width: 100%; padding: 10px 14px; border-radius: 10px; border: 1px solid #cbd5e1; font-size: 13px; color: #0f172a; box-sizing: border-box;"></textarea>
+            </div>
+
+            <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+              <button type="button" onclick="document.getElementById('complaintModal').style.display='none'" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">Cancel</button>
+              <button type="submit" style="background: #dc2626; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">Submit Complaint to Admin</button>
+            </div>
+          </form>
+        </div>
+      </div>
+      {% endif %}
+
       <!-- Dashboard Hero -->
       <div class="mtc-shell" style="padding: 0 12px 24px; margin-top: 0;">
         <div class="sdh-hero">
@@ -450,13 +520,9 @@ TutorMatch AI{% endblock %} {% block content %}
                   <div class="mtc-recommended-tutor-actions">
                     <a
                       href="{% url 'tutor_detail' tutor_id=tutor.id %}"
-                      class="btn btn-ghost"
-                      >Profile</a
-                    >
-                    <a
-                      href="{% url 'book_tutor' tutor_id=tutor.id %}"
                       class="btn btn-primary"
-                      >Book Now</a
+                      style="width: 100%; font-weight: 700;"
+                      >Browse Courses</a
                     >
                   </div>
                 </div>

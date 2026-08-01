@@ -107,7 +107,7 @@ def book_tutor(request, tutor_id):
             "tutor": tutor,
             "amount": default_amount,
             "rate_period": tutor.rate_period,
-            "rate_period_label": tutor.rate_period_label,
+            "rate_period_label": tutor.get_rate_period_display(),
             "online_class_fee": tutor.online_class_fee,
             "physical_class_fee": tutor.physical_class_fee,
             "default_class_type": default_class_type,
@@ -117,6 +117,7 @@ def book_tutor(request, tutor_id):
 
 @login_required
 def student_bookings(request):
+    Booking.cleanup_expired_pending()
     student_profile = _profile_for_user(request.user)
     sync_due_installments()
     bookings_queryset = (
@@ -328,7 +329,7 @@ def student_confirm_payout(request, installment_id):
     installment.mark_released()
     messages.success(
         request,
-        f"Week {installment.week_number} confirmed. Tutor payout has been released automatically.",
+        f"Month {installment.week_number} confirmed. Tutor payout has been released automatically.",
     )
     return redirect("student_bookings")
 

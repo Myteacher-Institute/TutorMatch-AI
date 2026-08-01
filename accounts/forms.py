@@ -10,7 +10,22 @@ from .models import SuccessStory, UserProfile
 from .email_services import send_transactional_email
 
 
+import re
+
+
 class Registration(UserCreationForm):
+    full_name = forms.CharField(
+        label='Full name',
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Full Name'}),
+    )
+    username = forms.CharField(
+        label='Username',
+        max_length=150,
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Username'}),
+    )
     email = forms.EmailField(required=True)
     phonenumber = forms.CharField(
         label='Phone number',
@@ -34,7 +49,13 @@ class Registration(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'email', 'phonenumber', 'role_selection', 'password1', 'password2']
+        fields = ['full_name', 'username', 'email', 'phonenumber', 'role_selection', 'password1', 'password2']
+
+    def clean_username(self):
+        username = self.cleaned_data.get('username', '').strip()
+        if User.objects.filter(username__iexact=username).exists():
+            raise forms.ValidationError('Username already taken by another user')
+        return username
 
     def clean_email(self):
         email = self.cleaned_data.get('email')
@@ -44,10 +65,14 @@ class Registration(UserCreationForm):
 
     def save(self, commit=True):
         user = super().save(commit=False)
+        full_name = self.cleaned_data.get('full_name', '').strip()
+        parts = full_name.split(maxsplit=1)
+        user.first_name = parts[0] if len(parts) > 0 else ''
+        user.last_name = parts[1] if len(parts) > 1 else ''
+
         user.email = self.cleaned_data['email']
-        user.username = self.cleaned_data['email']
-        user.first_name = self.cleaned_data['first_name']
-        user.last_name = self.cleaned_data['last_name']
+        user.username = self.cleaned_data['username'].strip()
+
         if commit:
             user.save()
             UserProfile.objects.update_or_create(
@@ -73,6 +98,8 @@ class Login(AuthenticationForm):
         if username_or_email is not None and password:
             lookup = username_or_email.strip()
             user = User.objects.filter(email__iexact=lookup).first()
+            if not user:
+                user = User.objects.filter(username__iexact=lookup).first()
             username = user.get_username() if user else lookup
             self.user_cache = authenticate(
                 self.request,
@@ -118,9 +145,23 @@ class ZeptoPasswordResetForm(PasswordResetForm):
 
 
 class SuccessStoryForm(forms.ModelForm):
+    RATING_CHOICES = [
+        (5, "5 Stars ★★★★★ - Exceptional"),
+        (4, "4 Stars ★★★★☆ - Great"),
+        (3, "3 Stars ★★★☆☆ - Good"),
+        (2, "2 Stars ★★☆☆☆ - Fair"),
+        (1, "1 Star ★☆☆☆☆ - Poor"),
+    ]
+    rating = forms.TypedChoiceField(
+        choices=RATING_CHOICES,
+        coerce=int,
+        initial=5,
+        widget=forms.Select(attrs={"class": "story-rating-select"}),
+    )
+
     class Meta:
         model = SuccessStory
-        fields = ["title", "story"]
+        fields = ["title", "rating", "story"]
         widgets = {
             "title": forms.TextInput(attrs={"placeholder": "Give your story a short title"}),
             "story": forms.Textarea(attrs={"placeholder": "Tell the community what changed for you...", "rows": 6}),

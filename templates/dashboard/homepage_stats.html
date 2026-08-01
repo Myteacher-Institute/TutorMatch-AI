@@ -119,6 +119,34 @@
             <p>The homepage will display this number + the actual parent/student accounts registered.</p>
           </div>
 
+          <hr style="margin: 32px 0 24px; border: 0; border-top: 1px solid #e2e8f0;">
+          <h2 style="font-size: 20px; color: #0f172a; margin: 0 0 16px;">Platform Video Settings</h2>
+
+          <div class="mtc-stats-group">
+            <label for="video_section_active" style="display: flex; align-items: center; gap: 10px; cursor: pointer;">
+              <input type="checkbox" id="video_section_active" name="video_section_active" {% if config.video_section_active %}checked{% endif %} style="width: 20px; height: 20px; accent-color: #2563eb;">
+              Show Platform Video Section on Homepage
+            </label>
+          </div>
+
+          <div class="mtc-stats-group">
+            <label for="video_section_title">Video Section Title</label>
+            <input type="text" id="video_section_title" name="video_section_title" value="{{ config.video_section_title }}" style="max-width: 100%;">
+            <p>Main heading displayed above the video section.</p>
+          </div>
+
+          <div class="mtc-stats-group">
+            <label for="video_section_subtitle">Video Section Subtitle / Description</label>
+            <textarea id="video_section_subtitle" name="video_section_subtitle" rows="3" style="width:100%; padding: 12px 16px; border: 1px solid #cbd5e1; border-radius: 10px; font-size: 15px; font-family: inherit;">{{ config.video_section_subtitle }}</textarea>
+            <p>Short description text under the title.</p>
+          </div>
+
+          <div class="mtc-stats-group">
+            <label for="youtube_video_url">YouTube Video URL</label>
+            <input type="url" id="youtube_video_url" name="youtube_video_url" value="{{ config.youtube_video_url }}" placeholder="https://www.youtube.com/watch?v=..." style="max-width: 100%;">
+            <p>Paste the YouTube video link from your boss/oga here (e.g., <code>https://www.youtube.com/watch?v=...</code> or <code>https://youtu.be/...</code>).</p>
+          </div>
+
           <div class="mtc-stats-actions">
             <button type="submit">
               <i class="fa-solid fa-floppy-disk"></i> Save Configuration

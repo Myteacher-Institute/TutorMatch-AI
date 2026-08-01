@@ -22,6 +22,10 @@ class UserProfile(models.Model):
     email_verification_token = models.CharField(max_length=96, blank=True)
     email_verification_sent_at = models.DateTimeField(null=True, blank=True)
     email_verified_at = models.DateTimeField(null=True, blank=True)
+    wallet_balance = models.DecimalField(max_digits=10, decimal_places=2, default=0.00)
+    last_account_details_update = models.DateTimeField(null=True, blank=True)
+    pending_account_details_update = models.JSONField(null=True, blank=True)
+    pending_update_effective_at = models.DateTimeField(null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
@@ -33,10 +37,55 @@ class UserProfile(models.Model):
         self.email_verification_code = ""
         self.email_verification_token = ""
 
+    def process_pending_account_details(self):
+        """Auto-apply requested details when the 4-day delay expires."""
+        if self.pending_account_details_update and self.pending_update_effective_at:
+            if timezone.now() >= self.pending_update_effective_at:
+                data = self.pending_account_details_update
+                user = self.user
+                if data.get("full_name"):
+                    parts = data["full_name"].strip().split(maxsplit=1)
+                    user.first_name = parts[0] if len(parts) > 0 else ""
+                    user.last_name = parts[1] if len(parts) > 1 else ""
+                if data.get("username"):
+                    user.username = data["username"].strip()
+                if data.get("email"):
+                    user.email = data["email"].strip()
+                user.save()
+
+                if data.get("phone_number"):
+                    self.phone_number = data["phone_number"].strip()
+
+                self.pending_account_details_update = None
+                self.pending_update_effective_at = None
+                self.save()
+
+    @property
+    def can_update_account_details(self):
+        if not self.last_account_details_update:
+            return True
+        from datetime import timedelta
+        return timezone.now() >= self.last_account_details_update + timedelta(days=90)
+
+    @property
+    def next_allowed_account_details_update(self):
+        if not self.last_account_details_update:
+            return None
+        from datetime import timedelta
+        return self.last_account_details_update + timedelta(days=90)
+
+
+from django.core.validators import MinValueValidator, MaxValueValidator
+
 
 class SuccessStory(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="success_stories")
     title = models.CharField(max_length=120)
+    rating = models.PositiveSmallIntegerField(
+        default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(5)],
+        help_text="Rating out of 5 stars"
+    )
     story = models.TextField(max_length=1200)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -55,7 +104,10 @@ class SuccessStory(models.Model):
     def profile_photo(self):
         profile = getattr(self.user, "profile", None)
         tutor = getattr(profile, "tutor_profile", None) if profile else None
-        return tutor.profile_photo if tutor and tutor.profile_photo else ""
+        if tutor and getattr(tutor, "profile_photo", None):
+            return tutor.profile_photo
+        avatar_num = ((self.user_id or 1) % 3) + 1
+        return f"/static/images/avatars/avatar{avatar_num}.png"
 
 
 class HomepageStatsSetting(models.Model):
@@ -75,6 +127,42 @@ class HomepageStatsSetting(models.Model):
         default=1500,
         help_text="Starting count for Parents Joined"
     )
+    video_section_title = models.CharField(
+        max_length=200,
+        default="Discover How MyteacherConnect Works",
+        help_text="Title for the homepage video section"
+    )
+    video_section_subtitle = models.TextField(
+        default="Watch our short overview to see how our AI matching, verified background-checked tutors, and safe lesson delivery empower learning across Nigeria.",
+        help_text="Subtitle description for the video section"
+    )
+    youtube_video_url = models.URLField(
+        blank=True,
+        default="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+        help_text="YouTube video URL (e.g. https://www.youtube.com/watch?v=VIDEO_ID)"
+    )
+    video_section_active = models.BooleanField(
+        default=True,
+        help_text="Toggle to show or hide the video section on the homepage"
+    )
+
+    @property
+    def youtube_embed_url(self):
+        if not self.youtube_video_url:
+            return ""
+        url = str(self.youtube_video_url).strip()
+        if "embed/" in url:
+            return url
+        video_id = ""
+        if "v=" in url:
+            video_id = url.split("v=")[1].split("&")[0]
+        elif "youtu.be/" in url:
+            video_id = url.split("youtu.be/")[1].split("?")[0]
+        elif "shorts/" in url:
+            video_id = url.split("shorts/")[1].split("?")[0]
+        if video_id:
+            return f"https://www.youtube-nocookie.com/embed/{video_id}?rel=0"
+        return url
 
     class Meta:
         verbose_name = "Homepage Stats Setting"

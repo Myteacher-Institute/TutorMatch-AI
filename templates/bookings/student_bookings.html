@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}My Bookings | TutorMatch AI{% endblock %}
+{% block title %}My Bookings | MyteacherConnect{% endblock %}
 
 {% block content %}
 <style>
@@ -24,6 +24,28 @@
     max-width: 100% !important;
     height: 100vh !important;
     overflow: hidden !important;
+  }
+
+  .booking-course-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    color: #1d4ed8;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 6px;
+    margin-bottom: 6px;
+  }
+
+  .booking-mode-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 11px;
+    color: #64748b;
+    font-weight: 600;
   }
 </style>
 
@@ -65,21 +87,25 @@
 
     <!-- Scrollable Content Viewport -->
     <div class="chat-view-viewport" style="overflow-y: auto; display: block;">
-      <div class="mtc-shell" style="padding: 24px 12px 40px; margin-top: 0;">
+      <div class="mtc-shell" style="padding: 24px 16px 40px; margin-top: 0; max-width: 1200px;">
         <div class="mtc-admin-content">
-          <div class="mtc-student-bookings-head">
+          
+          <div class="mtc-student-bookings-head" style="margin-bottom: 24px;">
             <div>
-              <p class="mtc-student-bookings-eyebrow">Lesson Schedule</p>
-              <h1>My Bookings</h1>
-              <p class="lead">Track your tutor requests, lesson times, payment status, and completed lessons.</p>
+              <p class="mtc-student-bookings-eyebrow" style="color: #2563eb; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 4px;">My Learning Dashboard</p>
+              <h1 style="margin: 0 0 6px; font-size: 26px; font-weight: 800; color: #0f172a;">Course &amp; Lesson Bookings</h1>
+              <p class="lead" style="margin: 0; color: #64748b; font-size: 14px;">Track your enrolled course packages, lesson schedules, payment status, and tutor progress.</p>
             </div>
-            <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find Tutor</a>
+            <a href="{% url 'tutor_list' %}" class="btn btn-primary" style="font-weight: 700; border-radius: 10px; padding: 10px 18px;">
+              <i class="fa-solid fa-compass" style="margin-right: 6px;"></i>Explore Courses
+            </a>
           </div>
 
-          <div class="mtc-admin-metrics-grid" style="margin-bottom: 30px; margin-top: 20px">
+          <!-- Summary Cards -->
+          <div class="mtc-admin-metrics-grid" style="margin-bottom: 28px;">
             <div class="mtc-admin-metric-card mtc-metric-upcoming">
               <div class="mtc-metric-icon">
-                <i class="fa-solid fa-receipt"></i>
+                <i class="fa-solid fa-book-open"></i>
               </div>
               <div class="mtc-metric-content">
                 <span>Total Bookings</span>
@@ -88,7 +114,7 @@
             </div>
             <div class="mtc-admin-metric-card mtc-metric-recommended">
               <div class="mtc-metric-icon">
-                <i class="fa-solid fa-arrow-turn-down"></i>
+                <i class="fa-solid fa-clock-rotate-left"></i>
               </div>
               <div class="mtc-metric-content">
                 <span>Pending Review</span>
@@ -97,127 +123,196 @@
             </div>
             <div class="mtc-admin-metric-card mtc-metric-active">
               <div class="mtc-metric-icon">
-                <i class="fa-solid fa-arrow-right-to-bracket"></i>
+                <i class="fa-solid fa-calendar-check"></i>
               </div>
               <div class="mtc-metric-content">
-                <span>Next Lesson</span>
+                <span>Next Scheduled Lesson</span>
                 <strong>
-                  {% if next_booking %}{{ next_booking.booking_date|date:"M j" }}
+                  {% if next_booking %}{{ next_booking.booking_date|date:"M j, Y" }}
                     {% if next_booking.lesson_time %} at {{ next_booking.lesson_time|time:"g:i A" }}{% endif %}
-                  {% else %}-{% endif %}
+                  {% else %}No Upcoming Lesson{% endif %}
                 </strong>
               </div>
             </div>
             <div class="mtc-admin-metric-card mtc-metric-completed">
               <div class="mtc-metric-icon">
-                <i class="fa-solid fa-check-double"></i>
+                <i class="fa-solid fa-circle-check"></i>
               </div>
               <div class="mtc-metric-content">
-                <span>Completed</span>
+                <span>Completed Lessons</span>
                 <strong>{{ completed_lessons_count }}</strong>
               </div>
             </div>
           </div>
 
-          <div class="mtc-student-bookings-card">
-            <div class="mtc-student-bookings-card-head">
+          <!-- Table Container -->
+          <div class="mtc-student-bookings-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 24px; box-shadow: 0 4px 16px rgba(0,0,0,0.03);">
+            <div class="mtc-student-bookings-card-head" style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #f1f5f9; padding-bottom: 16px; margin-bottom: 20px;">
               <div>
-                <h2 style="color: #1D4ED8;">Booking List</h2>
-                <p>All lessons you have requested are shown here.</p>
+                <h2 style="color: #0f172a; margin: 0 0 4px; font-size: 18px; font-weight: 700;">My Enrolled Bookings</h2>
+                <p style="margin: 0; color: #64748b; font-size: 13px;">View active tutors, course details, payment history, and monthly satisfaction releases.</p>
               </div>
               {% if pending_payment_count %}
-              <span class="mtc-pending-payment-badge">
-                <i class="fa-solid fa-triangle-exclamation"></i>
-                {{ pending_payment_count }} pending payment{{ pending_payment_count|pluralize }}
+              <span class="mtc-pending-payment-badge" style="background: #fef2f2; color: #dc2626; border: 1px solid #fecaca; padding: 6px 14px; border-radius: 20px; font-size: 12px; font-weight: 700;">
+                <i class="fa-solid fa-triangle-exclamation" style="margin-right: 4px;"></i>
+                {{ pending_payment_count }} Action Required (Unpaid)
               </span>
               {% endif %}
             </div>
 
             {% if bookings %}
-              <div class="mtc-student-bookings-table-wrap" style="max-height: 520px; overflow: auto;">
-                <table class="mtc-student-bookings-table">
+              <div class="mtc-student-bookings-table-wrap" style="max-height: 560px; overflow: auto;">
+                <table class="mtc-student-bookings-table" style="width: 100%; border-collapse: separate; border-spacing: 0;">
                   <thead>
-                    <tr>
-                      <th>Tutor name</th>
-                      <th>Date</th>
-                      <th>Time</th>
-                      <th>Status</th>
-                      <th>Amount</th>
-                      <th>Payment status</th>
-                      <th>Action</th>
+                    <tr style="background: #f8fafc; border-bottom: 2px solid #e2e8f0;">
+                      <th style="padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Course &amp; Tutor</th>
+                      <th style="padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Schedule &amp; Duration</th>
+                      <th style="padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Total Fee</th>
+                      <th style="padding: 12px 14px; text-align: left; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Status &amp; Payment</th>
+                      <th style="padding: 12px 14px; text-align: right; font-size: 12px; font-weight: 700; color: #475569; text-transform: uppercase;">Actions</th>
                     </tr>
                   </thead>
                   <tbody>
                     {% for booking in bookings %}
-                      <tr>
-                        <td>
-                          <div class="mtc-student-bookings-tutor">
-                            {% if booking.tutor.profile_photo %}
-                              <img src="{{ booking.tutor.profile_photo }}" alt="{{ booking.tutor.get_full_name|default:booking.tutor.username }}">
+                      <tr style="border-bottom: 1px solid #f1f5f9; vertical-align: top;">
+                        
+                        <!-- 1. COURSE & TUTOR INFO -->
+                        <td style="padding: 16px 14px;">
+                          <div style="margin-bottom: 6px;">
+                            {% if booking.course_offer %}
+                              <span class="booking-course-tag"><i class="fa-solid fa-book-bookmark text-primary"></i> {{ booking.course_offer.title }}</span>
                             {% else %}
-                              <i class="fa-regular fa-user"></i>
+                              <span class="booking-course-tag"><i class="fa-solid fa-graduation-cap text-primary"></i> {{ booking.tutor.subjects.all|join:", "|default:"Private Tutoring" }}</span>
+                            {% endif %}
+                          </div>
+                          
+                          <div class="mtc-student-bookings-tutor" style="display: flex; gap: 10px; align-items: center;">
+                            {% if booking.tutor.profile_photo %}
+                              <img src="{{ booking.tutor.profile_photo }}" alt="{{ booking.tutor.get_full_name }}" style="width: 42px; height: 42px; border-radius: 10px; object-fit: cover;">
+                            {% else %}
+                              <div style="width: 42px; height: 42px; border-radius: 10px; background: #e0e7ff; color: #3730a3; font-weight: 700; display: grid; place-items: center; font-size: 15px;">
+                                {{ booking.tutor.user.user.first_name|slice:":1"|default:booking.tutor.user.user.username|slice:":1" }}
+                              </div>
                             {% endif %}
                             <div>
-                              <strong>{{ booking.tutor.get_full_name|default:booking.tutor.username }}</strong>
-                              <small>{{ booking.tutor.location|default:"Location pending" }}</small>
+                              <strong style="display: block; font-size: 14px; color: #0f172a;">{{ booking.tutor.user.user.get_full_name|default:booking.tutor.user.user.username }}</strong>
+                              <span class="booking-mode-tag">
+                                {% if booking.class_type == "online" %}
+                                  <i class="fa-solid fa-laptop-code" style="color: #2563eb;"></i> Online Class
+                                {% else %}
+                                  <i class="fa-solid fa-house-user" style="color: #2563eb;"></i> Physical Class
+                                {% endif %}
+                                &bull; {{ booking.tutor.location|default:"Nigeria" }}
+                              </span>
                             </div>
                           </div>
                         </td>
-                        <td>{{ booking.booking_date|date:"M j, Y" }}</td>
-                        <td>
-                          {{ booking.lesson_time|time:"g:i A" }}<br>
-                          <small>{{ booking.duration_value }} {{ booking.get_duration_unit_display }}</small>
+
+                        <!-- 2. SCHEDULE & DURATION -->
+                        <td style="padding: 16px 14px; font-size: 13px; color: #334155;">
+                          {% if booking.booking_date %}
+                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 2px;">
+                              <i class="fa-solid fa-calendar-days text-primary" style="margin-right: 4px;"></i> {{ booking.booking_date|date:"M j, Y" }}
+                            </div>
+                            <div style="color: #64748b; font-size: 12px;">
+                              <i class="fa-solid fa-clock" style="margin-right: 4px;"></i>
+                              {% if booking.lesson_time %}{{ booking.lesson_time|time:"g:i A" }}{% else %}Time flexible / arranged{% endif %}
+                            </div>
+                          {% else %}
+                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 2px;">
+                              <i class="fa-solid fa-calendar-check text-primary" style="margin-right: 4px;"></i> Course Enrollment
+                            </div>
+                            <div style="color: #64748b; font-size: 12px;">
+                              Flexible lesson schedule
+                            </div>
+                          {% endif %}
+
+                          <div style="margin-top: 6px; font-size: 12px; color: #2563eb; font-weight: 600;">
+                            <i class="fa-solid fa-hourglass-half text-primary" style="margin-right: 4px;"></i> {{ booking.duration_value }} {{ booking.get_duration_unit_display }}
+                          </div>
                         </td>
-                        <td>
-                          <span class="mtc-status-pill mtc-status-{{ booking.status }}">
-                            {{ booking.get_status_display }}
-                          </span>
+
+                        <!-- 3. TOTAL FEE -->
+                        <td style="padding: 16px 14px;">
+                          <strong style="font-size: 16px; color: #0f172a; display: block;">&#8358;{{ booking.amount|floatformat:2 }}</strong>
+                          <span style="font-size: 11px; color: #64748b;">Package Total</span>
                         </td>
-                        <td><strong>₦{{ booking.amount }}</strong></td>
-                        <td>
-                          <span class="mtc-payment-pill mtc-payment-{{ booking.display_payment_status }}">
-                            {{ booking.display_payment_status_label }}
-                          </span>
-                        </td>
-                        <td>
-                          <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
-                            {% if booking.status != "cancelled" %}
+
+                        <!-- 4. STATUS & PAYMENT -->
+                        <td style="padding: 16px 14px;">
+                          <!-- Booking Status -->
+                          <div style="margin-bottom: 6px;">
+                            {% if booking.status == "accepted" %}
+                              <span style="background: #dcfce7; color: #15803d; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">Accepted</span>
+                            {% elif booking.status == "completed" %}
+                              <span style="background: #f3e8ff; color: #6b21a8; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">Completed</span>
+                            {% elif booking.status == "cancelled" %}
+                              <span style="background: #fef2f2; color: #b91c1c; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">Cancelled</span>
+                            {% else %}
+                              <span style="background: #fef3c7; color: #b45309; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">Pending Review</span>
+                            {% endif %}
+                          </div>
+
+                          <!-- Payment Status -->
+                          <div>
                             {% if booking.display_payment_status == "paid" %}
-                              {% if booking.status == "completed" %}
-                                {% if booking.reviews.exists %}
-                                  <span class="mtc-reviewed-label">Reviewed</span>
-                                {% else %}
-                                  <a href="{% url 'add_review' booking.id %}" class="mtc-review-button">Review</a>
-                                {% endif %}
-                              {% endif %}
-                              <a href="{% url 'chat:chat_view' booking.id %}" class="mtc-chat-button" style="display: inline-flex; align-items: center; gap: 4px; padding: 6px 12px; border-radius: 8px; background: #2563eb; color: #ffffff; font-size: 13px; font-weight: 600; text-decoration: none;">
-                                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
-                                Chat
+                              <span style="background: #eff6ff; color: #1d4ed8; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;"><i class="fa-solid fa-check" style="margin-right: 3px;"></i> Paid</span>
+                            {% elif booking.display_payment_status == "failed" %}
+                              <span style="background: #fef2f2; color: #dc2626; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;"><i class="fa-solid fa-xmark" style="margin-right: 3px;"></i> Payment Failed</span>
+                            {% else %}
+                              <span style="background: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;"><i class="fa-solid fa-hourglass" style="margin-right: 3px;"></i> Unpaid</span>
+                            {% endif %}
+                          </div>
+                        </td>
+
+                        <!-- 5. ACTIONS -->
+                        <td style="padding: 16px 14px; text-align: right;">
+                          <div style="display: flex; flex-direction: column; gap: 8px; align-items: flex-end;">
+
+                            {% if booking.display_payment_status == "paid" %}
+                              <!-- Chat with Tutor Button -->
+                              <a href="{% url 'chat:chat_view' booking.id %}" class="btn btn-primary" style="font-size: 12px; font-weight: 700; border-radius: 8px; padding: 6px 14px; text-decoration: none; display: inline-flex; align-items: center; gap: 6px; background: #2563eb; color: #ffffff;">
+                                <i class="fa-solid fa-comments"></i> Chat with Tutor
                               </a>
+
+                              <!-- Monthly Satisfaction / Payout Release Card -->
                               {% if booking.next_payout_installment %}
-                                <div style="flex-basis: 100%; font-size: 12px; color: #475569;">
-                                  Week {{ booking.next_payout_installment.week_number }} payout:
-                                  <strong>{{ booking.next_payout_installment.get_status_display }}</strong>
-                                  {% if booking.next_payout_installment.status == "awaiting_student" %}
-                                    <br>Confirm within 4 days or it auto-approves on {{ booking.next_payout_installment.auto_release_at|date:"M j, Y" }}.
-                                  {% elif booking.next_payout_installment.status == "scheduled" and booking.can_confirm_payout_week %}
-                                    <br>Test mode: you can confirm this scheduled week now.
+                                <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 10px; font-size: 11px; text-align: left; width: 100%; max-width: 220px;">
+                                  <div style="font-weight: 700; color: #0f172a; margin-bottom: 2px;">
+                                    Monthly Payout: {{ booking.next_payout_installment.get_status_display }}
+                                  </div>
+                                  <div style="font-size: 10.5px; color: #64748b;">
+                                    Released on the last day of the month
+                                  </div>
+                                  
+                                  {% if booking.can_confirm_payout_week %}
+                                    <form method="post" action="{% url 'student_confirm_payout' booking.next_payout_installment.id %}" style="margin-top: 6px;">
+                                      {% csrf_token %}
+                                      <button type="submit" class="btn" style="width: 100%; background: #16a34a; color: #ffffff; font-size: 11px; font-weight: 700; padding: 5px 8px; border-radius: 6px; border: none; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 4px;">
+                                        <i class="fa-solid fa-circle-check"></i> Confirm Satisfaction
+                                      </button>
+                                    </form>
                                   {% endif %}
                                 </div>
-                                {% if booking.can_confirm_payout_week %}
-                                  <form method="post" action="{% url 'student_confirm_payout' booking.next_payout_installment.id %}" style="display: inline;">
-                                    {% csrf_token %}
-                                    <button type="submit" class="mtc-review-button" style="border: 0;">
-                                      <i class="fa-solid fa-circle-check"></i> Satisfied
-                                    </button>
-                                  </form>
+                              {% endif %}
+
+                              <!-- Complaint / Issue Trigger -->
+                              <button type="button" data-complaint-trigger="student-complaint-{{ booking.id }}" class="btn" style="border: 1px solid #fed7aa; background: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; cursor: pointer; display: inline-flex; align-items: center; gap: 4px;">
+                                <i class="fa-solid fa-headset"></i> Report Issue
+                              </button>
+
+                              <!-- Review Button if Completed -->
+                              {% if booking.status == "completed" %}
+                                {% if not booking.reviews.exists %}
+                                  <a href="{% url 'add_review' booking.id %}" class="btn" style="border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 11px; font-weight: 700; padding: 4px 10px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa-solid fa-star text-warning"></i> Leave Review
+                                  </a>
                                 {% endif %}
                               {% endif %}
-                              <button type="button" class="mtc-review-button" data-complaint-trigger="student-complaint-{{ booking.id }}" style="border: 0; cursor: pointer; display: inline-flex; background: #fff7ed; color: #c2410c;">
-                                <i class="fa-solid fa-headset"></i> Complaint
-                              </button>
+
+                              <!-- Complaint Modal -->
                               <div class="mtc-complaint-overlay" id="student-complaint-{{ booking.id }}" data-complaint-modal hidden>
-                                <section class="mtc-complaint-modal" role="dialog" aria-modal="true" aria-labelledby="student-complaint-title-{{ booking.id }}">
+                                <section class="mtc-complaint-modal" role="dialog" aria-modal="true" aria-labelledby="student-complaint-title-{{ booking.id }}" style="text-align: left;">
                                   <div class="mtc-complaint-modal-header">
                                     <div>
                                       <h2 id="student-complaint-title-{{ booking.id }}">Submit a complaint</h2>
@@ -242,9 +337,9 @@
                                   <label>Complaint details
                                   <textarea name="message" rows="4" minlength="10" required placeholder="Explain what happened. Support will review before payout is released."></textarea>
                                   </label>
-                                   <label>Evidence link <span>(optional)</span>
-                                   <input type="url" name="evidence_url" placeholder="https://example.com/evidence">
-                                   </label>
+                                  <label>Evidence link <span>(optional)</span>
+                                  <input type="url" name="evidence_url" placeholder="https://example.com/evidence">
+                                  </label>
                                   <div class="mtc-complaint-actions">
                                     <button type="button" class="mtc-complaint-cancel" data-complaint-close>Cancel</button>
                                     <button type="submit" class="btn btn-primary">Send to support</button>
@@ -252,20 +347,17 @@
                                   </form>
                                 </section>
                               </div>
-                              {% if booking.open_support_ticket %}
-                                <span class="mtc-pending-payment-badge" style="background: #fef3c7; color: #92400e;">
-                                  Support: {{ booking.open_support_ticket.get_status_display }}
-                                </span>
-                              {% endif %}
+
                             {% else %}
-                              <form method="post" action="{% url 'payment_checkout' booking.id %}" style="display: inline;">
+                              <!-- Pay Now Button -->
+                              <form method="post" action="{% url 'payment_checkout' booking.id %}" style="display: inline-block;">
                                 {% csrf_token %}
-                                <button type="submit" class="btn btn-primary" style="padding: 4px 12px; border-radius: 8px; font-size: 13px; font-weight: 600;">
-                                  <i class="fa-solid fa-cart-shopping"></i>  Pay Now
+                                <button type="submit" class="btn btn-primary" style="padding: 8px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; background: #2563eb; color: #ffffff; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px;">
+                                  <i class="fa-solid fa-credit-card"></i> Pay Now
                                 </button>
                               </form>
                             {% endif %}
-                            {% endif %}
+
                           </div>
                         </td>
                       </tr>
@@ -273,47 +365,34 @@
                   </tbody>
                 </table>
               </div>
+
               {% if page_obj.has_other_pages %}
-                <nav class="mtc-bookings-pagination" aria-label="Booking list pagination">
-                  <div class="mtc-bookings-pagination-summary">
+                <nav class="mtc-bookings-pagination" aria-label="Booking list pagination" style="margin-top: 20px; display: flex; justify-content: space-between; align-items: center;">
+                  <div class="mtc-bookings-pagination-summary" style="font-size: 13px; color: #64748b;">
                     Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
                   </div>
-                  <div class="mtc-bookings-pagination-controls">
+                  <div style="display: flex; gap: 8px;">
                     {% if page_obj.has_previous %}
-                      <a href="?page={{ page_obj.previous_page_number }}" aria-label="Previous page">
-                        <i class="fa-solid fa-chevron-left"></i>
-                        Previous
-                      </a>
-                    {% else %}
-                      <span class="is-disabled">
-                        <i class="fa-solid fa-chevron-left"></i>
-                        Previous
-                      </span>
+                      <a href="?page={{ page_obj.previous_page_number }}" class="btn" style="border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; text-decoration: none;">&laquo; Previous</a>
                     {% endif %}
                     {% if page_obj.has_next %}
-                      <a href="?page={{ page_obj.next_page_number }}" aria-label="Next page">
-                        Next
-                        <i class="fa-solid fa-chevron-right"></i>
-                      </a>
-                    {% else %}
-                      <span class="is-disabled">
-                        Next
-                        <i class="fa-solid fa-chevron-right"></i>
-                      </span>
+                      <a href="?page={{ page_obj.next_page_number }}" class="btn" style="border: 1px solid #cbd5e1; background: #ffffff; color: #0f172a; font-size: 12px; font-weight: 600; padding: 6px 12px; border-radius: 6px; text-decoration: none;">Next &raquo;</a>
                     {% endif %}
                   </div>
                 </nav>
               {% endif %}
+
             {% else %}
-              <div class="mtc-student-bookings-empty">
-                <div class="mtc-student-bookings-empty-icon">
-                  <i class="fa-solid fa-calendar-check"></i>
-                </div>
-                <h2>No bookings yet</h2>
-                <p>Your tutor bookings will appear here after you schedule a lesson.</p>
-                <a href="{% url 'home' %}#search-section" class="btn btn-primary">Find a Tutor</a>
+              <div style="text-align: center; padding: 50px 20px; color: #64748b;">
+                <i class="fa-solid fa-folder-open" style="font-size: 40px; color: #cbd5e1; margin-bottom: 14px; display: block;"></i>
+                <h3 style="margin: 0 0 6px; font-size: 16px; font-weight: 700; color: #0f172a;">No bookings found</h3>
+                <p style="margin: 0 0 16px; font-size: 13px;">Browse available tutors and courses to start learning.</p>
+                <a href="{% url 'tutor_list' %}" class="btn btn-primary" style="font-weight: 700; border-radius: 8px; padding: 8px 18px;">
+                  Explore Courses &amp; Tutors
+                </a>
               </div>
             {% endif %}
+
           </div>
         </div>
       </div>

@@ -176,7 +176,23 @@ def _extract_with_rules(text, base_intent=None):
         ("D-Line", ["d line", "d-line"]),
         ("Ada George", ["ada george"]),
         ("Woji", ["woji"]),
-        ("Online", ["online", "remote"]),
+        ("Lagos", ["lagos", "ikeja", "lekki", "victoria island", "yaba"]),
+        ("Abuja", ["abuja", "fct", "garki", "wuse", "maitama"]),
+        ("Ibadan", ["ibadan"]),
+        ("Kano", ["kano"]),
+        ("Enugu", ["enugu"]),
+        ("Benin", ["benin", "benin city"]),
+        ("Calabar", ["calabar"]),
+        ("Uyo", ["uyo"]),
+        ("Owerri", ["owerri"]),
+        ("Asaba", ["asaba"]),
+        ("Warri", ["warri"]),
+        ("Kaduna", ["kaduna"]),
+        ("Jos", ["jos"]),
+        ("Ilorin", ["ilorin"]),
+        ("Abeokuta", ["abeokuta"]),
+        ("Akure", ["akure"]),
+        ("Online", ["online", "remote", "virtual"]),
     ]
     location_match = _latest_pattern_match(normalized, location_patterns)
     if location_match:
@@ -571,7 +587,7 @@ def _photo_url(tutor):
         return photo.url
     if photo:
         return str(photo)
-    return "https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=600&q=80"
+    return "https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?auto=format&fit=crop&w=600&q=80"
 
 
 def _known_subjects():

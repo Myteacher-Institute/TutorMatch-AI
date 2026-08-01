@@ -310,8 +310,7 @@
                     </div>
 
                     <div class="best-match-actions" style="display: flex; gap: 12px; margin-top: auto;">
-                      <a href="{% url 'book_tutor' tutor.id %}" class="btn btn-primary" style="flex: 1; background: var(--blue); color: var(--white); font-weight: 700; border-radius: 8px; min-height: 44px; font-size: 14px;">Book Lessons</a>
-                      <a href="{% url 'tutor_detail' tutor.id %}" class="btn btn-ghost" style="flex: 1; border: 1px solid var(--line); border-radius: 8px; font-weight: 700; background: var(--white); color: #4b5563; min-height: 44px; font-size: 14px;">View Full Profile</a>
+                      <a href="{% url 'tutor_detail' tutor.id %}" class="btn btn-primary" style="flex: 1; background: var(--blue); color: var(--white); font-weight: 700; border-radius: 8px; min-height: 44px; font-size: 14px; display: inline-flex; align-items: center; justify-content: center;">Browse Course Offerings</a>
                     </div>
                   </div>
                 </article>
@@ -368,9 +367,8 @@
                       <span style="font-size: 11px; color: var(--muted);">/cycle</span>
                     </div>
                     
-                    <div style="display: flex; gap: 6px;">
-                      <a href="{% url 'tutor_detail' tutor.id %}" class="btn btn-ghost" style="min-height: 32px; padding: 0 10px; font-size: 11px; border: 1px solid var(--line); border-radius: 6px; font-weight: 700; background: var(--white); color: #4b5563;">Profile</a>
-                      <a href="{% url 'book_tutor' tutor.id %}" class="btn btn-primary" style="min-height: 32px; padding: 0 10px; font-size: 11px; border-radius: 6px; font-weight: 700; background: var(--blue); color: var(--white);">Book Now</a>
+                    <div style="display: flex; gap: 6px; width: 100%;">
+                      <a href="{% url 'tutor_detail' tutor.id %}" class="btn btn-primary" style="flex: 1; min-height: 34px; padding: 0 12px; font-size: 12px; border-radius: 6px; font-weight: 700; background: var(--blue); color: var(--white); text-align: center; display: inline-flex; align-items: center; justify-content: center;">Browse Courses</a>
                     </div>
                   </div>
                 </article>
@@ -513,7 +511,7 @@
             <!-- Broadened Tutor 1 -->
             <article style="display: flex; flex-direction: column; background: var(--white); border: 1px solid #bfdbfe; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.02); position: relative; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
               <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; width: 100%;">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=600&q=80" alt="Chioma Egwu" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+                <img src="{% static 'images/avatars/avatar1.png' %}" alt="Chioma Egwu" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
                 <div style="flex: 1; min-width: 0;">
                   <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Chioma Egwu</h4>
                   <p style="margin: 2px 0 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Further Mathematics & Physics Specialist</p>
@@ -556,7 +554,7 @@
             <!-- Broadened Tutor 2 -->
             <article style="display: flex; flex-direction: column; background: var(--white); border: 1px solid #bfdbfe; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.02); position: relative; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
               <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; width: 100%;">
-                <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=600&q=80" alt="Kabiru Bello" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+                <img src="{% static 'images/avatars/avatar2.png' %}" alt="Kabiru Bello" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
                 <div style="flex: 1; min-width: 0;">
                   <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Kabiru Bello</h4>
                   <p style="margin: 2px 0 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Mathematics & Technical Drawing</p>
@@ -599,7 +597,7 @@
             <!-- Broadened Tutor 3 -->
             <article style="display: flex; flex-direction: column; background: var(--white); border: 1px solid #bfdbfe; border-radius: 16px; padding: 20px; box-shadow: 0 4px 15px rgba(15, 23, 42, 0.02); position: relative; transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
               <div style="display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; width: 100%;">
-                <img src="https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=600&q=80" alt="Abimbola Adeniran" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
+                <img src="{% static 'images/avatars/avatar3.png' %}" alt="Abimbola Adeniran" style="width: 48px; height: 48px; border-radius: 50%; object-fit: cover;">
                 <div style="flex: 1; min-width: 0;">
                   <h4 style="margin: 0; font-size: 16px; font-weight: 700; color: #0f172a; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">Abimbola Adeniran</h4>
                   <p style="margin: 2px 0 0; color: var(--muted); font-size: 12px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">General Sciences & Math</p>

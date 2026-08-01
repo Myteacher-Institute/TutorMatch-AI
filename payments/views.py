@@ -48,16 +48,16 @@ def flutterwave_configuration_error():
     if not secret_key or not public_key:
         return "Flutterwave is not configured. Add FLUTTERWAVE_SECRET_KEY and FLUTTERWAVE_PUBLIC_KEY to your .env file."
 
-    if not secret_key.startswith("FLWSECK_"):
+    if not secret_key.startswith(("FLWSECK_", "FLWSECK-")):
         return (
-            "Flutterwave hosted checkout requires your standard Secret Key starting with FLWSECK_ "
-            "(e.g., FLWSECK_LIVE-...). Copy it from Flutterwave Dashboard > Settings > API Keys."
+            "Flutterwave hosted checkout requires your standard Secret Key starting with FLWSECK_ or FLWSECK- "
+            "from Flutterwave Dashboard > Settings > API Keys."
         )
 
-    if not public_key.startswith("FLWPUBK_"):
+    if not public_key.startswith(("FLWPUBK_", "FLWPUBK-")):
         return (
-            "Flutterwave hosted checkout requires your standard Public Key starting with FLWPUBK_ "
-            "(e.g., FLWPUBK_LIVE-...). Copy it from Flutterwave Dashboard > Settings > API Keys."
+            "Flutterwave hosted checkout requires your standard Public Key starting with FLWPUBK_ or FLWPUBK- "
+            "from Flutterwave Dashboard > Settings > API Keys."
         )
 
     return ""
@@ -145,6 +145,20 @@ def checkout(request, booking_id):
         return redirect("student_bookings")
 
     if request.method == "POST":
+        user_profile = getattr(request.user, "profile", None)
+        use_wallet = request.POST.get("use_wallet") == "1"
+        if user_profile and user_profile.wallet_balance > 0 and (use_wallet or user_profile.wallet_balance >= booking.amount):
+            wallet_discount = min(user_profile.wallet_balance, booking.amount)
+            user_profile.wallet_balance -= wallet_discount
+            user_profile.save(update_fields=["wallet_balance"])
+
+            remaining_amount = booking.amount - wallet_discount
+            if remaining_amount <= Decimal("0.00"):
+                payment = _upsert_booking_payment(booking, status="paid", reference=f"WALLET-{booking.id}-{timezone_now_ref()}")
+                _ensure_payout_installments(booking, payment)
+                messages.success(request, f"Booking #{booking.id} paid instantly using ₦{wallet_discount} from your platform wallet credit!")
+                return redirect(f"{reverse('payment_success')}?booking_id={booking.id}")
+
         if not flutterwave_is_configured():
             messages.error(request, flutterwave_configuration_error())
             return redirect("payment_failed")
@@ -188,7 +202,7 @@ def checkout(request, booking_id):
         messages.error(request, res_data.get("message") or "Payment initialization failed. Please try again.")
         return redirect("payment_failed")
 
-    commission = booking.amount * Decimal('0.15')
+    commission = booking.amount * Decimal('0.20')
     tutor_payout = booking.amount - commission
     template_context = {
         "booking": booking,

@@ -41,6 +41,7 @@ def tutor_dashboard(request):
         'pending_earnings': profile.pending_earnings,
         'total_paid_out': profile.total_paid_out,
         'next_payout_date': profile.next_payout_date,
+        'upcoming_installments': profile.upcoming_payout_installments,
         'upcoming_bookings': upcoming_bookings,
         'active_tab': 'dashboard',
     })
@@ -77,7 +78,7 @@ def tutor_profile(request):
                 profile.subjects.add(subj)
 
         messages.success(request, 'Personal profile updated successfully.')
-        return redirect('tutor_dashboard')
+        return redirect('tutor_profile')
     else:
         # If the form is not valid and method is POST, show the errors
         if request.method == 'POST':
@@ -139,8 +140,6 @@ def tutor_verification(request):
 
         profile.documents.all().delete()
         profile.verification_status = "pending"
-        profile.user.is_verified = False
-        profile.user.save(update_fields=["is_verified"])
 
         doc = form.save(commit=False)
         doc.tutor = profile

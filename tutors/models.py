@@ -112,12 +112,12 @@ class Tutor(models.Model):
     account_number = models.CharField(max_length=20, blank=True)
     payout_schedule = models.CharField(
         max_length=20,
-        choices=[("monthly", "Monthly (Recommended)"), ("biweekly", "Bi-weekly")],
+        choices=[("monthly", "Monthly (Last day of every month)")],
         default="monthly",
     )
 
     def save(self, *args, **kwargs):
-        self.is_publicly_visible = self.verification_status == "approved"
+        self.is_publicly_visible = (self.verification_status == "approved" and bool(self.profile_photo))
         if kwargs.get("update_fields") is not None and "verification_status" in kwargs["update_fields"]:
             kwargs["update_fields"] = list(kwargs["update_fields"]) + ["is_publicly_visible"]
         super().save(*args, **kwargs)
@@ -128,6 +128,61 @@ class Tutor(models.Model):
     @property
     def is_verified(self):
         return self.verification_status == "approved"
+
+    @property
+    def missing_profile_fields(self):
+        missing = []
+        if not self.profile_photo:
+            missing.append("Profile Photo")
+        if not self.bio:
+            missing.append("Biography / Bio")
+        if not self.location and not self.address:
+            missing.append("Location / Address")
+        if not self.subjects.exists():
+            missing.append("Teaching Subjects")
+        if self.rate_amount == 0 and self.online_class_fee == 0 and self.physical_class_fee == 0 and not self.course_offers.exists():
+            missing.append("Class Rates / Pricing")
+        if not self.qualifications:
+            missing.append("Qualifications")
+        if not self.bank_name or not self.account_number or not self.account_name:
+            missing.append("Bank Payout Details")
+        if not self.documents.exists():
+            missing.append("Verification Documents (ID / NIN)")
+        return missing
+
+    @property
+    def is_profile_complete(self):
+        return len(self.missing_profile_fields) == 0
+
+    @property
+    def upcoming_payout_installments(self):
+        """
+        Returns all active upcoming PayoutInstallment records for this tutor's paid course bookings,
+        ordered by period_end (earliest payout coming sooner).
+        """
+        try:
+            from payments.models import PayoutInstallment
+            return PayoutInstallment.objects.filter(
+                booking__tutor=self,
+                booking__status="accepted",
+                booking__payments__payment_status__in=["paid", "released"],
+                status__in=["approved", "awaiting_student", "pending", "scheduled"],
+            ).select_related("booking__student__user", "booking__course_offer", "payment").order_by("period_end")
+        except Exception:
+            return []
+
+    @property
+    def next_payout_date(self):
+        """
+        Returns the earliest upcoming payout date across all active paid course bookings.
+        Returns None if the tutor has no active paid course bookings.
+        """
+        installments = self.upcoming_payout_installments
+        if installments:
+            first_upcoming = installments.first()
+            if first_upcoming and first_upcoming.period_end:
+                return first_upcoming.period_end
+        return None
 
     @property
     def first_name(self):
@@ -196,18 +251,6 @@ class Tutor(models.Model):
     @property
     def total_paid_out(self):
         return self.current_balance
-
-    @property
-    def next_payout_date(self):
-        from django.utils import timezone
-        import datetime
-        now = timezone.localdate()
-        if now.day < 5:
-            return datetime.date(now.year, now.month, 5)
-        else:
-            month = now.month + 1 if now.month < 12 else 1
-            year = now.year + 1 if now.month == 12 else now.year
-            return datetime.date(year, month, 5)
 
 
 class TutorDocument(models.Model):

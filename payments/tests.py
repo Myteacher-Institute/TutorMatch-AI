@@ -89,6 +89,14 @@ class PaymentVerificationTests(TestCase):
         self.assertEqual(flutterwave_configuration_error(), "")
 
     @override_settings(
+        FLUTTERWAVE_SECRET_KEY="FLWSECK-50843853ecce4eedca188b18fb7afbd2-19fb913f38dvt-X",
+        FLUTTERWAVE_PUBLIC_KEY="FLWPUBK-21a5ffcd60d46505c7893d9bd2cea6de-X",
+    )
+    def test_hyphenated_credentials_are_accepted(self):
+        self.assertTrue(flutterwave_is_configured())
+        self.assertEqual(flutterwave_configuration_error(), "")
+
+    @override_settings(
         FLUTTERWAVE_SECRET_KEY="v4-client-id",
         FLUTTERWAVE_PUBLIC_KEY="v4-client-secret",
     )

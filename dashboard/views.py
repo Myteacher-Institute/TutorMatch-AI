@@ -54,6 +54,11 @@ def home(request):
     ) + cc_offset
     parents_count = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count() + pj_offset
 
+    from accounts.models import SuccessStory
+    success_stories = list(
+        SuccessStory.objects.select_related("user__profile__tutor_profile")
+        .order_by("-created_at")[:6]
+    )
 
     return render(
         request,
@@ -64,6 +69,8 @@ def home(request):
             "completed_lessons_count": completed_lessons_count,
             "cities_covered_count": cities_covered_count,
             "parents_count": parents_count,
+            "success_stories": success_stories,
+            "config": config,
         },
     )
 
@@ -93,6 +100,11 @@ def contact(request):
 
 @admin_required
 def admin_dashboard(request):
+    try:
+        from bookings.models import Booking
+        Booking.cleanup_expired_pending()
+    except Exception:
+        pass
     total_tutors = UserProfile.objects.filter(role=UserProfile.ROLE_TUTOR).count()
     total_students = UserProfile.objects.filter(role=UserProfile.ROLE_STUDENT).count()
 
@@ -116,8 +128,8 @@ def admin_dashboard(request):
             payment_status__in=["paid", "released"]
         ).aggregate(Sum("amount"))["amount__sum"] or 0
         total_revenue = f"{float(received_amount):,.2f}"
-        total_commission = f"{float(received_amount) * 0.15:,.2f}"
-        total_tutor_payout = f"{float(received_amount) * 0.85:,.2f}"
+        total_commission = f"{float(received_amount) * 0.20:,.2f}"
+        total_tutor_payout = f"{float(received_amount) * 0.80:,.2f}"
     except (LookupError, AttributeError, ValueError):
         pass
 
@@ -327,7 +339,7 @@ def export_weekly_report(request):
         received = Payment.objects.filter(payment_status__in=["paid", "released"])
         received_amount = float(received.aggregate(Sum("amount"))["amount__sum"] or 0)
         total_collected = received_amount
-        total_commission = total_collected * 0.15
+        total_commission = total_collected * 0.20
         total_payout = float(received.filter(payment_status="released").aggregate(Sum("tutor_payout"))["tutor_payout__sum"] or 0)
 
     day_revenue = []
@@ -493,38 +505,96 @@ def verifications(request):
     if request.method == "POST" and action and profile_id:
         try:
             profile = UserProfile.objects.get(pk=profile_id)
+            tutor_obj = Tutor.objects.filter(user=profile).first()
+
             if action == "approve":
                 profile.is_verified = True
-                profile.save()
-
-                try:
-                    tutor_obj = Tutor.objects.filter(user=profile).first()
-                    if tutor_obj:
-                        tutor_obj.verification_status = "approved"
-                        tutor_obj.save(update_fields=["verification_status"])
-                        tutor_obj.documents.update(verification_status="approved")
-                except (LookupError, AttributeError):
-                    pass
+                profile.save(update_fields=["is_verified"])
+                if tutor_obj:
+                    tutor_obj.verification_status = "approved"
+                    tutor_obj.save(update_fields=["verification_status"])
+                    tutor_obj.documents.update(verification_status="approved")
+                messages.success(request, f"Tutor {profile.user.get_full_name() or profile.user.username} has been approved.")
 
             elif action == "reject":
-                profile.is_verified = False
-                profile.save()
+                if tutor_obj:
+                    tutor_obj.verification_status = "rejected"
+                    tutor_obj.save(update_fields=["verification_status"])
+                    tutor_obj.documents.update(verification_status="rejected")
+                messages.warning(request, f"Tutor {profile.user.get_full_name() or profile.user.username} set to rejected/incomplete.")
 
-                try:
-                    tutor_obj = Tutor.objects.filter(user=profile).first()
-                    if tutor_obj:
-                        tutor_obj.verification_status = "rejected"
-                        tutor_obj.save(update_fields=["verification_status"])
-                        tutor_obj.documents.update(verification_status="rejected")
-                except (LookupError, AttributeError):
-                    pass
+            elif action == "send_missing_email":
+                if tutor_obj:
+                    missing_items = tutor_obj.missing_profile_fields
+                    if missing_items:
+                        missing_text = "\n- ".join([""] + missing_items)
+                        tutor_email = profile.user.email
+                        tutor_name = profile.user.get_full_name() or profile.user.username
+                        subject = "Action Required: Complete Your Tutor Profile on MyteacherConnect"
+                        html_body = f"""
+                            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #1e293b; max-width: 600px; margin: 0 auto; padding: 20px;">
+                              <h2 style="color: #2563eb;">Complete Your Tutor Profile</h2>
+                              <p>Hello <strong>{tutor_name}</strong>,</p>
+                              <p>We reviewed your tutor application on <strong>MyteacherConnect</strong>. To complete your verification, please log in and update the following missing items:</p>
+                              <ul style="background: #f8fafc; padding: 16px 24px; border-radius: 8px; border: 1px solid #e2e8f0;">
+                                {''.join(f'<li style="margin-bottom: 6px; font-weight: bold;">{item}</li>' for item in missing_items)}
+                              </ul>
+                              <p><a href="https://myteacherconnect.org/tutors/profile/" style="background: #2563eb; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 6px; display: inline-block; font-weight: bold;">Update Profile Now</a></p>
+                              <p>Thank you,<br><strong>MyteacherConnect Admin Team</strong></p>
+                            </div>
+                        """
+                        text_body = f"Hello {tutor_name},\n\nPlease complete the following missing items on your MyteacherConnect tutor profile:{missing_text}\n\nLink: https://myteacherconnect.org/tutors/profile/\n\nThank you,\nMyteacherConnect Admin Team"
+                        try:
+                            from accounts.email_services import send_transactional_email
+                            send_transactional_email(
+                                to_email=tutor_email,
+                                to_name=tutor_name,
+                                subject=subject,
+                                html_body=html_body,
+                                text_body=text_body,
+                            )
+                            messages.success(request, f"Verification reminder email successfully sent to {tutor_email}.")
+                        except Exception as exc:
+                            logger.exception("Failed to send verification reminder email to %s", tutor_email)
+                            messages.error(request, f"Could not send email to {tutor_email}: {exc}")
+                    else:
+                        messages.info(request, f"Tutor {profile.user.get_full_name() or profile.user.username} has no missing items.")
         except UserProfile.DoesNotExist:
             pass
 
-    pending_tutors = Tutor.objects.filter(
-        verification_status__in=["pending", "rejected"]
-    ).select_related("user__user").prefetch_related("documents").order_by("-user__created_at")
-    return render(request, "dashboard/verifications.html", {"pending_tutors": pending_tutors})
+    status_filter = request.GET.get("status", "pending").strip()
+    base_qs = (
+        Tutor.objects
+        .select_related("user__user")
+        .prefetch_related("documents", "subjects", "course_offers")
+        .order_by("-user__created_at")
+    )
+
+    if status_filter == "pending":
+        tutors_qs = base_qs.filter(verification_status="pending")
+    elif status_filter == "approved":
+        tutors_qs = base_qs.filter(verification_status="approved")
+    elif status_filter == "rejected":
+        tutors_qs = base_qs.filter(verification_status="rejected")
+    else:
+        tutors_qs = base_qs
+
+    status_counts = {
+        "pending": base_qs.filter(verification_status="pending").count(),
+        "approved": base_qs.filter(verification_status="approved").count(),
+        "rejected": base_qs.filter(verification_status="rejected").count(),
+        "all": base_qs.count(),
+    }
+
+    return render(
+        request,
+        "dashboard/verifications.html",
+        {
+            "pending_tutors": tutors_qs,
+            "status_filter": status_filter,
+            "status_counts": status_counts,
+        },
+    )
 
 
 @admin_required
@@ -707,6 +777,33 @@ def support(request):
             ticket.resolved_at = timezone.now()
             ticket.save(update_fields=["status", "resolved_at", "admin_note"])
             messages.success(request, "Ticket resolved and weekly payment refund was initiated.")
+
+        elif action == "block_tutor_and_credit_student":
+            if not installment:
+                messages.error(request, "This ticket is not linked to a payout installment.")
+                return redirect("admin_support")
+
+            installment.status = PayoutInstallment.STATUS_HELD_FOR_STUDENT
+            installment.save(update_fields=["status"])
+
+            tutor = installment.booking.tutor
+            if tutor:
+                tutor.verification_status = "rejected"
+                tutor.is_publicly_visible = False
+                tutor.save(update_fields=["verification_status", "is_publicly_visible"])
+                if tutor.user and tutor.user.user:
+                    tutor.user.user.is_active = False
+                    tutor.user.user.save(update_fields=["is_active"])
+
+            student = installment.booking.student
+            if student:
+                student.wallet_balance += installment.amount
+                student.save(update_fields=["wallet_balance"])
+
+            ticket.status = SupportTicket.STATUS_RESOLVED
+            ticket.resolved_at = timezone.now()
+            ticket.save(update_fields=["status", "resolved_at", "admin_note"])
+            messages.success(request, f"Tutor {tutor.get_full_name if tutor else ''} has been blocked and ₦{installment.amount} credited to student's wallet balance.")
 
         elif action == "close":
             ticket.status = SupportTicket.STATUS_CLOSED
@@ -958,8 +1055,12 @@ def homepage_stats(request):
         config.lessons_completed_offset = int(request.POST.get("lessons_completed_offset", 5000))
         config.cities_covered_offset = int(request.POST.get("cities_covered_offset", 793))
         config.parents_joined_offset = int(request.POST.get("parents_joined_offset", 1500))
+        config.video_section_title = request.POST.get("video_section_title", "Discover How MyteacherConnect Works")
+        config.video_section_subtitle = request.POST.get("video_section_subtitle", "")
+        config.youtube_video_url = request.POST.get("youtube_video_url", "")
+        config.video_section_active = request.POST.get("video_section_active") == "on"
         config.save()
-        messages.success(request, "Homepage stats starting values updated successfully.")
+        messages.success(request, "Homepage stats & platform video settings updated successfully.")
         return redirect("admin_homepage_stats")
 
     return render(

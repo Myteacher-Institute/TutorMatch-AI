@@ -30,35 +30,35 @@ def create_weekly_payout_schedule(payment):
 
     if booking.course_offer:
         offer = booking.course_offer
-        weeks = offer.total_weeks
-        weekly_amount = offer.weekly_student_cost
-        weekly_commission = offer.platform_commission_per_class * Decimal(offer.days_per_week)
-        weekly_tutor_payout = offer.weekly_tutor_payout
+        months = getattr(offer, "duration_months", 1) or 1
+        monthly_amount = offer.monthly_fee or payment.amount
+        monthly_commission = (monthly_amount * Decimal("0.20")).quantize(Decimal("0.01"))
+        monthly_tutor_payout = (monthly_amount * Decimal("0.80")).quantize(Decimal("0.01"))
     else:
-        weeks = payout_period_count(booking)
-        weekly_amount = (payment.amount / Decimal(weeks)).quantize(Decimal("0.01"))
-        weekly_commission = (payment.commission / Decimal(weeks)).quantize(Decimal("0.01"))
-        weekly_tutor_payout = (payment.tutor_payout / Decimal(weeks)).quantize(Decimal("0.01"))
+        months = max(int(booking.duration_value or 1), 1) if booking.duration_unit == "months" else 1
+        monthly_amount = (payment.amount / Decimal(months)).quantize(Decimal("0.01"))
+        monthly_commission = (payment.commission / Decimal(months)).quantize(Decimal("0.01"))
+        monthly_tutor_payout = (payment.tutor_payout / Decimal(months)).quantize(Decimal("0.01"))
 
-    base_date = booking.booking_date or booking.created_at.date() if booking.created_at else timezone.localdate()
+    base_date = booking.booking_date or (booking.created_at.date() if booking.created_at else timezone.localdate())
 
     with transaction.atomic():
-        for week_number in range(1, weeks + 1):
-            period_start = base_date + timedelta(days=(week_number - 1) * 7)
-            period_end = period_start + timedelta(days=6)
+        for month_number in range(1, months + 1):
+            period_start = base_date + timedelta(days=(month_number - 1) * 30)
+            period_end = period_start + timedelta(days=30)
             auto_release_at = timezone.make_aware(
                 timezone.datetime.combine(period_end, timezone.datetime.max.time())
-            ) + timedelta(days=SATISFACTION_WINDOW_DAYS)
+            )
 
             PayoutInstallment.objects.create(
                 payment=payment,
                 booking=booking,
-                week_number=week_number,
+                week_number=month_number,
                 period_start=period_start,
                 period_end=period_end,
-                amount=weekly_amount,
-                commission=weekly_commission,
-                tutor_payout=weekly_tutor_payout,
+                amount=monthly_amount,
+                commission=monthly_commission,
+                tutor_payout=monthly_tutor_payout,
                 auto_release_at=auto_release_at,
             )
 

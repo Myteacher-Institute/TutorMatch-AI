@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Tutor Verifications | Myteacherconnect{% endblock %}
+{% block title %}Tutor Verifications & Management | Myteacherconnect Admin{% endblock %}
 
 {% block content %}
 <div class="mtc-shell admin-dashboard-light">
@@ -9,75 +9,337 @@
     <div class="mtc-admin-content">
       <div class="mtc-homepage-admin-hero">
         <div>
-          <h1 style="color: #fff;">Tutor Verification Queue</h1>
-          <p>Review pending government IDs, NIN documents, and academic certificates submitted by onboarding tutors.</p>
+          <h1 style="color: #fff; margin: 0 0 6px;">Tutor Verification & Management</h1>
+          <p style="margin: 0; opacity: 0.9;">Review full tutor submissions, check completeness, approve/reject profiles, or email tutors directly about incomplete details.</p>
         </div>
-        <span class="mtc-home-featured-count">{{ pending_tutors|length }} pending</span>
+        <span class="mtc-home-featured-count">{{ status_counts.pending }} Pending</span>
       </div>
-      
-      <div class="mtc-admin-card">
-        <h2>Verification List ({{ pending_tutors|length }} pending)</h2>
-        
-        <div style="display: grid; gap: 20px; margin-top: 20px;">
-          {% for tutor in pending_tutors %}
-            <div class="mtc-verification-card">
-              
-              <!-- Avatar or placeholder -->
-              <div style="display: grid; width: 64px; height: 64px; place-items: center; border-radius: 14px; background: #e4efff; color: var(--blue); font-size: 20px; font-weight: 700;">
-                {{ tutor.user.user.first_name|slice:":1" }}{% if tutor.user.user.last_name %}{{ tutor.user.user.last_name|slice:":1" }}{% else %}{{ tutor.user.user.username|slice:":1" }}{% endif %}
-              </div>
-              
-              <!-- Profile Details -->
-              <div>
-                <h3 style="margin: 0; font-size: 16px; font-weight: 600;">
-                  {{ tutor.user.user.get_full_name|default:tutor.user.user.username }}
-                </h3>
-                <p style="margin: 4px 0 0; color: var(--muted); font-size: 13px;">
-                  Email: {{ tutor.user.user.email }} • Phone: {{ tutor.user.phone_number|default:"-" }}
-                </p>
-                <div style="margin-top: 10px; display: flex; gap: 14px; flex-wrap: wrap;">
-                  {% for doc in tutor.documents.all %}
-                  <a href="{{ doc.document_url }}" target="_blank" style="font-size: 12px; font-weight: 700; color: #ffffff; background: var(--blue); padding: 4px 10px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                    📄 {{ doc.get_document_type_display }}
-                  </a>
-                  {% endfor %}
-                  {% if not tutor.documents.all %}
-                  <span style="font-size: 11px; font-weight: 700; color: #dc2626;">No document uploaded</span>
-                  {% endif %}
-                </div>
-              </div>
-              
-              <!-- Action Buttons -->
-              <div style="display: flex; gap: 8px;">
-                <form method="post" style="display: inline-block;" data-confirm="Rejecting will send the tutor back to re-upload their documents. Are you sure you want to reject?" data-confirm-title="Reject Tutor" data-confirm-label="Reject" data-confirm-danger>
-                  {% csrf_token %}
-                  <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
-                  <input type="hidden" name="action" value="reject">
-                  <button type="submit" class="btn" style="min-height: 38px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; border-radius: 8px; font-weight: 700; font-size: 13px; padding: 0 16px;">
-                    Reject
-                  </button>
-                </form>
-                
-                <form method="post" style="display: inline-block;">
-                  {% csrf_token %}
-                  <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
-                  <input type="hidden" name="action" value="approve">
-                  <button type="submit" class="btn btn-primary" style="min-height: 38px; border-radius: 8px; font-weight: 700; font-size: 13px; padding: 0 16px;">
-                    Approve
-                  </button>
-                </form>
-              </div>
-              
-            </div>
-          {% empty %}
-            <div style="text-align: center; padding: 40px 20px; color: var(--muted);">
-              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; color: #cbd5e1;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
-              <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--ink);">Verification queue is clean!</h3>
-              <p style="margin: 6px 0 0; font-size: 13px;">No tutors are currently awaiting document review.</p>
+
+      <!-- Filter Tabs -->
+      <div style="display: flex; gap: 10px; margin: 20px 0; flex-wrap: wrap;">
+        <a href="?status=pending" class="btn" style="border-radius: 20px; font-weight: 600; font-size: 13px; padding: 6px 16px; text-decoration: none; {% if status_filter == 'pending' %}background: var(--blue); color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+          Pending ({{ status_counts.pending }})
+        </a>
+        <a href="?status=approved" class="btn" style="border-radius: 20px; font-weight: 600; font-size: 13px; padding: 6px 16px; text-decoration: none; {% if status_filter == 'approved' %}background: #16a34a; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+          Approved ({{ status_counts.approved }})
+        </a>
+        <a href="?status=rejected" class="btn" style="border-radius: 20px; font-weight: 600; font-size: 13px; padding: 6px 16px; text-decoration: none; {% if status_filter == 'rejected' %}background: #dc2626; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+          Rejected / Incomplete ({{ status_counts.rejected }})
+        </a>
+        <a href="?status=all" class="btn" style="border-radius: 20px; font-weight: 600; font-size: 13px; padding: 6px 16px; text-decoration: none; {% if status_filter == 'all' %}background: #0f172a; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+          All Tutors ({{ status_counts.all }})
+        </a>
+      </div>
+
+      {% if messages %}
+        <div style="margin-bottom: 20px;">
+          {% for message in messages %}
+            <div class="booking-flow-message {{ message.tags }}" style="padding: 12px 16px; border-radius: 10px; background: #eff6ff; border: 1px solid #bfdbfe; color: #1e40af; margin-bottom: 8px;">
+              {{ message }}
             </div>
           {% endfor %}
         </div>
-        
+      {% endif %}
+
+      <div class="mtc-admin-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; padding-bottom: 14px; margin-bottom: 20px;">
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #0f172a;">
+            Showing {{ status_filter|title }} Tutors ({{ pending_tutors|length }})
+          </h2>
+        </div>
+
+        <div style="display: grid; gap: 20px;">
+          {% for tutor in pending_tutors %}
+            <div class="mtc-verification-card" style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 16px; padding: 20px; display: grid; grid-template-columns: auto 1fr auto; gap: 20px; align-items: start;">
+
+              <!-- Avatar -->
+              <div style="width: 64px; height: 64px; border-radius: 14px; background: #eff6ff; overflow: hidden; display: grid; place-items: center; border: 1px solid #cbd5e1;">
+                {% if tutor.profile_photo %}
+                  <img src="{{ tutor.profile_photo }}" alt="{{ tutor.get_full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                  <span style="font-size: 22px; font-weight: 700; color: #2563eb;">
+                    {{ tutor.user.user.first_name|slice:":1"|default:tutor.user.user.username|slice:":1" }}
+                  </span>
+                {% endif %}
+              </div>
+
+              <!-- Main Info -->
+              <div>
+                <div style="display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                  <h3 style="margin: 0; font-size: 17px; font-weight: 700; color: #0f172a;">
+                    {{ tutor.user.user.get_full_name|default:tutor.user.user.username }}
+                  </h3>
+
+                  <!-- Verification Status Badge -->
+                  {% if tutor.verification_status == 'approved' %}
+                    <span style="background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; text-transform: uppercase;">Approved</span>
+                  {% elif tutor.verification_status == 'rejected' %}
+                    <span style="background: #fef2f2; color: #dc2626; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; text-transform: uppercase;">Rejected</span>
+                  {% else %}
+                    <span style="background: #fef3c7; color: #d97706; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px; text-transform: uppercase;">Pending Review</span>
+                  {% endif %}
+
+                  <!-- Profile Completeness Badge -->
+                  {% if tutor.is_profile_complete %}
+                    <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
+                      <i class="fa-solid fa-circle-check"></i> Profile 100% Complete
+                    </span>
+                  {% else %}
+                    <span style="background: #fff7ed; color: #c2410c; font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 12px;">
+                      <i class="fa-solid fa-triangle-exclamation"></i> {{ tutor.missing_profile_fields|length }} Missing Field(s)
+                    </span>
+                  {% endif %}
+                </div>
+
+                <p style="margin: 6px 0 10px; color: #64748b; font-size: 13px; line-height: 1.4;">
+                  <strong>Email:</strong> {{ tutor.user.user.email }} &bull;
+                  <strong>Phone:</strong> {{ tutor.user.phone_number|default:"Not provided" }} &bull;
+                  <strong>Location:</strong> {{ tutor.location|default:"Not specified" }} {% if tutor.state %}({{ tutor.state }}){% endif %}
+                </p>
+
+                <!-- Subjects & Documents Pills -->
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; align-items: center;">
+                  {% if tutor.subjects.all %}
+                    <span style="font-size: 12px; color: #475569;"><strong>Subjects:</strong> {{ tutor.subjects.all|join:", " }}</span>
+                  {% endif %}
+                  
+                  <span style="color: #cbd5e1;">|</span>
+
+                  {% for doc in tutor.documents.all %}
+                    <a href="{{ doc.document_url }}" target="_blank" style="font-size: 11px; font-weight: 700; color: #1e40af; background: #dbeafe; padding: 3px 8px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                      📄 {{ doc.get_document_type_display }}
+                    </a>
+                  {% empty %}
+                    <span style="font-size: 11px; font-weight: 700; color: #dc2626;">No Verification Document</span>
+                  {% endfor %}
+                </div>
+
+                {% if tutor.missing_profile_fields %}
+                  <div style="margin-top: 10px; padding: 8px 12px; background: #fff1f2; border: 1px dashed #fecaca; border-radius: 8px; font-size: 12px; color: #9f1239;">
+                    <strong>Incomplete details:</strong> {{ tutor.missing_profile_fields|join:", " }}
+                  </div>
+                {% endif %}
+              </div>
+
+              <!-- Admin Action Buttons -->
+              <div style="display: flex; flex-direction: column; gap: 8px; min-width: 170px;">
+                <button type="button" onclick="document.getElementById('modal-tutor-{{ tutor.id }}').style.display='flex'" class="btn" style="width: 100%; border: 1px solid #cbd5e1; background: #f8fafc; color: #0f172a; border-radius: 8px; font-weight: 700; font-size: 12px; padding: 8px 12px; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                  <i class="fa-solid fa-eye"></i> View Full Details
+                </button>
+
+                <!-- Email Tutor Button -->
+                {% if tutor.missing_profile_fields %}
+                  <a href="mailto:{{ tutor.user.user.email }}?subject=Action%20Required:%20Complete%20Your%20Tutor%20Profile%20on%20MyteacherConnect&body=Hello%20{{ tutor.user.user.first_name|default:tutor.user.user.username }},%0A%0AWe%20reviewed%20your%20tutor%20application%20on%20MyteacherConnect.%20To%20complete%20your%20verification,%20please%20log%20in%20and%20update%20the%20following%20missing%20details:%0A%0A-%20{{ tutor.missing_profile_fields|join:'%0A-%20' }}%0A%0ALink:%20https://myteacherconnect.org/tutors/profile/%0A%0AThank%20you,%0AMyteacherConnect%20Team" 
+                     class="btn" style="width: 100%; border: 1px solid #fdba74; background: #fff7ed; color: #c2410c; border-radius: 8px; font-weight: 700; font-size: 12px; padding: 8px 12px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                    <i class="fa-solid fa-envelope"></i> Email Incomplete Info
+                  </a>
+                {% else %}
+                  <a href="mailto:{{ tutor.user.user.email }}?subject=Update%20regarding%20your%20Tutor%20Application%20on%20MyteacherConnect" 
+                     class="btn" style="width: 100%; border: 1px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 8px; font-weight: 600; font-size: 12px; padding: 8px 12px; text-decoration: none; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px;">
+                    <i class="fa-solid fa-envelope"></i> Email Tutor
+                  </a>
+                {% endif %}
+
+                <!-- Approve / Reject Form Actions -->
+                <div style="display: flex; gap: 6px; margin-top: 4px;">
+                  {% if tutor.verification_status != 'approved' %}
+                    <form method="post" style="flex: 1;">
+                      {% csrf_token %}
+                      <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
+                      <input type="hidden" name="action" value="approve">
+                      <button type="submit" class="btn btn-primary" style="width: 100%; border-radius: 8px; font-weight: 700; font-size: 12px; padding: 7px 10px;">
+                        Approve
+                      </button>
+                    </form>
+                  {% endif %}
+
+                  {% if tutor.verification_status != 'rejected' %}
+                    <form method="post" style="flex: 1;" data-confirm="Marking as rejected will notify the tutor to complete missing items. Continue?" data-confirm-title="Reject Tutor" data-confirm-label="Reject" data-confirm-danger>
+                      {% csrf_token %}
+                      <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
+                      <input type="hidden" name="action" value="reject">
+                      <button type="submit" class="btn" style="width: 100%; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; border-radius: 8px; font-weight: 700; font-size: 12px; padding: 7px 10px;">
+                        Reject
+                      </button>
+                    </form>
+                  {% endif %}
+                </div>
+              </div>
+
+            </div>
+
+            <!-- Full Details Modal for Tutor -->
+            <div id="modal-tutor-{{ tutor.id }}" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 9999; justify-content: center; align-items: center; padding: 20px;">
+              <div style="background: #ffffff; width: 100%; max-width: 750px; max-height: 90vh; border-radius: 20px; overflow-y: auto; box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25); display: flex; flex-direction: column;">
+                
+                <!-- Modal Header -->
+                <div style="padding: 20px 24px; border-bottom: 1px solid #e2e8f0; display: flex; justify-content: space-between; align-items: center; background: #f8fafc; position: sticky; top: 0; z-index: 10;">
+                  <div style="display: flex; align-items: center; gap: 12px;">
+                    <div style="width: 44px; height: 44px; border-radius: 10px; background: #2563eb; color: #fff; font-weight: 700; display: grid; place-items: center; font-size: 18px;">
+                      {{ tutor.user.user.first_name|slice:":1"|default:tutor.user.user.username|slice:":1" }}
+                    </div>
+                    <div>
+                      <h2 style="margin: 0; font-size: 18px; font-weight: 700; color: #0f172a;">
+                        {{ tutor.user.user.get_full_name|default:tutor.user.user.username }}
+                      </h2>
+                      <span style="font-size: 12px; color: #64748b;">Full Tutor Application & Profile Record</span>
+                    </div>
+                  </div>
+                  <button type="button" onclick="document.getElementById('modal-tutor-{{ tutor.id }}').style.display='none'" style="border: none; background: #cbd5e1; color: #0f172a; width: 32px; height: 32px; border-radius: 50%; cursor: pointer; font-weight: 700;">&times;</button>
+                </div>
+
+                <!-- Modal Body -->
+                <div style="padding: 24px; display: grid; gap: 24px;">
+
+                  <!-- Completeness Banner -->
+                  {% if tutor.missing_profile_fields %}
+                    <div style="padding: 14px 18px; background: #fff1f2; border: 1px solid #fecaca; border-radius: 12px; color: #9f1239;">
+                      <h4 style="margin: 0 0 6px; font-size: 14px; font-weight: 700;"><i class="fa-solid fa-circle-exclamation"></i> Incomplete Profile Items ({{ tutor.missing_profile_fields|length }})</h4>
+                      <ul style="margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.5;">
+                        {% for field in tutor.missing_profile_fields %}
+                          <li>{{ field }}</li>
+                        {% endfor %}
+                      </ul>
+                    </div>
+                  {% else %}
+                    <div style="padding: 12px 16px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; color: #166534; font-size: 13px; font-weight: 600;">
+                      <i class="fa-solid fa-circle-check"></i> All profile details and verification fields are complete!
+                    </div>
+                  {% endif %}
+
+                  <!-- 1. Personal & Contact Info -->
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
+                    <h3 style="margin: 0 0 14px; font-size: 14px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">1. Personal & Contact Details</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 13px;">
+                      <div><strong>Full Name:</strong> {{ tutor.user.user.get_full_name|default:"Not filled" }}</div>
+                      <div><strong>Username:</strong> {{ tutor.user.user.username }}</div>
+                      <div><strong>Email:</strong> {{ tutor.user.user.email }}</div>
+                      <div><strong>Phone Number:</strong> {{ tutor.user.phone_number|default:"Not filled" }}</div>
+                      <div><strong>City / Location:</strong> {{ tutor.location|default:"Not filled" }}</div>
+                      <div><strong>State:</strong> {{ tutor.state|default:"Not filled" }}</div>
+                      <div><strong>L.G.A.:</strong> {{ tutor.local_government|default:"Not filled" }}</div>
+                      <div><strong>Country:</strong> {{ tutor.country }}</div>
+                      <div style="grid-column: span 2;"><strong>Full Address:</strong> {{ tutor.address|default:"Not filled" }}</div>
+                    </div>
+                  </div>
+
+                  <!-- 2. Biography & Qualifications -->
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
+                    <h3 style="margin: 0 0 14px; font-size: 14px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">2. Experience & Biography</h3>
+                    <div style="display: grid; gap: 10px; font-size: 13px;">
+                      <div><strong>Years of Experience:</strong> {{ tutor.years_experience }} years</div>
+                      <div><strong>Qualifications:</strong> {{ tutor.qualifications|default:"Not filled" }}</div>
+                      <div><strong>Languages Spoken:</strong> {{ tutor.languages_spoken|default:"Not filled" }}</div>
+                      <div><strong>Teaching Mode:</strong> {{ tutor.get_teaching_mode_display }}</div>
+                      <div><strong>Biography:</strong></div>
+                      <p style="margin: 0; background: #ffffff; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px; font-size: 13px; line-height: 1.5; color: #334155;">
+                        {{ tutor.bio|default:"No bio written yet." }}
+                      </p>
+                    </div>
+                  </div>
+
+                  <!-- 3. Subjects & Pricing -->
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
+                    <h3 style="margin: 0 0 14px; font-size: 14px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">3. Subjects Taught & Fees</h3>
+                    <div style="display: grid; gap: 12px; font-size: 13px;">
+                      <div>
+                        <strong>Subjects Taught:</strong>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+                          {% for subject in tutor.subjects.all %}
+                            <span style="background: #e0e7ff; color: #3730a3; font-weight: 600; font-size: 12px; padding: 3px 10px; border-radius: 12px;">{{ subject.subject_name }}</span>
+                          {% empty %}
+                            <span style="color: #dc2626;">No subjects selected</span>
+                          {% endfor %}
+                        </div>
+                      </div>
+                      <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 6px;">
+                        <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px;">
+                          <span style="color: #64748b; font-size: 11px;">Weekly Rate</span>
+                          <strong style="display: block; font-size: 15px; color: #0f172a;">&#8358;{{ tutor.rate_amount }}</strong>
+                        </div>
+                        <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px;">
+                          <span style="color: #64748b; font-size: 11px;">Online Class Fee</span>
+                          <strong style="display: block; font-size: 15px; color: #0f172a;">&#8358;{{ tutor.online_class_fee }}</strong>
+                        </div>
+                        <div style="background: #ffffff; border: 1px solid #cbd5e1; padding: 10px; border-radius: 8px;">
+                          <span style="color: #64748b; font-size: 11px;">Physical Class Fee</span>
+                          <strong style="display: block; font-size: 15px; color: #0f172a;">&#8358;{{ tutor.physical_class_fee }}</strong>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- 4. Bank Payout Details -->
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
+                    <h3 style="margin: 0 0 14px; font-size: 14px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">4. Bank Payout Details</h3>
+                    <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; font-size: 13px;">
+                      <div><strong>Payout Method:</strong> {{ tutor.get_payout_method_display }}</div>
+                      <div><strong>Payout Schedule:</strong> {{ tutor.get_payout_schedule_display }}</div>
+                      <div><strong>Bank Name:</strong> {{ tutor.bank_name|default:"Not filled" }}</div>
+                      <div><strong>Account Name:</strong> {{ tutor.account_name|default:"Not filled" }}</div>
+                      <div><strong>Account Number:</strong> {{ tutor.account_number|default:"Not filled" }}</div>
+                    </div>
+                  </div>
+
+                  <!-- 5. Verification Documents -->
+                  <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
+                    <h3 style="margin: 0 0 14px; font-size: 14px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">5. Uploaded Documents</h3>
+                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                      {% for doc in tutor.documents.all %}
+                        <a href="{{ doc.document_url }}" target="_blank" class="btn" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 16px; text-decoration: none; color: #1e40af; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                          📄 {{ doc.get_document_type_display }} &bull; View Document <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
+                        </a>
+                      {% empty %}
+                        <span style="color: #dc2626; font-size: 13px; font-weight: 600;">No verification documents uploaded.</span>
+                      {% endfor %}
+                    </div>
+                  </div>
+
+                </div>
+
+                <!-- Modal Footer -->
+                <div style="padding: 16px 24px; border-top: 1px solid #e2e8f0; background: #f8fafc; display: flex; justify-content: space-between; align-items: center; border-radius: 0 0 20px 20px;">
+                  <button type="button" onclick="document.getElementById('modal-tutor-{{ tutor.id }}').style.display='none'" class="btn" style="border: 1px solid #cbd5e1; background: #ffffff; color: #475569; border-radius: 8px; font-size: 13px; font-weight: 600; padding: 8px 16px;">
+                    Close Window
+                  </button>
+
+                  <div style="display: flex; gap: 10px;">
+                    {% if tutor.missing_profile_fields %}
+                      <form method="post" style="display: inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
+                        <input type="hidden" name="action" value="send_missing_email">
+                        <button type="submit" class="btn" style="border: 1px solid #fdba74; background: #fff7ed; color: #c2410c; border-radius: 8px; font-weight: 700; font-size: 13px; padding: 8px 16px;">
+                          <i class="fa-solid fa-paper-plane"></i> Email Tutor Missing Items
+                        </button>
+                      </form>
+                    {% endif %}
+
+                    {% if tutor.verification_status != 'approved' %}
+                      <form method="post" style="display: inline-block;">
+                        {% csrf_token %}
+                        <input type="hidden" name="profile_id" value="{{ tutor.user.pk }}">
+                        <input type="hidden" name="action" value="approve">
+                        <button type="submit" class="btn btn-primary" style="border-radius: 8px; font-weight: 700; font-size: 13px; padding: 8px 18px;">
+                          Approve Application
+                        </button>
+                      </form>
+                    {% endif %}
+                  </div>
+                </div>
+
+              </div>
+            </div>
+
+          {% empty %}
+            <div style="text-align: center; padding: 40px 20px; color: var(--muted);">
+              <svg viewBox="0 0 24 24" width="48" height="48" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="margin: 0 auto 16px; color: #cbd5e1;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+              <h3 style="margin: 0; font-size: 16px; font-weight: 600; color: var(--ink);">No tutors in this category</h3>
+              <p style="margin: 6px 0 0; font-size: 13px;">Select a different filter above to view pending, approved, or rejected tutors.</p>
+            </div>
+          {% endfor %}
+        </div>
+
       </div>
     </div>
   </section>

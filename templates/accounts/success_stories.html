@@ -29,6 +29,17 @@
           {{ form.title }}
           {% for error in form.title.errors %}<p class="story-field-error">{{ error }}</p>{% endfor %}
 
+          <label for="{{ form.rating.id_for_label }}">Your rating</label>
+          <div class="rating-star-picker" id="ratingStarPicker">
+            <span data-value="1" title="1 Star">★</span>
+            <span data-value="2" title="2 Stars">★</span>
+            <span data-value="3" title="3 Stars">★</span>
+            <span data-value="4" title="4 Stars">★</span>
+            <span data-value="5" title="5 Stars" class="active">★</span>
+          </div>
+          {{ form.rating }}
+          {% for error in form.rating.errors %}<p class="story-field-error">{{ error }}</p>{% endfor %}
+
           <label for="{{ form.story.id_for_label }}">Your story</label>
           {{ form.story }}
           {% for error in form.story.errors %}<p class="story-field-error">{{ error }}</p>{% endfor %}
@@ -54,15 +65,14 @@
           {% for success_story in stories %}
             <article class="success-story-card">
               <i class="fa-solid fa-quote-left story-quote" aria-hidden="true"></i>
+              <div class="story-stars" style="color: #fbbf24; font-size: 15px; margin: 4px 0 6px; letter-spacing: 2px;">
+                {% if success_story.rating >= 1 %}★{% else %}☆{% endif %}{% if success_story.rating >= 2 %}★{% else %}☆{% endif %}{% if success_story.rating >= 3 %}★{% else %}☆{% endif %}{% if success_story.rating >= 4 %}★{% else %}☆{% endif %}{% if success_story.rating >= 5 %}★{% else %}☆{% endif %}
+              </div>
               <h3>{{ success_story.title }}</h3>
               <p>{{ success_story.story|linebreaksbr }}</p>
               <footer class="story-author">
                 <div class="story-avatar">
-                  {% if success_story.profile_photo %}
-                    <img src="{{ success_story.profile_photo }}" alt="{{ success_story.author_name }}">
-                  {% else %}
-                    <i class="fa-solid fa-user" aria-hidden="true"></i>
-                  {% endif %}
+                  <img src="{{ success_story.profile_photo }}" alt="{{ success_story.author_name }}">
                 </div>
                 <div>
                   <strong>{{ success_story.author_name }}</strong>
@@ -106,4 +116,47 @@
     </div>
   </div>
 </section>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+  const picker = document.getElementById("ratingStarPicker");
+  const select = document.getElementById("{{ form.rating.id_for_label }}") || document.querySelector(".story-rating-select");
+  if (picker && select) {
+    const stars = picker.querySelectorAll("span");
+    function updateStars(val) {
+      stars.forEach(s => {
+        if (parseInt(s.dataset.value) <= val) {
+          s.classList.add("active");
+        } else {
+          s.classList.remove("active");
+        }
+      });
+    }
+    updateStars(parseInt(select.value) || 5);
+    stars.forEach(star => {
+      star.addEventListener("click", function() {
+        const val = parseInt(this.dataset.value);
+        select.value = val;
+        updateStars(val);
+      });
+      star.addEventListener("mouseenter", function() {
+        const val = parseInt(this.dataset.value);
+        stars.forEach(s => {
+          if (parseInt(s.dataset.value) <= val) {
+            s.classList.add("hover");
+          } else {
+            s.classList.remove("hover");
+          }
+        });
+      });
+      star.addEventListener("mouseleave", function() {
+        stars.forEach(s => s.classList.remove("hover"));
+      });
+    });
+    select.addEventListener("change", function() {
+      updateStars(parseInt(this.value));
+    });
+  }
+});
+</script>
 {% endblock %}

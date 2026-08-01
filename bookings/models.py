@@ -36,6 +36,21 @@ class Booking (models.Model):
     weeks_total = models.PositiveSmallIntegerField(default=4)
     weeks_completed = models.PositiveSmallIntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now)
+
+    @classmethod
+    def cleanup_expired_pending(cls):
+        """Auto-delete pending or failed/cancelled bookings older than 24 hours."""
+        from datetime import timedelta
+        cutoff = timezone.now() - timedelta(hours=24)
+        expired_qs = cls.objects.filter(
+            created_at__lte=cutoff,
+        ).filter(
+            models.Q(status__in=["pending", "cancelled"]) | models.Q(payments__payment_status="failed")
+        ).exclude(
+            payments__payment_status__in=["paid", "released"]
+        )
+        count, _ = expired_qs.delete()
+        return count
     
     def __str__(self):
         return f"{self.student} - {self.tutor} - {self.booking_date}"

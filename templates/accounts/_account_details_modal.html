@@ -1,0 +1,93 @@
+<!-- Account Details & 3-Month / 4-Day Update Modal -->
+<style>
+  .account-modal-input {
+    width: 100%;
+    padding: 10px 14px;
+    border-radius: 10px;
+    border: 1px solid #cbd5e1;
+    font-size: 13px;
+    color: #0f172a;
+    box-sizing: border-box;
+    background: #ffffff;
+  }
+  .account-modal-input[readonly] {
+    background: #f8fafc;
+    cursor: not-allowed;
+  }
+</style>
+
+<div id="accountDetailsModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
+  <div style="background: #ffffff; width: 100%; max-width: 520px; border-radius: 20px; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+      <div>
+        <h3 style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-user-gear" style="color: #2563eb;"></i> Account Signup Details
+        </h3>
+        <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">View and request updates to your primary account credentials.</p>
+      </div>
+      <button type="button" onclick="document.getElementById('accountDetailsModal').style.display='none'" style="background: #f1f5f9; border: none; font-size: 20px; color: #64748b; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;">&times;</button>
+    </div>
+
+    {% if request.user.profile.pending_account_details_update %}
+      <!-- Pending Update Notice (4-Day Delay) -->
+      <div style="background: #eff6ff; border: 1px solid #93c5fd; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">
+        <div style="font-size: 12px; font-weight: 800; color: #1d4ed8; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-clock-rotate-left"></i> Update Pending Review (4-Day Delay)
+        </div>
+        <p style="margin: 6px 0 0; font-size: 12.5px; color: #1e40af; line-height: 1.45;">
+          Your requested changes will automatically take effect on <strong>{{ request.user.profile.pending_update_effective_at|date:"F j, Y \a\t g:i A" }}</strong>.
+        </p>
+        <div style="margin-top: 8px; font-size: 11.5px; color: #3b82f6; background: #ffffff; padding: 8px 12px; border-radius: 8px;">
+          Requested Name: <strong>{{ request.user.profile.pending_account_details_update.full_name }}</strong> &bull; Username: <strong>{{ request.user.profile.pending_account_details_update.username }}</strong>
+        </div>
+      </div>
+    {% elif not request.user.profile.can_update_account_details %}
+      <!-- 3-Month Rate Limit Restriction -->
+      <div style="background: #fff7ed; border: 1px solid #fdba74; border-radius: 12px; padding: 14px 16px; margin-bottom: 18px;">
+        <div style="font-size: 12px; font-weight: 800; color: #c2410c; text-transform: uppercase; letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px;">
+          <i class="fa-solid fa-triangle-exclamation"></i> 3-Month Update Limit Reached
+        </div>
+        <p style="margin: 6px 0 0; font-size: 12.5px; color: #9a3412; line-height: 1.45;">
+          Account details can only be changed once every 3 months (90 days). Next allowed update date: <strong>{{ request.user.profile.next_allowed_account_details_update|date:"F j, Y" }}</strong>.
+        </p>
+      </div>
+    {% endif %}
+
+    <form method="post" action="{% url 'update_account_details' %}">
+      {% csrf_token %}
+      
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">Full Name</label>
+        <input type="text" name="full_name" class="account-modal-input" value="{{ request.user.get_full_name }}" required {% if not request.user.profile.can_update_account_details or request.user.profile.pending_account_details_update %}readonly{% endif %}>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">Username</label>
+        <input type="text" name="username" class="account-modal-input" value="{{ request.user.username }}" required {% if not request.user.profile.can_update_account_details or request.user.profile.pending_account_details_update %}readonly{% endif %}>
+      </div>
+
+      <div style="margin-bottom: 14px;">
+        <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">Email Address</label>
+        <input type="email" name="email" class="account-modal-input" value="{{ request.user.email }}" required {% if not request.user.profile.can_update_account_details or request.user.profile.pending_account_details_update %}readonly{% endif %}>
+      </div>
+
+      <div style="margin-bottom: 18px;">
+        <label style="display: block; font-size: 12.5px; font-weight: 700; color: #334155; margin-bottom: 6px;">Phone Number</label>
+        <input type="text" name="phone_number" class="account-modal-input" value="{{ request.user.profile.phone_number }}" required {% if not request.user.profile.can_update_account_details or request.user.profile.pending_account_details_update %}readonly{% endif %}>
+      </div>
+
+      <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 10px 12px; margin-bottom: 20px; font-size: 11.5px; color: #64748b; line-height: 1.4;">
+        <i class="fa-solid fa-shield-halved" style="color: #2563eb;"></i> <strong>Security Policy:</strong> For platform safety, signup details can only be changed <strong>once every 3 months</strong>, and requested changes take effect after a <strong>4-day review period</strong>.
+      </div>
+
+      <div style="display: flex; align-items: center; justify-content: flex-end; gap: 10px;">
+        <button type="button" onclick="document.getElementById('accountDetailsModal').style.display='none'" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">Close</button>
+        {% if request.user.profile.can_update_account_details and not request.user.profile.pending_account_details_update %}
+          <button type="submit" style="background: #2563eb; color: #ffffff; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer; box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);">
+            Request Details Update (4-Day Delay)
+          </button>
+        {% endif %}
+      </div>
+    </form>
+  </div>
+</div>

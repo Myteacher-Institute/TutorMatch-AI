@@ -100,7 +100,8 @@
                     <button type="submit" name="action" value="review" class="btn btn-ghost" style="min-height: 32px; border: 1px solid var(--line); border-radius: 6px; font-size: 12px;">Hold / Review</button>
                   {% endif %}
                   {% if ticket.installment and ticket.status != "resolved" and ticket.status != "closed" %}
-                    <button type="submit" name="action" value="release" class="btn btn-primary" style="min-height: 32px; border-radius: 6px; font-size: 12px;">Release Payout</button>
+                    <button type="submit" name="action" value="release" class="btn btn-primary" style="min-height: 32px; border-radius: 6px; font-size: 12px;"><i class="fa-solid fa-circle-check"></i> Force Release Payout</button>
+                    <button type="submit" name="action" value="block_tutor_and_credit_student" class="btn" style="min-height: 32px; border: 1px solid #b91c1c; background: #991b1b; color: #ffffff; border-radius: 6px; font-size: 12px; font-weight: 700;"><i class="fa-solid fa-user-slash"></i> Block Tutor & Credit Student</button>
                     <button type="submit" name="action" value="refund" class="btn" style="min-height: 32px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; border-radius: 6px; font-size: 12px;" data-confirm="This will request a Flutterwave refund for this weekly amount. Continue?" data-confirm-title="Refund Week" data-confirm-label="Refund" data-confirm-danger>Refund Week</button>
                   {% endif %}
                   {% if ticket.status != "closed" %}

@@ -138,9 +138,9 @@
       <a href="{% url 'register' %}?role=tutor" class="mtc-dark-btn">Become a Tutor</a>
       <div class="mtc-joined">
         <div class="mtc-avatars">
-          <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=80&q=80" alt="">
-          <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=80&q=80" alt="">
-          <img src="https://images.unsplash.com/photo-1580894732444-8ecded7900cd?auto=format&fit=crop&w=80&q=80" alt="">
+          <img src="{% static 'images/avatars/avatar1.png' %}" alt="Parent Avatar 1">
+          <img src="{% static 'images/avatars/avatar2.png' %}" alt="Parent Avatar 2">
+          <img src="{% static 'images/avatars/avatar3.png' %}" alt="Parent Avatar 3">
         </div>
         <span>Joined by {{ parents_count|default:1500|intcomma }}+ parents</span>
       </div>
@@ -335,8 +335,7 @@
           </span>
           <div>
             <h3>Secure Payments</h3>
-            <p>We manage payments on-platform and release tutor payouts weekly after student confirmation or support
-              review.</p>
+            <p>We manage payments on-platform and process tutor payouts monthly on the last day of every month after student 30-day satisfaction confirmation.</p>
           </div>
         </article>
         <article>
@@ -366,6 +365,42 @@
   </div>
 </section>
 
+{% if config.video_section_active|default:True %}
+<section class="mtc-platform-video-section">
+  <div class="mtc-shell">
+    <div class="mtc-video-head">
+      <span class="eyebrow" style="display: inline-flex; align-items: center; gap: 6px; background: #eff6ff; color: #2563eb; padding: 6px 14px; border-radius: 99px; font-weight: 700; font-size: 13px;">
+        <i class="fa-solid fa-circle-play"></i> Platform Overview
+      </span>
+      <h2>{{ config.video_section_title|default:"Discover How MyteacherConnect Works" }}</h2>
+      <p>{{ config.video_section_subtitle|default:"Watch our short overview to see how our AI matching, verified background-checked tutors, and safe lesson delivery empower learning across Nigeria." }}</p>
+    </div>
+
+    <div class="mtc-video-card">
+      {% if config.youtube_embed_url %}
+        <div class="mtc-video-iframe-wrap">
+          <iframe 
+            src="{{ config.youtube_embed_url }}" 
+            title="{{ config.video_section_title }}" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      {% else %}
+        <div class="mtc-video-iframe-wrap">
+          <iframe 
+            src="https://www.youtube-nocookie.com/embed/dQw4w9WgXcQ" 
+            title="MyteacherConnect Platform Video" 
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share" 
+            allowfullscreen>
+          </iframe>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</section>
+{% endif %}
+
 <section class="mtc-community">
   <div class="mtc-shell">
     <div class="mtc-community-head">
@@ -374,89 +409,122 @@
     </div>
     <div class="mtc-community-slider">
       <div class="mtc-community-track">
-        <!-- Testimonial 1 -->
-        <article>
-          <div class="mtc-stars">★★★★★</div>
-          <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching
-            really worked for us!"</p>
-          <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
-              alt="Mrs. Funmi Balogun">
-            <div>
-              <strong>Mrs. Funmi Balogun</strong>
-              <span>Lagos Parent</span>
+        {% if success_stories %}
+          {% for story in success_stories %}
+            <article>
+              <div class="mtc-stars" style="color: #fbbf24; font-size: 15px;">
+                {% if story.rating >= 1 %}★{% else %}☆{% endif %}{% if story.rating >= 2 %}★{% else %}☆{% endif %}{% if story.rating >= 3 %}★{% else %}☆{% endif %}{% if story.rating >= 4 %}★{% else %}☆{% endif %}{% if story.rating >= 5 %}★{% else %}☆{% endif %}
+              </div>
+              <p>"{{ story.story }}"</p>
+              <div class="mtc-reviewer">
+                <img src="{{ story.profile_photo }}" alt="{{ story.author_name }}">
+                <div>
+                  <strong>{{ story.author_name }}</strong>
+                  <span>{{ story.title }}</span>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+          {% for story in success_stories %}
+            <article>
+              <div class="mtc-stars" style="color: #fbbf24; font-size: 15px;">
+                {% if story.rating >= 1 %}★{% else %}☆{% endif %}{% if story.rating >= 2 %}★{% else %}☆{% endif %}{% if story.rating >= 3 %}★{% else %}☆{% endif %}{% if story.rating >= 4 %}★{% else %}☆{% endif %}{% if story.rating >= 5 %}★{% else %}☆{% endif %}
+              </div>
+              <p>"{{ story.story }}"</p>
+              <div class="mtc-reviewer">
+                <img src="{{ story.profile_photo }}" alt="{{ story.author_name }}">
+                <div>
+                  <strong>{{ story.author_name }}</strong>
+                  <span>{{ story.title }}</span>
+                </div>
+              </div>
+            </article>
+          {% endfor %}
+        {% else %}
+          <!-- Testimonial 1 -->
+          <article>
+            <div class="mtc-stars">★★★★★</div>
+            <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching
+              really worked for us!"</p>
+            <div class="mtc-reviewer">
+              <img src="{% static 'images/avatars/avatar1.png' %}"
+                alt="Mrs. Funmi Balogun">
+              <div>
+                <strong>Mrs. Funmi Balogun</strong>
+                <span>Lagos Parent</span>
+              </div>
             </div>
-          </div>
-        </article>
-        <!-- Testimonial 2 -->
-        <article>
-          <div class="mtc-stars">★★★★★</div>
-          <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is
-            incredibly transparent."</p>
-          <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80"
-              alt="Mr. Emeka Obi">
-            <div>
-              <strong>Mr. Emeka Obi</strong>
-              <span>Math Tutor, Abuja</span>
+          </article>
+          <!-- Testimonial 2 -->
+          <article>
+            <div class="mtc-stars">★★★★★</div>
+            <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is
+              incredibly transparent."</p>
+            <div class="mtc-reviewer">
+              <img src="{% static 'images/avatars/avatar2.png' %}"
+                alt="Mr. Emeka Obi">
+              <div>
+                <strong>Mr. Emeka Obi</strong>
+                <span>Math Tutor, Abuja</span>
+              </div>
             </div>
-          </div>
-        </article>
-        <!-- Testimonial 3 -->
-        <article>
-          <div class="mtc-stars">★★★★★</div>
-          <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic
-            websites in months."</p>
-          <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80"
-              alt="Dr. Amina Yusuf">
-            <div>
-              <strong>Dr. Amina Yusuf</strong>
-              <span>Kano Parent</span>
+          </article>
+          <!-- Testimonial 3 -->
+          <article>
+            <div class="mtc-stars">★★★★★</div>
+            <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic
+              websites in months."</p>
+            <div class="mtc-reviewer">
+              <img src="{% static 'images/avatars/avatar3.png' %}"
+                alt="Dr. Amina Yusuf">
+              <div>
+                <strong>Dr. Amina Yusuf</strong>
+                <span>Kano Parent</span>
+              </div>
             </div>
-          </div>
-        </article>
+          </article>
 
-        <!-- Duplicated for Infinite Scroll Loop -->
-        <article>
-          <div class="mtc-stars">★★★★★</div>
-          <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching
-            really worked for us!"</p>
-          <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=100&q=80"
-              alt="Mrs. Funmi Balogun">
-            <div>
-              <strong>Mrs. Funmi Balogun</strong>
-              <span>Lagos Parent</span>
+          <!-- Duplicated for Infinite Scroll Loop -->
+          <article>
+            <div class="mtc-stars">★★★★★</div>
+            <p>"My son's JAMB score improved from 210 to 290 thanks to the amazing tutor we found here. The AI matching
+              really worked for us!"</p>
+            <div class="mtc-reviewer">
+              <img src="{% static 'images/avatars/avatar1.png' %}"
+                alt="Mrs. Funmi Balogun">
+              <div>
+                <strong>Mrs. Funmi Balogun</strong>
+                <span>Lagos Parent</span>
+              </div>
             </div>
-          </div>
-        </article>
-        <article>
-          <div class="mtc-stars">★★★★★</div>
-          <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is
-            incredibly transparent."</p>
-          <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1560250097-0b93528c311a?auto=format&fit=crop&w=100&q=80"
-              alt="Mr. Emeka Obi">
-            <div>
-              <strong>Mr. Emeka Obi</strong>
-              <span>Math Tutor, Abuja</span>
+          </article>
+          <article>
+            <div class="mtc-stars">★★★★★</div>
+            <p>"As a tutor, this platform has provided me with a steady stream of serious students. The payment system is
+              incredibly transparent."</p>
+            <div class="mtc-reviewer">
+              <img src="{% static 'images/avatars/avatar2.png' %}"
+                alt="Mr. Emeka Obi">
+              <div>
+                <strong>Mr. Emeka Obi</strong>
+                <span>Math Tutor, Abuja</span>
+              </div>
             </div>
-          </div>
-        </article>
-        <article>
-          <div class="mtc-stars">★★★★★</div>
-          <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic
-            websites in months."</p>
-          <div class="mtc-reviewer">
-            <img src="https://images.unsplash.com/photo-1544717305-2782549b5136?auto=format&fit=crop&w=100&q=80"
-              alt="Dr. Amina Yusuf">
-            <div>
-              <strong>Dr. Amina Yusuf</strong>
-              <span>Kano Parent</span>
+          </article>
+          <article>
+            <div class="mtc-stars">★★★★★</div>
+            <p>"The coding tutor we found for our kids was exceptional. They went from zero knowledge to building basic
+              websites in months."</p>
+            <div class="mtc-reviewer">
+              <img src="{% static 'images/avatars/avatar3.png' %}"
+                alt="Dr. Amina Yusuf">
+              <div>
+                <strong>Dr. Amina Yusuf</strong>
+                <span>Kano Parent</span>
+              </div>
             </div>
-          </div>
-        </article>
+          </article>
+        {% endif %}
       </div>
     </div>
   </div>

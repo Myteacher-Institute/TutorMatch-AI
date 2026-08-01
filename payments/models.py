@@ -31,8 +31,8 @@ class Payment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     
     def save(self, *args, **kwargs):
-        self.commission = self.amount * Decimal('0.15')
-        self.tutor_payout = self.amount * Decimal('0.85')
+        self.commission = self.amount * Decimal('0.20')
+        self.tutor_payout = self.amount * Decimal('0.80')
         super().save(*args, **kwargs)
 
 
@@ -43,6 +43,7 @@ class PayoutInstallment(models.Model):
     STATUS_DISPUTED = "disputed"
     STATUS_RELEASED = "released"
     STATUS_REFUNDED = "refunded"
+    STATUS_HELD_FOR_STUDENT = "held_for_student"
     STATUS_CANCELLED = "cancelled"
 
     STATUS_CHOICES = [
@@ -52,6 +53,7 @@ class PayoutInstallment(models.Model):
         (STATUS_DISPUTED, "Disputed"),
         (STATUS_RELEASED, "Released"),
         (STATUS_REFUNDED, "Refunded"),
+        (STATUS_HELD_FOR_STUDENT, "Held for student"),
         (STATUS_CANCELLED, "Cancelled"),
     ]
 
@@ -89,8 +91,8 @@ class PayoutInstallment(models.Model):
 
     def save(self, *args, **kwargs):
         if self.amount is not None:
-            self.commission = self.amount * Decimal("0.15")
-            self.tutor_payout = self.amount * Decimal("0.85")
+            self.commission = self.amount * Decimal("0.20")
+            self.tutor_payout = self.amount * Decimal("0.80")
         super().save(*args, **kwargs)
 
     def __str__(self):

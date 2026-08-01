@@ -13,6 +13,7 @@ urlpatterns = [
     path("verify/resend/", views.resend_verification_email, name="resend_verification_email"),
     path("dashboard/", views.student_dashboard, name="student_dashboard"),
     path("saved-tutors/", views.saved_tutors, name="saved_tutors"),
+    path("update-account-details/", views.update_account_details, name="update_account_details"),
     path("delete-account/", views.delete_account, name="delete_account"),
     path(
         "toggle-save-tutor/<int:tutor_id>/",

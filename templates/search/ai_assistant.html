@@ -1317,8 +1317,7 @@
                                 <strong>Experience:</strong> {{ tutor.experience }} yrs
                               </p>
                               <div class="tutor-card-buttons">
-                                <a href="{% url 'tutor_detail' tutor.id %}" class="tutor-btn tutor-btn-secondary" target="_blank" rel="noopener noreferrer">View Profile</a>
-                                <a href="{% url 'book_tutor' tutor.id %}" class="tutor-btn tutor-btn-primary" target="_blank" rel="noopener noreferrer">Book Tutor</a>
+                                <a href="{% url 'tutor_detail' tutor.id %}" class="tutor-btn tutor-btn-primary" style="flex: 1; text-align: center;" target="_blank" rel="noopener noreferrer">Browse Courses</a>
                               </div>
                             {% endif %}
                           </div>

@@ -73,7 +73,7 @@
       </button>
     </div>
 
-    <div class="user-profile-widget" onclick="window.location.href='{% url 'student_dashboard' %}'">
+    <div class="user-profile-widget" onclick="document.getElementById('accountDetailsModal').style.display='flex'" style="cursor: pointer;" title="Click to view &amp; update account details">
       <div class="user-avatar-circle">
         {% if request.user.is_authenticated %}{{ request.user.first_name|default:request.user.username|first|upper }}{% else %}G{% endif %}
       </div>
@@ -85,3 +85,4 @@
     </div>
   </div>
 </aside>
+{% include "accounts/_account_details_modal.html" %}

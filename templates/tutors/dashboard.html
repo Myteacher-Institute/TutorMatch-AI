@@ -78,19 +78,28 @@
             </span>
           </div>
 
-          <!-- Card 3: Next Payout -->
-          <div class="donezo-metric-card">
+          <!-- Card 3: Next Payout (Interactive) -->
+          <div class="donezo-metric-card" onclick="document.getElementById('nextPayoutsModal').style.display='flex'" style="cursor: pointer; transition: transform 0.2s ease, box-shadow 0.2s ease;" title="Click to view all upcoming course payout schedules">
             <div class="donezo-metric-header">
               <span class="donezo-metric-title">Next Payout</span>
-              <div class="donezo-metric-icon-btn">
+              <div class="donezo-metric-icon-btn" style="background: #eff6ff; color: #2563eb;">
                 <i class="fa-solid fa-calendar-day"></i>
               </div>
             </div>
             <div class="donezo-metric-value">
-              {{ next_payout_date|date:"j F Y" }}
+              {% if next_payout_date %}
+                {{ next_payout_date|date:"j F Y" }}
+              {% else %}
+                <span style="font-size: 17px; color: #94a3b8; font-weight: 700;">No Active Payouts</span>
+              {% endif %}
             </div>
-            <span class="donezo-metric-badge donezo-badge-purple">
-              <i class="fa-solid fa-arrows-rotate"></i> {{ profile.get_payout_schedule_display|default:"Monthly Schedule" }}
+            <span class="donezo-metric-badge donezo-badge-purple" style="display: inline-flex; align-items: center; gap: 4px;">
+              <i class="fa-solid fa-arrows-rotate"></i> 
+              {% if upcoming_installments %}
+                {{ upcoming_installments|length }} upcoming &bull; Click for breakdown
+              {% else %}
+                No paid bookings active
+              {% endif %}
             </span>
           </div>
 
@@ -279,7 +288,67 @@
 
         </div>
 
-      </main>
+<!-- Upcoming Payout Breakdown Modal -->
+<div id="nextPayoutsModal" style="display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.65); backdrop-filter: blur(4px); z-index: 999999; align-items: center; justify-content: center; padding: 16px;">
+  <div style="background: #ffffff; width: 100%; max-width: 640px; border-radius: 20px; padding: 28px; box-shadow: 0 25px 60px rgba(0,0,0,0.3); position: relative; max-height: 90vh; overflow-y: auto;">
+    <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 14px;">
+      <div>
+        <h3 style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 800; display: flex; align-items: center; gap: 8px;">
+          <i class="fa-solid fa-receipt" style="color: #2563eb;"></i> Upcoming Course Payouts
+        </h3>
+        <p style="margin: 2px 0 0; font-size: 12px; color: #64748b;">Schedule of upcoming 30-day payout cycles for active student bookings.</p>
+      </div>
+      <button type="button" onclick="document.getElementById('nextPayoutsModal').style.display='none'" style="background: #f1f5f9; border: none; font-size: 20px; color: #64748b; cursor: pointer; width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center;">&times;</button>
+    </div>
+
+    {% if upcoming_installments %}
+      <div style="display: grid; gap: 12px;">
+        {% for item in upcoming_installments %}
+          <div style="border: 1px solid #e2e8f0; border-radius: 14px; padding: 16px; background: #ffffff; display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
+            <div style="flex: 1; min-width: 220px;">
+              <div style="font-size: 14px; font-weight: 800; color: #0f172a;">
+                {% if item.booking.course_offer %}
+                  {{ item.booking.course_offer.title }}
+                {% else %}
+                  Tutoring Session #{{ item.booking.id }}
+                {% endif %}
+              </div>
+              <div style="font-size: 12px; color: #64748b; margin-top: 2px;">
+                Student: <strong>{{ item.booking.student.user.get_full_name|default:item.booking.student.user.username }}</strong>
+              </div>
+              <div style="font-size: 11.5px; color: #64748b; margin-top: 4px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap;">
+                <span><i class="fa-solid fa-calendar" style="color: #94a3b8;"></i> Paid: {{ item.booking.booking_date|date:"j M Y" }}</span>
+                <span><i class="fa-solid fa-clock-rotate-left" style="color: #2563eb;"></i> 30-Day Target: <strong>{{ item.period_end|date:"j F Y" }}</strong></span>
+              </div>
+            </div>
+
+            <div style="text-align: right; min-width: 130px;">
+              <div style="font-size: 16px; font-weight: 900; color: #0f172a;">
+                &#8358;{{ item.tutor_payout|floatformat:2 }}
+              </div>
+              <div style="margin-top: 6px;">
+                {% if item.status == 'released' %}
+                  <span style="background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">Released</span>
+                {% elif item.status == 'awaiting_student' %}
+                  <span style="background: #fef3c7; color: #d97706; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">Awaiting Student Confirmation</span>
+                {% else %}
+                  <span style="background: #eff6ff; color: #2563eb; font-size: 11px; font-weight: 700; padding: 3px 8px; border-radius: 12px;">Cycle Day 1-30</span>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div style="text-align: center; padding: 36px 20px; color: #64748b;">
+        <i class="fa-solid fa-calendar-xmark" style="font-size: 36px; color: #cbd5e1; margin-bottom: 12px; display: block;"></i>
+        <h4 style="margin: 0 0 4px; color: #334155; font-size: 15px; font-weight: 700;">No Active Paid Courses</h4>
+        <p style="margin: 0; font-size: 13px;">When students enroll and pay for your courses, your 30-day payout schedule will automatically appear here.</p>
+      </div>
+    {% endif %}
+
+    <div style="margin-top: 20px; text-align: right;">
+      <button type="button" onclick="document.getElementById('nextPayoutsModal').style.display='none'" style="background: #f1f5f9; color: #475569; border: none; padding: 10px 20px; border-radius: 10px; font-size: 13px; font-weight: 700; cursor: pointer;">Close</button>
     </div>
   </div>
 </div>
