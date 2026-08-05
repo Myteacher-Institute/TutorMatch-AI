@@ -152,7 +152,10 @@ class HomepageStatsSetting(models.Model):
         if not self.youtube_video_url:
             return False
         url = str(self.youtube_video_url).strip().lower()
-        return any(ext in url for ext in [".mp4", ".webm", ".ogg", ".mov", ".m4v"])
+        if "youtube.com" in url or "youtu.be" in url:
+            return False
+        return True
+
 
     @property
     def youtube_embed_url(self):

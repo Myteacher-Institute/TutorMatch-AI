@@ -142,10 +142,11 @@
           </div>
 
           <div class="mtc-stats-group">
-            <label for="youtube_video_url">Video URL (YouTube or Direct MP4)</label>
-            <input type="url" id="youtube_video_url" name="youtube_video_url" value="{{ config.youtube_video_url }}" placeholder="https://www.youtube.com/watch?v=... or https://example.com/video.mp4" style="max-width: 100%;">
-            <p>Paste a YouTube video link (e.g., <code>https://www.youtube.com/watch?v=...</code>) or direct video file URL (e.g., <code>https://.../video.mp4</code>).</p>
+            <label for="youtube_video_url">Video URL (Cloudinary, MP4/WebM, or YouTube)</label>
+            <input type="url" id="youtube_video_url" name="youtube_video_url" value="{{ config.youtube_video_url }}" placeholder="https://res.cloudinary.com/... or https://example.com/video.mp4" style="max-width: 100%;">
+            <p>Paste any video link — supports Cloudinary URLs (<code>res.cloudinary.com/...</code>), direct MP4/WebM video file URLs, or YouTube links.</p>
           </div>
+
 
           <div class="mtc-stats-actions">
             <button type="submit">
