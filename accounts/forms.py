@@ -46,10 +46,17 @@ class Registration(UserCreationForm):
         choices=[('student', 'Student/Parent'), ('tutor', 'Tutor')],
         required=True,
     )
+    agree_terms = forms.BooleanField(
+        required=True,
+        error_messages={
+            'required': 'You must agree to the Terms & Conditions and Privacy Policy to proceed.'
+        },
+    )
 
     class Meta:
         model = User
-        fields = ['full_name', 'username', 'email', 'phonenumber', 'role_selection', 'password1', 'password2']
+        fields = ['full_name', 'username', 'email', 'phonenumber', 'role_selection', 'password1', 'password2', 'agree_terms']
+
 
     def clean_username(self):
         username = self.cleaned_data.get('username', '').strip()

@@ -89,7 +89,7 @@
             </span>
             <i class="fa-solid fa-chevron-right text-muted mobile-nav-arrow" style="font-size: 11px; opacity: 0.5;"></i>
           </a>
-          <a href="{% url 'register' %}">
+          <a href="{% url 'tutor_terms' %}">
             <span>
               <span class="nav-link-icon-badge"><i class="fa-solid fa-chalkboard-user"></i></span>
               For Tutors
@@ -172,7 +172,8 @@
       </div>
       <div class="mtc-footer-links">
         <h2 style="color: #ffffff;">For Tutors</h2>
-        <a href="{% url 'register' %}" style="color: #94a3b8;">Become a Tutor</a>
+        <a href="{% url 'tutor_terms' %}" style="color: #94a3b8;">Tutor Terms & Policy</a>
+        <a href="{% url 'register' %}?role=tutor" style="color: #94a3b8;">Become a Tutor</a>
         <a href="{% url 'success_stories' %}" style="color: #94a3b8;">Success Stories</a>
       </div>
       <div class="mtc-footer-links">
@@ -186,9 +187,11 @@
       <div>
         <a href="{% url 'privacy_policy' %}">Privacy Policy</a>
         <a href="{% url 'terms_of_service' %}">Terms of Service</a>
+        <a href="{% url 'tutor_terms' %}">Tutor Terms</a>
       </div>
     </div>
   </footer>
+
   {% endblock %}
 
   <div class="mtc-confirm-overlay" id="mtcConfirmOverlay" hidden>

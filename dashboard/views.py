@@ -1052,11 +1052,17 @@ def revenue(request):
 
 
 def Termsofservice(request):
-    return render(request, "Terms_of_Service.html")
+    return render(request, "tutor_terms.html")
+
 
 
 def privacy_policy(request):
     return render(request, "privacy_policy.html")
+
+
+def tutor_terms(request):
+    return render(request, "tutor_terms.html")
+
 
 
 @admin_required

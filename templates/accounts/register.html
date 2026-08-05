@@ -43,7 +43,7 @@
           {% csrf_token %}
 
           {% for field in form %}
-            <div class="form-group {% if field.name == 'role_selection' or field.name == 'password1' or field.name == 'password2' %}span-2{% endif %}">
+            <div class="form-group {% if field.name == 'role_selection' or field.name == 'password1' or field.name == 'password2' or field.name == 'agree_terms' %}span-2{% endif %}">
               {% if field.name == 'role_selection' %}
                 <label>{{ field.label }}</label>
                 <div class="role-toggle" id="role-toggle">
@@ -51,6 +51,20 @@
                   <button type="button" class="role-toggle-btn {% if field.value == 'tutor' %}active{% endif %}" data-value="tutor">Tutor</button>
                 </div>
                 <input type="hidden" name="{{ field.name }}" id="{{ field.id_for_label }}" value="{{ field.value|default:'student' }}">
+              {% elif field.name == 'agree_terms' %}
+                <div class="agree-terms-wrapper" style="display: flex; align-items: flex-start; gap: 10px; font-size: 13px; color: #475569; margin-top: 6px;">
+                  <input
+                    type="checkbox"
+                    name="{{ field.name }}"
+                    id="{{ field.id_for_label }}"
+                    style="width: 18px; height: 18px; accent-color: #2563eb; cursor: pointer; margin-top: 2px; flex-shrink: 0;"
+                    {% if field.value %}checked{% endif %}
+                    required
+                  >
+                  <label for="{{ field.id_for_label }}" style="cursor: pointer; line-height: 1.5; font-weight: 500;">
+                    I agree to the <a href="{% url 'terms_of_service' %}" target="_blank" style="color: #2563eb; text-decoration: underline;">Terms & Conditions</a> and <a href="{% url 'privacy_policy' %}" target="_blank" style="color: #2563eb; text-decoration: underline;">Privacy Policy</a>.<span id="tutor-terms-link-span"> Tutors must also agree to the <a href="{% url 'tutor_terms' %}" target="_blank" style="color: #2563eb; font-weight: 700; text-decoration: underline;">Tutor Terms</a>.</span>
+                  </label>
+                </div>
               {% elif field.field.choices %}
                 <label for="{{ field.id_for_label }}">
                   {{ field.label }}
@@ -143,7 +157,18 @@
          welcomeSubtext.textContent = studentSubtext;
        }
      }
+     const tutorTermsSpan = document.getElementById('tutor-terms-link-span');
+     if (tutorTermsSpan) {
+       if (role === 'tutor') {
+         tutorTermsSpan.style.display = 'inline';
+         tutorTermsSpan.style.color = '#1e40af';
+       } else {
+         tutorTermsSpan.style.display = 'inline';
+         tutorTermsSpan.style.color = 'inherit';
+       }
+     }
    }
+
 
    if (roleToggle) {
      const toggleButtons = roleToggle.querySelectorAll('.role-toggle-btn');

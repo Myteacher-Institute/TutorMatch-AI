@@ -1,0 +1,589 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Tutor Terms & Conditions | Myteacherconnect{% endblock %}
+
+{% block content %}
+<style>
+  .tutor-terms-hero {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 50%, #1e3a8a 100%);
+    color: #ffffff;
+    padding: 50px 30px;
+    border-radius: 24px;
+    margin-top: 24px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 40px rgba(15, 23, 42, 0.15);
+  }
+  .tutor-terms-hero::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    right: -20%;
+    width: 400px;
+    height: 400px;
+    background: radial-gradient(circle, rgba(37, 99, 235, 0.25) 0%, rgba(255, 255, 255, 0) 70%);
+    border-radius: 50%;
+    pointer-events: none;
+  }
+  .tutor-terms-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(37, 99, 235, 0.2);
+    border: 1px solid rgba(59, 130, 246, 0.4);
+    color: #93c5fd;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+  }
+  .tutor-terms-hero h1 {
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 12px;
+    letter-spacing: -0.02em;
+    line-height: 1.2;
+  }
+  .tutor-terms-hero p.lead {
+    font-size: 1.125rem;
+    color: #cbd5e1;
+    max-width: 680px;
+    margin-bottom: 24px;
+    line-height: 1.6;
+  }
+  .tutor-highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 32px;
+  }
+  .tutor-highlight-card {
+    background: rgba(255, 255, 255, 0.06);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    padding: 20px;
+    transition: transform 0.2s ease, border-color 0.2s ease;
+  }
+  .tutor-highlight-card:hover {
+    transform: translateY(-2px);
+    border-color: rgba(147, 197, 253, 0.4);
+  }
+  .tutor-highlight-icon {
+    width: 42px;
+    height: 42px;
+    border-radius: 12px;
+    background: #2563eb;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 18px;
+    margin-bottom: 12px;
+  }
+  .tutor-highlight-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #f8fafc;
+    margin-bottom: 4px;
+  }
+  .tutor-highlight-desc {
+    font-size: 13px;
+    color: #94a3b8;
+    line-height: 1.4;
+  }
+  .tutor-nav-tabs {
+    display: flex;
+    gap: 12px;
+    margin: 36px 0 24px;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 2px;
+  }
+  .tutor-nav-btn {
+    background: none;
+    border: none;
+    font-size: 16px;
+    font-weight: 700;
+    color: #64748b;
+    padding: 12px 24px;
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s ease;
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+  .tutor-nav-btn:hover {
+    color: #1e40af;
+    background: #f1f5f9;
+  }
+  .tutor-nav-btn.active {
+    color: #2563eb;
+    border-bottom-color: #2563eb;
+    background: #eff6ff;
+  }
+  .tutor-policy-section {
+    display: none;
+  }
+  .tutor-policy-section.active {
+    display: block;
+  }
+  .tutor-content-wrapper {
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    gap: 40px;
+    align-items: start;
+  }
+  @media (max-width: 900px) {
+    .tutor-content-wrapper {
+      grid-template-columns: 1fr;
+    }
+    .tutor-toc-sidebar {
+      display: none;
+    }
+  }
+  .tutor-toc-sidebar {
+    position: sticky;
+    top: 90px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 20px;
+  }
+  .tutor-toc-title {
+    font-size: 14px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: #475569;
+    margin-bottom: 12px;
+  }
+  .tutor-toc-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    max-height: calc(100vh - 200px);
+    overflow-y: auto;
+  }
+  .tutor-toc-list a {
+    text-decoration: none;
+    font-size: 13px;
+    color: #64748b;
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: block;
+    transition: all 0.15s ease;
+  }
+  .tutor-toc-list a:hover {
+    color: #2563eb;
+    background: #eff6ff;
+  }
+  .tutor-text-body {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 20px;
+    padding: 36px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.03);
+  }
+  .tutor-text-body h2 {
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 32px 0 12px;
+    padding-top: 16px;
+    border-top: 1px dashed #e2e8f0;
+  }
+  .tutor-text-body h2:first-of-type {
+    margin-top: 0;
+    padding-top: 0;
+    border-top: none;
+  }
+  .tutor-text-body h3 {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1e293b;
+    margin: 16px 0 8px;
+  }
+  .tutor-text-body p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #334155;
+    margin-bottom: 12px;
+  }
+  .tutor-text-body ul {
+    margin-bottom: 16px;
+    padding-left: 24px;
+  }
+  .tutor-text-body li {
+    font-size: 15px;
+    line-height: 1.6;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+  .tutor-cta-banner {
+    margin-top: 48px;
+    background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+    border: 1px solid #bfdbfe;
+    border-radius: 20px;
+    padding: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+  .tutor-cta-text h3 {
+    font-size: 1.3rem;
+    font-weight: 800;
+    color: #1e40af;
+    margin-bottom: 6px;
+  }
+  .tutor-cta-text p {
+    font-size: 14px;
+    color: #3b82f6;
+    margin: 0;
+  }
+  .tutor-cta-btn {
+    background: #2563eb;
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: 15px;
+    padding: 12px 28px;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.3);
+    transition: transform 0.2s ease, background 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .tutor-cta-btn:hover {
+    background: #1d4ed8;
+    transform: translateY(-2px);
+  }
+</style>
+
+<section class="mtc-shell mtc-section-spacing" style="padding-bottom: 60px;">
+  <!-- HERO BANNER -->
+  <div class="tutor-terms-hero">
+    <div class="tutor-terms-badge">
+      <i class="fa-solid fa-file-contract"></i>
+      Official Platform Policy & Terms
+    </div>
+    <h1>Tutor Terms, Conditions & Privacy Policy</h1>
+    <p class="lead">Everything you need to know about teaching, revenue share, monthly payouts, code of conduct, and privacy rights as a registered tutor on Myteacherconnect.</p>
+    <div style="font-size: 13px; color: #94a3b8;">Effective Date: August 3, 2026</div>
+
+    <div class="tutor-highlights-grid">
+      <div class="tutor-highlight-card">
+        <div class="tutor-highlight-icon"><i class="fa-solid fa-coins"></i></div>
+        <div class="tutor-highlight-title">80% Revenue Share</div>
+        <div class="tutor-highlight-desc">Tutors earn 80% of all completed course and lesson fees paid by learners.</div>
+      </div>
+      <div class="tutor-highlight-card">
+        <div class="tutor-highlight-icon"><i class="fa-solid fa-calendar-check"></i></div>
+        <div class="tutor-highlight-title">Monthly Payouts</div>
+        <div class="tutor-highlight-desc">Earnings processed and paid out directly every calendar month.</div>
+      </div>
+      <div class="tutor-highlight-card">
+        <div class="tutor-highlight-icon"><i class="fa-solid fa-shield-halved"></i></div>
+        <div class="tutor-highlight-title">Fair Review Guarantee</div>
+        <div class="tutor-highlight-desc">7-day auto-approval for completed training if no dispute is raised.</div>
+      </div>
+      <div class="tutor-highlight-card">
+        <div class="tutor-highlight-icon"><i class="fa-solid fa-user-shield"></i></div>
+        <div class="tutor-highlight-title">Data Privacy & Security</div>
+        <div class="tutor-highlight-desc">Bank & personal info safeguarded under strict privacy standards.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NAVIGATION TABS -->
+  <div class="tutor-nav-tabs">
+    <button class="tutor-nav-btn active" onclick="switchTutorTab('terms')">
+      <i class="fa-solid fa-gavel" style="margin-right: 8px;"></i>
+      Tutor Terms & Conditions
+    </button>
+    <button class="tutor-nav-btn" onclick="switchTutorTab('privacy')">
+      <i class="fa-solid fa-lock" style="margin-right: 8px;"></i>
+      Tutor Privacy Policy
+    </button>
+  </div>
+
+  <!-- CONTENT SECTION 1: TUTOR TERMS & CONDITIONS -->
+  <div id="tutor-tab-terms" class="tutor-policy-section active">
+    <div class="tutor-content-wrapper">
+      <aside class="tutor-toc-sidebar">
+        <div class="tutor-toc-title">Table of Contents</div>
+        <ul class="tutor-toc-list">
+          <li><a href="#terms-1">1. Introduction</a></li>
+          <li><a href="#terms-2">2. Eligibility</a></li>
+          <li><a href="#terms-3">3. Tutor Responsibilities</a></li>
+          <li><a href="#terms-4">4. Course Delivery</a></li>
+          <li><a href="#terms-5">5. Tutor Earnings & Payment</a></li>
+          <li><a href="#terms-6">6. Performance Standards</a></li>
+          <li><a href="#terms-7">7. Cancellations & Absence</a></li>
+          <li><a href="#terms-8">8. Intellectual Property</a></li>
+          <li><a href="#terms-9">9. Confidentiality</a></li>
+          <li><a href="#terms-10">10. Non-Circumvention</a></li>
+          <li><a href="#terms-11">11. Code of Professional Conduct</a></li>
+          <li><a href="#terms-12">12. Suspension & Termination</a></li>
+          <li><a href="#terms-13">13. Limitation of Liability</a></li>
+          <li><a href="#terms-14">14. Amendments</a></li>
+          <li><a href="#terms-15">15. Contact</a></li>
+        </ul>
+      </aside>
+
+      <main class="tutor-text-body">
+        <h2 id="terms-1">1. Introduction</h2>
+        <p>Welcome to Myteacherconnect. These Tutor Terms and Conditions ("Terms") govern your registration and use of the Myteacherconnect platform as a tutor or instructor ("Tutor"). By registering as a Tutor, accepting teaching assignments, or using the platform, you agree to be bound by these Terms.</p>
+        <p>If you do not agree with these Terms, you must not use the platform as a Tutor.</p>
+
+        <h2 id="terms-2">2. Eligibility</h2>
+        <p>To register as a Tutor, you must:</p>
+        <ul>
+          <li>Be at least 18 years of age.</li>
+          <li>Provide complete, accurate, and truthful information during registration.</li>
+          <li>Possess the qualifications, certifications, skills, or experience necessary to teach your selected subjects.</li>
+          <li>Successfully complete any verification process required by Myteacherconnect.</li>
+          <li>Comply with all applicable laws and regulations.</li>
+        </ul>
+        <p>Myteacherconnect reserves the right to approve, reject, suspend, or terminate any tutor account at its sole discretion.</p>
+
+        <h2 id="terms-3">3. Tutor Responsibilities</h2>
+        <p>Tutors agree to:</p>
+        <ul>
+          <li>Deliver high-quality, professional, and engaging instruction.</li>
+          <li>Attend all scheduled classes punctually.</li>
+          <li>Prepare adequately for each lesson.</li>
+          <li>Follow the approved curriculum where applicable.</li>
+          <li>Provide learners with guidance, assignments, and feedback.</li>
+          <li>Maintain respectful and professional communication with learners.</li>
+          <li>Protect the privacy and confidentiality of learners.</li>
+          <li>Notify Myteacherconnect promptly if unable to attend a scheduled class.</li>
+          <li>Comply with all platform policies and community standards.</li>
+        </ul>
+
+        <h2 id="terms-4">4. Course Delivery</h2>
+        <p>Tutors are responsible for:</p>
+        <ul>
+          <li>Delivering lessons according to the agreed schedule.</li>
+          <li>Completing all assigned teaching sessions.</li>
+          <li>Recording attendance where applicable.</li>
+          <li>Conducting assessments and marking assignments where required.</li>
+          <li>Supporting learners until the completion of the training programme.</li>
+        </ul>
+
+        <h2 id="terms-5">5. Tutor Earnings and Payment</h2>
+        <h3>Revenue Sharing</h3>
+        <p>Tutors earn <strong>80%</strong> of the applicable training fees paid by learners for successfully completed training delivered through the Myteacherconnect platform.</p>
+        <p>The remaining <strong>20%</strong> is retained by Myteacherconnect to cover platform development, technology infrastructure, marketing, payment processing, customer support, administration, and operational costs.</p>
+
+        <h3>Monthly Payments</h3>
+        <p>Tutor earnings are processed and paid once every calendar month using the payment details provided by the Tutor.</p>
+        <p>Tutors are responsible for ensuring that their payment information remains accurate and up to date.</p>
+
+        <h3>Payment Approval</h3>
+        <p>To protect both learners and tutors, payments are subject to the following process:</p>
+        <ul>
+          <li>Tutors are paid monthly for completed training where the learner has submitted a Satisfactory review or selected the Satisfactory button on the platform.</li>
+          <li>If a learner does not provide any feedback within seven (7) days after the course or training has ended, and no complaint or dispute has been submitted, the training shall automatically be deemed satisfactorily completed, and the Tutor shall become eligible for payment.</li>
+          <li>Where a learner submits an Unsatisfactory review or raises a complaint within the seven-day review period, Myteacherconnect may temporarily withhold payment while investigating the matter.</li>
+          <li>During an investigation, both the learner and the Tutor may be asked to provide relevant information or evidence.</li>
+          <li>Following its review, Myteacherconnect will determine whether payment should be released, adjusted, or withheld. The platform's decision shall be final.</li>
+        </ul>
+
+        <h2 id="terms-6">6. Performance Standards</h2>
+        <p>Tutors are expected to maintain high teaching standards. Repeated issues including, but not limited to:</p>
+        <ul>
+          <li>Poor teaching quality</li>
+          <li>Failure to complete assigned classes</li>
+          <li>Frequent lateness</li>
+          <li>Repeated learner complaints</li>
+          <li>Inappropriate behaviour</li>
+          <li>Poor communication</li>
+          <li>Failure to comply with platform policies</li>
+        </ul>
+        <p>may result in warnings, suspension, removal from teaching assignments, or permanent termination of the tutor account.</p>
+
+        <h2 id="terms-7">7. Cancellations and Absence</h2>
+        <p>Tutors should provide reasonable notice whenever they are unable to conduct a scheduled class.</p>
+        <p>Repeated cancellations without valid reasons may negatively affect tutor ratings, future teaching opportunities, and continued use of the platform.</p>
+
+        <h2 id="terms-8">8. Intellectual Property</h2>
+        <p>Tutors retain ownership of educational materials they independently create.</p>
+        <p>By uploading any materials to Myteacherconnect, Tutors grant Myteacherconnect a non-exclusive, worldwide licence to host, display, reproduce, and use such materials solely for delivering educational services through the platform.</p>
+        <p>Tutors warrant that they own or have permission to use any content they upload.</p>
+
+        <h2 id="terms-9">9. Confidentiality</h2>
+        <p>Tutors shall keep confidential all learner information, assessment records, payment information, platform data, and other confidential information obtained through Myteacherconnect.</p>
+        <p>Confidential information shall not be disclosed except where required by law or expressly authorised by Myteacherconnect.</p>
+
+        <h2 id="terms-10">10. Non-Circumvention</h2>
+        <p>Learners introduced through Myteacherconnect are clients of the platform.</p>
+        <p>Tutors shall not directly or indirectly encourage, solicit, or persuade learners to receive educational services outside the Myteacherconnect platform without prior written approval.</p>
+        <p>Violation of this clause may result in immediate suspension or permanent termination.</p>
+
+        <h2 id="terms-11">11. Code of Professional Conduct</h2>
+        <p>Tutors shall not:</p>
+        <ul>
+          <li>Harass, threaten, or discriminate against learners.</li>
+          <li>Use abusive, offensive, or inappropriate language.</li>
+          <li>Request unnecessary personal information.</li>
+          <li>Engage in fraudulent or deceptive activities.</li>
+          <li>Misrepresent qualifications or teaching experience.</li>
+          <li>Upload illegal, offensive, or copyrighted material without permission.</li>
+          <li>Engage in any conduct that damages the reputation of Myteacherconnect.</li>
+        </ul>
+
+        <h2 id="terms-12">12. Suspension and Termination</h2>
+        <p>Myteacherconnect may suspend or terminate a Tutor account at any time for:</p>
+        <ul>
+          <li>Violation of these Terms.</li>
+          <li>Fraudulent conduct.</li>
+          <li>Repeated poor learner feedback.</li>
+          <li>Misconduct.</li>
+          <li>Inactivity.</li>
+          <li>Any action considered harmful to the platform, learners, or other users.</li>
+        </ul>
+
+        <h2 id="terms-13">13. Limitation of Liability</h2>
+        <p>Myteacherconnect provides a technology platform connecting learners and tutors. To the maximum extent permitted by applicable law, Myteacherconnect shall not be liable for indirect, incidental, consequential, or special damages arising from the Tutor's use of the platform.</p>
+
+        <h2 id="terms-14">14. Amendments</h2>
+        <p>Myteacherconnect may revise these Terms from time to time. Updated Terms become effective immediately upon publication unless otherwise stated. Continued use of the platform constitutes acceptance of the revised Terms.</p>
+
+        <h2 id="terms-15">15. Contact</h2>
+        <p>For enquiries regarding these Terms, please contact:</p>
+        <p>
+          <strong>Myteacherconnect Support</strong><br>
+          Email: <a href="mailto:support@myteacherconnect.org">support@myteacherconnect.org</a><br>
+          Website: <a href="https://www.myteacherconnect.org" target="_blank" rel="noopener">www.myteacherconnect.org</a>
+        </p>
+      </main>
+    </div>
+  </div>
+
+  <!-- CONTENT SECTION 2: TUTOR PRIVACY POLICY -->
+  <div id="tutor-tab-privacy" class="tutor-policy-section">
+    <div class="tutor-content-wrapper">
+      <aside class="tutor-toc-sidebar">
+        <div class="tutor-toc-title">Privacy Topics</div>
+        <ul class="tutor-toc-list">
+          <li><a href="#priv-1">1. Introduction</a></li>
+          <li><a href="#priv-2">2. Information We Collect</a></li>
+          <li><a href="#priv-3">3. How We Use Information</a></li>
+          <li><a href="#priv-4">4. Tutor Payments</a></li>
+          <li><a href="#priv-5">5. Learner Reviews</a></li>
+          <li><a href="#priv-6">6. Information Sharing</a></li>
+          <li><a href="#priv-7">7. Data Security</a></li>
+          <li><a href="#priv-8">8. Data Retention</a></li>
+          <li><a href="#priv-9">9. Your Privacy Rights</a></li>
+          <li><a href="#priv-10">10. Cookies & Analytics</a></li>
+          <li><a href="#priv-11">11. Changes to Policy</a></li>
+          <li><a href="#priv-12">12. Contact Support</a></li>
+        </ul>
+      </aside>
+
+      <main class="tutor-text-body">
+        <h2 id="priv-1">1. Introduction</h2>
+        <p>This Privacy Policy explains how Myteacherconnect collects, uses, stores, processes, and protects the personal information of Tutors using the platform.</p>
+        <p>By registering as a Tutor, you consent to the collection and processing of your information in accordance with this Privacy Policy.</p>
+
+        <h2 id="priv-2">2. Information We Collect</h2>
+        <p>We may collect:</p>
+        <ul>
+          <li>Full name, Email address, Phone number, Residential address, Date of birth</li>
+          <li>Profile photograph, Academic qualifications, Professional certifications, Employment history, Teaching experience</li>
+          <li>Government-issued identification (where required)</li>
+          <li>Bank account or payment details, Tax information (where applicable)</li>
+          <li>Login credentials, Device and browser information</li>
+          <li>Teaching activity, Earnings history, Student ratings and reviews</li>
+        </ul>
+
+        <h2 id="priv-3">3. How We Use Your Information</h2>
+        <p>We use Tutor information to:</p>
+        <ul>
+          <li>Create and manage tutor accounts.</li>
+          <li>Verify identity and qualifications.</li>
+          <li>Match Tutors with learners.</li>
+          <li>Process monthly tutor payments.</li>
+          <li>Monitor teaching quality.</li>
+          <li>Improve platform services.</li>
+          <li>Prevent fraud and misuse.</li>
+          <li>Communicate important updates.</li>
+          <li>Meet legal and regulatory obligations.</li>
+        </ul>
+
+        <h2 id="priv-4">4. Tutor Payments</h2>
+        <p>Payment information is collected solely for processing tutor earnings.</p>
+        <p>Tutor payments are made monthly in accordance with the Myteacherconnect Tutor Terms and Conditions.</p>
+        <p>Reasonable administrative, organisational, and technical safeguards are implemented to protect payment information.</p>
+
+        <h2 id="priv-5">5. Learner Reviews</h2>
+        <p>Learners may submit ratings, reviews, and satisfaction feedback after completing a course.</p>
+        <p>These reviews may be used to: improve service quality, determine tutor rankings, support dispute resolution, and confirm payment eligibility under the Tutor Terms.</p>
+        <p>If no learner feedback is received within seven (7) days after course completion and no dispute has been lodged, the training may be treated as satisfactorily completed for payment purposes.</p>
+
+        <h2 id="priv-6">6. Information Sharing</h2>
+        <p>Myteacherconnect may share Tutor information only where necessary with payment service providers, identity verification providers, technology service providers, regulatory authorities, or law enforcement agencies where legally required.</p>
+        <p><strong>Myteacherconnect does not sell Tutor personal information to third parties.</strong></p>
+
+        <h2 id="priv-7">7. Data Security</h2>
+        <p>Myteacherconnect implements appropriate administrative, physical, and technical safeguards to protect personal information against unauthorised access, disclosure, alteration, loss, or destruction.</p>
+
+        <h2 id="priv-8">8. Data Retention</h2>
+        <p>Tutor information will be retained only for as long as necessary to provide platform services, process payments, resolve disputes, comply with legal obligations, prevent fraud, and enforce contractual rights.</p>
+
+        <h2 id="priv-9">9. Your Privacy Rights</h2>
+        <p>Subject to applicable law, Tutors may request to access personal information, correct inaccurate information, update payment details, request deletion of eligible personal information, or withdraw consent where legally permitted.</p>
+
+        <h2 id="priv-10">10. Cookies and Analytics</h2>
+        <p>Myteacherconnect uses cookies and similar technologies to maintain secure login sessions, improve website functionality, analyse platform usage, enhance the user experience, and improve platform performance.</p>
+
+        <h2 id="priv-11">11. Changes to this Privacy Policy</h2>
+        <p>Myteacherconnect may update this Privacy Policy from time to time. The latest version will always be published on the platform with the updated effective date.</p>
+
+        <h2 id="priv-12">12. Contact</h2>
+        <p>For privacy enquiries or requests regarding your personal information, please contact:</p>
+        <p>
+          <strong>Myteacherconnect Support</strong><br>
+          Email: <a href="mailto:support@myteacherconnect.org">support@myteacherconnect.org</a><br>
+          Website: <a href="https://www.myteacherconnect.org" target="_blank" rel="noopener">www.myteacherconnect.org</a>
+        </p>
+      </main>
+    </div>
+  </div>
+
+  <!-- CALL TO ACTION BANNER -->
+  <div class="tutor-cta-banner">
+    <div class="tutor-cta-text">
+      <h3>Ready to Become a Verified Tutor?</h3>
+      <p>Join over 1,500+ educators delivering high-quality online & home tutoring across Nigeria.</p>
+    </div>
+    <a href="{% url 'register' %}?role=tutor" class="tutor-cta-btn">
+      Apply as a Tutor
+      <i class="fa-solid fa-arrow-right"></i>
+    </a>
+  </div>
+</section>
+
+<script>
+  function switchTutorTab(tabName) {
+    document.querySelectorAll('.tutor-nav-btn').forEach(btn => btn.classList.remove('active'));
+    document.querySelectorAll('.tutor-policy-section').forEach(sec => sec.classList.remove('active'));
+
+    if (tabName === 'terms') {
+      document.querySelectorAll('.tutor-nav-btn')[0].classList.add('active');
+      document.getElementById('tutor-tab-terms').classList.add('active');
+    } else {
+      document.querySelectorAll('.tutor-nav-btn')[1].classList.add('active');
+      document.getElementById('tutor-tab-privacy').classList.add('active');
+    }
+  }
+</script>
+{% endblock %}

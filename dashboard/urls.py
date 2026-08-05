@@ -20,4 +20,6 @@ urlpatterns = [
     path("admin-dashboard/success-stories/<int:story_id>/delete/", views.delete_success_story, name="admin_delete_success_story"),
     path("terms-of-service/", views.Termsofservice, name="terms_of_service"),
     path("privacy-policy/", views.privacy_policy, name="privacy_policy"),
+    path("tutor-terms/", views.tutor_terms, name="tutor_terms"),
 ]
+
