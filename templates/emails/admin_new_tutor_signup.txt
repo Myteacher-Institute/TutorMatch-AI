@@ -1,0 +1,19 @@
+[NEW TUTOR REGISTRATION ALERT]
+
+Hello Administrator,
+
+A new tutor account has just registered on {{ brand_name }} and is awaiting review and verification.
+
+Tutor Details:
+- Full Name: {{ tutor_name }}
+- Username: @{{ tutor_username }}
+- Email: {{ tutor_email }}
+- Phone: {{ tutor_phone }}
+- Registered At: {{ registered_at }}
+- Verification Status: Pending Verification
+
+To review credentials, documents, and approve or reject this tutor's profile, visit the Admin Verifications dashboard:
+{{ admin_verifications_url }}
+
+---
+Automated Notification from {{ brand_name }} ({{ site_url }})

@@ -6,7 +6,11 @@ from datetime import timedelta
 from django.shortcuts import render, redirect, get_object_or_404
 from .forms import Registration, Login, SuccessStoryForm
 from .models import SuccessStory, UserProfile
-from .account_emails import send_verification_email, send_welcome_email
+from .account_emails import (
+    send_verification_email,
+    send_welcome_email,
+    send_admin_new_tutor_notification,
+)
 from .email_services import TransactionalEmailError
 from django.contrib import messages
 from django.contrib.auth import login as auth_login, logout as auth_logout
@@ -66,7 +70,11 @@ def register(request):
                 messages.warning(request, _email_delivery_error_message(exc))
             except Exception:
                 logger.exception("Failed to send verification email during registration for user %s", user.pk)
-                messages.warning(request, "Account created, but we could not send the verification code right now. You can resend it from the verification page.")
+            if profile.role == UserProfile.ROLE_TUTOR:
+                try:
+                    send_admin_new_tutor_notification(request, profile)
+                except Exception:
+                    logger.exception("Failed to send admin notification for new tutor signup user %s", user.pk)
 
             auth_login(request, user)
             messages.success(request, "Account created successfully! Please check your email for the 6-digit verification code.")

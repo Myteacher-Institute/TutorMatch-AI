@@ -146,6 +146,11 @@ def tutor_verification(request):
         doc.document_url = upload_file_in_memory(document_file, folder="/tutor_documents")
         doc.save()
         profile.save(update_fields=["verification_status"])
+        try:
+            from accounts.account_emails import send_admin_tutor_documents_submitted_notification
+            send_admin_tutor_documents_submitted_notification(request, profile)
+        except Exception:
+            pass
         messages.success(request, 'Document uploaded successfully.')
         return redirect('tutor_verification')
 

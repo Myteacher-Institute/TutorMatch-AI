@@ -1,0 +1,18 @@
+[TUTOR DOCUMENTS SUBMITTED FOR REVIEW]
+
+Hello Administrator,
+
+Tutor {{ tutor_name }} has uploaded verification documents and is awaiting your review.
+
+Tutor Details:
+- Tutor Name: {{ tutor_name }}
+- Email: {{ tutor_email }}
+- Phone: {{ tutor_phone }}
+- Submitted At: {{ submitted_at }}
+- Documents Count: {{ documents_count }}
+
+To review uploaded documents and approve or reject the tutor, visit:
+{{ admin_verifications_url }}
+
+---
+Automated Notification from {{ brand_name }} ({{ site_url }})

@@ -1,0 +1,123 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tutor Documents Submitted - MyteacherConnect</title>
+  </head>
+  <body style="margin:0; padding:0; background:#f1f5f9; font-family:Inter, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; color:#0f172a;">
+    <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f1f5f9; padding:32px 16px;">
+      <tr>
+        <td align="center">
+          <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="max-width:640px; background:#ffffff; border-radius:16px; overflow:hidden; border:1px solid #e2e8f0; box-shadow:0 4px 6px -1px rgba(0,0,0,0.05);">
+            
+            <!-- Header -->
+            <tr>
+              <td style="background:linear-gradient(135deg, #0f172a 0%, #1e3a8a 50%, #2563eb 100%); padding:32px 32px 28px; color:#ffffff;">
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0">
+                  <tr>
+                    <td>
+                      <img src="{{ logo_url }}" alt="MyteacherConnect" width="200" style="display:block; max-width:200px; width:100%; height:auto;">
+                    </td>
+                    <td align="right">
+                      <span style="display:inline-block; background:rgba(59, 130, 246, 0.2); border:1px solid #60a5fa; color:#dbeafe; font-size:11px; font-weight:800; text-transform:uppercase; letter-spacing:0.08em; padding:5px 12px; border-radius:9999px;">
+                        Documents Uploaded
+                      </span>
+                    </td>
+                  </tr>
+                </table>
+                <h1 style="margin:24px 0 6px; font-size:24px; font-weight:800; line-height:1.2; color:#ffffff;">
+                  📄 Tutor Documents Submitted
+                </h1>
+                <p style="margin:0; color:#cbd5e1; font-size:14px; line-height:1.5;">
+                  A tutor has submitted verification documents (ID, credentials) for admin approval.
+                </p>
+              </td>
+            </tr>
+
+            <!-- Body Content -->
+            <tr>
+              <td style="padding:32px;">
+                <p style="margin:0 0 20px; color:#334155; font-size:15px; line-height:1.6;">
+                  Hello Administrator,
+                </p>
+                <p style="margin:0 0 24px; color:#334155; font-size:15px; line-height:1.6;">
+                  Tutor <strong>{{ tutor_name }}</strong> has uploaded verification documents and is awaiting your review.
+                </p>
+
+                <!-- Tutor Info Card -->
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; margin-bottom:28px; overflow:hidden;">
+                  <tr>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; width:38%; font-size:13px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">
+                      Tutor Name
+                    </td>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; font-size:14px; font-weight:700; color:#0f172a;">
+                      {{ tutor_name }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; font-size:13px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">
+                      Email
+                    </td>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; font-size:14px; color:#2563eb; font-weight:600;">
+                      <a href="mailto:{{ tutor_email }}" style="color:#2563eb; text-decoration:none;">{{ tutor_email }}</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; font-size:13px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">
+                      Phone Number
+                    </td>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; font-size:14px; color:#1e293b;">
+                      {{ tutor_phone }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; font-size:13px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">
+                      Submitted At
+                    </td>
+                    <td style="padding:14px 20px; border-bottom:1px solid #e2e8f0; font-size:14px; color:#475569;">
+                      {{ submitted_at|date:"F j, Y · g:i A" }}
+                    </td>
+                  </tr>
+                  <tr>
+                    <td style="padding:14px 20px; font-size:13px; font-weight:700; color:#64748b; text-transform:uppercase; letter-spacing:0.05em;">
+                      Document Count
+                    </td>
+                    <td style="padding:14px 20px; font-size:14px; color:#0f172a; font-weight:600;">
+                      {{ documents_count }} file(s) attached
+                    </td>
+                  </tr>
+                </table>
+
+                <!-- Action Button -->
+                <table role="presentation" width="100%" cellspacing="0" cellpadding="0" style="margin-bottom:28px;">
+                  <tr>
+                    <td align="center">
+                      <a href="{{ admin_verifications_url }}" style="display:inline-block; width:100%; max-width:320px; text-align:center; background:#2563eb; color:#ffffff; text-decoration:none; border-radius:10px; padding:14px 24px; font-size:15px; font-weight:800; letter-spacing:0.02em; box-shadow:0 4px 6px -1px rgba(37,99,235,0.3);">
+                        Review Documents Now &rarr;
+                      </a>
+                    </td>
+                  </tr>
+                </table>
+
+              </td>
+            </tr>
+
+            <!-- Footer -->
+            <tr>
+              <td style="padding:24px 32px; background:#f8fafc; border-top:1px solid #e2e8f0; color:#64748b; font-size:12px; line-height:1.7;">
+                <p style="margin:0 0 10px; color:#64748b;">
+                  This is an automated administrative notification from <strong>{{ brand_name }}</strong>.
+                </p>
+                <p style="margin:0; color:#94a3b8;">
+                  &copy; {{ brand_name }} &bull; <a href="{{ site_url }}" style="color:#64748b; text-decoration:underline;">{{ site_url }}</a>
+                </p>
+              </td>
+            </tr>
+
+          </table>
+        </td>
+      </tr>
+    </table>
+  </body>
+</html>
