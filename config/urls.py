@@ -5,11 +5,14 @@ from django.urls import include, path
 from django.views.generic import TemplateView
 
 from tutors.sitemaps import CourseOfferSitemap, StaticViewSitemap, TutorProfileSitemap
+from blog.sitemaps import BlogPostSitemap, BlogCategorySitemap
 
 sitemaps = {
     "static": StaticViewSitemap,
     "tutors": TutorProfileSitemap,
     "courses": CourseOfferSitemap,
+    "blog": BlogPostSitemap,
+    "blog_categories": BlogCategorySitemap,
 }
 
 urlpatterns = [
@@ -31,6 +34,7 @@ urlpatterns = [
     path("", include("bookings.urls")),
     path("", include("payments.urls")),
     path("", include("reviews.urls")),
+    path("", include("blog.urls")),
     path("", include(("Chat.urls", "Chat"), namespace="chat")),
 ]
 

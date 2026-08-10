@@ -96,6 +96,13 @@
             </span>
             <i class="fa-solid fa-chevron-right text-muted mobile-nav-arrow" style="font-size: 11px; opacity: 0.5;"></i>
           </a>
+          <a href="{% url 'blog_list' %}">
+            <span>
+              <span class="nav-link-icon-badge"><i class="fa-solid fa-newspaper"></i></span>
+              Blog
+            </span>
+            <i class="fa-solid fa-chevron-right text-muted mobile-nav-arrow" style="font-size: 11px; opacity: 0.5;"></i>
+          </a>
         </div>
       {% if request.user.is_authenticated %}
         <div class="nav-actions">
@@ -178,6 +185,7 @@
       </div>
       <div class="mtc-footer-links">
         <h2 style="color: #ffffff;">Company</h2>
+        <a href="{% url 'blog_list' %}" style="color: #94a3b8;">Blog & Insights</a>
         <a href="{% url 'contact' %}" style="color: #94a3b8;">Contact</a>
         <a href="{% url 'terms_of_service' %}" style="color: #94a3b8;">Terms of Service</a>
       </div>

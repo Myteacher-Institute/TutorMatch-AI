@@ -1,0 +1,854 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ post.get_meta_title }}{% endblock %}
+
+{% block meta_description %}{{ post.get_meta_description }}{% endblock %}
+
+{% block meta_keywords %}{{ post.get_meta_keywords }}{% endblock %}
+
+{% block canonical_url %}{{ absolute_url }}{% endblock %}
+
+{% block og_type %}article{% endblock %}
+{% block og_url %}{{ absolute_url }}{% endblock %}
+{% block og_title %}{{ post.title }}{% endblock %}
+{% block og_description %}{{ post.get_meta_description }}{% endblock %}
+{% block og_image %}{{ post.effective_image_url }}{% endblock %}
+
+{% block twitter_title %}{{ post.title }}{% endblock %}
+{% block twitter_description %}{{ post.get_meta_description }}{% endblock %}
+{% block twitter_image %}{{ post.effective_image_url }}{% endblock %}
+
+{% block schema_markup %}
+<!-- JSON-LD Structured Data for Google Search Rich Results -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "headline": "{{ post.title|escapejs }}",
+  "description": "{{ post.get_meta_description|escapejs }}",
+  "image": ["{{ post.effective_image_url }}"],
+  "datePublished": "{{ post.published_at|date:'c' }}",
+  "dateModified": "{{ post.updated_at|date:'c' }}",
+  "author": {
+    "@type": "Person",
+    "name": "{{ post.author_display_name|escapejs }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "MyteacherConnect",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "https://myteacherconnect.org/static/images/logos/myteacherconnect-logo-blue-transparent.png"
+    }
+  },
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ absolute_url }}"
+  }
+}
+</script>
+
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BreadcrumbList",
+  "itemListElement": [
+    {
+      "@type": "ListItem",
+      "position": 1,
+      "name": "Home",
+      "item": "{{ SITE_URL }}/"
+    },
+    {
+      "@type": "ListItem",
+      "position": 2,
+      "name": "Blog",
+      "item": "{{ SITE_URL }}/blog/"
+    }
+    {% if post.category %}
+    ,{
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ post.category.name|escapejs }}",
+      "item": "{{ SITE_URL }}/blog/?category={{ post.category.slug }}"
+    },
+    {
+      "@type": "ListItem",
+      "position": 4,
+      "name": "{{ post.title|escapejs }}",
+      "item": "{{ absolute_url }}"
+    }
+    {% else %}
+    ,{
+      "@type": "ListItem",
+      "position": 3,
+      "name": "{{ post.title|escapejs }}",
+      "item": "{{ absolute_url }}"
+    }
+    {% endif %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="mtc-article-page">
+  {% if is_admin_preview %}
+    <div class="mtc-preview-banner">
+      <div class="mtc-shell">
+        <i class="fa-solid fa-eye"></i> <strong>Admin Preview Mode:</strong> This post is currently a <strong>Draft</strong> and is not visible to the public. <a href="{% url 'admin_blog_edit' post.id %}">Edit Post</a>
+      </div>
+    </div>
+  {% endif %}
+
+  <!-- Reading Progress Bar -->
+  <div class="mtc-reading-progress-bar" id="readingProgressBar"></div>
+
+  <div class="mtc-shell mtc-article-container">
+    <!-- Breadcrumb UI -->
+    <nav class="mtc-article-breadcrumbs" aria-label="Breadcrumb">
+      <a href="{% url 'home' %}"><i class="fa-solid fa-house"></i> Home</a>
+      <i class="fa-solid fa-chevron-right separator"></i>
+      <a href="{% url 'blog_list' %}">Blog</a>
+      {% if post.category %}
+        <i class="fa-solid fa-chevron-right separator"></i>
+        <a href="{% url 'blog_list' %}?category={{ post.category.slug }}">{{ post.category.name }}</a>
+      {% endif %}
+      <i class="fa-solid fa-chevron-right separator"></i>
+      <span class="current">{{ post.title|truncatechars:35 }}</span>
+    </nav>
+
+    <!-- Article Header -->
+    <header class="mtc-article-header">
+      {% if post.category %}
+        <a href="{% url 'blog_list' %}?category={{ post.category.slug }}" class="mtc-article-category-badge">
+          <i class="fa-solid {{ post.category.icon }}"></i> {{ post.category.name }}
+        </a>
+      {% endif %}
+      <h1 class="mtc-article-title">{{ post.title }}</h1>
+
+      <div class="mtc-article-meta-bar">
+        <div class="mtc-article-author-info">
+          <div class="mtc-author-avatar-circle">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+          <div>
+            <div class="mtc-author-name-text">{{ post.author_display_name }}</div>
+            <div class="mtc-author-role-text">Education Specialist</div>
+          </div>
+        </div>
+
+        <div class="mtc-article-metrics">
+          <span><i class="fa-regular fa-calendar"></i> {{ post.published_at|date:"F j, Y" }}</span>
+          <span><i class="fa-regular fa-clock"></i> {{ post.estimated_read_time }} min read</span>
+          <span><i class="fa-regular fa-eye"></i> {{ post.views_count }} views</span>
+        </div>
+      </div>
+    </header>
+
+    <!-- Featured Banner Image -->
+    <div class="mtc-article-hero-image-wrap">
+      <img src="{{ post.effective_image_url }}" alt="{{ post.title }}" class="mtc-article-hero-img">
+    </div>
+
+    <!-- Article Main Grid: Content + Floating Social Share -->
+    <div class="mtc-article-body-layout">
+      <!-- Floating Social Share Sidebar -->
+      <aside class="mtc-social-share-sticky">
+        <div class="mtc-social-share-label">Share</div>
+        <a href="{{ share_urls.whatsapp }}" target="_blank" rel="noopener noreferrer" class="mtc-share-btn whatsapp" title="Share on WhatsApp" aria-label="Share on WhatsApp">
+          <i class="fa-brands fa-whatsapp"></i>
+        </a>
+        <a href="{{ share_urls.twitter }}" target="_blank" rel="noopener noreferrer" class="mtc-share-btn twitter" title="Share on X (Twitter)" aria-label="Share on X">
+          <i class="fa-brands fa-x-twitter"></i>
+        </a>
+        <a href="{{ share_urls.facebook }}" target="_blank" rel="noopener noreferrer" class="mtc-share-btn facebook" title="Share on Facebook" aria-label="Share on Facebook">
+          <i class="fa-brands fa-facebook-f"></i>
+        </a>
+        <a href="{{ share_urls.linkedin }}" target="_blank" rel="noopener noreferrer" class="mtc-share-btn linkedin" title="Share on LinkedIn" aria-label="Share on LinkedIn">
+          <i class="fa-brands fa-linkedin-in"></i>
+        </a>
+        <button type="button" class="mtc-share-btn copy-link" id="copyLinkBtn" title="Copy Link" aria-label="Copy Link" onclick="copyArticleUrl()">
+          <i class="fa-solid fa-link"></i>
+        </button>
+      </aside>
+
+      <!-- Article Rich Content Body -->
+      <article class="mtc-article-content-body">
+        {% if post.excerpt %}
+          <div class="mtc-article-lead-box">
+            <p>{{ post.excerpt }}</p>
+          </div>
+        {% endif %}
+
+        <!-- Rendered Post Body -->
+        <div class="mtc-rich-text-content">
+          {{ post.content|safe }}
+        </div>
+
+        <!-- Social Share Bar (Mobile & Bottom) -->
+        <div class="mtc-bottom-share-section">
+          <h4>Found this helpful? Share with other parents & students:</h4>
+          <div class="mtc-bottom-share-buttons">
+            <a href="{{ share_urls.whatsapp }}" target="_blank" rel="noopener noreferrer" class="btn btn-share whatsapp"><i class="fa-brands fa-whatsapp"></i> WhatsApp</a>
+            <a href="{{ share_urls.twitter }}" target="_blank" rel="noopener noreferrer" class="btn btn-share twitter"><i class="fa-brands fa-x-twitter"></i> X (Twitter)</a>
+            <a href="{{ share_urls.facebook }}" target="_blank" rel="noopener noreferrer" class="btn btn-share facebook"><i class="fa-brands fa-facebook-f"></i> Facebook</a>
+            <button type="button" class="btn btn-share copy" onclick="copyArticleUrl()"><i class="fa-solid fa-link"></i> Copy Link</button>
+          </div>
+        </div>
+
+        <!-- Tutor Booking Conversion CTA Card -->
+        <div class="mtc-article-cta-card">
+          <div class="mtc-article-cta-badge"><i class="fa-solid fa-graduation-cap"></i> Verified Tutoring in Nigeria</div>
+          <h3>Achieve Academic Excellence with 1-on-1 Personalized Tutoring</h3>
+          <p>Whether you need a dedicated Math tutor in Port Harcourt, a WAEC/JAMB coach in Lagos, or a British Curriculum teacher in Abuja, MyteacherConnect connects you with top vetted educators.</p>
+          <div class="mtc-article-cta-actions">
+            <a href="{% url 'home' %}#search-section" class="btn btn-primary" style="border-radius: 999px; font-weight: 700; padding: 12px 28px; background: #2563eb;">Find a Tutor in Your City</a>
+            <a href="{% url 'course_list' %}" class="btn btn-ghost" style="font-weight: 700; color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; padding: 12px 24px;">Explore Courses</a>
+          </div>
+        </div>
+
+        <!-- Author Bio Box -->
+        <div class="mtc-author-bio-card">
+          <div class="mtc-author-avatar-large">
+            <i class="fa-solid fa-user-tie"></i>
+          </div>
+          <div class="mtc-author-bio-details">
+            <h4>Written by {{ post.author_display_name }}</h4>
+            <p>Dedicated to empowering Nigerian students, parents, and educators with actionable study guides, exam strategies, and educational technology insights.</p>
+            <div class="mtc-author-social-links">
+              <a href="https://www.facebook.com/myteacherinstitute" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-facebook"></i> Facebook</a>
+              <a href="https://www.linkedin.com/company/myteacher-institute" target="_blank" rel="noopener noreferrer"><i class="fa-brands fa-linkedin"></i> LinkedIn</a>
+            </div>
+          </div>
+        </div>
+      </article>
+    </div>
+
+    <!-- Related Articles Section -->
+    {% if related_posts %}
+      <section class="mtc-related-articles-section">
+        <div class="mtc-section-header">
+          <h2>Related Educational Guides</h2>
+          <a href="{% url 'blog_list' %}" class="mtc-view-all-link">All Articles <i class="fa-solid fa-arrow-right"></i></a>
+        </div>
+        <div class="mtc-related-grid">
+          {% for rp in related_posts %}
+            <article class="mtc-related-card">
+              <a href="{{ rp.get_absolute_url }}" class="mtc-related-img-wrap">
+                <img src="{{ rp.effective_image_url }}" alt="{{ rp.title }}" loading="lazy">
+              </a>
+              <div class="mtc-related-body">
+                <div class="mtc-related-meta">
+                  <span>{{ rp.published_at|date:"M d, Y" }}</span> • <span>{{ rp.estimated_read_time }} min read</span>
+                </div>
+                <h4><a href="{{ rp.get_absolute_url }}">{{ rp.title }}</a></h4>
+                <p>{{ rp.excerpt|truncatewords:14 }}</p>
+              </div>
+            </article>
+          {% endfor %}
+        </div>
+      </section>
+    {% endif %}
+  </div>
+</div>
+
+<div id="copyToast" class="mtc-copy-toast"><i class="fa-solid fa-circle-check"></i> Article link copied to clipboard!</div>
+
+<script>
+  // Reading Progress Bar
+  window.addEventListener('scroll', () => {
+    const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+    const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+    const scrolled = (winScroll / height) * 100;
+    const bar = document.getElementById("readingProgressBar");
+    if (bar) {
+      bar.style.width = scrolled + "%";
+    }
+  });
+
+  // Copy Link Function
+  function copyArticleUrl() {
+    const url = window.location.href;
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(url).then(() => {
+        showCopyToast();
+      });
+    } else {
+      const dummy = document.createElement("input");
+      document.body.appendChild(dummy);
+      dummy.value = url;
+      dummy.select();
+      document.execCommand("copy");
+      document.body.removeChild(dummy);
+      showCopyToast();
+    }
+  }
+
+  function showCopyToast() {
+    const toast = document.getElementById("copyToast");
+    if (toast) {
+      toast.classList.add("show");
+      setTimeout(() => {
+        toast.classList.remove("show");
+      }, 2500);
+    }
+  }
+</script>
+
+<style>
+  .mtc-article-page {
+    background: #f8fafc;
+    min-height: 100vh;
+    padding-bottom: 80px;
+  }
+
+  .mtc-preview-banner {
+    background: #f59e0b;
+    color: #0f172a;
+    padding: 10px 0;
+    font-size: 14px;
+    text-align: center;
+  }
+
+  .mtc-preview-banner a {
+    font-weight: 700;
+    text-decoration: underline;
+    margin-left: 8px;
+  }
+
+  .mtc-reading-progress-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 4px;
+    background: #2563eb;
+    z-index: 100;
+    width: 0%;
+    transition: width 0.1s ease;
+  }
+
+  .mtc-article-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding-top: 24px;
+  }
+
+  .mtc-article-breadcrumbs {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .mtc-article-breadcrumbs a {
+    color: #64748b;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .mtc-article-breadcrumbs a:hover {
+    color: #2563eb;
+  }
+
+  .mtc-article-breadcrumbs .separator {
+    font-size: 10px;
+    opacity: 0.5;
+  }
+
+  .mtc-article-breadcrumbs .current {
+    color: #0f172a;
+    font-weight: 600;
+  }
+
+  .mtc-article-header {
+    margin-bottom: 28px;
+  }
+
+  .mtc-article-category-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 13px;
+    font-weight: 700;
+    padding: 6px 14px;
+    border-radius: 999px;
+    margin-bottom: 16px;
+    text-decoration: none;
+  }
+
+  .mtc-article-title {
+    font-size: clamp(28px, 4vw, 42px);
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+    margin-bottom: 20px;
+  }
+
+  .mtc-article-meta-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 20px;
+    padding: 16px 0;
+    border-top: 1px solid #e2e8f0;
+    border-bottom: 1px solid #e2e8f0;
+    flex-wrap: wrap;
+  }
+
+  .mtc-article-author-info {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mtc-author-avatar-circle {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .mtc-author-name-text {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+  }
+
+  .mtc-author-role-text {
+    font-size: 12px;
+    color: #64748b;
+  }
+
+  .mtc-article-metrics {
+    display: flex;
+    gap: 18px;
+    font-size: 13px;
+    color: #64748b;
+  }
+
+  .mtc-article-hero-image-wrap {
+    width: 100%;
+    border-radius: 20px;
+    overflow: hidden;
+    margin-bottom: 36px;
+    box-shadow: 0 12px 36px rgba(15, 23, 42, 0.08);
+  }
+
+  .mtc-article-hero-img {
+    width: 100%;
+    max-height: 480px;
+    object-fit: cover;
+    display: block;
+  }
+
+  /* Body Layout */
+  .mtc-article-body-layout {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 36px;
+    position: relative;
+  }
+
+  .mtc-social-share-sticky {
+    position: sticky;
+    top: 100px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .mtc-social-share-label {
+    font-size: 11px;
+    font-weight: 800;
+    text-transform: uppercase;
+    color: #94a3b8;
+    letter-spacing: 0.5px;
+  }
+
+  .mtc-share-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #ffffff;
+    font-size: 18px;
+    text-decoration: none;
+    transition: transform 0.2s, opacity 0.2s;
+    border: none;
+    cursor: pointer;
+  }
+
+  .mtc-share-btn:hover {
+    transform: scale(1.1);
+  }
+
+  .mtc-share-btn.whatsapp { background: #25d366; }
+  .mtc-share-btn.twitter { background: #0f172a; }
+  .mtc-share-btn.facebook { background: #1877f2; }
+  .mtc-share-btn.linkedin { background: #0a66c2; }
+  .mtc-share-btn.copy-link { background: #64748b; }
+
+  .mtc-article-content-body {
+    min-width: 0;
+  }
+
+  .mtc-article-lead-box {
+    background: #ffffff;
+    border-left: 4px solid #2563eb;
+    padding: 20px 24px;
+    border-radius: 0 12px 12px 0;
+    margin-bottom: 30px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+  }
+
+  .mtc-article-lead-box p {
+    font-size: 17px;
+    line-height: 1.6;
+    color: #1e293b;
+    font-weight: 500;
+    margin: 0;
+  }
+
+  /* Rich Typography */
+  .mtc-rich-text-content {
+    font-size: 17px;
+    line-height: 1.8;
+    color: #334155;
+  }
+
+  .mtc-rich-text-content h2 {
+    font-size: 26px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 40px 0 16px;
+    line-height: 1.3;
+  }
+
+  .mtc-rich-text-content h3 {
+    font-size: 21px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 32px 0 14px;
+  }
+
+  .mtc-rich-text-content p {
+    margin-bottom: 22px;
+  }
+
+  .mtc-rich-text-content ul,
+  .mtc-rich-text-content ol {
+    margin: 0 0 24px 20px;
+    padding-left: 10px;
+  }
+
+  .mtc-rich-text-content li {
+    margin-bottom: 10px;
+  }
+
+  .mtc-rich-text-content blockquote {
+    background: #eff6ff;
+    border-left: 4px solid #2563eb;
+    margin: 28px 0;
+    padding: 20px 24px;
+    border-radius: 0 12px 12px 0;
+    font-style: italic;
+    color: #1e3a8a;
+  }
+
+  .mtc-rich-text-content blockquote p {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+  }
+
+  .mtc-rich-text-content img {
+    border-radius: 12px;
+    margin: 24px 0;
+    max-width: 100%;
+  }
+
+  /* Bottom Share */
+  .mtc-bottom-share-section {
+    margin: 48px 0 36px;
+    padding: 24px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+  }
+
+  .mtc-bottom-share-section h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 16px 0;
+  }
+
+  .mtc-bottom-share-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+
+  .btn-share {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 18px;
+    border-radius: 999px;
+    color: #ffffff;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+  }
+
+  .btn-share.whatsapp { background: #25d366; }
+  .btn-share.twitter { background: #0f172a; }
+  .btn-share.facebook { background: #1877f2; }
+  .btn-share.copy { background: #475569; }
+
+  /* Conversion CTA Card */
+  .mtc-article-cta-card {
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    color: #ffffff;
+    padding: 36px 32px;
+    border-radius: 20px;
+    margin: 40px 0;
+    box-shadow: 0 16px 40px rgba(15, 23, 42, 0.15);
+  }
+
+  .mtc-article-cta-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+    padding: 4px 12px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+    margin-bottom: 12px;
+  }
+
+  .mtc-article-cta-card h3 {
+    font-size: 22px;
+    font-weight: 800;
+    margin-bottom: 10px;
+    color: #ffffff;
+  }
+
+  .mtc-article-cta-card p {
+    font-size: 14px;
+    color: #94a3b8;
+    line-height: 1.6;
+    margin-bottom: 22px;
+  }
+
+  .mtc-article-cta-actions {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+
+  /* Author Bio */
+  .mtc-author-bio-card {
+    display: flex;
+    gap: 20px;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    margin: 40px 0;
+    align-items: center;
+  }
+
+  .mtc-author-avatar-large {
+    width: 64px;
+    height: 64px;
+    border-radius: 50%;
+    background: #e2e8f0;
+    color: #475569;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    flex-shrink: 0;
+  }
+
+  .mtc-author-bio-details h4 {
+    font-size: 16px;
+    font-weight: 700;
+    color: #0f172a;
+    margin: 0 0 6px 0;
+  }
+
+  .mtc-author-bio-details p {
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.5;
+    margin: 0 0 10px 0;
+  }
+
+  .mtc-author-social-links {
+    display: flex;
+    gap: 16px;
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .mtc-author-social-links a {
+    color: #2563eb;
+    text-decoration: none;
+  }
+
+  /* Related Articles Grid */
+  .mtc-related-articles-section {
+    margin-top: 60px;
+    padding-top: 40px;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .mtc-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  .mtc-section-header h2 {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0;
+  }
+
+  .mtc-view-all-link {
+    color: #2563eb;
+    font-size: 14px;
+    font-weight: 700;
+    text-decoration: none;
+  }
+
+  .mtc-related-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 20px;
+  }
+
+  .mtc-related-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+    transition: transform 0.2s;
+  }
+
+  .mtc-related-card:hover {
+    transform: translateY(-3px);
+  }
+
+  .mtc-related-img-wrap {
+    height: 140px;
+    display: block;
+    overflow: hidden;
+  }
+
+  .mtc-related-img-wrap img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .mtc-related-body {
+    padding: 16px;
+  }
+
+  .mtc-related-meta {
+    font-size: 11px;
+    color: #94a3b8;
+    margin-bottom: 6px;
+  }
+
+  .mtc-related-body h4 {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.35;
+    margin: 0 0 8px 0;
+  }
+
+  .mtc-related-body h4 a {
+    color: #0f172a;
+    text-decoration: none;
+  }
+
+  .mtc-related-body h4 a:hover {
+    color: #2563eb;
+  }
+
+  .mtc-related-body p {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.45;
+    margin: 0;
+  }
+
+  /* Copy Toast */
+  .mtc-copy-toast {
+    position: fixed;
+    bottom: 24px;
+    right: 24px;
+    background: #0f172a;
+    color: #ffffff;
+    padding: 12px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
+    transform: translateY(100px);
+    opacity: 0;
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    z-index: 1000;
+  }
+
+  .mtc-copy-toast.show {
+    transform: translateY(0);
+    opacity: 1;
+  }
+
+  .mtc-copy-toast i {
+    color: #10b981;
+  }
+
+  @media (max-width: 768px) {
+    .mtc-article-body-layout {
+      grid-template-columns: 1fr;
+    }
+    .mtc-social-share-sticky {
+      display: none;
+    }
+    .mtc-related-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+{% endblock %}

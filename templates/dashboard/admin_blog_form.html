@@ -1,0 +1,430 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ page_title }} | Myteacherconnect Admin{% endblock %}
+
+{% block content %}
+<style>
+  .mtc-form-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 20px 28px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: 18px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.12);
+  }
+
+  .mtc-form-header h1 {
+    font-size: 22px;
+    font-weight: 800;
+    margin: 0 0 4px 0;
+    color: #ffffff;
+  }
+
+  .mtc-form-header p {
+    font-size: 13px;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .mtc-blog-editor-grid {
+    display: grid;
+    grid-template-columns: 1fr 340px;
+    gap: 24px;
+    align-items: start;
+  }
+
+  .mtc-editor-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 24px;
+    margin-bottom: 24px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.02);
+  }
+
+  .mtc-editor-card-title {
+    font-size: 16px;
+    font-weight: 800;
+    color: #0f172a;
+    margin: 0 0 16px 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f1f5f9;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mtc-form-group {
+    margin-bottom: 20px;
+  }
+
+  .mtc-form-label {
+    display: block;
+    font-size: 13px;
+    font-weight: 700;
+    color: #334155;
+    margin-bottom: 6px;
+  }
+
+  .mtc-form-help {
+    font-size: 12px;
+    color: #64748b;
+    margin-top: 4px;
+  }
+
+  .mtc-input,
+  .mtc-select,
+  .mtc-textarea {
+    width: 100%;
+    padding: 10px 14px;
+    border: 1px solid #cbd5e1;
+    border-radius: 10px;
+    font-size: 14px;
+    color: #0f172a;
+    background: #ffffff;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    outline: none;
+    font-family: inherit;
+  }
+
+  .mtc-input:focus,
+  .mtc-select:focus,
+  .mtc-textarea:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  }
+
+  .mtc-editor-toolbar {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 8px;
+    flex-wrap: wrap;
+    background: #f8fafc;
+    padding: 6px;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .mtc-tool-btn {
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 700;
+    background: #ffffff;
+    border: 1px solid #cbd5e1;
+    border-radius: 6px;
+    color: #334155;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .mtc-tool-btn:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+  }
+
+  /* Google Search Snippet Preview Box */
+  .mtc-serp-preview {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 12px;
+    font-family: Arial, sans-serif;
+  }
+
+  .mtc-serp-site {
+    font-size: 12px;
+    color: #202124;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 4px;
+  }
+
+  .mtc-serp-title {
+    font-size: 18px;
+    color: #1a0dab;
+    line-height: 1.3;
+    font-weight: 400;
+    margin-bottom: 4px;
+    cursor: pointer;
+  }
+
+  .mtc-serp-snippet {
+    font-size: 13px;
+    color: #4d5156;
+    line-height: 1.4;
+  }
+
+  @media (max-width: 992px) {
+    .mtc-blog-editor-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<div class="mtc-shell admin-dashboard-light" style="padding-top: 24px; padding-bottom: 60px;">
+  <section class="mtc-admin-layout">
+    {% include "dashboard/_admin_nav.html" %}
+    <div class="mtc-admin-content">
+      <!-- Header -->
+      <div class="mtc-form-header">
+        <div>
+          <h1><i class="fas fa-file-pen" style="margin-right: 8px;"></i> {{ page_title }}</h1>
+          <p>Draft high-quality educational content and optimize metadata for maximum SEO reach.</p>
+        </div>
+        <a href="{% url 'admin_blog_list' %}" class="btn btn-ghost" style="color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; font-weight: 700;">
+          <i class="fa-solid fa-arrow-left"></i> Back to Blog List
+        </a>
+      </div>
+
+      {% if form.errors %}
+        <div class="alert alert-danger mtc-global-alert mtc-global-alert-danger" style="margin-bottom: 24px;">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <div>
+            <strong>Please correct the following errors:</strong>
+            <ul style="margin: 6px 0 0 20px; padding: 0;">
+              {% for field in form %}
+                {% for error in field.errors %}
+                  <li><strong>{{ field.label }}:</strong> {{ error }}</li>
+                {% endfor %}
+              {% endfor %}
+              {% for error in form.non_field_errors %}
+                <li>{{ error }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        </div>
+      {% endif %}
+
+      <form method="post" enctype="multipart/form-data" id="blogPostForm">
+        {% csrf_token %}
+        <div class="mtc-blog-editor-grid">
+          <!-- Main Content Column -->
+          <div>
+            <!-- Article Content Card -->
+            <div class="mtc-editor-card">
+              <h3 class="mtc-editor-card-title"><i class="fa-solid fa-align-left text-primary"></i> Article Content</h3>
+
+              <!-- Title -->
+              <div class="mtc-form-group">
+                <label for="id_blog_title" class="mtc-form-label">Article Title <span class="text-danger">*</span></label>
+                {{ form.title }}
+                <div class="mtc-form-help">Make it compelling and include main keywords (e.g. subject, exam, city).</div>
+              </div>
+
+              <!-- Slug -->
+              <div class="mtc-form-group">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px;">
+                  <label for="id_blog_slug" class="mtc-form-label" style="margin: 0;">URL Slug</label>
+                  <button type="button" class="mtc-tool-btn" onclick="generateSlugFromTitle()"><i class="fa-solid fa-wand-magic-sparkles"></i> Auto-Generate Slug</button>
+                </div>
+                {{ form.slug }}
+                <div class="mtc-form-help">Leave empty to generate automatically from title. Clean URLs rank higher in Google.</div>
+              </div>
+
+              <!-- Excerpt -->
+              <div class="mtc-form-group">
+                <label for="id_blog_excerpt" class="mtc-form-label">Summary / Excerpt <span class="text-danger">*</span></label>
+                {{ form.excerpt }}
+                <div class="mtc-form-help">1-2 sentences summarizing the article for card previews and default search snippet.</div>
+              </div>
+
+              <!-- Content Body with quick format buttons -->
+              <div class="mtc-form-group">
+                <label for="id_blog_content" class="mtc-form-label">Full Article Body (HTML / Formatted Text) <span class="text-danger">*</span></label>
+                
+                <div class="mtc-editor-toolbar">
+                  <button type="button" class="mtc-tool-btn" onclick="insertTag('<h2>', '</h2>')"><b>H2</b></button>
+                  <button type="button" class="mtc-tool-btn" onclick="insertTag('<h3>', '</h3>')"><b>H3</b></button>
+                  <button type="button" class="mtc-tool-btn" onclick="insertTag('<strong>', '</strong>')"><b>Bold</b></button>
+                  <button type="button" class="mtc-tool-btn" onclick="insertTag('<ul>\n  <li>', '</li>\n</ul>')">List</button>
+                  <button type="button" class="mtc-tool-btn" onclick="insertTag('<blockquote><p>', '</p></blockquote>')">Quote</button>
+                  <button type="button" class="mtc-tool-btn" onclick="insertTag('<p>', '</p>')">Paragraph</button>
+                  <button type="button" class="mtc-tool-btn" onclick="insertTag('<a href=\"#\">', '</a>')">Link</button>
+                </div>
+
+                {{ form.content }}
+                <div class="mtc-form-help">You can format with standard HTML tags (e.g. &lt;h2&gt;, &lt;p&gt;, &lt;ul&gt;, &lt;blockquote&gt;).</div>
+              </div>
+            </div>
+
+            <!-- Media Card -->
+            <div class="mtc-editor-card">
+              <h3 class="mtc-editor-card-title"><i class="fa-solid fa-image text-primary"></i> Featured Image</h3>
+              
+              <div class="mtc-form-group">
+                <label for="id_blog_image" class="mtc-form-label">Upload Image File</label>
+                {{ form.image }}
+                <div class="mtc-form-help">Recommended size: 1200x630 px (JPG / PNG / WebP) for OpenGraph and social previews.</div>
+              </div>
+
+              <div class="mtc-form-group" style="margin-bottom: 0;">
+                <label for="id_blog_image_url" class="mtc-form-label">Or External Image URL (CDN / ImageKit)</label>
+                {{ form.image_url }}
+                <div class="mtc-form-help">Provide an external direct image link if you are hosting via CDN or ImageKit.</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Sidebar: Publishing & SEO Settings -->
+          <div>
+            <!-- Publishing Actions Card -->
+            <div class="mtc-editor-card">
+              <h3 class="mtc-editor-card-title"><i class="fa-solid fa-sliders text-primary"></i> Publishing Options</h3>
+
+              <!-- Status -->
+              <div class="mtc-form-group">
+                <label for="id_blog_status" class="mtc-form-label">Status</label>
+                {{ form.status }}
+              </div>
+
+              <!-- Category -->
+              <div class="mtc-form-group">
+                <label for="id_blog_category" class="mtc-form-label">Category</label>
+                {{ form.category }}
+              </div>
+
+              <!-- Read Time -->
+              <div class="mtc-form-group">
+                <label for="id_blog_read_time" class="mtc-form-label">Estimated Read Time (Minutes)</label>
+                {{ form.estimated_read_time }}
+                <div class="mtc-form-help">Auto-calculated from word count if left as 0 or empty.</div>
+              </div>
+
+              <!-- Is Featured Checkbox -->
+              <div class="mtc-form-group" style="display: flex; align-items: center; gap: 10px;">
+                {{ form.is_featured }}
+                <label for="id_blog_is_featured" class="mtc-form-label" style="margin: 0; cursor: pointer;">
+                  Pin as Featured Hero Article
+                </label>
+              </div>
+
+              <!-- Action Buttons -->
+              <div style="display: flex; flex-direction: column; gap: 10px; margin-top: 24px;">
+                <button type="submit" class="btn btn-primary" style="border-radius: 999px; font-weight: 700; width: 100%; padding: 12px; background: #2563eb; border-color: #2563eb;">
+                  <i class="fa-solid fa-floppy-disk"></i> {% if is_create %}Publish / Save Post{% else %}Update Post{% endif %}
+                </button>
+                <a href="{% url 'admin_blog_list' %}" class="btn btn-ghost" style="border: 1px solid #e2e8f0; border-radius: 999px; font-weight: 700; text-align: center; width: 100%;">
+                  Cancel
+                </a>
+              </div>
+            </div>
+
+            <!-- SEO & Google Search Snippet Card -->
+            <div class="mtc-editor-card">
+              <h3 class="mtc-editor-card-title"><i class="fa-solid fa-magnifying-glass-chart text-primary"></i> SEO Optimization</h3>
+
+              <div class="mtc-form-group">
+                <label for="id_blog_meta_title" class="mtc-form-label">Meta Title (Google Title)</label>
+                {{ form.meta_title }}
+                <div class="mtc-form-help">Defaults to post title if left empty. (50-60 characters recommended).</div>
+              </div>
+
+              <div class="mtc-form-group">
+                <label for="id_blog_meta_description" class="mtc-form-label">Meta Description</label>
+                {{ form.meta_description }}
+                <div class="mtc-form-help">Defaults to excerpt if left empty. (150-160 characters recommended).</div>
+              </div>
+
+              <div class="mtc-form-group">
+                <label for="id_blog_meta_keywords" class="mtc-form-label">SEO Keywords</label>
+                {{ form.meta_keywords }}
+                <div class="mtc-form-help">Comma-separated target search phrases.</div>
+              </div>
+
+              <!-- Live Google SERP Snippet Preview -->
+              <div style="margin-top: 18px;">
+                <label class="mtc-form-label"><i class="fa-brands fa-google"></i> Google Search Preview</label>
+                <div class="mtc-serp-preview">
+                  <div class="mtc-serp-site">
+                    <span style="font-weight: 700;">MyteacherConnect</span> • <span id="serpUrlPreview">https://myteacherconnect.org/blog/...</span>
+                  </div>
+                  <div class="mtc-serp-title" id="serpTitlePreview">Article Title | MyteacherConnect Blog</div>
+                  <div class="mtc-serp-snippet" id="serpSnippetPreview">A short summary of your article will appear here in Google search results...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+    </div>
+  </section>
+</div>
+
+<script>
+  // Insert Tag Helper
+  function insertTag(startTag, endTag) {
+    const textarea = document.getElementById("id_blog_content");
+    if (!textarea) return;
+    const start = textarea.selectionStart;
+    const end = textarea.selectionEnd;
+    const text = textarea.value;
+    const selected = text.substring(start, end);
+    const replacement = startTag + (selected || "Content here") + endTag;
+    textarea.value = text.substring(0, start) + replacement + text.substring(end);
+    textarea.focus();
+    textarea.setSelectionRange(start + startTag.length, start + replacement.length - endTag.length);
+  }
+
+  // Slug Generator
+  function generateSlugFromTitle() {
+    const titleInput = document.getElementById("id_blog_title");
+    const slugInput = document.getElementById("id_blog_slug");
+    if (titleInput && slugInput) {
+      const slug = titleInput.value
+        .toLowerCase()
+        .trim()
+        .replace(/[^\w\s-]/g, '')
+        .replace(/[\s_-]+/g, '-')
+        .replace(/^-+|-+$/g, '');
+      slugInput.value = slug;
+      updateSerpPreview();
+    }
+  }
+
+  // Live SERP Preview Updates
+  function updateSerpPreview() {
+    const titleInput = document.getElementById("id_blog_title");
+    const metaTitleInput = document.getElementById("id_blog_meta_title");
+    const excerptInput = document.getElementById("id_blog_excerpt");
+    const metaDescInput = document.getElementById("id_blog_meta_description");
+    const slugInput = document.getElementById("id_blog_slug");
+
+    const serpTitle = document.getElementById("serpTitlePreview");
+    const serpSnippet = document.getElementById("serpSnippetPreview");
+    const serpUrl = document.getElementById("serpUrlPreview");
+
+    if (serpTitle) {
+      const titleVal = (metaTitleInput && metaTitleInput.value.trim()) || (titleInput && titleInput.value.trim()) || "Article Title";
+      serpTitle.textContent = titleVal + " | MyteacherConnect Blog";
+    }
+
+    if (serpSnippet) {
+      const descVal = (metaDescInput && metaDescInput.value.trim()) || (excerptInput && excerptInput.value.trim()) || "A short summary of your article will appear here in Google search results...";
+      serpSnippet.textContent = descVal.length > 160 ? descVal.substring(0, 157) + "..." : descVal;
+    }
+
+    if (serpUrl && slugInput) {
+      const slugVal = slugInput.value.trim() || "...";
+      serpUrl.textContent = "https://myteacherconnect.org/blog/" + slugVal;
+    }
+  }
+
+  document.addEventListener("DOMContentLoaded", () => {
+    ["id_blog_title", "id_blog_meta_title", "id_blog_excerpt", "id_blog_meta_description", "id_blog_slug"].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) {
+        el.addEventListener("input", updateSerpPreview);
+      }
+    });
+    updateSerpPreview();
+  });
+</script>
+{% endblock %}

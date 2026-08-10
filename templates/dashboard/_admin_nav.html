@@ -34,6 +34,7 @@
     </a>
     <a href="{% url 'admin_homepage_stats' %}" class="{% if url_name == 'admin_homepage_stats' %}active{% endif %}"><i class="fas fa-sliders-h"></i> Stats Setting</a>
     <a href="{% url 'admin_success_stories' %}" class="{% if url_name == 'admin_success_stories' %}active{% endif %}"><i class="fas fa-quote-left"></i> Success Stories</a>
+    <a href="{% url 'admin_blog_list' %}" class="{% if 'admin_blog' in url_name %}active{% endif %}"><i class="fas fa-newspaper"></i> Blog Posts</a>
   </nav>
 </aside>
 {% endwith %}

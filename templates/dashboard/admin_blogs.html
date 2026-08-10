@@ -1,0 +1,485 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Manage Blog Posts | Myteacherconnect Admin{% endblock %}
+
+{% block content %}
+<style>
+  .mtc-blog-admin-hero {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 24px 30px;
+    background: linear-gradient(135deg, #1e293b, #0f172a);
+    border-radius: 18px;
+    color: #ffffff;
+    margin-bottom: 24px;
+    box-shadow: 0 14px 36px rgba(15, 23, 42, 0.12);
+  }
+
+  .mtc-blog-admin-hero h1 {
+    font-size: 24px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    color: #ffffff;
+  }
+
+  .mtc-blog-admin-hero p {
+    font-size: 14px;
+    color: #94a3b8;
+    margin: 0;
+  }
+
+  .mtc-blog-admin-stats-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+    margin-bottom: 24px;
+  }
+
+  .mtc-blog-admin-stat-card {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 18px 20px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    box-shadow: 0 4px 12px rgba(15, 23, 42, 0.03);
+  }
+
+  .mtc-blog-stat-icon {
+    width: 44px;
+    height: 44px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+  }
+
+  .mtc-blog-stat-icon.total { background: #eff6ff; color: #2563eb; }
+  .mtc-blog-stat-icon.published { background: #f0fdf4; color: #16a34a; }
+  .mtc-blog-stat-icon.drafts { background: #fff7ed; color: #ea580c; }
+  .mtc-blog-stat-icon.views { background: #fdf2f8; color: #db2777; }
+
+  .mtc-blog-stat-info h4 {
+    font-size: 12px;
+    font-weight: 600;
+    color: #64748b;
+    margin: 0 0 2px 0;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+  }
+
+  .mtc-blog-stat-info span {
+    font-size: 22px;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .mtc-blog-admin-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+  }
+
+  .mtc-blog-admin-search-form {
+    display: flex;
+    gap: 10px;
+    flex: 1;
+    max-width: 500px;
+  }
+
+  .mtc-blog-admin-search-input {
+    flex: 1;
+    padding: 10px 16px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    font-size: 14px;
+    outline: none;
+  }
+
+  .mtc-blog-admin-search-input:focus {
+    border-color: #2563eb;
+  }
+
+  .mtc-blog-table-container {
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.03);
+  }
+
+  .mtc-blog-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 14px;
+  }
+
+  .mtc-blog-table th {
+    background: #f8fafc;
+    padding: 14px 18px;
+    text-align: left;
+    font-size: 12px;
+    font-weight: 700;
+    color: #475569;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .mtc-blog-table td {
+    padding: 16px 18px;
+    border-bottom: 1px solid #f1f5f9;
+    color: #334155;
+    vertical-align: middle;
+  }
+
+  .mtc-blog-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .mtc-blog-table tr:hover td {
+    background: #fafafa;
+  }
+
+  .mtc-table-post-cell {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+
+  .mtc-table-thumb {
+    width: 54px;
+    height: 54px;
+    border-radius: 10px;
+    object-fit: cover;
+    flex-shrink: 0;
+  }
+
+  .mtc-table-title-link {
+    font-weight: 700;
+    color: #0f172a;
+    text-decoration: none;
+    line-height: 1.35;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .mtc-table-title-link:hover {
+    color: #2563eb;
+  }
+
+  .mtc-table-slug {
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: monospace;
+  }
+
+  .mtc-status-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 999px;
+    font-size: 12px;
+    font-weight: 700;
+  }
+
+  .mtc-status-badge.published {
+    background: #dcfce7;
+    color: #166534;
+  }
+
+  .mtc-status-badge.draft {
+    background: #fef3c7;
+    color: #92400e;
+  }
+
+  .mtc-table-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mtc-action-btn {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #475569;
+    background: #f1f5f9;
+    border: 1px solid #e2e8f0;
+    font-size: 14px;
+    cursor: pointer;
+    text-decoration: none;
+    transition: all 0.15s;
+  }
+
+  .mtc-action-btn:hover {
+    background: #e2e8f0;
+    color: #0f172a;
+  }
+
+  .mtc-action-btn.edit:hover {
+    background: #eff6ff;
+    color: #2563eb;
+    border-color: #bfdbfe;
+  }
+
+  .mtc-action-btn.delete:hover {
+    background: #fef2f2;
+    color: #ef4444;
+    border-color: #fecaca;
+  }
+
+  .mtc-action-btn.toggle:hover {
+    background: #f0fdf4;
+    color: #16a34a;
+    border-color: #bbf7d0;
+  }
+
+  @media (max-width: 992px) {
+    .mtc-blog-admin-stats-grid {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 640px) {
+    .mtc-blog-admin-hero {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .mtc-blog-admin-stats-grid {
+      grid-template-columns: 1fr;
+    }
+    .mtc-blog-table-container {
+      overflow-x: auto;
+    }
+  }
+</style>
+
+<div class="mtc-shell admin-dashboard-light" style="padding-top: 24px; padding-bottom: 60px;">
+  <section class="mtc-admin-layout">
+    {% include "dashboard/_admin_nav.html" %}
+    <div class="mtc-admin-content">
+      <!-- Top Hero Header -->
+      <div class="mtc-blog-admin-hero">
+        <div>
+          <h1><i class="fas fa-newspaper" style="margin-right: 8px;"></i> Blog & SEO Articles</h1>
+          <p>Create, manage, and publish high-ranking educational guides to boost SEO traffic.</p>
+        </div>
+        <div style="display: flex; gap: 10px;">
+          <a href="{% url 'blog_list' %}" target="_blank" class="btn btn-ghost" style="color: #ffffff; border: 1px solid rgba(255,255,255,0.3); border-radius: 999px; font-weight: 700;">
+            <i class="fa-solid fa-arrow-up-right-from-square"></i> View Public Blog
+          </a>
+          <a href="{% url 'admin_blog_create' %}" class="btn btn-primary" style="background: #2563eb; border-color: #2563eb; border-radius: 999px; font-weight: 700;">
+            <i class="fa-solid fa-plus"></i> Write New Article
+          </a>
+        </div>
+      </div>
+
+      <!-- Stats Cards -->
+      <div class="mtc-blog-admin-stats-grid">
+        <div class="mtc-blog-admin-stat-card">
+          <div class="mtc-blog-stat-icon total"><i class="fas fa-layer-group"></i></div>
+          <div class="mtc-blog-stat-info">
+            <h4>Total Posts</h4>
+            <span>{{ stats.total }}</span>
+          </div>
+        </div>
+
+        <div class="mtc-blog-admin-stat-card">
+          <div class="mtc-blog-stat-icon published"><i class="fas fa-circle-check"></i></div>
+          <div class="mtc-blog-stat-info">
+            <h4>Published</h4>
+            <span>{{ stats.published }}</span>
+          </div>
+        </div>
+
+        <div class="mtc-blog-admin-stat-card">
+          <div class="mtc-blog-stat-icon drafts"><i class="fas fa-file-pen"></i></div>
+          <div class="mtc-blog-stat-info">
+            <h4>Drafts</h4>
+            <span>{{ stats.drafts }}</span>
+          </div>
+        </div>
+
+        <div class="mtc-blog-admin-stat-card">
+          <div class="mtc-blog-stat-icon views"><i class="fas fa-chart-line"></i></div>
+          <div class="mtc-blog-stat-info">
+            <h4>Total Reads</h4>
+            <span>{{ stats.total_views }}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filter Toolbar -->
+      <div class="mtc-blog-admin-toolbar">
+        <form method="get" class="mtc-blog-admin-search-form">
+          <input type="text" name="q" value="{{ search_query }}" placeholder="Search articles by title, excerpt..." class="mtc-blog-admin-search-input">
+          {% if status_filter %}
+            <input type="hidden" name="status" value="{{ status_filter }}">
+          {% endif %}
+          {% if category_id %}
+            <input type="hidden" name="category" value="{{ category_id }}">
+          {% endif %}
+          <button type="submit" class="btn btn-primary" style="border-radius: 10px; font-weight: 700;">Search</button>
+        </form>
+
+        <div style="display: flex; gap: 10px; align-items: center;">
+          <!-- Status Filter -->
+          <form method="get" style="margin: 0;">
+            {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+            {% if category_id %}<input type="hidden" name="category" value="{{ category_id }}">{% endif %}
+            <select name="status" onchange="this.form.submit()" class="form-select mtc-select" style="padding: 8px 12px; font-size: 13px; border-radius: 8px; border-color: #e2e8f0;">
+              <option value="">All Statuses</option>
+              <option value="published" {% if status_filter == "published" %}selected{% endif %}>Published</option>
+              <option value="draft" {% if status_filter == "draft" %}selected{% endif %}>Drafts</option>
+            </select>
+          </form>
+
+          <!-- Category Filter -->
+          <form method="get" style="margin: 0;">
+            {% if search_query %}<input type="hidden" name="q" value="{{ search_query }}">{% endif %}
+            {% if status_filter %}<input type="hidden" name="status" value="{{ status_filter }}">{% endif %}
+            <select name="category" onchange="this.form.submit()" class="form-select mtc-select" style="padding: 8px 12px; font-size: 13px; border-radius: 8px; border-color: #e2e8f0;">
+              <option value="">All Categories</option>
+              {% for cat in categories %}
+                <option value="{{ cat.id }}" {% if category_id|slugify == cat.id|slugify %}selected{% endif %}>{{ cat.name }}</option>
+              {% endfor %}
+            </select>
+          </form>
+        </div>
+      </div>
+
+      <!-- Articles Table -->
+      <div class="mtc-blog-table-container">
+        {% if posts %}
+          <table class="mtc-blog-table">
+            <thead>
+              <tr>
+                <th>Article</th>
+                <th>Category</th>
+                <th>Author</th>
+                <th>Status</th>
+                <th>Views</th>
+                <th>Date</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for post in posts %}
+                <tr>
+                  <td>
+                    <div class="mtc-table-post-cell">
+                      <img src="{{ post.effective_image_url }}" alt="{{ post.title }}" class="mtc-table-thumb">
+                      <div>
+                        <a href="{{ post.get_absolute_url }}" target="_blank" class="mtc-table-title-link">
+                          {{ post.title }}
+                          {% if post.is_featured %}
+                            <span style="font-size: 11px; background: #eff6ff; color: #2563eb; padding: 2px 6px; border-radius: 4px; margin-left: 4px;">Featured</span>
+                          {% endif %}
+                        </a>
+                        <div class="mtc-table-slug">/blog/{{ post.slug }}/</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td>
+                    {% if post.category %}
+                      <span style="font-weight: 600; font-size: 13px; color: #475569;">
+                        <i class="fa-solid {{ post.category.icon }}" style="margin-right: 4px; color: #2563eb;"></i> {{ post.category.name }}
+                      </span>
+                    {% else %}
+                      <span class="text-muted" style="font-size: 12px;">Uncategorized</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span style="font-size: 13px; font-weight: 600;">{{ post.author_display_name }}</span>
+                  </td>
+                  <td>
+                    {% if post.status == "published" %}
+                      <span class="mtc-status-badge published"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> Published</span>
+                    {% else %}
+                      <span class="mtc-status-badge draft"><i class="fa-solid fa-circle" style="font-size: 6px;"></i> Draft</span>
+                    {% endif %}
+                  </td>
+                  <td>
+                    <span style="font-weight: 700; color: #0f172a;"><i class="fa-regular fa-eye" style="color: #94a3b8; margin-right: 4px;"></i> {{ post.views_count }}</span>
+                  </td>
+                  <td>
+                    <span style="font-size: 12px; color: #64748b;">{{ post.published_at|date:"M j, Y" }}</span>
+                  </td>
+                  <td style="text-align: right;">
+                    <div class="mtc-table-actions" style="justify-content: flex-end;">
+                      <!-- Preview Link -->
+                      <a href="{{ post.get_absolute_url }}" target="_blank" class="mtc-action-btn" title="View Public Post">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                      </a>
+
+                      <!-- Edit Button -->
+                      <a href="{% url 'admin_blog_edit' post.id %}" class="mtc-action-btn edit" title="Edit Article">
+                        <i class="fa-solid fa-pen-to-square"></i>
+                      </a>
+
+                      <!-- Toggle Status Form -->
+                      <form method="post" action="{% url 'admin_blog_toggle_status' post.id %}" style="display: inline; margin: 0;">
+                        {% csrf_token %}
+                        <button type="submit" class="mtc-action-btn toggle" title="{% if post.status == 'published' %}Unpublish (make draft){% else %}Publish now{% endif %}">
+                          {% if post.status == 'published' %}
+                            <i class="fa-solid fa-eye-slash"></i>
+                          {% else %}
+                            <i class="fa-solid fa-check"></i>
+                          {% endif %}
+                        </button>
+                      </form>
+
+                      <!-- Delete Form -->
+                      <form method="post" action="{% url 'admin_blog_delete' post.id %}" style="display: inline; margin: 0;" onsubmit="return confirm('Are you sure you want to permanently delete this blog post?');">
+                        {% csrf_token %}
+                        <button type="submit" class="mtc-action-btn delete" title="Delete Post">
+                          <i class="fa-solid fa-trash"></i>
+                        </button>
+                      </form>
+                    </div>
+                  </td>
+                </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        {% else %}
+          <div style="padding: 60px 30px; text-align: center;">
+            <div style="font-size: 40px; color: #94a3b8; margin-bottom: 16px;"><i class="fas fa-newspaper"></i></div>
+            <h3 style="font-size: 18px; font-weight: 700; color: #0f172a; margin-bottom: 6px;">No articles found</h3>
+            <p style="font-size: 14px; color: #64748b; margin-bottom: 20px;">No blog posts match your current search or filter criteria.</p>
+            <a href="{% url 'admin_blog_create' %}" class="btn btn-primary" style="border-radius: 999px; font-weight: 700;">Create First Article</a>
+          </div>
+        {% endif %}
+      </div>
+
+      <!-- Pagination -->
+      {% if posts.has_other_pages %}
+        <div style="margin-top: 24px; display: flex; justify-content: center; gap: 8px;">
+          {% if posts.has_previous %}
+            <a href="?page={{ posts.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn btn-ghost" style="border: 1px solid #e2e8f0; font-weight: 700;">Previous</a>
+          {% endif %}
+          <span style="display: inline-flex; align-items: center; padding: 0 16px; font-weight: 700; font-size: 14px; color: #475569;">
+            Page {{ posts.number }} of {{ posts.paginator.num_pages }}
+          </span>
+          {% if posts.has_next %}
+            <a href="?page={{ posts.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if status_filter %}&status={{ status_filter }}{% endif %}" class="btn btn-ghost" style="border: 1px solid #e2e8f0; font-weight: 700;">Next</a>
+          {% endif %}
+        </div>
+      {% endif %}
+    </div>
+  </section>
+</div>
+{% endblock %}
