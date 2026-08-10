@@ -136,9 +136,10 @@ class BlogPost(models.Model):
             except Exception:
                 pass
         if self.image_url:
-            return self.image_url
-        # Fallback to high-quality educational banner
-        return "https://images.unsplash.com/photo-1523240795612-9a054b0db644?auto=format&fit=crop&w=1200&q=80"
+            if self.image_url.startswith("/") or self.image_url.startswith("http"):
+                return self.image_url
+            return f"/static/{self.image_url}"
+        return "/static/images/blog/african-students-study-group.png"
 
     def get_meta_title(self):
         return self.meta_title.strip() if self.meta_title else f"{self.title} | MyteacherConnect Blog"

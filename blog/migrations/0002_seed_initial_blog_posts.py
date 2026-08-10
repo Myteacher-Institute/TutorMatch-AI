@@ -52,7 +52,7 @@ def seed_initial_categories_and_posts(apps, schema_editor):
                 "slug": "how-to-score-300-in-jamb-utme-and-ace-waec",
                 "category": created_cats.get("exam-preparation"),
                 "is_featured": True,
-                "image_url": "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?auto=format&fit=crop&w=1200&q=80",
+                "image_url": "/static/images/blog/jamb-cbt-center.png",
                 "excerpt": "Discover proven study schedules, CBT test techniques, and subject-specific hacks used by top 1% Nigerian students to crush JAMB and secure straight A's in WAEC.",
                 "content": """
 <h2>Why Early Preparation Matters for WAEC & JAMB</h2>
@@ -93,7 +93,7 @@ def seed_initial_categories_and_posts(apps, schema_editor):
                 "slug": "advantages-of-hiring-verified-home-tutor-nigeria",
                 "category": created_cats.get("tutoring-learning-tips"),
                 "is_featured": False,
-                "image_url": "https://images.unsplash.com/photo-1577896851231-70ef18881754?auto=format&fit=crop&w=1200&q=80",
+                "image_url": "/static/images/blog/tutor-reading-with-children.png",
                 "excerpt": "From personalized pacing to safe background-checked educators, explore why Nigerian parents are increasingly switching to AI-matched home tutoring.",
                 "content": """
 <h2>Why Nigerian Parents Choose Private Home Tutoring</h2>
@@ -123,7 +123,7 @@ def seed_initial_categories_and_posts(apps, schema_editor):
                 "slug": "how-ai-matching-is-revolutionizing-private-education-nigeria",
                 "category": created_cats.get("stem-future-skills"),
                 "is_featured": False,
-                "image_url": "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80",
+                "image_url": "/static/images/blog/african-students-study-group.png",
                 "excerpt": "Learn how MyteacherConnect uses intelligent AI matching algorithms to pair students with their ideal subject tutors based on location, curriculum, and learning needs.",
                 "content": """
 <h2>Moving Beyond Word-of-Mouth Tutor Hiring</h2>

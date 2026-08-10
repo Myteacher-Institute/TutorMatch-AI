@@ -198,7 +198,9 @@
           <div class="mtc-cta-icon-badge"><i class="fa-solid fa-chalkboard-user"></i></div>
           <h4>Need a Top Private Tutor?</h4>
           <p>Get matched with verified 1-on-1 home and online tutors in Port Harcourt, Lagos & Abuja in under 60 seconds.</p>
-          <a href="{% url 'home' %}#search-section" class="btn btn-primary btn-block" style="border-radius: 999px; font-weight: 700; width: 100%; text-align: center; display: block; background: #2563eb;">Find a Tutor Today</a>
+          <a href="{% url 'home' %}#search-section" class="mtc-sidebar-cta-btn">
+            <i class="fa-solid fa-magnifying-glass"></i> Find a Tutor Today
+          </a>
         </div>
 
         <!-- Popular Posts -->
@@ -694,7 +696,38 @@
     font-size: 13px;
     color: #94a3b8;
     line-height: 1.5;
-    margin-bottom: 18px;
+    margin-bottom: 20px;
+  }
+
+  .mtc-sidebar-cta-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 46px;
+    padding: 12px 20px;
+    background: #2563eb;
+    color: #ffffff;
+    font-size: 14px;
+    font-weight: 700;
+    border-radius: 999px;
+    text-decoration: none;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: all 0.2s ease;
+    cursor: pointer;
+    box-sizing: border-box;
+  }
+
+  .mtc-sidebar-cta-btn:hover {
+    background: #1d4ed8;
+    color: #ffffff;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 22px rgba(37, 99, 235, 0.45);
+  }
+
+  .mtc-sidebar-cta-btn:active {
+    transform: translateY(0);
   }
 
   .mtc-sidebar-box {
