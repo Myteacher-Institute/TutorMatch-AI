@@ -14,8 +14,9 @@ def seo_context(request):
     else:
         canonical_url = site_url
 
-    default_title = "MyteacherConnect | Find Verified Home & Online Tutors in Nigeria"
-    default_description = "Connect with background-checked home and online tutors in Nigeria for Mathematics, English, Sciences, WAEC/JAMB preparation, and coding."
+    default_title = "MyteacherConnect | Find Tutor & Best Home Tutors in PH, Lagos & Abuja"
+    default_description = "Find the best verified home and online tutors on MyteacherConnect (MyTeacher / MyTeach). Connect with top background-checked private tutors in Port Harcourt (PH), Lagos, Abuja, and across Nigeria for WAEC, JAMB, Math, Sciences & coding."
+    default_keywords = "find tutor, tutor in ph, best tutor, myteacher, myteach, myteacherconnect, connect, tutor in port harcourt, home tutors nigeria, find private tutor lagos, abuja home lesson teacher, hire best tutor, waec jamb tutor, best home tutor in ph, online math teacher nigeria, private lesson teacher, connect with tutor, science tutor port harcourt, math tutor ph"
     default_image = f"{site_url}/static/images/logos/myteacherconnect-logo-blue-transparent.png"
 
     return {
@@ -24,5 +25,8 @@ def seo_context(request):
         "GOOGLE_SITE_VERIFICATION": google_verification,
         "DEFAULT_SEO_TITLE": default_title,
         "DEFAULT_SEO_DESCRIPTION": default_description,
+        "DEFAULT_SEO_KEYWORDS": default_keywords,
         "DEFAULT_SEO_IMAGE": default_image,
+        "BRAND_NAME": "MyteacherConnect",
+        "BRAND_ALIASES": "MyTeacher, MyTeach, MyteacherConnect, TutorMatch AI",
     }

@@ -5,6 +5,66 @@
 {% block global_messages %}{% endblock %}
 
 {% block content %}
+<style>
+  .mtc-verify-code-group {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    gap: 12px;
+    margin: 18px 0 10px;
+  }
+  .mtc-verify-code-input {
+    width: 100%;
+    aspect-ratio: 1;
+    min-width: 0;
+    border: 2px solid #cbd5e1 !important;
+    border-radius: 12px !important;
+    background: #ffffff !important;
+    color: #0f172a !important;
+    font-size: 24px !important;
+    font-weight: 800 !important;
+    text-align: center !important;
+    outline: none !important;
+    box-shadow: 0 1px 3px rgba(15, 23, 42, 0.08) !important;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  }
+  .mtc-verify-code-input:hover:not(:focus) {
+    border-color: #94a3b8 !important;
+    background: #f8fafc !important;
+  }
+  .mtc-verify-code-input:focus {
+    border-color: #2563eb !important;
+    background: #ffffff !important;
+    box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.2), 0 2px 4px rgba(37, 99, 235, 0.1) !important;
+    transform: translateY(-2px);
+  }
+  .mtc-verify-code-input.is-filled {
+    border-color: #2563eb !important;
+    background: #eff6ff !important;
+    color: #1d4ed8 !important;
+  }
+  .mtc-verify-submit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    transition: all 0.2s ease;
+  }
+  .mtc-verify-submit.is-submitting {
+    opacity: 0.85;
+    pointer-events: none;
+    cursor: wait;
+  }
+  @media (max-width: 520px) {
+    .mtc-verify-code-group {
+      gap: 8px;
+    }
+    .mtc-verify-code-input {
+      font-size: 20px !important;
+      border-radius: 10px !important;
+    }
+  }
+</style>
+
 <section class="mtc-verify-popup-page">
   <div class="mtc-verify-backdrop" aria-hidden="true"></div>
   <div class="mtc-verify-card" role="dialog" aria-labelledby="verify-title" aria-describedby="verify-copy">
@@ -54,12 +114,15 @@
             maxlength="1"
             autocomplete="{% if forloop.first %}one-time-code{% else %}off{% endif %}"
             aria-label="Digit {{ forloop.counter }}"
+            data-index="{{ forloop.counter0 }}"
             required
           >
         {% endfor %}
       </div>
 
-      <button type="submit" class="mtc-verify-submit">Verify Email</button>
+      <button type="submit" class="mtc-verify-submit" id="verify-submit-btn">
+        <span id="btn-text">Verify Email</span>
+      </button>
     </form>
 
     <div class="mtc-verify-resend">
@@ -78,22 +141,89 @@
     if (!form) return;
 
     var hiddenInput = document.getElementById('otp-input');
+    var submitBtn = document.getElementById('verify-submit-btn');
+    var btnText = document.getElementById('btn-text');
     var inputs = Array.prototype.slice.call(form.querySelectorAll('.mtc-verify-code-input'));
+    var isSubmitted = false;
 
-    function syncCode() {
-      hiddenInput.value = inputs.map(function (input) { return input.value; }).join('');
+    function getCode() {
+      return inputs.map(function (input) { return input.value.trim(); }).join('');
     }
 
+    function syncCode() {
+      var code = getCode();
+      hiddenInput.value = code;
+      inputs.forEach(function (input) {
+        if (input.value.trim().length > 0) {
+          input.classList.add('is-filled');
+        } else {
+          input.classList.remove('is-filled');
+        }
+      });
+      return code;
+    }
+
+    function triggerAutoSubmit() {
+      var code = syncCode();
+      if (code.length === 6 && !isSubmitted) {
+        isSubmitted = true;
+        if (submitBtn) {
+          submitBtn.classList.add('is-submitting');
+          submitBtn.disabled = true;
+          if (btnText) {
+            btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 8px;"></i> Verifying...';
+          }
+        }
+        form.submit();
+      }
+    }
+
+    // Auto-focus first input on load
+    setTimeout(function () {
+      if (inputs[0]) inputs[0].focus();
+    }, 150);
+
     inputs.forEach(function (input, index) {
-      input.addEventListener('input', function () {
-        input.value = input.value.replace(/\D/g, '').slice(0, 1);
+      input.addEventListener('input', function (e) {
+        var val = input.value.replace(/\D/g, '');
+        if (val.length > 1) {
+          // Handle multi-character entry
+          var chars = val.split('');
+          for (var i = 0; i < chars.length && (index + i) < inputs.length; i++) {
+            inputs[index + i].value = chars[i];
+          }
+          syncCode();
+          var nextIndex = Math.min(index + chars.length, inputs.length - 1);
+          inputs[nextIndex].focus();
+          triggerAutoSubmit();
+          return;
+        }
+
+        input.value = val.slice(0, 1);
         syncCode();
-        if (input.value && inputs[index + 1]) inputs[index + 1].focus();
+
+        if (input.value && inputs[index + 1]) {
+          inputs[index + 1].focus();
+        }
+
+        triggerAutoSubmit();
       });
 
       input.addEventListener('keydown', function (event) {
-        if (event.key === 'Backspace' && !input.value && inputs[index - 1]) {
+        if (event.key === 'Backspace') {
+          if (!input.value && inputs[index - 1]) {
+            inputs[index - 1].focus();
+            inputs[index - 1].value = '';
+            syncCode();
+            event.preventDefault();
+          } else {
+            input.value = '';
+            syncCode();
+          }
+        } else if (event.key === 'ArrowLeft' && inputs[index - 1]) {
           inputs[index - 1].focus();
+        } else if (event.key === 'ArrowRight' && inputs[index + 1]) {
+          inputs[index + 1].focus();
         }
       });
 
@@ -105,11 +235,39 @@
           box.value = pasted[boxIndex] || '';
         });
         syncCode();
-        inputs[Math.min(pasted.length, inputs.length) - 1].focus();
+        if (pasted.length < inputs.length && inputs[pasted.length]) {
+          inputs[pasted.length].focus();
+        } else if (inputs[inputs.length - 1]) {
+          inputs[inputs.length - 1].focus();
+        }
+        triggerAutoSubmit();
       });
     });
 
-    form.addEventListener('submit', syncCode);
+    form.addEventListener('submit', function (e) {
+      var code = syncCode();
+      if (code.length === 6) {
+        if (!isSubmitted) {
+          isSubmitted = true;
+          if (submitBtn) {
+            submitBtn.classList.add('is-submitting');
+            submitBtn.disabled = true;
+            if (btnText) {
+              btnText.innerHTML = '<i class="fa-solid fa-circle-notch fa-spin" style="margin-right: 8px;"></i> Verifying...';
+            }
+          }
+        }
+      } else {
+        e.preventDefault();
+        // Focus first empty input
+        for (var i = 0; i < inputs.length; i++) {
+          if (!inputs[i].value) {
+            inputs[i].focus();
+            break;
+          }
+        }
+      }
+    });
   })();
 </script>
 {% endblock %}

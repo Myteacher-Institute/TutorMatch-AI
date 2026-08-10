@@ -1,5 +1,7 @@
 {% extends "base.html" %}
-{% block title %}{{ offer.title }} by {{ offer.tutor.get_full_name }} — TutorMatch AI{% endblock %}
+{% block title %}{{ offer.title }} by {{ offer.tutor.get_full_name }} | MyteacherConnect (MyTeacher){% endblock %}
+{% block meta_description %}{{ offer.title }} taught by verified tutor {{ offer.tutor.get_full_name }} in {{ offer.tutor.location|default:"Nigeria" }}. Book lessons directly on MyteacherConnect.{% endblock %}
+{% block meta_keywords %}find tutor, tutor in ph, best tutor, myteacher, myteach, myteacherconnect, connect, {{ offer.subject.subject_name }} tutor, hire tutor in {{ offer.tutor.location|default:"Nigeria" }}{% endblock %}
 
 {% block content %}
 {% load humanize %}

@@ -1,9 +1,9 @@
 {% extends "base.html" %}
 {% load static humanize %}
 
-{% block title %}Myteacherconnect | Find Verified Home & Online Tutors in Nigeria{% endblock %}
-{% block meta_description %}Find and hire background-checked private home and online tutors in Lagos, Abuja, Port Harcourt, and across Nigeria. AI-powered matching for Mathematics, English, Sciences, WAEC/JAMB & coding.{% endblock %}
-{% block meta_keywords %}home tutors Nigeria, find tutor Lagos, Abuja home lesson teacher, WAEC JAMB tutor, online math teacher Nigeria, hire private tutor{% endblock %}
+{% block title %}MyteacherConnect | Find Tutor & Best Home Tutors in PH, Lagos, Abuja | MyTeacher{% endblock %}
+{% block meta_description %}Find and hire the best verified home and online tutors in Port Harcourt (PH), Lagos, Abuja, and across Nigeria. AI-powered matching on MyteacherConnect (MyTeacher / MyTeach) for WAEC/JAMB, Mathematics, English, Sciences & Coding.{% endblock %}
+{% block meta_keywords %}find tutor, tutor in ph, best tutor, myteacher, myteach, myteacherconnect, connect, tutor in port harcourt, home tutors nigeria, find private tutor lagos, abuja home lesson teacher, waec jamb tutor, best home tutor in ph, hire best tutor, online math teacher nigeria{% endblock %}
 
 {% block schema_markup %}
 <script type="application/ld+json">
@@ -14,12 +14,17 @@
       "@type": "EducationalOrganization",
       "@id": "{{ SITE_URL }}/#organization",
       "name": "MyteacherConnect",
+      "alternateName": ["MyTeacher", "MyTeach", "MyteacherConnect", "TutorMatch AI"],
       "url": "{{ SITE_URL }}",
       "logo": "{{ DEFAULT_SEO_IMAGE }}",
       "sameAs": [
-        "https://twitter.com/MyteacherConn"
+        "https://twitter.com/MyteacherConn",
+        "https://www.facebook.com/myteacherinstitute",
+        "https://www.instagram.com/myteacherinstitute",
+        "https://www.linkedin.com/company/myteacher-institute"
       ],
-      "description": "Nigeria's #1 AI-powered tutoring platform connecting students with verified background-checked home and online tutors.",
+      "description": "Nigeria's #1 tutoring platform connecting students with verified background-checked home and online tutors in Port Harcourt (PH), Lagos, Abuja, and nationwide.",
+      "keywords": "find tutor, tutor in ph, best tutor, myteacher, myteach, myteacherconnect, connect, tutor in port harcourt, home tutors nigeria, hire private tutor",
       "address": {
         "@type": "PostalAddress",
         "addressCountry": "NG"
@@ -30,7 +35,8 @@
       "@id": "{{ SITE_URL }}/#website",
       "url": "{{ SITE_URL }}",
       "name": "MyteacherConnect",
-      "description": "Find Verified Home Tutors in Nigeria Anywhere",
+      "alternateName": ["MyTeacher", "MyTeach"],
+      "description": "Find Tutor & Best Verified Home and Online Tutors in PH and Nigeria",
       "publisher": {
         "@id": "{{ SITE_URL }}/#organization"
       },

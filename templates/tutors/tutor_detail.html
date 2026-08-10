@@ -1,6 +1,7 @@
 {% extends "base.html" %}
 {% block title %}{{ tutor.user.user.get_full_name }} — Verified Tutor in {{ tutor.location|default:"Nigeria" }} | MyteacherConnect{% endblock %}
-{% block meta_description %}Book {{ tutor.user.user.get_full_name }}, a verified home and online tutor in {{ tutor.location|default:"Nigeria" }} with {{ tutor.years_experience }} years experience in {% for s in tutor.subjects.all %}{{ s.subject_name }}{% if not forloop.last %}, {% endif %}{% endfor %}.{% endblock %}
+{% block meta_description %}Book {{ tutor.user.user.get_full_name }}, a verified home and online tutor in {{ tutor.location|default:"Nigeria" }} with {{ tutor.years_experience }} years experience in {% for s in tutor.subjects.all %}{{ s.subject_name }}{% if not forloop.last %}, {% endif %}{% endfor %} on MyteacherConnect (MyTeacher).{% endblock %}
+{% block meta_keywords %}find tutor, tutor in ph, best tutor, myteacher, myteach, myteacherconnect, connect, tutor {{ tutor.location|default:"Nigeria" }}, {% for s in tutor.subjects.all %}{{ s.subject_name }} tutor{% if not forloop.last %}, {% endif %}{% endfor %}, hire private tutor{% endblock %}
 
 {% if tutor.profile_photo %}
 {% block og_image %}{{ tutor.profile_photo }}{% endblock %}
