@@ -53,6 +53,10 @@
     --code-body-text: #f8fafc;
   }
 
+  .guest-limit-text.is-limit-reached {
+    color: #ef4444 !important;
+  }
+
   html.dark {
     --bg-main: #0b0f19;             /* Website footer deep navy/black */
     --bg-sidebar: #101a33;          /* Website custom brand navy */
@@ -1149,7 +1153,7 @@
       </div>
 
       <!-- Account Profile Section -->
-      <div class="user-profile-widget" onclick="window.location.href='{% url 'student_dashboard' %}'">
+      <a class="user-profile-widget" href="{% url 'student_dashboard' %}" style="text-decoration: none; color: inherit;">
         <div class="user-avatar-circle">
           {% if request.user.is_authenticated %}{{ request.user.first_name|default:request.user.username|first|upper }}{% else %}G{% endif %}
         </div>
@@ -1158,7 +1162,7 @@
           <span>{% if request.user.is_authenticated %}Student Workspace{% else %}Free Preview{% endif %}</span>
         </div>
         <svg viewBox="0 0 24 24" width="14" height="14" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-muted);"><path d="M9 18l6-6-6-6"></path></svg>
-      </div>
+      </a>
     </div>
   </aside>
 
@@ -1248,7 +1252,7 @@
             <div class="composer-disclaimer">
               Myteacher AI can make mistakes. Verify important info.
               {% if not request.user.is_authenticated %}
-                &bull; <span class="guest-limit-text" style="font-weight: 500; {% if user_msg_count >= 5 %}color: #ef4444;{% endif %}">Free messages used: <span class="guest-msg-count">{{ user_msg_count|default:"0" }}</span>/5</span>
+                &bull; <span class="guest-limit-text{% if user_msg_count >= 5 %} is-limit-reached{% endif %}" style="font-weight: 500;">Free messages used: <span class="guest-msg-count">{{ user_msg_count|default:"0" }}</span>/5</span>
               {% endif %}
             </div>
           </div>
@@ -1348,7 +1352,7 @@
           <div class="composer-disclaimer">
             Myteacher AI can make mistakes. Verify important info.
             {% if not request.user.is_authenticated %}
-              &bull; <span class="guest-limit-text" style="font-weight: 500; {% if user_msg_count >= 5 %}color: #ef4444;{% endif %}">Free messages used: <span class="guest-msg-count">{{ user_msg_count|default:"0" }}</span>/5</span>
+              &bull; <span class="guest-limit-text{% if user_msg_count >= 5 %} is-limit-reached{% endif %}" style="font-weight: 500;">Free messages used: <span class="guest-msg-count">{{ user_msg_count|default:"0" }}</span>/5</span>
             {% endif %}
           </div>
         </div>
@@ -1408,7 +1412,7 @@
     if (!userMessage) return;
     
     // Guest limit check
-    const isGuest = {% if request.user.is_authenticated %}false{% else %}true{% endif %};
+    const isGuest = "{{ request.user.is_authenticated|yesno:'false,true' }}" === "true";
     const userMsgCount = document.querySelectorAll('.user-msg').length;
     if (isGuest && userMsgCount >= 5) {
       if (typeof window.mtcConfirm !== 'undefined') {
