@@ -97,6 +97,25 @@ class Tutor(models.Model):
     is_home_featured = models.BooleanField(default=False)
     home_featured_order = models.PositiveSmallIntegerField(default=0)
 
+    def calculate_booking_amount(self, duration_value=1, duration_unit="weeks", class_type="online"):
+        duration_value = max(int(duration_value or 1), 1)
+        if class_type == "physical":
+            rate = self.physical_class_fee or self.rate_amount
+        else:
+            rate = self.online_class_fee or self.rate_amount
+        if not rate:
+            rate = self.rate_amount or 0
+
+        unit_days = {
+            "days": Decimal("1"),
+            "weeks": Decimal("7"),
+            "months": Decimal("30"),
+        }
+        total_days = Decimal(duration_value) * unit_days.get(duration_unit, Decimal("7"))
+        period_days = self.RATE_PERIOD_DAYS.get(self.rate_period, Decimal("7"))
+        periods = (total_days / period_days).quantize(Decimal("1"), rounding=ROUND_CEILING)
+        return Decimal(rate) * max(Decimal("1"), periods)
+
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("tutor_detail", kwargs={"tutor_id": self.pk})

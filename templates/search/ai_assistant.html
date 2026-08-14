@@ -1306,7 +1306,7 @@
                                     </div>
                                     <div style="display: flex; gap: 6px;">
                                       <a href="{% url 'course_detail' offer.id %}" class="tutor-btn tutor-btn-secondary" style="flex: 1; padding: 6px 10px; font-size: 11.5px; text-align: center;" target="_blank" rel="noopener noreferrer">View Course</a>
-                                      <a href="{% url 'book_tutor' tutor.id %}?course_id={{ offer.id }}" class="tutor-btn tutor-btn-primary" style="flex: 1; padding: 6px 10px; font-size: 11.5px; text-align: center;" target="_blank" rel="noopener noreferrer">Book Course</a>
+                                      <a href="{% url 'book_tutor' tutor.id %}?course_offer_id={{ offer.id }}" class="tutor-btn tutor-btn-primary" style="flex: 1; padding: 6px 10px; font-size: 11.5px; text-align: center;" target="_blank" rel="noopener noreferrer">Book Course</a>
                                     </div>
                                   </div>
                                 {% endfor %}

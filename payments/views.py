@@ -155,7 +155,8 @@ def checkout(request, booking_id):
             remaining_amount = booking.amount - wallet_discount
             if remaining_amount <= Decimal("0.00"):
                 payment = _upsert_booking_payment(booking, status="paid", reference=f"WALLET-{booking.id}-{timezone_now_ref()}")
-                _ensure_payout_installments(booking, payment)
+                _activate_platform_managed_payouts(payment)
+                _mark_booking_paid(booking)
                 messages.success(request, f"Booking #{booking.id} paid instantly using ₦{wallet_discount} from your platform wallet credit!")
                 return redirect(f"{reverse('payment_success')}?booking_id={booking.id}")
 

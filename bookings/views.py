@@ -36,7 +36,12 @@ def book_tutor(request, tutor_id):
     )
     student_profile = _profile_for_user(request.user)
 
-    course_offer_id = request.GET.get("course_offer_id") or request.POST.get("course_offer_id")
+    course_offer_id = (
+        request.GET.get("course_offer_id")
+        or request.POST.get("course_offer_id")
+        or request.GET.get("course_id")
+        or request.POST.get("course_id")
+    )
     if course_offer_id:
         from tutors.models import CourseOffer
         course_offer = get_object_or_404(CourseOffer, pk=course_offer_id, is_active=True)
