@@ -3,11 +3,11 @@
 
 {% block title %}
   {% if current_category %}
-    {{ current_category.name }} Articles & Guides | MyteacherConnect Blog
+    {{ current_category.name }} Articles &amp; Guides | MyteacherConnect STEM Blog
   {% elif search_query %}
     Search results for "{{ search_query }}" | MyteacherConnect Blog
   {% else %}
-    Educational Blog, Exam Guides & Tutoring Insights in Nigeria | MyteacherConnect
+    STEM &amp; Digital Skills Blog, Exam Guides &amp; Tutoring Insights | MyteacherConnect
   {% endif %}
 {% endblock %}
 
@@ -15,12 +15,12 @@
   {% if current_category %}
     Explore expert educational guides, study tips, and articles about {{ current_category.name }} on MyteacherConnect.
   {% else %}
-    Read expert education advice, WAEC & JAMB study guides, home tutoring tips, and STEM learning insights for parents, students, and tutors in Nigeria.
+    Read expert STEM education advice, WAEC &amp; JAMB science guides, coding for kids tutorials, digital skills roadmaps, and 1-on-1 tutoring insights in Nigeria.
   {% endif %}
 {% endblock %}
 
 {% block meta_keywords %}
-  education blog nigeria, waec jamb study tips, hire private tutor lagos, port harcourt home lesson, stem education nigeria, myteacherconnect blog
+  stem blog nigeria, coding for kids lagos, waec further maths guide, jamb science prep, digital skills tutorial nigeria, private tutor lagos, myteacherconnect blog
 {% endblock %}
 
 {% block content %}
@@ -29,21 +29,21 @@
   <section class="mtc-blog-hero">
     <div class="mtc-shell">
       <div class="mtc-blog-hero-content">
-        <span class="mtc-blog-badge"><i class="fa-solid fa-sparkles"></i> Insights, Guides & Learning</span>
+        <span class="mtc-blog-badge"><i class="fa-solid fa-flask"></i> STEM &amp; Digital Skills Learning Hub</span>
         <h1 class="mtc-blog-hero-title">
           {% if current_category %}
             {{ current_category.name }}
           {% elif search_query %}
             Results for <span class="text-highlight">"{{ search_query }}"</span>
           {% else %}
-            The MyteacherConnect <span class="text-highlight">Blog</span>
+            STEM &amp; Digital Skills <span class="text-highlight">Blog</span>
           {% endif %}
         </h1>
         <p class="mtc-blog-hero-subtitle">
           {% if current_category %}
-            {{ current_category.description|default:"Browse our curated guides and tips in this category." }}
+            {{ current_category.description|default:"Browse our curated STEM and digital learning guides." }}
           {% else %}
-            Proven study hacks, exam strategies, parenting tips, and insights on 1-on-1 private tutoring across Nigeria.
+            Proven coding guides, WAEC/JAMB science strategies, digital skills roadmaps, and 1-on-1 STEM tutoring insights for parents &amp; students.
           {% endif %}
         </p>
 
@@ -54,7 +54,7 @@
           {% endif %}
           <div class="mtc-blog-search-box">
             <i class="fa-solid fa-magnifying-glass"></i>
-            <input type="text" name="q" value="{{ search_query }}" placeholder="Search articles on WAEC, JAMB, Math, Home Tutoring..." aria-label="Search blog posts">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search STEM guides, Coding for kids, WAEC Further Maths, UI/UX..." aria-label="Search blog posts">
             <button type="submit" class="mtc-blog-search-btn">Search</button>
           </div>
         </form>

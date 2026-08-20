@@ -290,6 +290,73 @@ TutorMatch AI{% endblock %} {% block content %}
             </div>
           </div>
 
+          {% if user_intro_calls %}
+            <!-- DISCOVERY CALLS MEETING TRACKER -->
+            <div class="mtc-admin-card mtc-discovery-card-wrapper" style="margin-bottom: 24px; border: 1.5px solid #bfdbfe; background: linear-gradient(180deg, #f8fafc 0%, #eff6ff 100%); border-radius: 20px; padding: 20px;">
+              <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;">
+                <div>
+                  <h3 style="margin: 0; font-size: 17px; font-weight: 800; color: #0f172a; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa-solid fa-phone-volume" style="color: #2563eb;"></i> My Requested Discovery Calls
+                  </h3>
+                  <p style="margin: 2px 0 0; font-size: 13px; color: #64748b;">
+                    When your tutor accepts your request, their Google Meet/WhatsApp link will appear below for your 15-minute intro.
+                  </p>
+                </div>
+              </div>
+
+              <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px;">
+                {% for call in user_intro_calls %}
+                  <div class="mtc-discovery-item" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 14px; padding: 16px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 2px 8px rgba(0,0,0,0.03);">
+                    <div>
+                      <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                        <span style="font-size: 11px; font-weight: 700; color: #64748b;">{{ call.created_at|date:"M d, Y" }}</span>
+                        {% if call.status == 'accepted' %}
+                          <span style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 99px;">
+                            ✅ Accepted &amp; Link Ready
+                          </span>
+                        {% elif call.status == 'completed' %}
+                          <span style="background: #f1f5f9; color: #475569; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 99px;">
+                            Completed
+                          </span>
+                        {% else %}
+                          <span style="background: #fef3c7; color: #b45309; border: 1px solid #fde68a; font-size: 10.5px; font-weight: 800; padding: 2px 8px; border-radius: 99px;">
+                            ⏳ Pending Tutor Reply
+                          </span>
+                        {% endif %}
+                      </div>
+
+                      <strong style="font-size: 15px; color: #0f172a; display: block; margin-bottom: 4px;">
+                        Tutor: {{ call.tutor.get_full_name }}
+                      </strong>
+                      {% if call.course_offer %}
+                        <div style="font-size: 12px; color: #2563eb; font-weight: 600; margin-bottom: 10px;">
+                          {{ call.course_offer.title }}
+                        </div>
+                      {% endif %}
+                    </div>
+
+                    <!-- CONNECTION LINK OR STATUS -->
+                    <div style="margin-top: 10px; padding-top: 10px; border-top: 1px dashed #e2e8f0;">
+                      {% if call.status == 'accepted' and call.meeting_link %}
+                        <a href="{{ call.meeting_link }}" target="_blank" class="btn btn-primary" style="display: block; text-align: center; font-size: 12.5px; font-weight: 700; padding: 8px 14px; background: #2563eb; border-radius: 10px; text-decoration: none; box-shadow: 0 4px 12px rgba(37,99,235,0.25);">
+                          <i class="fa-solid fa-video" style="margin-right: 6px;"></i> Join Meeting / Connect
+                        </a>
+                      {% elif call.status == 'accepted' %}
+                        <a href="https://wa.me/{{ call.tutor.whatsapp_number|default:call.tutor.phone_number|slugify }}" target="_blank" class="btn btn-primary" style="display: block; text-align: center; font-size: 12.5px; font-weight: 700; padding: 8px 14px; background: #16a34a; border-radius: 10px; text-decoration: none;">
+                          <i class="fa-brands fa-whatsapp" style="margin-right: 6px;"></i> WhatsApp Tutor Now
+                        </a>
+                      {% else %}
+                        <span style="font-size: 12px; color: #64748b; font-style: italic; display: block;">
+                          Tutor will email you &amp; post meeting link here when accepted.
+                        </span>
+                      {% endif %}
+                    </div>
+                  </div>
+                {% endfor %}
+              </div>
+            </div>
+          {% endif %}
+
           <div class="mtc-dashboard-grid">
             <div class="mtc-dashboard-main">
               <div

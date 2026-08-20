@@ -66,6 +66,9 @@
     <a href="{% url 'course_offer_list' %}" title="Teaching Services" {% if active_tab == 'offers' %}class="active"{% endif %}>
       <i class="fa-solid fa-layer-group nav-icon"></i><span class="nav-label">Teaching Services</span>
     </a>
+    <a href="{% url 'tutor_intro_calls' %}" title="Discovery Calls" {% if active_tab == 'intro_calls' %}class="active"{% endif %}>
+      <i class="fa-solid fa-phone nav-icon" style="color: #2563eb;"></i><span class="nav-label">Discovery Calls</span>
+    </a>
     <a href="{% url 'tutor_bookings' %}" title="Bookings" {% if active_tab == 'bookings' %}class="active"{% endif %}>
       <i class="fa-solid fa-receipt nav-icon"></i><span class="nav-label">Bookings</span>
       {% if pending_bookings_count %}

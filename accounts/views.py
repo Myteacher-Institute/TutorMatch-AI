@@ -17,6 +17,7 @@ from django.contrib.auth import login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.db import transaction
+from django.db.models import Count, Q
 from django.views.decorators.http import require_POST
 
 logger = logging.getLogger(__name__)
@@ -230,6 +231,11 @@ def student_dashboard(request):
         period_end__lte=timezone.localdate(),
     ).select_related("booking__tutor__user__user", "booking__course_offer").first()
 
+    from tutors.models import IntroCallRequest
+    user_intro_calls = IntroCallRequest.objects.filter(
+        Q(user=student_profile) | Q(student_email=request.user.email)
+    ).select_related("tutor__user__user", "course_offer").order_by("-created_at")[:6]
+
     return render(
         request,
         'accounts/dashboard.html',
@@ -242,6 +248,7 @@ def student_dashboard(request):
             "cancelled_lessons_count": cancelled_lessons_count,
             "weekly_booking_count": weekly_booking_count,
             "due_satisfaction_installment": due_satisfaction_installment,
+            "user_intro_calls": user_intro_calls,
             "wallet_balance": getattr(student_profile, "wallet_balance", Decimal("0.00")),
             "active_tab": "dashboard",
         },

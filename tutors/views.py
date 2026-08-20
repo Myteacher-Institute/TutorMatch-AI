@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.db.models import Avg, Count, Q, Sum
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import Http404
@@ -439,9 +440,14 @@ def request_intro_call(request, tutor_id):
     if course_offer_id:
         course_offer = CourseOffer.objects.filter(id=course_offer_id).first()
 
+    user_profile = None
+    if request.user.is_authenticated and hasattr(request.user, "profile"):
+        user_profile = request.user.profile
+
     intro_call = IntroCallRequest.objects.create(
         tutor=tutor,
         course_offer=course_offer,
+        user=user_profile,
         student_name=student_name,
         student_email=student_email,
         phone_number=phone_number,
@@ -467,7 +473,7 @@ Details:
 - Course Interest: {course_offer.title if course_offer else 'General Tutoring'}
 - Note: {notes or 'No additional notes'}
 
-Please reach out to them via WhatsApp or Phone to conduct your 15-minute intro call.
+Please log in to your Tutor Dashboard to accept this request and set your meeting link (WhatsApp, Google Meet, or Zoom).
 
 REMINDER: Discovery calls can take place on Phone, Zoom, or WhatsApp, but ALL course payments MUST be processed through MyteacherConnect to be protected by our 30-Day Escrow Payout Policy.
 
@@ -480,10 +486,89 @@ MyteacherConnect Team
 
     messages.success(
         request,
-        f"🎉 Your 15-Minute Free Discovery Call request was sent to {tutor.get_full_name}! They will contact you shortly on {phone_number}."
+        f"🎉 Your 15-Minute Free Discovery Call request was sent to {tutor.get_full_name}! Check your email & dashboard for meeting connection updates."
     )
     if course_offer_id:
         return redirect("course_detail", offer_id=course_offer_id)
     return redirect("tutor_detail", tutor_id=tutor.id)
+
+
+@tutor_required
+def tutor_intro_calls(request):
+    """Tutor view to see all incoming discovery call requests."""
+    tutor, _ = Tutor.objects.get_or_create(user=request.user.profile)
+
+    status_filter = request.GET.get("status", "").strip()
+    calls = IntroCallRequest.objects.filter(tutor=tutor).select_related("course_offer", "user")
+
+    if status_filter:
+        calls = calls.filter(status=status_filter)
+
+    return render(request, "tutors/tutor_intro_calls.html", {
+        "profile": tutor,
+        "tutor": tutor,
+        "calls": calls,
+        "status_filter": status_filter,
+        "pending_count": IntroCallRequest.objects.filter(tutor=tutor, status="pending").count(),
+        "accepted_count": IntroCallRequest.objects.filter(tutor=tutor, status="accepted").count(),
+        "completed_count": IntroCallRequest.objects.filter(tutor=tutor, status="completed").count(),
+        "active_tab": "intro_calls",
+    })
+
+
+@tutor_required
+@require_POST
+def update_intro_call_status(request, call_id):
+    """Tutor view to accept call, attach meeting link, and notify student."""
+    tutor, _ = Tutor.objects.get_or_create(user=request.user.profile)
+    if not tutor:
+        messages.error(request, "Unauthorized")
+        return redirect("home")
+
+    call = get_object_or_404(IntroCallRequest, id=call_id, tutor=tutor)
+    new_status = request.POST.get("status", call.status).strip()
+    meeting_method = request.POST.get("meeting_method", call.meeting_method).strip()
+    meeting_link = request.POST.get("meeting_link", "").strip()
+    tutor_reply_notes = request.POST.get("tutor_reply_notes", "").strip()
+
+    call.status = new_status
+    if meeting_method:
+        call.meeting_method = meeting_method
+    if meeting_link:
+        call.meeting_link = meeting_link
+    if tutor_reply_notes:
+        call.tutor_reply_notes = tutor_reply_notes
+    call.save()
+
+    # If accepted / link attached, email student!
+    if new_status in ["accepted", "completed"] and call.student_email:
+        try:
+            from accounts.email_services import send_transactional_email
+            subject = f"✅ Discovery Call Update from Tutor {tutor.get_full_name}"
+            content = f"""
+Hello {call.student_name},
+
+Great news! Tutor {tutor.get_full_name} has accepted your 15-Minute Discovery Call request on MyteacherConnect.
+
+Meeting Connection Details:
+- Tutor Name: {tutor.get_full_name}
+- Course: {call.course_offer.title if call.course_offer else 'General Tutoring'}
+- Connection Method: {call.get_meeting_method_display()}
+- Meeting Link / Contact Info: {call.meeting_link or call.tutor.whatsapp_number or call.tutor.phone_number or 'Tutor will contact you at call time'}
+- Note from Tutor: {call.tutor_reply_notes or 'Looking forward to meeting you!'}
+
+You can also view this meeting link directly inside your MyteacherConnect Student Dashboard.
+
+REMINDER: All course bookings and payments MUST take place on MyteacherConnect to qualify for our 30-Day Escrow Money-Back Guarantee.
+
+Best regards,
+MyteacherConnect Team
+"""
+            send_transactional_email(call.student_email, subject, content)
+        except Exception as e:
+            logger.warning(f"Failed sending intro call update email to student: {e}")
+
+    messages.success(request, f"Updated Discovery Call request from {call.student_name}.")
+    return redirect("tutor_intro_calls")
 
 

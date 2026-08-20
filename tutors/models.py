@@ -443,19 +443,35 @@ class CourseOffer(models.Model):
 class IntroCallRequest(models.Model):
     STATUS_CHOICES = [
         ("pending", "Pending"),
-        ("contacted", "Contacted"),
+        ("accepted", "Accepted / Link Sent"),
         ("completed", "Completed"),
+        ("cancelled", "Cancelled"),
+    ]
+
+    MEETING_METHOD_CHOICES = [
+        ("whatsapp", "WhatsApp Call"),
+        ("google_meet", "Google Meet"),
+        ("phone", "Direct Phone Call"),
+        ("zoom", "Zoom Meeting"),
     ]
 
     tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name="intro_call_requests")
     course_offer = models.ForeignKey(CourseOffer, on_delete=models.SET_NULL, null=True, blank=True, related_name="intro_call_requests")
+    user = models.ForeignKey("accounts.UserProfile", on_delete=models.SET_NULL, null=True, blank=True, related_name="student_intro_calls")
     student_name = models.CharField(max_length=150)
     student_email = models.EmailField()
     phone_number = models.CharField(max_length=50, help_text="Phone or WhatsApp number for discovery call")
     preferred_call_time = models.CharField(max_length=100, help_text="e.g. Tomorrow 4:00 PM, Weekday evening")
     notes = models.TextField(blank=True, default="", help_text="What student/parent wants to discuss")
+    meeting_link = models.CharField(max_length=255, blank=True, default="", help_text="Google Meet link, WhatsApp link, or phone number set by tutor")
+    meeting_method = models.CharField(max_length=30, choices=MEETING_METHOD_CHOICES, default="whatsapp")
+    tutor_reply_notes = models.TextField(blank=True, default="", help_text="Instructions or note from tutor")
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
     created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        ordering = ["-created_at"]
 
     def __str__(self):
         return f"Intro Call Request from {self.student_name} for {self.tutor}"

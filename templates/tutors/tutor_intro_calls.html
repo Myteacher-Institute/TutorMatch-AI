@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Discovery Call Requests | Tutor Dashboard{% endblock %}
+
+{% block content %}
+<div class="tutor-portal-bg admin-dashboard-light">
+  <div class="mtc-shell">
+
+    <div class="tutor-sidebar-overlay" id="tutor-sidebar-overlay"></div>
+
+    <div class="mtc-admin-layout">
+
+      {% include "tutors/tutor_sidebar.html" with profile=profile active_tab="intro_calls" %}
+
+      <!-- MAIN CONTENT -->
+      <main class="mtc-admin-content">
+
+        <!-- HEADER HERO -->
+        <div style="display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 16px; margin-bottom: 28px; background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 24px;">
+          <div>
+            <div style="display: flex; align-items: center; gap: 10px;">
+              <a href="{% url 'tutor_dashboard' %}" class="btn btn-ghost" style="padding: 4px 10px; font-size: 13px; color: #64748b;">
+                <i class="fa-solid fa-arrow-left" style="margin-right: 6px;"></i>Dashboard
+              </a>
+              <span style="color: #cbd5e1;">/</span>
+              <span style="font-size: 13px; font-weight: 700; color: #2563eb;">Discovery Calls</span>
+            </div>
+            <h1 style="font-size: 26px; font-weight: 800; color: #0f172a; margin: 8px 0 4px; display: flex; align-items: center;">
+              <i class="fa-solid fa-phone-volume" style="color: #2563eb; margin-right: 10px;"></i> 15-Minute Free Discovery Calls
+            </h1>
+            <p style="color: #64748b; font-size: 14px; margin: 0;">
+              Review incoming requests from parents &amp; students, set your Google Meet/WhatsApp links, and convert leads.
+            </p>
+          </div>
+
+          <div style="background: #eff6ff; border: 1.5px solid #bfdbfe; border-radius: 16px; padding: 12px 20px; display: flex; align-items: center; gap: 16px;">
+            <div>
+              <span style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #1e40af; letter-spacing: 0.5px; display: block;">Pending</span>
+              <span style="font-size: 22px; font-weight: 800; color: #1d4ed8;">{{ pending_count }}</span>
+            </div>
+            <div style="width: 1px; height: 32px; background: #bfdbfe;"></div>
+            <div>
+              <span style="font-size: 11px; text-transform: uppercase; font-weight: 800; color: #15803d; letter-spacing: 0.5px; display: block;">Accepted</span>
+              <span style="font-size: 22px; font-weight: 800; color: #16a34a;">{{ accepted_count }}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAFETY POLICY REMINDER -->
+        <div style="background: #fffbebf5; border: 1px solid #fef3c7; border-left: 4px solid #f59e0b; border-radius: 14px; padding: 14px 18px; margin-bottom: 24px; display: flex; align-items: flex-start; gap: 12px;">
+          <i class="fa-solid fa-shield-halved" style="font-size: 22px; color: #d97706; margin-top: 2px;"></i>
+          <div style="font-size: 13.5px; color: #92400e; line-height: 1.5;">
+            <strong>Platform Escrow Reminder:</strong> Discovery calls are free 15-minute consultations to discuss learning goals. You can meet via WhatsApp, Google Meet, or Zoom. However, <strong>ALL course payments MUST be processed through MyteacherConnect</strong> to qualify for payout and protect your tutor verification standing.
+          </div>
+        </div>
+
+        <!-- STATUS FILTER TABS -->
+        <div style="display: flex; gap: 8px; margin-bottom: 24px; border-bottom: 1px solid #e2e8f0; padding-bottom: 12px; flex-wrap: wrap;">
+          <a href="{% url 'tutor_intro_calls' %}" class="btn" style="border-radius: 99px; font-size: 13px; font-weight: 700; padding: 6px 18px; {% if not status_filter %}background: #2563eb; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+            All Requests ({{ calls.count }})
+          </a>
+          <a href="{% url 'tutor_intro_calls' %}?status=pending" class="btn" style="border-radius: 99px; font-size: 13px; font-weight: 700; padding: 6px 18px; {% if status_filter == 'pending' %}background: #f59e0b; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+            Pending ({{ pending_count }})
+          </a>
+          <a href="{% url 'tutor_intro_calls' %}?status=accepted" class="btn" style="border-radius: 99px; font-size: 13px; font-weight: 700; padding: 6px 18px; {% if status_filter == 'accepted' %}background: #16a34a; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+            Accepted ({{ accepted_count }})
+          </a>
+          <a href="{% url 'tutor_intro_calls' %}?status=completed" class="btn" style="border-radius: 99px; font-size: 13px; font-weight: 700; padding: 6px 18px; {% if status_filter == 'completed' %}background: #64748b; color: #fff;{% else %}background: #f1f5f9; color: #475569;{% endif %}">
+            Completed ({{ completed_count }})
+          </a>
+        </div>
+
+        <!-- CALL REQUEST CARDS GRID -->
+        {% if calls %}
+          <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 20px;">
+            {% for call in calls %}
+              <div style="background: #ffffff; border: 1px solid #e2e8f0; border-radius: 20px; padding: 20px; display: flex; flex-direction: column; justify-content: space-between; box-shadow: 0 4px 12px rgba(0,0,0,0.03);">
+                <div>
+                  <!-- TOP META -->
+                  <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <span style="font-size: 11.5px; font-weight: 700; color: #64748b;">
+                      {{ call.created_at|date:"M d, Y • g:i A" }}
+                    </span>
+                    {% if call.status == 'pending' %}
+                      <span style="background: #fef3c7; color: #d97706; border: 1px solid #fde68a; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 99px; text-transform: uppercase;">
+                        ⏳ Pending
+                      </span>
+                    {% elif call.status == 'accepted' %}
+                      <span style="background: #dcfce7; color: #15803d; border: 1px solid #bbf7d0; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 99px; text-transform: uppercase;">
+                        ✅ Accepted
+                      </span>
+                    {% elif call.status == 'completed' %}
+                      <span style="background: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 99px; text-transform: uppercase;">
+                        🎉 Completed
+                      </span>
+                    {% else %}
+                      <span style="background: #fee2e2; color: #b91c1c; border: 1px solid #fca5a5; font-size: 10.5px; font-weight: 800; padding: 3px 10px; border-radius: 99px; text-transform: uppercase;">
+                        Cancelled
+                      </span>
+                    {% endif %}
+                  </div>
+
+                  <!-- STUDENT NAME & COURSE -->
+                  <h3 style="margin: 0 0 4px; font-size: 17px; font-weight: 800; color: #0f172a;">
+                    {{ call.student_name }}
+                  </h3>
+                  {% if call.course_offer %}
+                    <div style="display: inline-flex; align-items: center; gap: 6px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: #2563eb; margin-bottom: 12px;">
+                      <i class="fa-solid fa-graduation-cap"></i> {{ call.course_offer.title }}
+                    </div>
+                  {% endif %}
+
+                  <!-- DETAILS LIST -->
+                  <div style="background: #f8fafc; border-radius: 12px; padding: 14px; margin-bottom: 16px; font-size: 13px;">
+                    <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: #334155;">
+                      <i class="fa-solid fa-phone" style="color: #2563eb; width: 16px;"></i>
+                      <strong>Phone/WhatsApp:</strong>
+                      <a href="https://wa.me/{{ call.phone_number|slugify }}" target="_blank" style="color: #2563eb; text-decoration: underline; font-weight: 700;">
+                        {{ call.phone_number }}
+                      </a>
+                    </div>
+                    <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: #334155;">
+                      <i class="fa-solid fa-clock" style="color: #f59e0b; width: 16px;"></i>
+                      <strong>Preferred Time:</strong> {{ call.preferred_call_time|default:"Anytime" }}
+                    </div>
+                    {% if call.student_email %}
+                      <div style="margin-bottom: 8px; display: flex; align-items: center; gap: 8px; color: #334155;">
+                        <i class="fa-solid fa-envelope" style="color: #64748b; width: 16px;"></i>
+                        <strong>Email:</strong> {{ call.student_email }}
+                      </div>
+                    {% endif %}
+                    {% if call.notes %}
+                      <div style="margin-top: 10px; padding-top: 8px; border-top: 1px solid #e2e8f0; color: #475569; font-style: italic;">
+                        "{{ call.notes }}"
+                      </div>
+                    {% endif %}
+                  </div>
+
+                  <!-- SET MEETING LINK INFO IF ACCEPTED -->
+                  {% if call.meeting_link or call.tutor_reply_notes %}
+                    <div style="background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 12px; padding: 12px 14px; margin-bottom: 16px; font-size: 12.5px; color: #1e40af;">
+                      <div style="font-weight: 700; margin-bottom: 4px; display: flex; align-items: center; gap: 6px;">
+                        <i class="fa-solid fa-video"></i> Meeting Details Sent:
+                      </div>
+                      {% if call.meeting_link %}
+                        <a href="{{ call.meeting_link }}" target="_blank" style="color: #2563eb; font-weight: 700; word-break: break-all; text-decoration: underline;">
+                          {{ call.meeting_link }}
+                        </a>
+                      {% endif %}
+                      {% if call.tutor_reply_notes %}
+                        <div style="margin-top: 4px; color: #3b82f6;">Note: {{ call.tutor_reply_notes }}</div>
+                      {% endif %}
+                    </div>
+                  {% endif %}
+                </div>
+
+                <!-- ACTION FORM -->
+                <form action="{% url 'update_intro_call_status' call.id %}" method="post" style="border-top: 1px solid #f1f5f9; padding-top: 14px; margin-top: 6px;">
+                  {% csrf_token %}
+                  
+                  <div style="display: flex; flex-direction: column; gap: 8px; margin-bottom: 10px;">
+                    <label style="font-size: 11px; font-weight: 800; color: #475569; text-transform: uppercase;">Update Meeting Details:</label>
+                    <div style="display: flex; gap: 8px;">
+                      <select name="meeting_method" style="padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; width: 45%;">
+                        <option value="whatsapp" {% if call.meeting_method == 'whatsapp' %}selected{% endif %}>WhatsApp Call</option>
+                        <option value="google_meet" {% if call.meeting_method == 'google_meet' %}selected{% endif %}>Google Meet</option>
+                        <option value="phone" {% if call.meeting_method == 'phone' %}selected{% endif %}>Phone Call</option>
+                        <option value="zoom" {% if call.meeting_method == 'zoom' %}selected{% endif %}>Zoom</option>
+                      </select>
+                      <input type="text" name="meeting_link" value="{{ call.meeting_link }}" placeholder="Meeting link or info..." style="padding: 8px 10px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 12px; flex: 1;">
+                    </div>
+                  </div>
+
+                  <div style="display: flex; gap: 8px; flex-wrap: wrap;">
+                    <input type="hidden" name="status" id="status-input-{{ call.id }}" value="{{ call.status }}">
+                    <button type="submit" onclick="document.getElementById('status-input-{{ call.id }}').value='accepted';" class="btn btn-primary" style="flex: 1; font-size: 12px; font-weight: 700; padding: 8px 12px; background: #2563eb; border-radius: 10px;">
+                      {% if call.status == 'accepted' %}Update Link{% else %}Accept &amp; Send Link{% endif %}
+                    </button>
+                    {% if call.status != 'completed' %}
+                      <button type="submit" onclick="document.getElementById('status-input-{{ call.id }}').value='completed';" class="btn btn-outline" style="font-size: 12px; font-weight: 700; padding: 8px 12px; border-radius: 10px; border-color: #16a34a; color: #16a34a;">
+                        Mark Completed
+                      </button>
+                    {% endif %}
+                  </div>
+                </form>
+
+              </div>
+            {% endfor %}
+          </div>
+        {% else %}
+          <div style="text-align: center; padding: 60px 20px; background: #ffffff; border: 1px dashed #cbd5e1; border-radius: 20px;">
+            <div style="width: 72px; height: 72px; border-radius: 50%; background: #eff6ff; color: #2563eb; display: grid; place-items: center; font-size: 30px; margin: 0 auto 16px; box-shadow: 0 4px 14px rgba(37, 99, 235, 0.15);">
+              <i class="fa-solid fa-headset"></i>
+            </div>
+            <h3 style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0 0 8px;">No Discovery Call Requests Found</h3>
+            <p style="color: #64748b; font-size: 14px; max-width: 450px; margin: 0 auto 20px;">
+              When parents or students request a free 15-minute intro call from your course pages, they will appear right here.
+            </p>
+            <a href="{% url 'course_offer_create' %}" class="btn btn-primary" style="border-radius: 99px; padding: 10px 24px; font-weight: 700;">
+              Create New STEM Course Offer
+            </a>
+          </div>
+        {% endif %}
+
+      </main>
+
+    </div>
+  </div>
+</div>
+{% endblock %}
