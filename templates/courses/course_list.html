@@ -103,11 +103,31 @@
   @media (max-width: 1024px) {
     .course-grid-container {
       grid-template-columns: repeat(2, 1fr);
+      gap: 20px;
+    }
+    .course-search-box {
+      max-width: 100%;
+      padding: 16px;
+    }
+    .course-search-flex {
+      gap: 12px;
+    }
+    .course-search-input-wrap {
+      flex: 1 1 100%;
+    }
+    .course-select-wrap {
+      flex: 1 1 calc(50% - 6px);
+    }
+    .course-btn-submit {
+      width: 100%;
     }
   }
   @media (max-width: 640px) {
     .course-grid-container {
       grid-template-columns: 1fr;
+    }
+    .course-select-wrap {
+      flex: 1 1 100%;
     }
   }
 
@@ -277,15 +297,15 @@
   <div class="mtc-shell">
 
     <!-- HERO SEARCH HEADER -->
-    <div class="text-center" style="max-width:720px;margin:0 auto 40px auto;">
+    <div class="text-center" style="max-width:780px;margin:0 auto 36px auto;">
       <div class="course-hero-badge">
-        <i class="fa-solid fa-graduation-cap"></i>Course & Lesson Marketplace
+        <i class="fa-solid fa-atom"></i>STEM &amp; Digital Skills Marketplace
       </div>
-      <h1 style="font-size:38px;font-weight:900;color:#0f172a;letter-spacing:-0.5px;margin-bottom:12px;line-height:1.2;">
-        Find & Enroll in Structured Courses from Top Tutors
+      <h1 style="font-size:36px;font-weight:900;color:#0f172a;letter-spacing:-0.5px;margin-bottom:12px;line-height:1.2;">
+        Explore STEM &amp; Digital Skills Courses
       </h1>
-      <p style="color:#64748b;font-size:16px;line-height:1.6;margin-bottom:32px;">
-        Browse verified course offerings with custom daily rates, schedules, delivery formats, and structured outlines.
+      <p style="color:#64748b;font-size:16px;line-height:1.6;margin-bottom:28px;">
+        Enroll in structured 1-on-1 programs in Science, Coding, Engineering, Mathematics, and Creative Digital Tools.
       </p>
 
       <!-- FILTER & SEARCH BAR CARD -->
@@ -293,14 +313,16 @@
         <div class="course-search-flex">
           <div class="course-search-input-wrap">
             <i class="fa-solid fa-magnifying-glass" style="color:#94a3b8;"></i>
-            <input type="text" name="q" value="{{ search_query }}" placeholder="Search Python, Maths, WAEC...">
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Search Python, Physics, WAEC Further Maths, Figma...">
           </div>
           <div class="course-select-wrap">
-            <select name="subject">
-              <option value="">All Subjects</option>
-              {% for sub in subjects %}
-                <option value="{{ sub.id }}" {% if selected_subject == sub.id|stringformat:"s" %}selected{% endif %}>{{ sub.subject_name }}</option>
-              {% endfor %}
+            <select name="category">
+              <option value="">All STEM Categories</option>
+              <option value="Science" {% if selected_category == 'Science' %}selected{% endif %}>🔬 Science</option>
+              <option value="Technology" {% if selected_category == 'Technology' %}selected{% endif %}>💻 Tech &amp; Coding</option>
+              <option value="Engineering" {% if selected_category == 'Engineering' %}selected{% endif %}>⚙️ Engineering &amp; CAD</option>
+              <option value="Mathematics" {% if selected_category == 'Mathematics' %}selected{% endif %}>📐 Mathematics</option>
+              <option value="Digital" {% if selected_category == 'Digital' %}selected{% endif %}>🎨 Digital Skills</option>
             </select>
           </div>
           <div class="course-select-wrap">
@@ -308,7 +330,7 @@
               <option value="">All Formats</option>
               <option value="online" {% if selected_mode == 'online' %}selected{% endif %}>Online</option>
               <option value="home" {% if selected_mode == 'home' %}selected{% endif %}>Home Lesson</option>
-              <option value="office" {% if selected_mode == 'office' %}selected{% endif %}>Tutor Studio</option>
+              <option value="both" {% if selected_mode == 'both' %}selected{% endif %}>Both (Online &amp; Home)</option>
             </select>
           </div>
           <div>
@@ -316,6 +338,15 @@
               Search
             </button>
           </div>
+        </div>
+
+        <div style="display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: 16px; padding-top: 14px; border-top: 1px solid #f1f5f9;">
+          <a href="{% url 'course_list' %}" style="font-size: 12px; font-weight: 700; text-decoration: none; padding: 4px 12px; border-radius: 99px; {% if not selected_category %}background:#0f172a; color:#fff;{% else %}background:#f1f5f9; color:#475569;{% endif %}">All Courses</a>
+          <a href="?category=Science" style="font-size: 12px; font-weight: 700; text-decoration: none; padding: 4px 12px; border-radius: 99px; {% if selected_category == 'Science' %}background:#16a34a; color:#fff;{% else %}background:#f0fdf4; color:#166534;{% endif %}">🔬 Science</a>
+          <a href="?category=Technology" style="font-size: 12px; font-weight: 700; text-decoration: none; padding: 4px 12px; border-radius: 99px; {% if selected_category == 'Technology' %}background:#2563eb; color:#fff;{% else %}background:#eff6ff; color:#1e40af;{% endif %}">💻 Coding &amp; Tech</a>
+          <a href="?category=Engineering" style="font-size: 12px; font-weight: 700; text-decoration: none; padding: 4px 12px; border-radius: 99px; {% if selected_category == 'Engineering' %}background:#d97706; color:#fff;{% else %}background:#fef3c7; color:#92400e;{% endif %}">⚙️ Engineering</a>
+          <a href="?category=Mathematics" style="font-size: 12px; font-weight: 700; text-decoration: none; padding: 4px 12px; border-radius: 99px; {% if selected_category == 'Mathematics' %}background:#db2777; color:#fff;{% else %}background:#fdf2f8; color:#9d174d;{% endif %}">📐 Mathematics</a>
+          <a href="?category=Digital" style="font-size: 12px; font-weight: 700; text-decoration: none; padding: 4px 12px; border-radius: 99px; {% if selected_category == 'Digital' %}background:#9333ea; color:#fff;{% else %}background:#faf5ff; color:#6b21a8;{% endif %}">🎨 Digital Skills</a>
         </div>
       </form>
     </div>

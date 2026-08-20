@@ -90,7 +90,7 @@ img {
   outline: none;
 }
 
-@media (min-width: 901px) {
+@media (min-width: 1025px) {
   .brand {
     flex: 1 1 0%;
   }
@@ -112,7 +112,7 @@ img {
   }
 }
 
-@media (max-width: 900px) {
+@media (max-width: 1024px) {
   .site-header {
     position: relative;
     z-index: 100;

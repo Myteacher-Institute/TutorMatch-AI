@@ -92,6 +92,23 @@ class TutorDocumentForm(forms.ModelForm):
 
 
 class CourseOfferForm(forms.ModelForm):
+    STEM_CATEGORY_CHOICES = [
+        ("Science", "🔬 Science (Physics, Chemistry, Biology)"),
+        ("Technology & Coding", "💻 Technology & Coding (Python, Web, AI)"),
+        ("Engineering & Robotics", "⚙️ Engineering & Robotics (CAD, Tech Drawing, Hardware)"),
+        ("Mathematics & Further Maths", "📐 Mathematics & Further Maths (Calculus, WAEC/JAMB)"),
+        ("Digital Skills & Design", "🎨 Digital Skills & Design (UI/UX, Graphics, Data Analysis)"),
+        ("Other Academic", "📚 Other Academic Disciplines"),
+    ]
+
+    category = forms.ChoiceField(
+        choices=STEM_CATEGORY_CHOICES,
+        widget=forms.Select(attrs={
+            "class": "form-select",
+            "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"
+        })
+    )
+
     class Meta:
         model = CourseOffer
         fields = [
@@ -109,14 +126,14 @@ class CourseOfferForm(forms.ModelForm):
             "physical_location",
             "schedule_days_times",
             "description",
+            "syllabus",
             "rules",
             "requirements",
             "cover_image",
             "cover_image_file",
         ]
         widgets = {
-            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Graphics Design, Mathematics, UI/UX", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
-            "category": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Digital Skills, Academics, Tech", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
+            "title": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Python Programming, Further Mathematics, UI/UX Design", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "level": forms.Select(attrs={"class": "form-select", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "currency": forms.Select(attrs={"class": "form-select", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "monthly_fee": forms.NumberInput(attrs={"class": "form-control", "placeholder": "25000", "min": "1000", "step": "500", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
@@ -128,7 +145,8 @@ class CourseOfferForm(forms.ModelForm):
             "online_platform": forms.Select(attrs={"class": "form-select", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "physical_location": forms.TextInput(attrs={"class": "form-control", "placeholder": "Address details if Physical class", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "schedule_days_times": forms.TextInput(attrs={"class": "form-control", "placeholder": "e.g. Mondays & Wednesdays, 4:00 PM - 6:00 PM", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
-            "description": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Detailed description of what students will learn...", "style": "width:100%; border-radius:12px; border:1.5px solid #cbd5e1; padding:12px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
+            "description": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Detailed description of what students will learn in this STEM / Digital Skills course...", "style": "width:100%; border-radius:12px; border:1.5px solid #cbd5e1; padding:12px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
+            "syllabus": forms.Textarea(attrs={"class": "form-control", "rows": 4, "placeholder": "Week 1: Introduction & Environment Setup\nWeek 2: Data Structures & Core Logic\nWeek 3: Real-World Exercises & Projects\nWeek 4: Review & Certification Prep", "style": "width:100%; border-radius:12px; border:1.5px solid #cbd5e1; padding:12px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "rules": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "e.g. 80% attendance required, late policy...", "style": "width:100%; border-radius:12px; border:1.5px solid #cbd5e1; padding:12px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "requirements": forms.Textarea(attrs={"class": "form-control", "rows": 3, "placeholder": "e.g. Laptop, notebook, basic computer literacy...", "style": "width:100%; border-radius:12px; border:1.5px solid #cbd5e1; padding:12px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),
             "cover_image": forms.URLInput(attrs={"class": "form-control", "placeholder": "https://images.unsplash.com/...", "style": "width:100%; height:48px; border-radius:12px; border:1.5px solid #cbd5e1; padding:10px 16px; font-size:14px; font-weight:600; color:#0f172a; background:#ffffff;"}),

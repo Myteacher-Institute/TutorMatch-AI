@@ -65,7 +65,40 @@
   </div>
 </div>
 
-<div class="admin-dashboard-light" style="background:#f8fafc;padding:50px 0 70px;">
+<style>
+  .tutor-detail-layout {
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 28px;
+  }
+  .tutor-detail-profile-row {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+  }
+  .tutor-detail-avatar img,
+  .tutor-detail-avatar-placeholder {
+    width: 96px;
+    height: 96px;
+    border-radius: 20px;
+    object-fit: cover;
+  }
+  @media (max-width: 1024px) {
+    .tutor-detail-layout {
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+  }
+  @media (max-width: 640px) {
+    .tutor-detail-profile-row {
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+  }
+</style>
+
+<div class="admin-dashboard-light" style="background:#f8fafc;padding:36px 0 60px;">
   <div class="mtc-shell">
     <div class="tutor-detail-layout">
 
@@ -103,11 +136,18 @@
                 <span><i class="fa-solid fa-briefcase" style="color:var(--blue);margin-right:5px;"></i>{{ tutor.years_experience }} yr{% if tutor.years_experience != 1 %}s{% endif %} experience</span>
               </div>
 
-              <div class="tutor-public-subjects" style="margin-top:14px;">
+              <div class="tutor-public-subjects" style="margin-top:14px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
+                {% for badge in tutor.stem_badges %}
+                  <span style="background:{{ badge.bg }}; color:{{ badge.color }}; border:1px solid {{ badge.border }}; font-size:12px; font-weight:800; padding:4px 12px; border-radius:99px; display:inline-flex; align-items:center; gap:5px;">
+                    <span>{{ badge.icon }}</span> {{ badge.name }}
+                  </span>
+                {% endfor %}
                 {% for subject in tutor.subjects.all %}
                   <span class="tutor-subject-pill">{{ subject.subject_name }}</span>
                 {% empty %}
-                  <span class="tutor-subjects-empty">No subjects listed</span>
+                  {% if not tutor.stem_badges %}
+                    <span class="tutor-subjects-empty">No subjects listed</span>
+                  {% endif %}
                 {% endfor %}
               </div>
             </div>
@@ -310,6 +350,10 @@
             </div>
           {% endif %}
 
+          <button type="button" class="btn btn-outline-primary w-100 rounded-pill font-bold py-2 mt-2 mb-2" data-bs-toggle="modal" data-bs-target="#tutorIntroCallModal" style="display:flex;align-items:center;justify-content:center;gap:8px;font-size:13.5px;border-width:2px;">
+            <i class="fa-solid fa-phone"></i>Request Free 15-Min Intro Call
+          </button>
+
           {% if not request.user.is_authenticated or request.user.profile.role != "tutor" %}
           <button
             type="button"
@@ -364,6 +408,67 @@
         </div>
       </div>
 
+    </div>
+  </div>
+</div>
+
+<!-- TUTOR INTRO CALL MODAL -->
+<div class="modal fade" id="tutorIntroCallModal" tabindex="-1" aria-labelledby="tutorIntroCallModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content" style="border-radius:20px; border:none; box-shadow:0 20px 40px rgba(0,0,0,0.15);">
+      <div class="modal-header" style="background:#f8fafc; border-bottom:1px solid #e2e8f0; border-top-left-radius:20px; border-top-right-radius:20px; padding:20px 24px;">
+        <h5 class="modal-title" id="tutorIntroCallModalLabel" style="font-weight:800; color:#0f172a; font-size:18px;">
+          📞 Request Free 15-Min Discovery Call
+        </h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form action="{% url 'request_intro_call' tutor_id=tutor.id %}" method="POST">
+        {% csrf_token %}
+        
+        <div class="modal-body" style="padding:24px;">
+          
+          <!-- SECURITY NOTICE -->
+          <div style="background:#fffbe6; border:1.5px solid #ffe58f; border-radius:14px; padding:14px 16px; margin-bottom:20px; font-size:12.5px; color:#873800; line-height:1.5;">
+            <strong style="display:flex; align-items:center; gap:6px; margin-bottom:4px; font-size:13px; color:#d48806;">
+              <i class="fa-solid fa-shield-halved"></i> Platform Escrow &amp; Safety Policy
+            </strong>
+            You are free to have your 15-minute discovery call on <strong>Phone or WhatsApp</strong>. However, <strong>ALL course payments MUST be completed through MyteacherConnect</strong> to be protected by our 30-Day Escrow Satisfaction Guarantee. Never pay tutors directly off-platform!
+          </div>
+
+          <div class="mb-3">
+            <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Your Full Name <span class="text-danger">*</span></label>
+            <input type="text" name="student_name" class="form-control" required placeholder="e.g. Mrs. Adebayo" style="height:46px; border-radius:12px; font-weight:600;">
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-12 col-sm-6">
+              <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Phone / WhatsApp Number <span class="text-danger">*</span></label>
+              <input type="tel" name="phone_number" class="form-control" required placeholder="08012345678" style="height:46px; border-radius:12px; font-weight:600;">
+            </div>
+            <div class="col-12 col-sm-6">
+              <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Email Address</label>
+              <input type="email" name="student_email" class="form-control" placeholder="parent@gmail.com" style="height:46px; border-radius:12px; font-weight:600;">
+            </div>
+          </div>
+
+          <div class="mb-3">
+            <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Preferred Call Time</label>
+            <input type="text" name="preferred_call_time" class="form-control" placeholder="e.g. Tomorrow 4:00 PM (WAT)" style="height:46px; border-radius:12px; font-weight:600;">
+          </div>
+
+          <div class="mb-2">
+            <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Notes / Learning Goal for Tutor</label>
+            <textarea name="notes" class="form-control" rows="2" placeholder="e.g. Discussing SS3 Physics exam prep and home lesson timetable..." style="border-radius:12px; font-weight:600;"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-footer" style="background:#f8fafc; border-top:1px solid #e2e8f0; border-bottom-left-radius:20px; border-bottom-right-radius:20px; padding:16px 24px;">
+          <button type="button" class="btn btn-light rounded-pill px-4 font-bold" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary rounded-pill px-4 font-bold" style="background:linear-gradient(135deg, #2563eb, #1d4ed8); border:none;">
+            Submit Request →
+          </button>
+        </div>
+      </form>
     </div>
   </div>
 </div>

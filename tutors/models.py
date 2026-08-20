@@ -272,6 +272,30 @@ class Tutor(models.Model):
     def total_paid_out(self):
         return self.current_balance
 
+    @property
+    def stem_badges(self):
+        badges = []
+        categories = list(self.course_offers.filter(is_active=True).values_list("category", flat=True))
+        subjects = [s.subject_name.lower() for s in self.subjects.all()]
+        offers_titles = [o.title.lower() for o in self.course_offers.filter(is_active=True)]
+        combined_text = " ".join(offers_titles + [c.lower() for c in categories] + subjects)
+
+        if any("science" in c.lower() for c in categories) or any(s in combined_text for s in ["physics", "chemistry", "biology", "science"]):
+            badges.append({"name": "Science Specialist", "icon": "🔬", "bg": "#f0fdf4", "color": "#166534", "border": "#bbf7d0"})
+        if any("tech" in c.lower() or "coding" in c.lower() for c in categories) or any(term in combined_text for term in ["python", "coding", "web", "react", "app", "tech", "javascript", "scratch"]):
+            badges.append({"name": "Coding & Tech Expert", "icon": "💻", "bg": "#eff6ff", "color": "#1e40af", "border": "#bfdbfe"})
+        if any("math" in c.lower() for c in categories) or any("math" in s for s in subjects) or "calculus" in combined_text:
+            badges.append({"name": "Maths & Further Maths", "icon": "📐", "bg": "#fdf2f8", "color": "#9d174d", "border": "#fbcfe8"})
+        if any("eng" in c.lower() or "cad" in c.lower() for c in categories) or any(term in combined_text for term in ["robotics", "cad", "drawing", "engineering"]):
+            badges.append({"name": "Engineering & CAD", "icon": "⚙️", "bg": "#fef3c7", "color": "#92400e", "border": "#fde68a"})
+        if any("digital" in c.lower() or "design" in c.lower() for c in categories) or any(term in combined_text for term in ["ui/ux", "figma", "graphic", "data", "excel"]):
+            badges.append({"name": "Digital Skills Mentor", "icon": "🎨", "bg": "#faf5ff", "color": "#6b21a8", "border": "#e9d5ff"})
+
+        if not badges:
+            badges.append({"name": "Verified STEM Mentor", "icon": "⚡", "bg": "#eff6ff", "color": "#2563eb", "border": "#dbeafe"})
+
+        return badges[:3]
+
 
 class TutorDocument(models.Model):
 
@@ -382,6 +406,7 @@ class CourseOffer(models.Model):
 
     # Details & Description
     description = models.TextField(help_text="Detailed description & what students will learn")
+    syllabus = models.TextField(blank=True, default="", help_text="Dynamic week-by-week course syllabus breakdown set by tutor")
     rules = models.TextField(blank=True, default="", help_text="Class guidelines & rules")
     requirements = models.TextField(blank=True, default="", help_text="Prerequisites & required items")
 
@@ -398,6 +423,42 @@ class CourseOffer(models.Model):
     @property
     def currency_symbol(self):
         return self.CURRENCY_SYMBOLS.get(self.currency, "₦")
+
+    @property
+    def syllabus_items(self):
+        if not self.syllabus or not self.syllabus.strip():
+            return []
+        lines = [line.strip() for line in self.syllabus.split("\n") if line.strip()]
+        items = []
+        for index, line in enumerate(lines, 1):
+            if ":" in line:
+                parts = line.split(":", 1)
+                title, desc = parts[0].strip(), parts[1].strip()
+            else:
+                title, desc = f"Week {index}", line
+            items.append({"title": title, "desc": desc, "step": index})
+        return items
+
+
+class IntroCallRequest(models.Model):
+    STATUS_CHOICES = [
+        ("pending", "Pending"),
+        ("contacted", "Contacted"),
+        ("completed", "Completed"),
+    ]
+
+    tutor = models.ForeignKey(Tutor, on_delete=models.CASCADE, related_name="intro_call_requests")
+    course_offer = models.ForeignKey(CourseOffer, on_delete=models.SET_NULL, null=True, blank=True, related_name="intro_call_requests")
+    student_name = models.CharField(max_length=150)
+    student_email = models.EmailField()
+    phone_number = models.CharField(max_length=50, help_text="Phone or WhatsApp number for discovery call")
+    preferred_call_time = models.CharField(max_length=100, help_text="e.g. Tomorrow 4:00 PM, Weekday evening")
+    notes = models.TextField(blank=True, default="", help_text="What student/parent wants to discuss")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"Intro Call Request from {self.student_name} for {self.tutor}"
 
     @property
     def cover_image_url(self):

@@ -12,14 +12,19 @@ logger = logging.getLogger(__name__)
 
 
 ASSISTANT_INSTRUCTIONS = """
-You are Myteacher AI, a warm, intelligent tutor-matching and platform assistant for students, parents, and tutors on MyteacherConnect in Nigeria.
+You are Myteacher AI, a warm, highly specialized STEM (Science, Technology, Engineering, Mathematics) & Digital Skills tutor-matching and platform assistant on MyteacherConnect in Nigeria.
 
 Your core roles:
-1. Natural Conversation & Matching:
-   - Ask clarifying questions (subject, course, skill, location, online vs home lessons) and recommend verified tutors and their specific Course Offers from our database.
-   - For every recommended tutor, detail their course title, delivery mode (Online or Home), price, and duration.
-   - Explain why their course fits the student's needs. Online courses are accessible nationwide & globally regardless of physical location!
-   - If no exact tutor match exists for a subject, politely inform the user and suggest related subjects or alternative skills (e.g. for Python, suggest Web Dev, JavaScript, HTML/CSS).
+1. STEM & Digital Skills Matching:
+   - Guide students and parents in finding expert 1-on-1 tutors in:
+     * Science (Physics, Chemistry, Biology, Basic Science, Agricultural Science)
+     * Technology & Coding (Python, Web Development, Scratch for Kids, Mobile Apps, AI & Data Science)
+     * Engineering & Applied Tech (Robotics, Technical Drawing, Basic Tech, CAD/AutoCAD)
+     * Mathematics & Analytics (General Maths, Further Maths, Calculus, WAEC/JAMB/SAT Math, Statistics)
+     * Digital Skills & Creative Tech (UI/UX Design with Figma, Graphic Design, Data Analysis with Excel/PowerBI, Product Design)
+   - Ask clarifying questions (specific STEM subject/tool, student level/age, location in Nigeria, Online vs Home lessons).
+   - Recommend verified tutors and their specific Course Offers from our database with clear course title, delivery mode (Online or Home), price, and duration.
+   - If no exact tutor match exists, recommend related STEM subjects (e.g. for Python, suggest Web Dev, JavaScript, or Data Analysis).
 
 2. Platform Rules & Knowledge Base:
    - Account Access: Sign up takes Full Name, custom Username, Email, Phone, Role, and Password. Account login supports EITHER Username OR Email Address. Account signup requires entering a 6-digit email OTP code to verify.
@@ -465,11 +470,11 @@ def _create_admin_alert(error, conversation, state):
 
 def assistant_suggestions():
     return [
-        "I need a tutor in PH for my SS2 daughter.",
-        "My child is 12 and needs help with Mathematics on weekends.",
-        "I want to learn Python from beginner level.",
-        "I need help with CSS and frontend web design.",
-        "Can you help me understand my Physics assignment?",
+        "I need a Python coding tutor for my 10-year-old child in Port Harcourt.",
+        "Looking for a WAEC & JAMB Further Mathematics and Physics tutor in Lagos.",
+        "I want to learn UI/UX design with Figma from scratch online.",
+        "Find a Robotics & Kids Scratch programming tutor near me.",
+        "Need an expert chemistry and biology home tutor in Abuja.",
         *suggested_prompts(),
     ]
 

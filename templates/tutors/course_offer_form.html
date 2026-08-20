@@ -63,14 +63,22 @@
                       Course / Subject Title <span class="text-danger">*</span>
                     </label>
                     {{ form.title }}
-                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">e.g. Graphics Design, Mathematics, UI/UX Design</small>
+                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">Quick suggestions (click to apply):</small>
+                    <div style="display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px;">
+                      <button type="button" onclick="document.querySelector('[name=title]').value='Python Programming'; document.querySelector('[name=category]').value='Technology & Coding';" style="font-size: 11px; font-weight: 600; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; border-radius: 6px; padding: 2px 8px; cursor: pointer;">💻 Python</button>
+                      <button type="button" onclick="document.querySelector('[name=title]').value='Further Mathematics'; document.querySelector('[name=category]').value='Mathematics & Further Maths';" style="font-size: 11px; font-weight: 600; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; border-radius: 6px; padding: 2px 8px; cursor: pointer;">📐 Further Maths</button>
+                      <button type="button" onclick="document.querySelector('[name=title]').value='Physics (WAEC / JAMB)'; document.querySelector('[name=category]').value='Science';" style="font-size: 11px; font-weight: 600; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; border-radius: 6px; padding: 2px 8px; cursor: pointer;">🔬 Physics</button>
+                      <button type="button" onclick="document.querySelector('[name=title]').value='UI/UX Design (Figma)'; document.querySelector('[name=category]').value='Digital Skills & Design';" style="font-size: 11px; font-weight: 600; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; border-radius: 6px; padding: 2px 8px; cursor: pointer;">🎨 UI/UX Design</button>
+                      <button type="button" onclick="document.querySelector('[name=title]').value='Coding & Robotics for Kids'; document.querySelector('[name=category]').value='Technology & Coding';" style="font-size: 11px; font-weight: 600; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; border-radius: 6px; padding: 2px 8px; cursor: pointer;">⚙️ Robotics & Kids Coding</button>
+                      <button type="button" onclick="document.querySelector('[name=title]').value='Data Analysis (Excel / PowerBI)'; document.querySelector('[name=category]').value='Digital Skills & Design';" style="font-size: 11px; font-weight: 600; border: 1px solid #bfdbfe; background: #eff6ff; color: #1e40af; border-radius: 6px; padding: 2px 8px; cursor: pointer;">📊 Data Analysis</button>
+                    </div>
                   </div>
                   <div class="col-12 col-md-5">
                     <label style="font-weight:700; font-size:13.5px; color:#1e293b; display:block; margin-bottom:6px;">
-                      Category <span class="text-danger">*</span>
+                      STEM Category <span class="text-danger">*</span>
                     </label>
                     {{ form.category }}
-                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">e.g. Digital Skills, Academics, Tech</small>
+                    <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">Select your course's core STEM pillar.</small>
                   </div>
                 </div>
 
@@ -203,7 +211,21 @@
                     Course Outline &amp; Description <span class="text-danger">*</span>
                   </label>
                   {{ form.description }}
-                  <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">Describe what students will learn, syllabus topics, and course objectives.</small>
+                  <small style="color:#64748b; font-size:12px; margin-top:4px; display:block;">Describe what students will learn, general topics, and course overview.</small>
+                </div>
+
+                <!-- Dynamic Week-by-Week Syllabus -->
+                <div class="mb-3" style="background:#f8fafc; border:1px solid #e2e8f0; border-radius:12px; padding:16px;">
+                  <label style="font-weight:700; font-size:13.5px; color:#0f172a; display:flex; align-items:center; gap:6px; margin-bottom:6px;">
+                    <span>📅</span> Week-by-Week Course Syllabus Breakdown
+                  </label>
+                  {{ form.syllabus }}
+                  <small style="color:#64748b; font-size:12px; margin-top:6px; display:block; line-height:1.5;">
+                    Enter each week on a new line. Example:<br>
+                    <code>Week 1: Introduction &amp; Tools Setup</code><br>
+                    <code>Week 2: Core Concepts &amp; Practical Exercises</code><br>
+                    <code>Week 3: Real-world Hands-on Project</code>
+                  </small>
                 </div>
 
                 <!-- Prerequisites & Class Rules SIDE BY SIDE -->

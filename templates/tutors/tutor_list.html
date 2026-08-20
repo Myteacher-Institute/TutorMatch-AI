@@ -387,16 +387,21 @@
   @media (max-width: 1120px) {
     .tutor-toolbar {
       flex-wrap: wrap;
+      gap: 10px;
     }
     .tutor-toolbar-search {
       flex-basis: 100%;
     }
     .tutor-toolbar select,
     .tutor-toolbar input[type="number"] {
-      flex: 1 1 150px;
+      flex: 1 1 calc(50% - 10px);
+    }
+    .tutor-filter-button {
+      flex: 1 1 100%;
     }
     .tutor-marketplace-grid {
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 20px;
     }
   }
   @media (max-width: 760px) {
@@ -406,6 +411,10 @@
     .tutor-filter-shell {
       position: static;
       padding: 14px;
+    }
+    .tutor-toolbar select,
+    .tutor-toolbar input[type="number"] {
+      flex: 1 1 100%;
     }
     .tutor-toolbar {
       display: grid;
@@ -449,19 +458,19 @@
 <section class="tutor-marketplace-page">
   <div class="mtc-shell">
     <header class="tutor-marketplace-hero">
-      <h1>Find Your Perfect Tutor</h1>
-      <p>Browse verified tutors and book your first session.</p>
+      <h1>Find Verified STEM &amp; Digital Tutors</h1>
+      <p>Connect with expert mentors in Science, Coding, Engineering, Mathematics, and Modern Digital Skills.</p>
     </header>
 
     <div class="tutor-filter-shell">
       <form method="get" class="tutor-toolbar" aria-label="Tutor filters">
         <div class="tutor-toolbar-search">
           <i class="fa-solid fa-magnifying-glass" aria-hidden="true"></i>
-          <input type="search" name="q" placeholder="Search by tutor, subject, or location" value="{{ request.GET.q|default:'' }}">
+          <input type="search" name="q" placeholder="Search by tutor, STEM subject, or location" value="{{ request.GET.q|default:'' }}">
         </div>
 
         <select name="subject" aria-label="Subject">
-          <option value="">Subject</option>
+          <option value="">All Subjects</option>
           {% for subject in subjects %}
             <option value="{{ subject.subject_name }}" {% if request.GET.subject == subject.subject_name %}selected{% endif %}>{{ subject.subject_name }}</option>
           {% endfor %}
@@ -490,14 +499,15 @@
         </button>
       </form>
 
-      <nav class="tutor-category-chips" aria-label="Popular subjects">
-        <a href="{% url 'tutor_list' %}" class="{% if not request.GET.subject %}is-active{% endif %}">All</a>
-        <a href="?subject=Mathematics" class="{% if request.GET.subject == 'Mathematics' %}is-active{% endif %}">Mathematics</a>
-        <a href="?subject=English" class="{% if request.GET.subject == 'English' %}is-active{% endif %}">English</a>
-        <a href="?subject=Physics" class="{% if request.GET.subject == 'Physics' %}is-active{% endif %}">Physics</a>
-        <a href="?subject=Chemistry" class="{% if request.GET.subject == 'Chemistry' %}is-active{% endif %}">Chemistry</a>
-        <a href="?subject=Biology" class="{% if request.GET.subject == 'Biology' %}is-active{% endif %}">Biology</a>
-        <a href="?subject=Economics" class="{% if request.GET.subject == 'Economics' %}is-active{% endif %}">Economics</a>
+      <nav class="tutor-category-chips" aria-label="Popular STEM subjects">
+        <a href="{% url 'tutor_list' %}" class="{% if not request.GET.subject %}is-active{% endif %}">All Tutors</a>
+        <a href="?subject=Python" class="{% if request.GET.subject == 'Python' %}is-active{% endif %}">💻 Python &amp; Coding</a>
+        <a href="?subject=Physics" class="{% if request.GET.subject == 'Physics' %}is-active{% endif %}">🔬 Physics</a>
+        <a href="?subject=Chemistry" class="{% if request.GET.subject == 'Chemistry' %}is-active{% endif %}">🧪 Chemistry</a>
+        <a href="?subject=Mathematics" class="{% if request.GET.subject == 'Mathematics' %}is-active{% endif %}">📐 Mathematics</a>
+        <a href="?subject=Further+Mathematics" class="{% if request.GET.subject == 'Further Mathematics' %}is-active{% endif %}">📐 Further Maths</a>
+        <a href="?subject=UI/UX+Design" class="{% if request.GET.subject == 'UI/UX Design' %}is-active{% endif %}">🎨 UI/UX Design</a>
+        <a href="?subject=Robotics" class="{% if request.GET.subject == 'Robotics' %}is-active{% endif %}">⚙️ Robotics &amp; CAD</a>
       </nav>
     </div>
 
@@ -552,11 +562,18 @@
                 {% endif %}
               </div>
 
-              <div class="tutor-subject-list">
-                {% for subject in tutor.subjects.all|slice:":3" %}
+              <div class="tutor-subject-list" style="display:flex; flex-wrap:wrap; gap:5px;">
+                {% for badge in tutor.stem_badges %}
+                  <span style="background:{{ badge.bg }}; color:{{ badge.color }}; border:1px solid {{ badge.border }}; font-size:11px; font-weight:800; padding:2px 8px; border-radius:99px; display:inline-flex; align-items:center; gap:3px;">
+                    <span>{{ badge.icon }}</span> {{ badge.name }}
+                  </span>
+                {% endfor %}
+                {% for subject in tutor.subjects.all|slice:":2" %}
                   <span>{{ subject.subject_name }}</span>
                 {% empty %}
-                  <span>No subjects listed</span>
+                  {% if not tutor.stem_badges %}
+                    <span>No subjects listed</span>
+                  {% endif %}
                 {% endfor %}
               </div>
 

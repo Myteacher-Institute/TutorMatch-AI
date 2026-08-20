@@ -4,16 +4,20 @@ from django.contrib import messages
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.http import Http404
+from django.views.decorators.http import require_POST
+from django.views.decorators.csrf import ensure_csrf_cookie
 from accounts.decorators import tutor_required
 from config.imagekit_utils import upload_file_in_memory, validate_file
-from .models import Tutor, TutorDocument, Subject, CourseOffer
+from .models import Tutor, TutorDocument, Subject, CourseOffer, IntroCallRequest
 from bookings.models import Booking
 from payments.models import PayoutInstallment
 from reviews.models import Review
 from .forms import TutorPersonalProfileForm, TutorPayoutForm, TutorDocumentForm, CourseOfferForm
 from .geo_data import NIGERIAN_LGAS, DEFAULT_COUNTRY, WORLD_SUBDIVISIONS
-from django.views.decorators.csrf import ensure_csrf_cookie
 import json
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -348,6 +352,7 @@ def course_offer_delete(request, offer_id):
 
 def course_list(request):
     subject_id = request.GET.get('subject')
+    category_filter = request.GET.get('category')
     mode_filter = request.GET.get('mode')
     search_query = request.GET.get('q', '').strip()
     currency_filter = request.GET.get('currency')
@@ -355,6 +360,8 @@ def course_list(request):
 
     offers_qs = CourseOffer.objects.filter(is_active=True, tutor__verification_status="approved", tutor__is_publicly_visible=True).select_related('tutor__user__user', 'subject')
 
+    if category_filter:
+        offers_qs = offers_qs.filter(category__icontains=category_filter)
     if subject_id:
         offers_qs = offers_qs.filter(subject_id=subject_id)
     if mode_filter:
@@ -365,15 +372,16 @@ def course_list(request):
         offers_qs = offers_qs.filter(
             Q(title__icontains=search_query) |
             Q(description__icontains=search_query) |
+            Q(category__icontains=search_query) |
             Q(subject__subject_name__icontains=search_query) |
             Q(tutor__user__user__first_name__icontains=search_query) |
             Q(tutor__user__user__last_name__icontains=search_query)
         )
 
     if sort_by == 'price_low':
-        offers_qs = offers_qs.order_by('daily_rate')
+        offers_qs = offers_qs.order_by('monthly_fee')
     elif sort_by == 'price_high':
-        offers_qs = offers_qs.order_by('-daily_rate')
+        offers_qs = offers_qs.order_by('-monthly_fee')
     else:
         offers_qs = offers_qs.order_by('-created_at')
 
@@ -388,6 +396,7 @@ def course_list(request):
         'page_obj': offers,
         'subjects': subjects,
         'selected_subject': subject_id,
+        'selected_category': category_filter,
         'selected_mode': mode_filter,
         'selected_currency': currency_filter,
         'search_query': search_query,
@@ -408,5 +417,73 @@ def course_detail(request, offer_id):
         'tutor': tutor,
         'reviews': reviews,
     })
+
+
+@require_POST
+def request_intro_call(request, tutor_id):
+    tutor = get_object_or_404(Tutor, id=tutor_id)
+    course_offer_id = request.POST.get("course_offer_id")
+    student_name = request.POST.get("student_name", "").strip()
+    student_email = request.POST.get("student_email", "").strip()
+    phone_number = request.POST.get("phone_number", "").strip()
+    preferred_call_time = request.POST.get("preferred_call_time", "").strip()
+    notes = request.POST.get("notes", "").strip()
+
+    if not student_name or not phone_number:
+        messages.error(request, "Please provide your name and phone/WhatsApp number for the 15-minute call.")
+        if course_offer_id:
+            return redirect("course_detail", offer_id=course_offer_id)
+        return redirect("tutor_detail", tutor_id=tutor.id)
+
+    course_offer = None
+    if course_offer_id:
+        course_offer = CourseOffer.objects.filter(id=course_offer_id).first()
+
+    intro_call = IntroCallRequest.objects.create(
+        tutor=tutor,
+        course_offer=course_offer,
+        student_name=student_name,
+        student_email=student_email,
+        phone_number=phone_number,
+        preferred_call_time=preferred_call_time,
+        notes=notes,
+    )
+
+    try:
+        from accounts.email_services import send_transactional_email
+        tutor_email = tutor.user.user.email if tutor.user and tutor.user.user else None
+        if tutor_email:
+            subject = f"📞 New 15-Min Free Discovery Call Request from {student_name}"
+            content = f"""
+Hello {tutor.first_name},
+
+{student_name} has requested a FREE 15-Minute Discovery Call with you on MyteacherConnect!
+
+Details:
+- Student/Parent Name: {student_name}
+- Phone / WhatsApp: {phone_number}
+- Email: {student_email or 'Not provided'}
+- Preferred Call Time: {preferred_call_time or 'Anytime'}
+- Course Interest: {course_offer.title if course_offer else 'General Tutoring'}
+- Note: {notes or 'No additional notes'}
+
+Please reach out to them via WhatsApp or Phone to conduct your 15-minute intro call.
+
+REMINDER: Discovery calls can take place on Phone, Zoom, or WhatsApp, but ALL course payments MUST be processed through MyteacherConnect to be protected by our 30-Day Escrow Payout Policy.
+
+Best regards,
+MyteacherConnect Team
+"""
+            send_transactional_email(tutor_email, subject, content)
+    except Exception as e:
+        logger.warning(f"Could not send intro call email notification: {e}")
+
+    messages.success(
+        request,
+        f"🎉 Your 15-Minute Free Discovery Call request was sent to {tutor.get_full_name}! They will contact you shortly on {phone_number}."
+    )
+    if course_offer_id:
+        return redirect("course_detail", offer_id=course_offer_id)
+    return redirect("tutor_detail", tutor_id=tutor.id)
 
 
