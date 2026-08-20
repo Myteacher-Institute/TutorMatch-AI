@@ -64,7 +64,11 @@ def tutor_profile(request):
             if not is_valid_file:
                 form.add_error('profile_photo_upload', error)
                 return render(request, 'tutors/profile_form.html', {'form': form, 'profile': profile, 'active_tab': 'profile'})
-            profile.profile_photo = upload_file_in_memory(photo, folder="/tutor_photos")
+            uploaded_photo = upload_file_in_memory(photo, folder="/tutor_photos")
+            if uploaded_photo:
+                profile.profile_photo = uploaded_photo
+            else:
+                messages.warning(request, 'Failed to upload new profile photo to cloud storage. Please try again.')
 
         profile.save()
         
@@ -138,12 +142,22 @@ def tutor_verification(request):
                 'active_tab': 'verification',
             })
 
+        uploaded_url = upload_file_in_memory(document_file, folder="/tutor_documents")
+        if not uploaded_url:
+            messages.error(request, 'Failed to upload document to cloud storage. Please verify your file format and network, then try again.')
+            return render(request, 'tutors/verification.html', {
+                'form': form,
+                'documents': profile.documents.all(),
+                'profile': profile,
+                'active_tab': 'verification',
+            })
+
         profile.documents.all().delete()
         profile.verification_status = "pending"
 
         doc = form.save(commit=False)
         doc.tutor = profile
-        doc.document_url = upload_file_in_memory(document_file, folder="/tutor_documents")
+        doc.document_url = uploaded_url
         doc.save()
         profile.save(update_fields=["verification_status"])
         try:

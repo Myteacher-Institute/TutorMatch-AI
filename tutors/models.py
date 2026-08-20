@@ -165,7 +165,8 @@ class Tutor(models.Model):
             missing.append("Qualifications")
         if not self.bank_name or not self.account_number or not self.account_name:
             missing.append("Bank Payout Details")
-        if not self.documents.exists():
+        valid_docs = self.documents.filter(document_url__isnull=False).exclude(document_url="").exclude(document_url="None")
+        if not valid_docs.exists():
             missing.append("Verification Documents (ID / NIN)")
         return missing
 
@@ -299,6 +300,24 @@ class TutorDocument(models.Model):
         default='pending'
     )
     uploaded_at = models.DateTimeField(auto_now_add=True)
+
+    @property
+    def has_valid_file(self):
+        return bool(self.document_url and str(self.document_url).strip() and str(self.document_url).strip() != "None")
+
+    @property
+    def is_image(self):
+        if not self.has_valid_file:
+            return False
+        url_lower = str(self.document_url).lower().split("?")[0]
+        return any(url_lower.endswith(ext) for ext in [".jpg", ".jpeg", ".png", ".webp", ".gif", ".bmp"])
+
+    @property
+    def is_pdf(self):
+        if not self.has_valid_file:
+            return False
+        url_lower = str(self.document_url).lower().split("?")[0]
+        return url_lower.endswith(".pdf")
 
     def __str__(self):
         return f"{self.tutor} — {self.get_document_type_display()}"

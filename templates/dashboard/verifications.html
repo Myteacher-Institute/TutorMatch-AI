@@ -106,9 +106,15 @@
                   <span style="color: #cbd5e1;">|</span>
 
                   {% for doc in tutor.documents.all %}
-                    <a href="{{ doc.document_url }}" target="_blank" style="font-size: 11px; font-weight: 700; color: #1e40af; background: #dbeafe; padding: 3px 8px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
-                      📄 {{ doc.get_document_type_display }}
-                    </a>
+                    {% if doc.has_valid_file %}
+                      <a href="{{ doc.document_url }}" target="_blank" rel="noopener noreferrer" style="font-size: 11px; font-weight: 700; color: #1e40af; background: #dbeafe; padding: 3px 8px; border-radius: 6px; text-decoration: none; display: inline-flex; align-items: center; gap: 4px;">
+                        📄 {{ doc.get_document_type_display }}
+                      </a>
+                    {% else %}
+                      <span style="font-size: 11px; font-weight: 700; color: #dc2626; background: #fee2e2; padding: 3px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 4px;">
+                        ⚠️ {{ doc.get_document_type_display }} (Upload Incomplete)
+                      </span>
+                    {% endif %}
                   {% empty %}
                     <span style="font-size: 11px; font-weight: 700; color: #dc2626;">No Verification Document</span>
                   {% endfor %}
@@ -288,13 +294,54 @@
                   <!-- 5. Verification Documents -->
                   <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 14px; padding: 18px;">
                     <h3 style="margin: 0 0 14px; font-size: 14px; font-weight: 700; color: #2563eb; text-transform: uppercase; letter-spacing: 0.5px;">5. Uploaded Documents</h3>
-                    <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <div style="display: grid; gap: 16px;">
                       {% for doc in tutor.documents.all %}
-                        <a href="{{ doc.document_url }}" target="_blank" class="btn" style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 10px; padding: 10px 16px; text-decoration: none; color: #1e40af; font-size: 13px; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
-                          📄 {{ doc.get_document_type_display }} &bull; View Document <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
-                        </a>
+                        {% if doc.has_valid_file %}
+                          <div style="background: #ffffff; border: 1px solid #cbd5e1; border-radius: 12px; padding: 14px; display: flex; flex-direction: column; gap: 12px;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                              <div style="display: flex; align-items: center; gap: 8px;">
+                                <span style="font-size: 18px;">📄</span>
+                                <div>
+                                  <strong style="font-size: 14px; color: #0f172a; display: block;">{{ doc.get_document_type_display }}</strong>
+                                  <span style="font-size: 11px; color: #64748b;">Uploaded {{ doc.uploaded_at|date:"M d, Y" }}</span>
+                                </div>
+                              </div>
+                              <a href="{{ doc.document_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                Open in New Tab <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
+                              </a>
+                            </div>
+
+                            {% if doc.is_image %}
+                              <div style="border-radius: 8px; overflow: hidden; border: 1px solid #e2e8f0; background: #0f172a; max-height: 350px; display: flex; justify-content: center; align-items: center;">
+                                <a href="{{ doc.document_url }}" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; text-align: center;">
+                                  <img src="{{ doc.document_url }}" alt="{{ doc.get_document_type_display }}" style="max-width: 100%; max-height: 350px; object-fit: contain; display: block; margin: 0 auto;">
+                                </a>
+                              </div>
+                            {% elif doc.is_pdf %}
+                              <div style="padding: 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
+                                <div style="display: flex; align-items: center; gap: 10px;">
+                                  <i class="fa-solid fa-file-pdf" style="font-size: 28px; color: #dc2626;"></i>
+                                  <div>
+                                    <strong style="font-size: 13px; color: #1e40af; display: block;">PDF Document</strong>
+                                    <span style="font-size: 12px; color: #3b82f6;">Click the button on the right to view or download the full PDF.</span>
+                                  </div>
+                                </div>
+                                <a href="{{ doc.document_url }}" target="_blank" rel="noopener noreferrer" style="background: #2563eb; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700;">View PDF</a>
+                              </div>
+                            {% endif %}
+                          </div>
+                        {% else %}
+                          <div style="background: #fff1f2; border: 1px solid #fecaca; border-radius: 12px; padding: 14px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px;">
+                            <div>
+                              <strong style="color: #9f1239; font-size: 13px; display: block;">⚠️ {{ doc.get_document_type_display }} &bull; File upload incomplete</strong>
+                              <span style="color: #be123c; font-size: 12px;">The document record exists but no valid cloud file URL was saved. Please click "Email Tutor Missing Items" below so the tutor can re-upload their document.</span>
+                            </div>
+                          </div>
+                        {% endif %}
                       {% empty %}
-                        <span style="color: #dc2626; font-size: 13px; font-weight: 600;">No verification documents uploaded.</span>
+                        <div style="padding: 12px; background: #fef2f2; border: 1px solid #fee2e2; border-radius: 8px; color: #dc2626; font-size: 13px; font-weight: 600;">
+                          No verification documents uploaded.
+                        </div>
                       {% endfor %}
                     </div>
                   </div>
