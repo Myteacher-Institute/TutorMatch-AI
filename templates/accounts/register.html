@@ -1,16 +1,46 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}Sign Up | Myteacherconnect{% endblock %}
+{% block title %}Sign Up | MyteacherConnect{% endblock %}
 {% block site_header %}{% endblock %}
 {% block site_footer %}{% endblock %}
 
 {% block content %}
+<style>
+  .role-toggle-btn {
+    transition: all 0.3s ease;
+  }
+  .role-toggle-btn.active[data-value="tutor"] {
+    background: linear-gradient(135deg, #1e40af, #2563eb) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+  }
+  .role-toggle-btn.active[data-value="student"] {
+    background: linear-gradient(135deg, #15803d, #16a34a) !important;
+    color: #ffffff !important;
+    box-shadow: 0 4px 14px rgba(22, 163, 74, 0.35);
+  }
+
+  .role-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border-radius: 99px;
+    font-size: 12px;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 12px;
+    transition: all 0.3s ease;
+  }
+</style>
+
 <section class="mtc-auth-section">
   <div class="mtc-auth-decor-1"></div>
   <div class="mtc-auth-decor-2"></div>
 
-  <div class="mtc-auth-container">
+  <div class="mtc-auth-container" id="auth-container">
     <aside class="mtc-auth-sidebar">
       <div class="mtc-auth-slider">
         <img src="https://res.cloudinary.com/cvp2quxz/image/upload/v1785029145/photo_2026-07-26_02-21-25_iz9m27.jpg" alt="Myteacherconnect preview 1" class="mtc-auth-slide active">
@@ -23,15 +53,20 @@
         </a>
       </div>
       <div class="mtc-auth-welcome">
-        <h2 id="auth-welcome-heading">Welcome to Myteacherconnect.</h2>
+        <h2 id="auth-welcome-heading">Welcome to MyteacherConnect.</h2>
         <p id="auth-welcome-subtext">Connect with verified tutors, compare the right match for your goals, and book trusted sessions that fit your schedule.</p>
       </div>
     </aside>
 
     <div class="mtc-auth-form-wrapper">
       <div class="mtc-auth-form-card mtc-auth-form-card-wide">
+        
+        <div id="auth-role-badge" class="role-badge-pill" style="background: #f0fdf4; color: #15803d; border: 1px solid #bbf7d0;">
+          <span>🎓</span> Student &amp; Parent Registration
+        </div>
+
         <h1>Sign Up</h1>
-        <p class="subtitle">Create your account as a student, parent, or tutor.</p>
+        <p class="subtitle">Create your account to start learning or teaching STEM &amp; Digital Skills.</p>
 
         {% if form.non_field_errors %}
           <div class="mtc-alert mtc-alert-danger">
@@ -62,7 +97,7 @@
                     required
                   >
                   <label for="{{ field.id_for_label }}" style="cursor: pointer; line-height: 1.5; font-weight: 500;">
-                    I agree to the <a href="{% url 'terms_of_service' %}" target="_blank" style="color: #2563eb; text-decoration: underline;">Terms & Conditions</a> and <a href="{% url 'privacy_policy' %}" target="_blank" style="color: #2563eb; text-decoration: underline;">Privacy Policy</a>.<span id="tutor-terms-link-span"> Tutors must also agree to the <a href="{% url 'tutor_terms' %}" target="_blank" style="color: #2563eb; font-weight: 700; text-decoration: underline;">Tutor Terms</a>.</span>
+                    I agree to the <a href="{% url 'terms_of_service' %}" target="_blank" style="color: #2563eb; text-decoration: underline;">Terms &amp; Conditions</a> and <a href="{% url 'privacy_policy' %}" target="_blank" style="color: #2563eb; text-decoration: underline;">Privacy Policy</a>.<span id="tutor-terms-link-span"> Tutors must also agree to the <a href="{% url 'tutor_terms' %}" target="_blank" style="color: #2563eb; font-weight: 700; text-decoration: underline;">Tutor Terms</a>.</span>
                   </label>
                 </div>
               {% elif field.field.choices %}
@@ -145,16 +180,31 @@
    }
 
    const roleToggle = document.getElementById('role-toggle');
+   const welcomeHeading = document.getElementById('auth-welcome-heading');
    const welcomeSubtext = document.getElementById('auth-welcome-subtext');
-   const studentSubtext = "Connect with verified tutors, compare the right match for your goals, and book trusted sessions that fit your schedule.";
-   const tutorSubtext = "Are you a qualified tutor in digital skills, Mathematics, English and exam preparation? Then apply here";
+   const authContainer = document.getElementById('auth-container');
+   const roleBadge = document.getElementById('auth-role-badge');
+   const studentSubtext = "Connect with verified STEM tutors, compare the right match for your learning goals, and book trusted sessions that fit your schedule.";
+   const tutorSubtext = "Are you a qualified tutor in Science, Technology, Coding, Mathematics, or Digital Skills? Apply here to share your knowledge and earn on your schedule.";
 
-   function updateAuthSubtext(role) {
-     if (welcomeSubtext) {
-       if (role === 'tutor') {
-         welcomeSubtext.textContent = tutorSubtext;
-       } else {
-         welcomeSubtext.textContent = studentSubtext;
+   function updateAuthLayout(role) {
+     if (role === 'tutor') {
+       if (welcomeHeading) welcomeHeading.textContent = "Become a Verified STEM & Digital Skills Tutor.";
+       if (welcomeSubtext) welcomeSubtext.textContent = tutorSubtext;
+       if (roleBadge) {
+         roleBadge.innerHTML = '<span>💻</span> STEM &amp; Digital Skills Tutor Application';
+         roleBadge.style.background = '#eff6ff';
+         roleBadge.style.color = '#1d4ed8';
+         roleBadge.style.border = '1px solid #bfdbfe';
+       }
+     } else {
+       if (welcomeHeading) welcomeHeading.textContent = "Welcome to MyteacherConnect.";
+       if (welcomeSubtext) welcomeSubtext.textContent = studentSubtext;
+       if (roleBadge) {
+         roleBadge.innerHTML = '<span>🎓</span> Student &amp; Parent Registration';
+         roleBadge.style.background = '#f0fdf4';
+         roleBadge.style.color = '#15803d';
+         roleBadge.style.border = '1px solid #bbf7d0';
        }
      }
      const tutorTermsSpan = document.getElementById('tutor-terms-link-span');
@@ -169,17 +219,24 @@
      }
    }
 
-
    if (roleToggle) {
      const toggleButtons = roleToggle.querySelectorAll('.role-toggle-btn');
      const hiddenInput = document.getElementById('id_role_selection');
-     const initialRole = hiddenInput.value || 'student';
      
+     // Check URL query parameter first (e.g. ?role=tutor)
+     const urlParams = new URLSearchParams(window.location.search);
+     const urlRole = urlParams.get('role');
+     let initialRole = hiddenInput.value || 'student';
+     if (urlRole && (urlRole === 'tutor' || urlRole === 'student')) {
+       initialRole = urlRole;
+       hiddenInput.value = urlRole;
+     }
+
      const selectedButton = roleToggle.querySelector(`.role-toggle-btn[data-value="${initialRole}"]`);
      if (selectedButton) {
        toggleButtons.forEach(b => b.classList.remove('active'));
        selectedButton.classList.add('active');
-       updateAuthSubtext(initialRole);
+       updateAuthLayout(initialRole);
      }
      
      toggleButtons.forEach(btn => {
@@ -187,9 +244,9 @@
          toggleButtons.forEach(b => b.classList.remove('active'));
          btn.classList.add('active');
          hiddenInput.value = btn.dataset.value;
-         updateAuthSubtext(btn.dataset.value);
+         updateAuthLayout(btn.dataset.value);
        });
      });
    }
- </script>
+</script>
 {% endblock %}
