@@ -266,6 +266,53 @@
         0% { left: -70%; }
         35%, 100% { left: 140%; }
       }
+
+      /* ============================================================
+         BECOME A TUTOR BUTTON & HERO ACTIONS ENHANCEMENT
+         ============================================================ */
+      .mtc-hero-actions {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        margin-top: 36px;
+        flex-wrap: wrap;
+      }
+
+      .mtc-dark-btn {
+        display: inline-flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        min-height: 48px !important;
+        padding: 0 24px !important;
+        min-width: auto !important;
+        border-radius: 12px !important;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%) !important;
+        color: #ffffff !important;
+        font-size: 13.5px !important;
+        font-weight: 700 !important;
+        text-decoration: none !important;
+        white-space: nowrap !important;
+        border: 1px solid rgba(255, 255, 255, 0.15) !important;
+        box-shadow: 0 4px 16px rgba(15, 23, 42, 0.15) !important;
+        transition: all 0.3s ease !important;
+      }
+
+      .mtc-dark-btn:hover {
+        background: linear-gradient(135deg, #1e293b 0%, #2563eb 100%) !important;
+        border-color: #3b82f6 !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 24px rgba(37, 99, 235, 0.3) !important;
+        color: #ffffff !important;
+      }
+
+      .mtc-joined {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        color: #475569;
+        font-size: 13px;
+      }
     </style>
 
     <script>
@@ -362,7 +409,7 @@
     </div>
 
     <div class="mtc-hero-actions">
-      <a href="{% url 'register' %}?role=tutor" class="mtc-dark-btn">Become a STEM Tutor</a>
+      <a href="{% url 'register' %}?role=tutor" class="mtc-dark-btn"><i class="fa-solid fa-laptop-code" style="margin-right: 6px; color: #60a5fa;"></i>Become a STEM &amp; Digital Skills Tutor</a>
       <div class="mtc-joined">
         <div class="mtc-avatars">
           <img src="{% static 'images/avatars/avatar1.png' %}" alt="Parent Avatar 1">
