@@ -306,9 +306,16 @@
                                   <span style="font-size: 11px; color: #64748b;">Uploaded {{ doc.uploaded_at|date:"M d, Y" }}</span>
                                 </div>
                               </div>
-                              <a href="{{ doc.document_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
-                                Open in New Tab <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
-                              </a>
+                              <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
+                                {% if doc.preview_image_url %}
+                                  <a href="{{ doc.preview_image_url }}" target="_blank" rel="noopener noreferrer" style="border: 1px solid #cbd5e1; background: #ffffff; color: #334155; border-radius: 8px; padding: 7px 12px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                    View Image Preview <i class="fa-solid fa-image" style="font-size: 11px;"></i>
+                                  </a>
+                                {% endif %}
+                                <a href="{{ doc.download_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-primary" style="border-radius: 8px; padding: 7px 14px; font-size: 12px; font-weight: 700; text-decoration: none; display: inline-flex; align-items: center; gap: 6px;">
+                                  Open / Download File <i class="fa-solid fa-arrow-up-right-from-square" style="font-size: 11px;"></i>
+                                </a>
+                              </div>
                             </div>
 
                             {% if doc.is_image %}
@@ -318,15 +325,29 @@
                                 </a>
                               </div>
                             {% elif doc.is_pdf %}
-                              <div style="padding: 16px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px;">
-                                <div style="display: flex; align-items: center; gap: 10px;">
-                                  <i class="fa-solid fa-file-pdf" style="font-size: 28px; color: #dc2626;"></i>
-                                  <div>
-                                    <strong style="font-size: 13px; color: #1e40af; display: block;">PDF Document</strong>
-                                    <span style="font-size: 12px; color: #3b82f6;">Click the button on the right to view or download the full PDF.</span>
+                              <div style="border-radius: 8px; overflow: hidden; border: 1px solid #cbd5e1; background: #f8fafc; padding: 12px; display: flex; flex-direction: column; gap: 10px;">
+                                {% if doc.preview_image_url %}
+                                  <div style="border-radius: 6px; overflow: hidden; border: 1px solid #e2e8f0; background: #0f172a; max-height: 300px; display: flex; justify-content: center; align-items: center;">
+                                    <a href="{{ doc.preview_image_url }}" target="_blank" rel="noopener noreferrer" style="display: block; width: 100%; text-align: center;">
+                                      <img src="{{ doc.preview_image_url }}" alt="PDF Document Preview" style="max-width: 100%; max-height: 300px; object-fit: contain; display: block; margin: 0 auto;">
+                                    </a>
+                                  </div>
+                                {% endif %}
+                                <div style="padding: 10px 14px; background: #eff6ff; border: 1px solid #bfdbfe; border-radius: 8px; display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap;">
+                                  <div style="display: flex; align-items: center; gap: 10px;">
+                                    <i class="fa-solid fa-file-pdf" style="font-size: 24px; color: #dc2626;"></i>
+                                    <div>
+                                      <strong style="font-size: 13px; color: #1e40af; display: block;">PDF Document</strong>
+                                      <span style="font-size: 11px; color: #3b82f6;">Preview displayed above. Click buttons to view image or download PDF.</span>
+                                    </div>
+                                  </div>
+                                  <div style="display: flex; gap: 6px;">
+                                    {% if doc.preview_image_url %}
+                                      <a href="{{ doc.preview_image_url }}" target="_blank" rel="noopener noreferrer" style="background: #0284c7; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700;">View Image</a>
+                                    {% endif %}
+                                    <a href="{{ doc.download_url }}" target="_blank" rel="noopener noreferrer" style="background: #2563eb; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700;">Download PDF</a>
                                   </div>
                                 </div>
-                                <a href="{{ doc.document_url }}" target="_blank" rel="noopener noreferrer" style="background: #2563eb; color: #ffffff; padding: 6px 12px; border-radius: 6px; text-decoration: none; font-size: 12px; font-weight: 700;">View PDF</a>
                               </div>
                             {% endif %}
                           </div>

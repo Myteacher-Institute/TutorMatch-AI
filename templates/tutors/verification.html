@@ -162,6 +162,11 @@
                 class="mtc-status-pill {% if doc.verification_status == 'approved' %}mtc-status-accepted{% elif doc.verification_status == 'rejected' %}mtc-status-cancelled{% else %}mtc-status-pending{% endif %}">
                 {{ doc.get_verification_status_display }}
               </span>
+              {% if doc.has_valid_file %}
+                <a href="{{ doc.download_url }}" target="_blank" rel="noopener noreferrer" style="font-size: 12px; font-weight: 600; color: #2563eb; text-decoration: none; margin-left: 8px;">
+                  <i class="fa-solid fa-eye"></i> View File
+                </a>
+              {% endif %}
             </div>
             {% endfor %}
           </div>

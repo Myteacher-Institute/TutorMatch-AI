@@ -343,6 +343,29 @@ class TutorDocument(models.Model):
         url_lower = str(self.document_url).lower().split("?")[0]
         return url_lower.endswith(".pdf")
 
+    @property
+    def preview_image_url(self):
+        if not self.has_valid_file:
+            return None
+        if self.is_image:
+            return self.document_url
+        if self.is_pdf and "res.cloudinary.com" in str(self.document_url):
+            url = str(self.document_url)
+            url_path = url.split("?")[0]
+            if url_path.lower().endswith(".pdf"):
+                idx = url_path.lower().rfind(".pdf")
+                return url_path[:idx] + ".jpg"
+        return None
+
+    @property
+    def download_url(self):
+        if not self.has_valid_file:
+            return ""
+        url = str(self.document_url)
+        if "res.cloudinary.com" in url and "/upload/" in url and "fl_attachment" not in url:
+            return url.replace("/upload/", "/upload/fl_attachment/")
+        return url
+
     def __str__(self):
         return f"{self.tutor} — {self.get_document_type_display()}"
 
