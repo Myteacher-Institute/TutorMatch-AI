@@ -248,6 +248,19 @@ def admin_dashboard(request):
                 "bg": "#f3e8ff",
             })
 
+    try:
+        IntroCallRequest = apps.get_model("tutors", "IntroCallRequest")
+        for req in IntroCallRequest.objects.select_related("tutor__user__user").order_by("-created_at")[:10]:
+            recent_activities.append({
+                "timestamp": req.created_at,
+                "text": f"Tutor Request — {req.student_name} requested {req.tutor.get_full_name}",
+                "icon": "fa-paper-plane",
+                "color": "#0284c7",
+                "bg": "#e0f2fe",
+            })
+    except (LookupError, AttributeError):
+        pass
+
     recent_activities.sort(key=lambda x: x["timestamp"], reverse=True)
     recent_activities = recent_activities[:20]
 

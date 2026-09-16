@@ -1321,7 +1321,7 @@
                                 <strong>Experience:</strong> {{ tutor.experience }} yrs
                               </p>
                               <div class="tutor-card-buttons">
-                                <a href="{% url 'tutor_detail' tutor.id %}" class="tutor-btn tutor-btn-primary" style="flex: 1; text-align: center;" target="_blank" rel="noopener noreferrer">Browse Courses</a>
+                                <a href="{% url 'tutor_detail' tutor.id %}?request=1" class="tutor-btn tutor-btn-primary" style="flex: 1; text-align: center; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-weight: 700;" target="_blank" rel="noopener noreferrer"><i class="fa-solid fa-paper-plane"></i> Get a Tutor</a>
                               </div>
                             {% endif %}
                           </div>

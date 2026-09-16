@@ -418,17 +418,17 @@
 
           <div class="mb-3">
             <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Your Full Name <span class="text-danger">*</span></label>
-            <input type="text" name="student_name" class="form-control" required placeholder="e.g. Mrs. Adebayo" style="height:46px; border-radius:12px; font-weight:600;">
+            <input type="text" name="student_name" class="form-control" required placeholder="e.g. Mrs. Adebayo" value="{% if request.user.is_authenticated %}{{ request.user.get_full_name|default:request.user.username }}{% endif %}" style="height:46px; border-radius:12px; font-weight:600;">
           </div>
 
           <div class="row g-3 mb-3">
             <div class="col-12 col-sm-6">
               <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Phone / WhatsApp Number <span class="text-danger">*</span></label>
-              <input type="tel" name="phone_number" class="form-control" required placeholder="08012345678" style="height:46px; border-radius:12px; font-weight:600;">
+              <input type="tel" name="phone_number" class="form-control" required placeholder="08012345678" value="{% if request.user.is_authenticated %}{{ request.user.profile.phone_number|default:'' }}{% endif %}" style="height:46px; border-radius:12px; font-weight:600;">
             </div>
             <div class="col-12 col-sm-6">
               <label style="font-weight:700; font-size:13px; color:#0f172a; display:block; margin-bottom:6px;">Email Address</label>
-              <input type="email" name="student_email" class="form-control" placeholder="parent@gmail.com" style="height:46px; border-radius:12px; font-weight:600;">
+              <input type="email" name="student_email" class="form-control" placeholder="parent@gmail.com" value="{% if request.user.is_authenticated %}{{ request.user.email }}{% endif %}" style="height:46px; border-radius:12px; font-weight:600;">
             </div>
           </div>
 
@@ -453,4 +453,19 @@
     </div>
   </div>
 </div>
+
+<script>
+  document.addEventListener("DOMContentLoaded", function() {
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.get('request') === '1' || urlParams.get('request') === 'true' || window.location.hash === '#introCallModal') {
+      const modalEl = document.getElementById('introCallModal');
+      if (modalEl) {
+        setTimeout(function() {
+          const modal = new bootstrap.Modal(modalEl);
+          modal.show();
+        }, 300);
+      }
+    }
+  });
+</script>
 {% endblock %}
