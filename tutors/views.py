@@ -457,74 +457,46 @@ def request_intro_call(request, tutor_id):
 
     try:
         from accounts.email_services import send_transactional_email
+        from accounts.account_emails import get_admin_notification_emails
         from django.conf import settings
         from django.urls import reverse
 
         tutor_email = tutor.user.user.email if tutor.user and tutor.user.user else None
         tutor_name = tutor.get_full_name or "Tutor"
 
-        # 1. Send Email Notification to Instructor / Tutor
-        if tutor_email:
-            subject = f"📞 New Tutor Request & Discovery Call from {student_name}"
-            body_text = f"""Hello {tutor_name},
+        # Send Email Notification EXCLUSIVELY to All Admin Email Recipients (not to tutor)
+        admin_recipients = get_admin_notification_emails()
+        if not admin_recipients:
+            default_email = getattr(settings, "DEFAULT_FROM_EMAIL", None)
+            if default_email:
+                admin_recipients = [(default_email, "Support Team")]
 
-{student_name} has requested a FREE 15-Minute Discovery Call / Tutor Request with you on MyteacherConnect!
+        admin_subject = f"🔔 [Callback Request] New Inquiry from {student_name}"
+        admin_body_text = f"""Hello Team,
 
-Request Details:
-- Student/Parent Name: {student_name}
-- Phone / WhatsApp: {phone_number}
-- Email: {student_email or 'Not provided'}
-- Preferred Call Time: {preferred_call_time or 'Anytime'}
-- Course Interest: {course_offer.title if course_offer else 'General Tutoring Service'}
-- Notes: {notes or 'No additional notes'}
-
-Please log in to your Tutor Dashboard to accept this request and set your meeting connection details.
-
-REMINDER: Discovery calls can take place on Phone, Zoom, or WhatsApp, but ALL course payments MUST be processed through MyteacherConnect to be protected by our 30-Day Escrow Payout Policy.
-
-Best regards,
-MyteacherConnect Team
-"""
-            send_transactional_email(
-                to_email=tutor_email,
-                to_name=tutor_name,
-                subject=subject,
-                html_body=body_text.replace("\n", "<br>"),
-                text_body=body_text,
-            )
-
-        # 2. Send Email Notification to Admin
-        admin_emails = getattr(settings, "ADMIN_NOTIFICATION_EMAILS", [])
-        if not admin_emails and getattr(settings, "DEFAULT_FROM_EMAIL", None):
-            admin_emails = [settings.DEFAULT_FROM_EMAIL]
-
-        admin_subject = f"🔔 [Admin Alert] New Tutor Service Request for {tutor_name}"
-        admin_body_text = f"""Hello Admin Team,
-
-A new Tutor Service Request / 15-Min Discovery Call has been submitted on MyteacherConnect!
+A new Callback & Support Request has been submitted on MyteacherConnect!
 
 Student / Parent Details:
 - Name: {student_name}
 - Phone / WhatsApp: {phone_number}
 - Email: {student_email or 'Not provided'}
 - Preferred Call Time: {preferred_call_time or 'Anytime'}
-- Notes / Learning Goal: {notes or 'None'}
+- Notes / Request Details: {notes or 'None'}
 
-Instructor / Tutor Requested:
-- Tutor Name: {tutor_name}
-- Tutor Email: {tutor_email or 'None'}
-- Service / Course: {course_offer.title if course_offer else 'General Tutoring'}
+Course & Tutor Context:
+- Requested Tutor: {tutor_name} ({tutor_email or 'No email'})
+- Service / Course: {course_offer.title if course_offer else 'General Tutoring Service'}
 
 Please review this request in the Admin Dashboard: {request.build_absolute_uri(reverse('admin_dashboard'))}
 
 Best regards,
 MyteacherConnect System
 """
-        for admin_email in admin_emails:
+        for admin_email, admin_name in admin_recipients:
             if admin_email and "@" in admin_email:
                 send_transactional_email(
                     to_email=admin_email,
-                    to_name="MyteacherConnect Admin",
+                    to_name=admin_name,
                     subject=admin_subject,
                     html_body=admin_body_text.replace("\n", "<br>"),
                     text_body=admin_body_text,
@@ -534,7 +506,7 @@ MyteacherConnect System
 
     messages.success(
         request,
-        f"🎉 Your request was sent to {tutor.get_full_name}! Check your email & dashboard for meeting connection updates."
+        "🎉 Your callback request has been submitted! Our support team will get back to you shortly."
     )
     if course_offer_id:
         return redirect("course_detail", offer_id=course_offer_id)
