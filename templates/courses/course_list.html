@@ -426,13 +426,13 @@
         <div style="display:flex;justify-content:center;margin-top:40px;">
           <div style="display:flex;gap:8px;align-items:center;">
             {% if page_obj.has_previous %}
-              <a class="btn btn-light rounded-pill px-3 fw-bold" href="?page={{ page_obj.previous_page_number }}&q={{ search_query }}&subject={{ selected_subject }}&mode={{ selected_mode }}">Previous</a>
+              <a class="btn btn-light rounded-pill px-3 fw-bold" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_subject and selected_subject != 'None' %}&subject={{ selected_subject }}{% endif %}{% if selected_mode and selected_mode != 'None' %}&mode={{ selected_mode }}{% endif %}{% if selected_category and selected_category != 'None' %}&category={{ selected_category }}{% endif %}{% if selected_currency and selected_currency != 'None' %}&currency={{ selected_currency }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Previous</a>
             {% endif %}
             {% for num in page_obj.paginator.page_range %}
-              <a class="btn {% if page_obj.number == num %}btn-primary{% else %}btn-light{% endif %} rounded-circle fw-bold" style="width:38px;height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;" href="?page={{ num }}&q={{ search_query }}&subject={{ selected_subject }}&mode={{ selected_mode }}">{{ num }}</a>
+              <a class="btn {% if page_obj.number == num %}btn-primary{% else %}btn-light{% endif %} rounded-circle fw-bold" style="width:38px;height:38px;padding:0;display:inline-flex;align-items:center;justify-content:center;" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_subject and selected_subject != 'None' %}&subject={{ selected_subject }}{% endif %}{% if selected_mode and selected_mode != 'None' %}&mode={{ selected_mode }}{% endif %}{% if selected_category and selected_category != 'None' %}&category={{ selected_category }}{% endif %}{% if selected_currency and selected_currency != 'None' %}&currency={{ selected_currency }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">{{ num }}</a>
             {% endfor %}
             {% if page_obj.has_next %}
-              <a class="btn btn-light rounded-pill px-3 fw-bold" href="?page={{ page_obj.next_page_number }}&q={{ search_query }}&subject={{ selected_subject }}&mode={{ selected_mode }}">Next</a>
+              <a class="btn btn-light rounded-pill px-3 fw-bold" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}{% if selected_subject and selected_subject != 'None' %}&subject={{ selected_subject }}{% endif %}{% if selected_mode and selected_mode != 'None' %}&mode={{ selected_mode }}{% endif %}{% if selected_category and selected_category != 'None' %}&category={{ selected_category }}{% endif %}{% if selected_currency and selected_currency != 'None' %}&currency={{ selected_currency }}{% endif %}{% if sort_by %}&sort={{ sort_by }}{% endif %}">Next</a>
             {% endif %}
           </div>
         </div>

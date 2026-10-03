@@ -469,24 +469,77 @@ class CourseOffer(models.Model):
         category_lower = (self.category or "").lower()
         combined = f"{title_lower} {subject_name} {category_lower}"
 
-        if any(w in combined for w in ["chem", "lab", "acid", "element"]):
-            return "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
-        elif any(w in combined for w in ["math", "calc", "algebra", "stat", "geom", "number", "quant"]):
-            return "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80"
-        elif any(w in combined for w in ["phys", "electr", "force", "atom"]):
-            return "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80"
-        elif any(w in combined for w in ["bio", "med", "health", "gene", "cell", "micro"]):
-            return "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=800&q=80"
-        elif any(w in combined for w in ["code", "tech", "python", "java", "web", "program", "data", "soft"]):
-            return "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80"
-        elif any(w in combined for w in ["design", "art", "graphic", "ui", "ux", "paint", "draw"]):
-            return "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=800&q=80"
-        elif any(w in combined for w in ["english", "lit", "read", "gramm", "write", "lang", "essay"]):
-            return "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80"
-        elif any(w in combined for w in ["biz", "busin", "acc", "econ", "fin", "mark", "trade"]):
-            return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+        item_id = self.id or 1
+        title_hash = sum(ord(c) for c in (self.title or ""))
+        seed = item_id * 17 + title_hash
 
-        return "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80"
+        pools = {
+            "english": [
+                "1457369804613-52c61a468e7d", "1456513080510-7bf3a84b82f8", "1476275466078-4007374efbbe",
+                "1544716278-ca5e3f4abd8c", "1512820790803-83ca734da794", "1497633762265-9d179a990aa6",
+                "1516979187457-637abb4f9353", "1481627834876-b7833e8f5570", "1434030216411-0b793f4b4173",
+                "1503676260728-1c00da094a0b", "1513475382585-d06e58bcb0e0", "1524995997946-a1c2e315a42f"
+            ],
+            "math": [
+                "1509228468518-180dd4864904", "1635070041078-e363dbe005cb", "1596495578065-6e0763fa1178",
+                "1614741118887-7a4ee193a5fa", "1518133910546-b6c2fb7d79e3", "1509869175650-a1d97972541a",
+                "1543269865-cbf427effbad", "1509228627152-72ae9ae6848d"
+            ],
+            "chem": [
+                "1532094349884-543bc11b234d", "1579154204601-01588f351e67", "1582719478250-c89cae4dc85b",
+                "1532187863486-abf9dbad1b69", "1564325724739-bae0bd08762c", "1516549655169-df83a0774514",
+                "1581093588401-fbb62a02f120", "1607613009820-a29f7bb81c04"
+            ],
+            "phys": [
+                "1635070041078-e363dbe005cb", "1507668077129-56e32842fceb", "1581092160607-ee22621dd758",
+                "1517976487492-5750f3195933", "1509228468518-180dd4864904", "1581092335397-9583fe92d232",
+                "1532094349884-543bc11b234d", "1518770660439-4636190af475"
+            ],
+            "bio": [
+                "1530026405186-ed1f139313f8", "1576086213369-97a306d36557", "1584515979956-d9f6e5d09982",
+                "1532187863486-abf9dbad1b69", "1507838153414-b4b713384a76", "1576091160399-112ba8d25d1d",
+                "1579154204601-01588f351e67", "1532094349884-543bc11b234d"
+            ],
+            "code": [
+                "1555066931-4365d14bab8c", "1526374965328-7f61d4dc18c5", "1517694712202-14dd9538aa97",
+                "1551288049-bebda4e38f71", "1504639725590-34d0984388bd", "1531403009284-440f080d1e12",
+                "1515879218367-8466d910aaa4", "1498050108023-c5249f4df085", "1526379095098-d400fd0bf935"
+            ],
+            "design": [
+                "1626785774573-4b799315345d", "1513364776144-60967b0f800f", "1507238691740-187a5b1d37b8",
+                "1542744094-3a31b272c490", "1561070791-2526d30994b5", "1579783902614-a3fb3927b675"
+            ],
+            "biz": [
+                "1460925895917-afdab827c52f", "1454165804606-c3d57bc86b40", "1507679799987-c73779587ccf",
+                "1551836022-d5d88e9218df", "1556761175-5973dc0f32e7", "1434626881859-194d67b2b86f"
+            ],
+            "general": [
+                "1524995997946-a1c2e315a42f", "1497633762265-9d179a990aa6", "1523240795612-9a054b0db644",
+                "1522202176988-66273c2fd55f", "1509062522246-3755977927d7", "1427504494785-3a9ca7044f45",
+                "1516321318423-f06f85e504b3", "1531482615713-2afd69097998", "1577896851231-70ef18881754"
+            ]
+        }
+
+        selected_pool = pools["general"]
+        if any(w in combined for w in ["chem", "lab", "acid", "element"]):
+            selected_pool = pools["chem"]
+        elif any(w in combined for w in ["math", "calc", "algebra", "stat", "geom", "number", "quant"]):
+            selected_pool = pools["math"]
+        elif any(w in combined for w in ["phys", "electr", "force", "atom"]):
+            selected_pool = pools["phys"]
+        elif any(w in combined for w in ["bio", "med", "health", "gene", "cell", "micro"]):
+            selected_pool = pools["bio"]
+        elif any(w in combined for w in ["code", "tech", "python", "java", "web", "program", "data", "soft"]):
+            selected_pool = pools["code"]
+        elif any(w in combined for w in ["design", "art", "graphic", "ui", "ux", "paint", "draw"]):
+            selected_pool = pools["design"]
+        elif any(w in combined for w in ["english", "lit", "read", "gramm", "write", "lang", "essay"]):
+            selected_pool = pools["english"]
+        elif any(w in combined for w in ["biz", "busin", "acc", "econ", "fin", "mark", "trade"]):
+            selected_pool = pools["biz"]
+
+        photo_id = selected_pool[seed % len(selected_pool)]
+        return f"https://images.unsplash.com/photo-{photo_id}?auto=format&fit=crop&w=800&q=80"
 
     @property
     def cover_image_url(self):

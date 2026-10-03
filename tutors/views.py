@@ -352,12 +352,24 @@ def course_offer_delete(request, offer_id):
 # ==========================================
 
 def course_list(request):
-    subject_id = request.GET.get('subject')
-    category_filter = request.GET.get('category')
-    mode_filter = request.GET.get('mode')
+    raw_subject = request.GET.get('subject')
+    raw_category = request.GET.get('category')
+    raw_mode = request.GET.get('mode')
     search_query = request.GET.get('q', '').strip()
-    currency_filter = request.GET.get('currency')
+    raw_currency = request.GET.get('currency')
     sort_by = request.GET.get('sort', 'newest')
+
+    # Sanitize filter parameters to prevent string "None" / "null" / invalid values
+    subject_id = None
+    if raw_subject and str(raw_subject).strip() not in ['None', 'null', '']:
+        try:
+            subject_id = int(raw_subject)
+        except (ValueError, TypeError):
+            subject_id = None
+
+    category_filter = raw_category.strip() if raw_category and str(raw_category).strip() not in ['None', 'null', ''] else None
+    mode_filter = raw_mode.strip() if raw_mode and str(raw_mode).strip() not in ['None', 'null', ''] else None
+    currency_filter = raw_currency.strip() if raw_currency and str(raw_currency).strip() not in ['None', 'null', ''] else None
 
     offers_qs = CourseOffer.objects.filter(is_active=True, tutor__verification_status="approved", tutor__is_publicly_visible=True).select_related('tutor__user__user', 'subject')
 
@@ -396,10 +408,10 @@ def course_list(request):
         'offers': offers,
         'page_obj': offers,
         'subjects': subjects,
-        'selected_subject': subject_id,
-        'selected_category': category_filter,
-        'selected_mode': mode_filter,
-        'selected_currency': currency_filter,
+        'selected_subject': subject_id or '',
+        'selected_category': category_filter or '',
+        'selected_mode': mode_filter or '',
+        'selected_currency': currency_filter or '',
         'search_query': search_query,
         'sort_by': sort_by,
     })
