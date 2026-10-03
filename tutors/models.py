@@ -463,12 +463,42 @@ class CourseOffer(models.Model):
         return items
 
     @property
+    def default_fallback_cover_url(self):
+        title_lower = (self.title or "").lower()
+        subject_name = (self.subject.subject_name if self.subject else "").lower()
+        category_lower = (self.category or "").lower()
+        combined = f"{title_lower} {subject_name} {category_lower}"
+
+        if any(w in combined for w in ["chem", "lab", "acid", "element"]):
+            return "https://images.unsplash.com/photo-1532094349884-543bc11b234d?auto=format&fit=crop&w=800&q=80"
+        elif any(w in combined for w in ["math", "calc", "algebra", "stat", "geom", "number", "quant"]):
+            return "https://images.unsplash.com/photo-1509228468518-180dd4864904?auto=format&fit=crop&w=800&q=80"
+        elif any(w in combined for w in ["phys", "electr", "force", "atom"]):
+            return "https://images.unsplash.com/photo-1635070041078-e363dbe005cb?auto=format&fit=crop&w=800&q=80"
+        elif any(w in combined for w in ["bio", "med", "health", "gene", "cell", "micro"]):
+            return "https://images.unsplash.com/photo-1530026405186-ed1f139313f8?auto=format&fit=crop&w=800&q=80"
+        elif any(w in combined for w in ["code", "tech", "python", "java", "web", "program", "data", "soft"]):
+            return "https://images.unsplash.com/photo-1555066931-4365d14bab8c?auto=format&fit=crop&w=800&q=80"
+        elif any(w in combined for w in ["design", "art", "graphic", "ui", "ux", "paint", "draw"]):
+            return "https://images.unsplash.com/photo-1626785774573-4b799315345d?auto=format&fit=crop&w=800&q=80"
+        elif any(w in combined for w in ["english", "lit", "read", "gramm", "write", "lang", "essay"]):
+            return "https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=800&q=80"
+        elif any(w in combined for w in ["biz", "busin", "acc", "econ", "fin", "mark", "trade"]):
+            return "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80"
+
+        return "https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=800&q=80"
+
+    @property
     def cover_image_url(self):
         if self.cover_image_file:
-            return self.cover_image_file.url
-        if self.cover_image:
-            return self.cover_image
-        return ""
+            try:
+                if self.cover_image_file.url:
+                    return self.cover_image_file.url
+            except Exception:
+                pass
+        if self.cover_image and self.cover_image.strip():
+            return self.cover_image.strip()
+        return self.default_fallback_cover_url
 
     @property
     def total_course_price(self):

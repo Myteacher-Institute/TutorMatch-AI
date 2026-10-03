@@ -359,13 +359,7 @@
             
             <!-- Cover Banner -->
             <div class="course-card-banner">
-              {% if offer.cover_image_url %}
-                <img src="{{ offer.cover_image_url }}" alt="{{ offer.title }}" class="course-card-img">
-              {% else %}
-                <div class="d-flex align-items-center justify-content-center h-100" style="color:#ffffff;">
-                  <i class="fa-solid fa-book-open fa-3x" style="opacity:0.3;"></i>
-                </div>
-              {% endif %}
+              <img src="{{ offer.cover_image_url }}" alt="{{ offer.title }}" class="course-card-img" onerror="this.onerror=null; this.src='{{ offer.default_fallback_cover_url }}';">
 
               <span class="course-badge-mode">
                 <i class="fa-solid {% if offer.delivery_mode == 'online' %}fa-laptop-code{% else %}fa-house-user{% endif %} me-1"></i>

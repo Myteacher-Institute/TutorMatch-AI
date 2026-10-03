@@ -167,13 +167,7 @@
                   
                   <!-- Course Banner Thumbnail -->
                   <div style="width:140px;height:110px;border-radius:14px;background:#0f172a;overflow:hidden;flex-shrink:0;">
-                    {% if offer.cover_image_url %}
-                      <img src="{{ offer.cover_image_url }}" alt="{{ offer.title }}" style="width:100%;height:100%;object-fit:cover;">
-                    {% else %}
-                      <div style="display:flex;align-items:center;justify-content:center;height:100%;color:#ffffff;">
-                        <i class="fa-solid fa-book-open fa-2x" style="opacity:0.3;"></i>
-                      </div>
-                    {% endif %}
+                    <img src="{{ offer.cover_image_url }}" alt="{{ offer.title }}" style="width:100%;height:100%;object-fit:cover;" onerror="this.onerror=null; this.src='{{ offer.default_fallback_cover_url }}';">
                   </div>
 
                   <!-- Course Content Info -->
