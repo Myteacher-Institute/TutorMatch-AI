@@ -1,7 +1,9 @@
 import logging
 import json
+import urllib.parse
 from accounts.models import UserProfile
 from django.conf import settings
+from django.http import JsonResponse
 from django.contrib import messages
 from django.core.paginator import Paginator
 from django.shortcuts import render, redirect, get_object_or_404
@@ -68,11 +70,19 @@ def home(request):
         .order_by("-created_at")[:6]
     )
 
+    all_verified_tutors = list(
+        Tutor.objects.select_related("user__user")
+        .prefetch_related("subjects")
+        .filter(is_publicly_visible=True, verification_status="approved")
+        .order_by("user__user__first_name", "id")[:30]
+    )
+
     return render(
         request,
         "home.html",
         {
             "featured_tutors": featured_tutors,
+            "all_verified_tutors": all_verified_tutors,
             "verified_tutors_count": verified_tutors_count,
             "completed_lessons_count": completed_lessons_count,
             "cities_covered_count": cities_covered_count,
@@ -81,6 +91,207 @@ def home(request):
             "config": config,
         },
     )
+
+
+@require_POST
+def home_tutor_booking(request):
+    parent_name = request.POST.get("parent_name", "").strip()
+    phone_number = request.POST.get("phone_number", "").strip()
+    email = request.POST.get("email", "").strip()
+    student_level = request.POST.get("student_level", "").strip()
+    subject = request.POST.get("subject", "").strip()
+    learning_mode = request.POST.get("learning_mode", "home").strip()
+    location = request.POST.get("location", "").strip()
+    preferred_schedule = request.POST.get("preferred_schedule", "").strip()
+    notes = request.POST.get("notes", "").strip()
+    tutor_id = request.POST.get("tutor_id", "").strip()
+
+    is_ajax = (
+        request.headers.get("x-requested-with") == "XMLHttpRequest"
+        or "application/json" in request.headers.get("Accept", "")
+    )
+
+    if not parent_name or not phone_number or not subject:
+        error_msg = "Please provide your name, phone/WhatsApp number, and the subject needed."
+        if is_ajax:
+            return JsonResponse({"success": False, "error": error_msg}, status=400)
+        messages.error(request, error_msg)
+        return redirect(f"{reverse('home')}#tutor-booking-section")
+
+    mode_labels = {
+        "home": "Home Tutoring (In-Person)",
+        "online": "1-on-1 Online Tutoring",
+        "hybrid": "Hybrid (In-Person & Online)",
+    }
+    learning_mode_display = mode_labels.get(learning_mode, learning_mode.title())
+
+    # Build WhatsApp formatted text for instant messaging
+    formatted_wa_text = (
+        f"Hello MyteacherConnect! I want to book a tutor:\n\n"
+        f"• Parent / Guardian: {parent_name}\n"
+        f"• Phone / WhatsApp: {phone_number}\n"
+        f"• Student Level / Class: {student_level or 'Not specified'}\n"
+        f"• Subject / Skill: {subject}\n"
+        f"• Tutoring Mode: {learning_mode_display}\n"
+        f"• Location / Area: {location or 'Not specified'}\n"
+        f"• Preferred Schedule: {preferred_schedule or 'Flexible'}\n"
+        f"• Learning Goals / Notes: {notes or 'None'}"
+    )
+    encoded_wa_msg = urllib.parse.quote(formatted_wa_text)
+    whatsapp_url = f"https://wa.me/2349030057489?text={encoded_wa_msg}"
+
+    # Try saving lead into IntroCallRequest if tutor or default tutor can be linked
+    try:
+        from tutors.models import Tutor as TutorModel, IntroCallRequest
+        tutor = None
+        if tutor_id:
+            tutor = TutorModel.objects.filter(id=tutor_id).first()
+        if not tutor:
+            tutor = TutorModel.objects.filter(verification_status="approved", is_publicly_visible=True).first()
+
+        user_profile = None
+        if request.user.is_authenticated and hasattr(request.user, "profile"):
+            user_profile = request.user.profile
+
+        if tutor:
+            full_notes = (
+                f"[Landing Page Booking Form]\n"
+                f"Subject: {subject}\n"
+                f"Student Level: {student_level}\n"
+                f"Mode: {learning_mode_display}\n"
+                f"Location: {location}\n"
+                f"Schedule: {preferred_schedule}\n"
+                f"Notes: {notes}"
+            )
+            IntroCallRequest.objects.create(
+                tutor=tutor,
+                user=user_profile,
+                student_name=parent_name,
+                student_email=email,
+                phone_number=phone_number,
+                preferred_call_time=preferred_schedule or "ASAP",
+                notes=full_notes,
+                meeting_method="whatsapp",
+            )
+    except Exception as exc:
+        logger.warning("Could not persist landing booking into IntroCallRequest: %s", exc)
+
+    # Disptach Admin Email Notification
+    try:
+        from accounts.account_emails import get_admin_notification_emails
+        from accounts.email_services import send_transactional_email
+        admin_recipients = get_admin_notification_emails()
+        if not admin_recipients:
+            default_email = getattr(settings, "DEFAULT_FROM_EMAIL", "support@myteacherconnect.org")
+            admin_recipients = [(default_email, "Support Team")]
+
+        admin_subject = f"🎯 [New Tutor Booking Lead] {parent_name} needs {subject} ({location or 'Nigeria'})"
+        clean_client_phone = phone_number.replace("+", "").replace(" ", "").replace("-", "")
+        admin_body_html = f"""
+        <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px;">
+          <div style="text-align: center; margin-bottom: 20px;">
+            <span style="background: #25D366; color: #ffffff; font-weight: bold; font-size: 13px; padding: 6px 16px; border-radius: 99px; text-transform: uppercase;">
+              New Landing Page Tutor Booking
+            </span>
+          </div>
+          <h2 style="color: #2563eb; margin-top: 0;">New Tutor Booking Request from Homepage</h2>
+          <p>A prospective client just filled out the tutor booking form on the homepage landing page:</p>
+          
+          <table style="width: 100%; border-collapse: collapse; margin: 20px 0; background: #f8fafc; border-radius: 12px; overflow: hidden;">
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0; width: 35%;">Parent / Client:</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">{parent_name}</td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Phone / WhatsApp:</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;"><a href="https://wa.me/{clean_client_phone}" style="color: #25D366; font-weight: bold;">{phone_number}</a></td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Email:</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">{email or 'Not provided'}</td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Student Level:</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">{student_level or 'Not specified'}</td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Subject(s):</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0; color: #2563eb; font-weight: bold;">{subject}</td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Tutoring Mode:</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">{learning_mode_display}</td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Location:</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">{location or 'Not specified'}</td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold; border-bottom: 1px solid #e2e8f0;">Preferred Schedule:</td><td style="padding: 10px 14px; border-bottom: 1px solid #e2e8f0;">{preferred_schedule or 'Flexible'}</td></tr>
+            <tr><td style="padding: 10px 14px; font-weight: bold;">Notes / Goals:</td><td style="padding: 10px 14px;">{notes or 'None'}</td></tr>
+          </table>
+
+          <div style="text-align: center; margin: 24px 0;">
+            <a href="https://wa.me/{clean_client_phone}?text=Hello%20{urllib.parse.quote(parent_name)}%2C%20thank%20you%20for%20contacting%20MyteacherConnect%20regarding%20a%20tutor%20for%20{urllib.parse.quote(subject)}." style="background: #25D366; color: #ffffff; padding: 12px 24px; text-decoration: none; border-radius: 99px; font-weight: bold; display: inline-block;">
+              💬 Chat with Client on WhatsApp
+            </a>
+          </div>
+          <p style="font-size: 12px; color: #64748b; text-align: center;">MyteacherConnect Automated Lead Dispatch</p>
+        </div>
+        """
+        admin_body_text = (
+            f"New Tutor Booking Lead from Homepage!\n\n"
+            f"Parent: {parent_name}\n"
+            f"Phone / WhatsApp: {phone_number}\n"
+            f"Email: {email or 'None'}\n"
+            f"Level: {student_level}\n"
+            f"Subject: {subject}\n"
+            f"Mode: {learning_mode_display}\n"
+            f"Location: {location}\n"
+            f"Schedule: {preferred_schedule}\n"
+            f"Notes: {notes}\n"
+        )
+        for admin_email, admin_name in admin_recipients:
+            if admin_email and "@" in admin_email:
+                send_transactional_email(
+                    to_email=admin_email,
+                    to_name=admin_name,
+                    subject=admin_subject,
+                    html_body=admin_body_html,
+                    text_body=admin_body_text,
+                )
+    except Exception as exc:
+        logger.warning("Could not dispatch admin lead email: %s", exc)
+
+    # If client entered email, send confirmation to client
+    if email and "@" in email:
+        try:
+            client_subject = "We received your Tutor Booking Request - MyteacherConnect"
+            client_body_html = f"""
+            <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #0f172a; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e2e8f0; border-radius: 16px;">
+              <h2 style="color: #2563eb;">Hello {parent_name},</h2>
+              <p>Thank you for requesting a tutor on <strong>MyteacherConnect</strong>! We have received your request for <strong>{subject}</strong> ({learning_mode_display}).</p>
+              <p>Our tutor coordination team is actively reviewing your requirements to match you with the best-fit, verified tutor near {location or 'you'}.</p>
+              
+              <div style="background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 12px; padding: 18px; margin: 20px 0;">
+                <p style="margin: 0 0 10px; font-weight: bold; color: #166534;">Want instant assistance or have urgent questions?</p>
+                <p style="margin: 0 0 14px; font-size: 14px; color: #166534;">Chat directly with our official tutor coordinator on WhatsApp: <strong>+234 903 005 7489</strong>.</p>
+                <a href="{whatsapp_url}" style="background: #25D366; color: #ffffff; padding: 10px 20px; text-decoration: none; border-radius: 99px; font-weight: bold; display: inline-block;">
+                  💬 Open WhatsApp Chat Now
+                </a>
+              </div>
+
+              <p>Best regards,<br><strong>MyteacherConnect Support Team</strong><br>WhatsApp: +234 903 005 7489<br>Email: support@myteacherconnect.org</p>
+            </div>
+            """
+            client_body_text = (
+                f"Hello {parent_name},\n\n"
+                f"We received your tutor request for {subject} on MyteacherConnect.\n"
+                f"Our team will match you with a verified tutor shortly.\n\n"
+                f"Need fast assistance? WhatsApp our support line at +234 903 005 7489: {whatsapp_url}\n\n"
+                f"Thank you,\nMyteacherConnect Team"
+            )
+            from accounts.email_services import send_transactional_email
+            send_transactional_email(
+                to_email=email,
+                to_name=parent_name,
+                subject=client_subject,
+                html_body=client_body_html,
+                text_body=client_body_text,
+            )
+        except Exception as exc:
+            logger.warning("Could not send client booking confirmation email: %s", exc)
+
+    if is_ajax:
+        return JsonResponse({
+            "success": True,
+            "message": f"Thank you {parent_name}! Your booking request for {subject} has been received. Our team will contact you shortly.",
+            "whatsapp_url": whatsapp_url,
+            "formatted_message": formatted_wa_text,
+            "parent_name": parent_name,
+            "subject": subject,
+        })
+
+    messages.success(request, f"Thank you {parent_name}! Your booking request for {subject} has been received. Click below to chat directly with us on WhatsApp for instant confirmation.")
+    return redirect(f"{reverse('home')}?booking_success=1&subject={urllib.parse.quote(subject)}#tutor-booking-section")
 
 
 def _available_home_tutors():
