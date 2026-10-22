@@ -46,11 +46,15 @@
   <script>
     (function () {
       try {
-        var theme = localStorage.getItem('ai-theme') || 'system';
-        var dark = theme === 'dark' ||
-          (theme === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches);
-        if (dark) document.documentElement.classList.add('dark');
-      } catch (e) {}
+        var theme = localStorage.getItem('ai-theme');
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+      } catch (e) {
+        document.documentElement.classList.remove('dark');
+      }
     })();
   </script>
 

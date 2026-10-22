@@ -72,15 +72,8 @@
     const root = document.documentElement;
     if (themeVal === 'dark') {
       root.classList.add('dark');
-    } else if (themeVal === 'light') {
-      root.classList.remove('dark');
     } else {
-      const matchesDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      if (matchesDark) {
-        root.classList.add('dark');
-      } else {
-        root.classList.remove('dark');
-      }
+      root.classList.remove('dark');
     }
   }
 
@@ -106,8 +99,8 @@
       updateDesktopToggleIcon(false);
     }
 
-    let activeTheme = 'system';
-    try { activeTheme = localStorage.getItem('ai-theme') || 'system'; } catch (e) {}
+    let activeTheme = 'light';
+    try { activeTheme = localStorage.getItem('ai-theme') || 'light'; } catch (e) {}
     setAppTheme(activeTheme);
 
     handleResponsiveLayout();
