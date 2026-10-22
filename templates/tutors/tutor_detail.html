@@ -139,7 +139,7 @@
               <div class="tutor-public-subjects" style="margin-top:14px; display:flex; flex-wrap:wrap; gap:6px; align-items:center;">
                 {% for badge in tutor.stem_badges %}
                   <span style="background:{{ badge.bg }}; color:{{ badge.color }}; border:1px solid {{ badge.border }}; font-size:12px; font-weight:800; padding:4px 12px; border-radius:99px; display:inline-flex; align-items:center; gap:5px;">
-                    <span>{{ badge.icon }}</span> {{ badge.name }}
+                    {% if 'fa-' in badge.icon %}<i class="{{ badge.icon }}"></i>{% else %}<span>{{ badge.icon }}</span>{% endif %} {{ badge.name }}
                   </span>
                 {% endfor %}
                 {% for subject in tutor.subjects.all %}

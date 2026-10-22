@@ -281,18 +281,18 @@ class Tutor(models.Model):
         combined_text = " ".join(offers_titles + [c.lower() for c in categories] + subjects)
 
         if any("science" in c.lower() for c in categories) or any(s in combined_text for s in ["physics", "chemistry", "biology", "science"]):
-            badges.append({"name": "Science Specialist", "icon": "🔬", "bg": "#f0fdf4", "color": "#166534", "border": "#bbf7d0"})
+            badges.append({"name": "Science Specialist", "icon": "fa-solid fa-flask", "emoji": "🔬", "bg": "#f0fdf4", "color": "#166534", "border": "#bbf7d0"})
         if any("tech" in c.lower() or "coding" in c.lower() for c in categories) or any(term in combined_text for term in ["python", "coding", "web", "react", "app", "tech", "javascript", "scratch"]):
-            badges.append({"name": "Coding & Tech Expert", "icon": "💻", "bg": "#eff6ff", "color": "#1e40af", "border": "#bfdbfe"})
+            badges.append({"name": "Coding & Tech Expert", "icon": "fa-solid fa-laptop-code", "emoji": "💻", "bg": "#eff6ff", "color": "#1e40af", "border": "#bfdbfe"})
         if any("math" in c.lower() for c in categories) or any("math" in s for s in subjects) or "calculus" in combined_text:
-            badges.append({"name": "Maths & Further Maths", "icon": "📐", "bg": "#fdf2f8", "color": "#9d174d", "border": "#fbcfe8"})
+            badges.append({"name": "Maths & Further Maths", "icon": "fa-solid fa-calculator", "emoji": "📐", "bg": "#fdf2f8", "color": "#9d174d", "border": "#fbcfe8"})
         if any("eng" in c.lower() or "cad" in c.lower() for c in categories) or any(term in combined_text for term in ["robotics", "cad", "drawing", "engineering"]):
-            badges.append({"name": "Engineering & CAD", "icon": "⚙️", "bg": "#fef3c7", "color": "#92400e", "border": "#fde68a"})
+            badges.append({"name": "Engineering & CAD", "icon": "fa-solid fa-gear", "emoji": "⚙️", "bg": "#fef3c7", "color": "#92400e", "border": "#fde68a"})
         if any("digital" in c.lower() or "design" in c.lower() for c in categories) or any(term in combined_text for term in ["ui/ux", "figma", "graphic", "data", "excel"]):
-            badges.append({"name": "Digital Skills Mentor", "icon": "🎨", "bg": "#faf5ff", "color": "#6b21a8", "border": "#e9d5ff"})
+            badges.append({"name": "Digital Skills Mentor", "icon": "fa-solid fa-palette", "emoji": "🎨", "bg": "#faf5ff", "color": "#6b21a8", "border": "#e9d5ff"})
 
         if not badges:
-            badges.append({"name": "Verified STEM Mentor", "icon": "⚡", "bg": "#eff6ff", "color": "#2563eb", "border": "#dbeafe"})
+            badges.append({"name": "Verified STEM Mentor", "icon": "fa-solid fa-bolt", "emoji": "⚡", "bg": "#eff6ff", "color": "#2563eb", "border": "#dbeafe"})
 
         return badges[:3]
 
