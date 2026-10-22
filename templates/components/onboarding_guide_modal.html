@@ -1,0 +1,908 @@
+<!-- ==========================================================================
+     MYTEACHERCONNECT INTERACTIVE ONBOARDING TOUR & WHATSAPP SUPPORT MODAL
+     Helps new and returning visitors understand how to use the site step-by-step
+     and provides instant, 1-click WhatsApp guidance (+234 903 005 7489).
+     ========================================================================== -->
+
+<style>
+  /* Base Overlay */
+  .mtc-tour-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.65);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    z-index: 99995;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1), visibility 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .mtc-tour-overlay.is-active {
+    opacity: 1;
+    visibility: visible;
+  }
+
+  /* Modal Card */
+  .mtc-tour-card {
+    position: relative;
+    background: #ffffff;
+    width: 100%;
+    max-width: 520px;
+    border-radius: 24px;
+    box-shadow: 0 25px 60px -15px rgba(15, 23, 42, 0.35), 0 0 0 1px rgba(226, 232, 240, 0.8);
+    overflow: hidden;
+    transform: scale(0.94) translateY(12px);
+    transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+    display: flex;
+    flex-direction: column;
+    max-height: 90vh;
+  }
+
+  .mtc-tour-overlay.is-active .mtc-tour-card {
+    transform: scale(1) translateY(0);
+  }
+
+  /* Dark mode support */
+  html.dark .mtc-tour-card {
+    background: #0f172a;
+    box-shadow: 0 25px 60px -15px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1);
+  }
+
+  /* Header Bar */
+  .mtc-tour-header {
+    padding: 18px 24px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 1px solid rgba(226, 232, 240, 0.6);
+  }
+
+  html.dark .mtc-tour-header {
+    border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  }
+
+  .mtc-tour-badge-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #eff6ff;
+    color: #2563eb;
+    font-size: 11.5px;
+    font-weight: 700;
+    padding: 4px 12px;
+    border-radius: 9999px;
+    letter-spacing: 0.02em;
+    text-transform: uppercase;
+  }
+
+  html.dark .mtc-tour-badge-pill {
+    background: rgba(37, 99, 235, 0.2);
+    color: #60a5fa;
+  }
+
+  .mtc-tour-close-btn {
+    background: transparent;
+    border: none;
+    color: #64748b;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mtc-tour-close-btn:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+  html.dark .mtc-tour-close-btn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: #f8fafc;
+  }
+
+  /* Progress Bar */
+  .mtc-tour-progress-track {
+    height: 4px;
+    background: #e2e8f0;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+  }
+
+  html.dark .mtc-tour-progress-track {
+    background: rgba(255, 255, 255, 0.08);
+  }
+
+  .mtc-tour-progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #2563eb 0%, #3b82f6 50%, #22c55e 100%);
+    width: 25%;
+    transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Slide Body */
+  .mtc-tour-body {
+    padding: 24px;
+    overflow-y: auto;
+    flex: 1;
+  }
+
+  .mtc-tour-step {
+    display: none;
+    animation: mtcFadeIn 0.3s ease;
+  }
+
+  .mtc-tour-step.is-current {
+    display: block;
+  }
+
+  @keyframes mtcFadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(6px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Step Visuals */
+  .mtc-step-icon-wrap {
+    width: 58px;
+    height: 58px;
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 26px;
+    margin-bottom: 16px;
+  }
+
+  .mtc-step-icon-welcome {
+    background: #dbeafe;
+    color: #2563eb;
+  }
+
+  .mtc-step-icon-search {
+    background: #e0e7ff;
+    color: #4f46e5;
+  }
+
+  .mtc-step-icon-book {
+    background: #fef3c7;
+    color: #d97706;
+  }
+
+  .mtc-step-icon-whatsapp {
+    background: #dcfce7;
+    color: #16a34a;
+  }
+
+  .mtc-tour-step h3 {
+    font-size: 21px;
+    font-weight: 800;
+    color: #0f172a;
+    line-height: 1.25;
+    margin: 0 0 10px;
+    letter-spacing: -0.02em;
+  }
+
+  html.dark .mtc-tour-step h3 {
+    color: #f8fafc;
+  }
+
+  .mtc-tour-step p {
+    font-size: 14.5px;
+    line-height: 1.55;
+    color: #475569;
+    margin: 0 0 16px;
+  }
+
+  html.dark .mtc-tour-step p {
+    color: #94a3b8;
+  }
+
+  /* Interactive Feature Mockups inside Tour */
+  .mtc-feature-highlight-box {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 14px;
+    padding: 14px;
+    margin: 14px 0 18px;
+  }
+
+  html.dark .mtc-feature-highlight-box {
+    background: rgba(30, 41, 59, 0.6);
+    border-color: rgba(255, 255, 255, 0.08);
+  }
+
+  .mtc-highlight-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .mtc-highlight-item:last-child {
+    margin-bottom: 0;
+  }
+
+  .mtc-highlight-icon {
+    font-size: 15px;
+    color: #2563eb;
+    margin-top: 2px;
+    flex-shrink: 0;
+  }
+
+  .mtc-highlight-text {
+    font-size: 13px;
+    line-height: 1.45;
+    color: #334155;
+  }
+
+  html.dark .mtc-highlight-text {
+    color: #cbd5e1;
+  }
+
+  /* Quick WhatsApp Banner within Step */
+  .mtc-step-wa-banner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 12px;
+    padding: 10px 14px;
+    margin-top: 14px;
+    text-decoration: none;
+    transition: all 0.2s ease;
+  }
+
+  .mtc-step-wa-banner:hover {
+    background: #dcfce7;
+    border-color: #86efac;
+    transform: translateY(-1px);
+  }
+
+  html.dark .mtc-step-wa-banner {
+    background: rgba(22, 163, 74, 0.15);
+    border-color: rgba(34, 197, 94, 0.3);
+  }
+
+  .mtc-step-wa-banner-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .mtc-step-wa-banner-left i {
+    font-size: 22px;
+    color: #16a34a;
+  }
+
+  .mtc-step-wa-title {
+    font-size: 12.5px;
+    font-weight: 700;
+    color: #14532d;
+    display: block;
+    line-height: 1.2;
+  }
+
+  html.dark .mtc-step-wa-title {
+    color: #4ade80;
+  }
+
+  .mtc-step-wa-sub {
+    font-size: 11.5px;
+    color: #166534;
+    display: block;
+  }
+
+  html.dark .mtc-step-wa-sub {
+    color: #86efac;
+  }
+
+  .mtc-step-wa-pill {
+    background: #16a34a;
+    color: #ffffff;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 5px 10px;
+    border-radius: 9999px;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+  }
+
+  /* Final Step Big WhatsApp Hero CTA */
+  .mtc-wa-hero-cta {
+    background: linear-gradient(135deg, #16a34a 0%, #15803d 100%);
+    color: #ffffff !important;
+    border-radius: 16px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    font-size: 15.5px;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 10px 25px -5px rgba(22, 163, 74, 0.4);
+    transition: all 0.25s ease;
+    margin: 16px 0 10px;
+  }
+
+  .mtc-wa-hero-cta:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 30px -5px rgba(22, 163, 74, 0.55);
+    color: #ffffff !important;
+  }
+
+  /* Navigation Footer */
+  .mtc-tour-footer {
+    padding: 16px 24px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid rgba(226, 232, 240, 0.6);
+    background: #ffffff;
+    border-bottom-left-radius: 24px;
+    border-bottom-right-radius: 24px;
+  }
+
+  html.dark .mtc-tour-footer {
+    border-top: 1px solid rgba(255, 255, 255, 0.08);
+    background: #0f172a;
+  }
+
+  .mtc-tour-dots {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .mtc-tour-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #cbd5e1;
+    cursor: pointer;
+    transition: all 0.25s ease;
+    border: none;
+    padding: 0;
+  }
+
+  html.dark .mtc-tour-dot {
+    background: #334155;
+  }
+
+  .mtc-tour-dot.is-active {
+    width: 22px;
+    border-radius: 9999px;
+    background: #2563eb;
+  }
+
+  .mtc-tour-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .mtc-tour-btn-ghost {
+    background: transparent;
+    border: 1px solid #e2e8f0;
+    color: #64748b;
+    font-size: 13.5px;
+    font-weight: 600;
+    padding: 8px 16px;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+
+  .mtc-tour-btn-ghost:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+  }
+
+  html.dark .mtc-tour-btn-ghost {
+    border-color: rgba(255, 255, 255, 0.12);
+    color: #94a3b8;
+  }
+
+  html.dark .mtc-tour-btn-ghost:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: #f8fafc;
+  }
+
+  .mtc-tour-btn-primary {
+    background: #2563eb;
+    border: 1px solid transparent;
+    color: #ffffff;
+    font-size: 13.5px;
+    font-weight: 700;
+    padding: 8px 20px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.35);
+    transition: all 0.2s ease;
+  }
+
+  .mtc-tour-btn-primary:hover {
+    background: #1d4ed8;
+    transform: translateY(-1px);
+    box-shadow: 0 6px 18px rgba(37, 99, 235, 0.45);
+    color: #ffffff;
+  }
+
+  /* Floating Help Trigger Badge (always available on page) */
+  .mtc-floating-help-trigger {
+    position: fixed;
+    bottom: 24px;
+    left: 24px;
+    z-index: 99990;
+    display: inline-flex;
+    align-items: center;
+    gap: 9px;
+    background: #ffffff;
+    color: #0f172a;
+    border: 1px solid rgba(226, 232, 240, 0.9);
+    padding: 10px 16px;
+    border-radius: 9999px;
+    box-shadow: 0 10px 30px -5px rgba(15, 23, 42, 0.15), 0 0 0 1px rgba(0, 0, 0, 0.03);
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+    text-decoration: none;
+  }
+
+  .mtc-floating-help-trigger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 35px -5px rgba(15, 23, 42, 0.22);
+    color: #2563eb;
+  }
+
+  html.dark .mtc-floating-help-trigger {
+    background: #1e293b;
+    color: #f8fafc;
+    border-color: rgba(255, 255, 255, 0.12);
+    box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.5);
+  }
+
+  .mtc-floating-help-pulse {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #22c55e;
+    position: relative;
+  }
+
+  .mtc-floating-help-pulse::after {
+    content: '';
+    position: absolute;
+    inset: -3px;
+    border-radius: 50%;
+    background: rgba(34, 197, 94, 0.4);
+    animation: mtcPulse 2s infinite;
+  }
+
+  @keyframes mtcPulse {
+    0% { transform: scale(1); opacity: 0.8; }
+    50% { transform: scale(1.6); opacity: 0; }
+    100% { transform: scale(1); opacity: 0; }
+  }
+
+  /* Mobile responsiveness */
+  @media (max-width: 600px) {
+    .mtc-tour-card {
+      border-radius: 20px;
+      max-height: 94vh;
+    }
+
+    .mtc-tour-header {
+      padding: 14px 18px 10px;
+    }
+
+    .mtc-tour-body {
+      padding: 18px;
+    }
+
+    .mtc-tour-step h3 {
+      font-size: 19px;
+    }
+
+    .mtc-tour-step p {
+      font-size: 13.5px;
+    }
+
+    .mtc-tour-footer {
+      padding: 14px 18px;
+    }
+
+    .mtc-floating-help-trigger {
+      bottom: 20px;
+      left: 16px;
+      padding: 8px 14px;
+      font-size: 12px;
+    }
+
+    .mtc-floating-help-label-long {
+      display: none;
+    }
+  }
+</style>
+
+<!-- MODAL OVERLAY -->
+<div id="mtcTourOverlay" class="mtc-tour-overlay" role="dialog" aria-modal="true" aria-labelledby="mtcTourStepTitle">
+  <div class="mtc-tour-card">
+    
+    <!-- Header -->
+    <div class="mtc-tour-header">
+      <div class="mtc-tour-badge-pill">
+        <i class="fa-solid fa-compass"></i>
+        <span>Guide &bull; Step <span id="mtcCurrentStepNum">1</span> of 4</span>
+      </div>
+      <button type="button" class="mtc-tour-close-btn" id="mtcTourCloseBtn" title="Close guide" aria-label="Close guide">
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- Progress Track -->
+    <div class="mtc-tour-progress-track">
+      <div class="mtc-tour-progress-fill" id="mtcTourProgressFill"></div>
+    </div>
+
+    <!-- Body / Steps -->
+    <div class="mtc-tour-body">
+      
+      <!-- STEP 1: WELCOME -->
+      <div class="mtc-tour-step is-current" data-step="1">
+        <div class="mtc-step-icon-wrap mtc-step-icon-welcome">
+          <i class="fa-solid fa-graduation-cap"></i>
+        </div>
+        <h3 id="mtcTourStepTitle">Welcome to MyteacherConnect 👋</h3>
+        <p>
+          We are Nigeria's <strong>#1 verified platform</strong> connecting parents, students, and professionals with top-rated home and online tutors in Coding, Robotics, AI, Mathematics, Sciences, and Exam Prep (WAEC/JAMB/IGCSE).
+        </p>
+
+        <div class="mtc-feature-highlight-box">
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-circle-check mtc-highlight-icon"></i>
+            <div class="mtc-highlight-text"><strong>100% Background-Vetted Tutors</strong> with proven track records.</div>
+          </div>
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-shield-halved mtc-highlight-icon"></i>
+            <div class="mtc-highlight-text"><strong>Safe Escrow Payments:</strong> Tutors are paid only when lessons are successfully completed.</div>
+          </div>
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-wand-magic-sparkles mtc-highlight-icon"></i>
+            <div class="mtc-highlight-text"><strong>Smart AI Search:</strong> Tell us what your child needs and get matched instantly.</div>
+          </div>
+        </div>
+
+        <a href="https://wa.me/2349030057489?text=Hello%20MyteacherConnect!%20I%20am%20new%20on%20the%20website%20and%20would%20love%20guidance%20on%20how%20to%20find%20a%20tutor." target="_blank" rel="noopener noreferrer" class="mtc-step-wa-banner">
+          <div class="mtc-step-wa-banner-left">
+            <i class="fa-brands fa-whatsapp"></i>
+            <div>
+              <span class="mtc-step-wa-title">Prefer 1-on-1 Help Right Now?</span>
+              <span class="mtc-step-wa-sub">Chat directly with our counselor on WhatsApp</span>
+            </div>
+          </div>
+          <span class="mtc-step-wa-pill"><i class="fa-brands fa-whatsapp"></i> Chat Now</span>
+        </a>
+      </div>
+
+      <!-- STEP 2: HOW TO SEARCH -->
+      <div class="mtc-tour-step" data-step="2">
+        <div class="mtc-step-icon-wrap mtc-step-icon-search">
+          <i class="fa-solid fa-magnifying-glass"></i>
+        </div>
+        <h3>Step 1: Finding Your Perfect Tutor</h3>
+        <p>
+          Finding an educator tailored to your learning goals is quick and intuitive:
+        </p>
+
+        <div class="mtc-feature-highlight-box">
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-keyboard mtc-highlight-icon"></i>
+            <div class="mtc-highlight-text">
+              <strong>Natural Language Search:</strong> Type what you need like <em>"Python coding for 10-year-old in PH"</em> or <em>"IGCSE Further Maths"</em>.
+            </div>
+          </div>
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-microphone mtc-highlight-icon" style="color: #ea580c;"></i>
+            <div class="mtc-highlight-text">
+              <strong>Voice Search:</strong> Tap the microphone icon in the search bar to speak your requirements directly!
+            </div>
+          </div>
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-sliders mtc-highlight-icon"></i>
+            <div class="mtc-highlight-text">
+              <strong>Filters:</strong> Filter by subject, budget, in-person (Lagos, Port Harcourt, Abuja) or online worldwide.
+            </div>
+          </div>
+        </div>
+
+        <a href="https://wa.me/2349030057489?text=Hello%20MyteacherConnect!%20Can%20you%20help%20me%20find%20the%20best%20tutor%20for%20my%20learning%20needs%3F" target="_blank" rel="noopener noreferrer" class="mtc-step-wa-banner">
+          <div class="mtc-step-wa-banner-left">
+            <i class="fa-brands fa-whatsapp"></i>
+            <div>
+              <span class="mtc-step-wa-title">Want us to find a tutor for you?</span>
+              <span class="mtc-step-wa-sub">Send us your subject & location on WhatsApp</span>
+            </div>
+          </div>
+          <span class="mtc-step-wa-pill"><i class="fa-brands fa-whatsapp"></i> Ask Us</span>
+        </a>
+      </div>
+
+      <!-- STEP 3: BOOKING & FREE INTRO CALL -->
+      <div class="mtc-tour-step" data-step="3">
+        <div class="mtc-step-icon-wrap mtc-step-icon-book">
+          <i class="fa-solid fa-calendar-check"></i>
+        </div>
+        <h3>Step 2: Free 15-Min Intro Call & Lessons</h3>
+        <p>
+          We make sure you and your child feel 100% confident before committing:
+        </p>
+
+        <div class="mtc-feature-highlight-box">
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-video mtc-highlight-icon" style="color: #0284c7;"></i>
+            <div class="mtc-highlight-text">
+              <strong>Free 15-Minute Discovery Call:</strong> Meet the tutor online or via WhatsApp call to discuss goals and personality fit.
+            </div>
+          </div>
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-lock mtc-highlight-icon" style="color: #16a34a;"></i>
+            <div class="mtc-highlight-text">
+              <strong>Escrow Protection:</strong> When you book, your payment is held safely until lessons are delivered.
+            </div>
+          </div>
+          <div class="mtc-highlight-item">
+            <i class="fa-solid fa-clock-rotate-left mtc-highlight-icon"></i>
+            <div class="mtc-highlight-text">
+              <strong>Flexible Schedules:</strong> Choose weekly, bi-weekly, or intensive weekend crash courses.
+            </div>
+          </div>
+        </div>
+
+        <a href="https://wa.me/2349030057489?text=Hello%20MyteacherConnect!%20I%20have%20questions%20about%20booking%20and%20pricing." target="_blank" rel="noopener noreferrer" class="mtc-step-wa-banner">
+          <div class="mtc-step-wa-banner-left">
+            <i class="fa-brands fa-whatsapp"></i>
+            <div>
+              <span class="mtc-step-wa-title">Questions about Pricing or Escrow?</span>
+              <span class="mtc-step-wa-sub">We answer in minutes on WhatsApp</span>
+            </div>
+          </div>
+          <span class="mtc-step-wa-pill"><i class="fa-brands fa-whatsapp"></i> Inquire</span>
+        </a>
+      </div>
+
+      <!-- STEP 4: WHATSAPP DIRECT ASSIST -->
+      <div class="mtc-tour-step" data-step="4">
+        <div class="mtc-step-icon-wrap mtc-step-icon-whatsapp">
+          <i class="fa-brands fa-whatsapp"></i>
+        </div>
+        <h3>Need Personal Guidance? We're on WhatsApp!</h3>
+        <p>
+          Find the site difficult to navigate or prefer human guidance? Our dedicated support team is ready on WhatsApp to walk you through every step or match you directly with a verified tutor!
+        </p>
+
+        <a href="https://wa.me/2349030057489?text=Hello%20MyteacherConnect!%20I%20am%20on%20the%20website%20and%20need%20guidance%20on%20how%20to%20use%20it%20to%20find%20a%20tutor." target="_blank" rel="noopener noreferrer" class="mtc-wa-hero-cta">
+          <i class="fa-brands fa-whatsapp" style="font-size: 22px;"></i>
+          <span>Chat With Us on WhatsApp (+234 903 005 7489)</span>
+        </a>
+
+        <div style="text-align: center; margin-top: 12px;">
+          <span style="font-size: 12.5px; color: #64748b; display: inline-flex; align-items: center; gap: 6px;">
+            <i class="fa-solid fa-clock" style="color: #22c55e;"></i> Fast response &bull; 7 days a week
+          </span>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer Controls -->
+    <div class="mtc-tour-footer">
+      <!-- Dots -->
+      <div class="mtc-tour-dots" id="mtcTourDots" aria-label="Slide indicators">
+        <button type="button" class="mtc-tour-dot is-active" data-go-step="1" aria-label="Go to Step 1"></button>
+        <button type="button" class="mtc-tour-dot" data-go-step="2" aria-label="Go to Step 2"></button>
+        <button type="button" class="mtc-tour-dot" data-go-step="3" aria-label="Go to Step 3"></button>
+        <button type="button" class="mtc-tour-dot" data-go-step="4" aria-label="Go to Step 4"></button>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="mtc-tour-actions">
+        <button type="button" class="mtc-tour-btn-ghost" id="mtcTourPrevBtn" style="display: none;">
+          <i class="fa-solid fa-arrow-left"></i> Back
+        </button>
+        <button type="button" class="mtc-tour-btn-primary" id="mtcTourNextBtn">
+          <span>Next</span> <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- FLOATING TRIGGER PILL (Accessible anytime on the page) -->
+<button type="button" class="mtc-floating-help-trigger" id="mtcFloatingHelpTrigger" title="Learn how to use MyteacherConnect & chat on WhatsApp">
+  <span class="mtc-floating-help-pulse"></span>
+  <i class="fa-brands fa-whatsapp" style="color: #16a34a; font-size: 16px;"></i>
+  <span>How to Use <span class="mtc-floating-help-label-long">&bull; WhatsApp Help</span></span>
+</button>
+
+<script>
+(function() {
+  const STORAGE_KEY = 'mtc_onboarding_guide_shown_v1';
+  const overlay = document.getElementById('mtcTourOverlay');
+  const closeBtn = document.getElementById('mtcTourCloseBtn');
+  const prevBtn = document.getElementById('mtcTourPrevBtn');
+  const nextBtn = document.getElementById('mtcTourNextBtn');
+  const dots = document.querySelectorAll('.mtc-tour-dot');
+  const steps = document.querySelectorAll('.mtc-tour-step');
+  const stepNumText = document.getElementById('mtcCurrentStepNum');
+  const progressFill = document.getElementById('mtcTourProgressFill');
+  const floatingTrigger = document.getElementById('mtcFloatingHelpTrigger');
+
+  let currentStep = 1;
+  const totalSteps = 4;
+
+  function updateStepUI() {
+    // Update step visibility
+    steps.forEach(function(step) {
+      const stepIdx = parseInt(step.getAttribute('data-step'), 10);
+      step.classList.toggle('is-current', stepIdx === currentStep);
+    });
+
+    // Update dots
+    dots.forEach(function(dot) {
+      const dotIdx = parseInt(dot.getAttribute('data-go-step'), 10);
+      dot.classList.toggle('is-active', dotIdx === currentStep);
+    });
+
+    // Update header & progress fill
+    if (stepNumText) stepNumText.textContent = currentStep;
+    if (progressFill) progressFill.style.width = ((currentStep / totalSteps) * 100) + '%';
+
+    // Update Prev button
+    if (prevBtn) {
+      prevBtn.style.display = currentStep > 1 ? 'inline-flex' : 'none';
+    }
+
+    // Update Next button
+    if (nextBtn) {
+      if (currentStep === totalSteps) {
+        nextBtn.innerHTML = '<span>Got It!</span> <i class="fa-solid fa-check"></i>';
+      } else {
+        nextBtn.innerHTML = '<span>Next</span> <i class="fa-solid fa-arrow-right"></i>';
+      }
+    }
+  }
+
+  function openGuideModal(stepToOpen) {
+    if (typeof stepToOpen === 'number') {
+      currentStep = Math.min(Math.max(stepToOpen, 1), totalSteps);
+    }
+    updateStepUI();
+    if (overlay) {
+      overlay.classList.add('is-active');
+      overlay.setAttribute('aria-hidden', 'false');
+      document.body.style.overflow = 'hidden';
+    }
+  }
+
+  function closeGuideModal() {
+    if (overlay) {
+      overlay.classList.remove('is-active');
+      overlay.setAttribute('aria-hidden', 'true');
+      document.body.style.overflow = '';
+    }
+    try {
+      localStorage.setItem(STORAGE_KEY, 'true');
+    } catch(e) {}
+  }
+
+  // Next / Finish
+  if (nextBtn) {
+    nextBtn.addEventListener('click', function() {
+      if (currentStep < totalSteps) {
+        currentStep++;
+        updateStepUI();
+      } else {
+        closeGuideModal();
+      }
+    });
+  }
+
+  // Previous
+  if (prevBtn) {
+    prevBtn.addEventListener('click', function() {
+      if (currentStep > 1) {
+        currentStep--;
+        updateStepUI();
+      }
+    });
+  }
+
+  // Dot clicks
+  dots.forEach(function(dot) {
+    dot.addEventListener('click', function() {
+      const targetStep = parseInt(this.getAttribute('data-go-step'), 10);
+      if (targetStep) {
+        currentStep = targetStep;
+        updateStepUI();
+      }
+    });
+  });
+
+  // Close button
+  if (closeBtn) {
+    closeBtn.addEventListener('click', closeGuideModal);
+  }
+
+  // Click outside modal card to close
+  if (overlay) {
+    overlay.addEventListener('click', function(e) {
+      if (e.target === overlay) {
+        closeGuideModal();
+      }
+    });
+  }
+
+  // Keyboard navigation (ESC to close, Left/Right arrows)
+  document.addEventListener('keydown', function(e) {
+    if (!overlay || !overlay.classList.contains('is-active')) return;
+    if (e.key === 'Escape') {
+      closeGuideModal();
+    } else if (e.key === 'ArrowRight' && currentStep < totalSteps) {
+      currentStep++;
+      updateStepUI();
+    } else if (e.key === 'ArrowLeft' && currentStep > 1) {
+      currentStep--;
+      updateStepUI();
+    }
+  });
+
+  // Floating trigger button to reopen anytime
+  if (floatingTrigger) {
+    floatingTrigger.addEventListener('click', function() {
+      openGuideModal(1);
+    });
+  }
+
+  // Auto-trigger on initial visit
+  // Trigger after 1.2s delay for a smooth visitor experience
+  setTimeout(function() {
+    try {
+      const hasSeen = localStorage.getItem(STORAGE_KEY);
+      if (!hasSeen) {
+        openGuideModal(1);
+      }
+    } catch(e) {
+      openGuideModal(1);
+    }
+  }, 1200);
+
+  // Expose global helper for any other button (e.g. footer / navbar link)
+  window.openMtcGuideTour = function(step) {
+    openGuideModal(step || 1);
+  };
+})();
+</script>
