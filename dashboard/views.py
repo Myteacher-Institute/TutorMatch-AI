@@ -534,14 +534,8 @@ def homepage_tutors(request):
 
 @admin_required
 def export_weekly_report(request):
-    from reportlab.lib.pagesizes import A4
-    from reportlab.lib import colors
-    from reportlab.lib.units import mm
-    from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
-    from reportlab.lib.enums import TA_CENTER, TA_LEFT
-    from reportlab.platypus import (
-        SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable,
-    )
+    import csv
+    import io
     from django.db.models import Sum, Count, Q
     from django.http import HttpResponse
 
@@ -608,107 +602,149 @@ def export_weekly_report(request):
                 t = tutor_map.get(r["booking__tutor"])
                 if not t:
                     continue
-                top_tutors.append((t.get_full_name or t.username, int(r["sessions"]), float(r["total_payout"])))
-        except (LookupError, AttributeError, TypeError):
-            pass
+                name = ""
+                if callable(getattr(t, "get_full_name", None)):
+                    name = t.get_full_name()
+                if not name and callable(getattr(t, "username", None)):
+                    name = t.username()
+                if not name and hasattr(t, "user") and t.user:
+                    if hasattr(t.user, "user") and t.user.user:
+                        name = t.user.user.get_full_name() or t.user.user.username
+                if not name:
+                    name = f"Tutor #{t.id}"
+                top_tutors.append((name, int(r.get("sessions") or 0), float(r.get("total_payout") or 0)))
+        except (LookupError, AttributeError, TypeError, Exception) as exc:
+            logger.warning("Error getting top tutors for weekly report: %s", exc)
 
-    naira = lambda v: "₦{:,.2f}".format(v)
+    def generate_csv():
+        response = HttpResponse(content_type="text/csv; charset=utf-8")
+        response["Content-Disposition"] = f'attachment; filename="weekly_report_{today.strftime("%Y-%m-%d")}.csv"'
+        writer = csv.writer(response)
+        writer.writerow(["MYTEACHERCONNECT WEEKLY PLATFORM REPORT"])
+        writer.writerow([f"Period: {week_start.strftime('%b %d, %Y')} to {today.strftime('%b %d, %Y')}"])
+        writer.writerow([f"Generated On: {timezone.now().strftime('%Y-%m-%d %H:%M')}"])
+        writer.writerow([])
+        writer.writerow(["KEY METRICS", "VALUE"])
+        writer.writerow(["Total Tutors", total_tutors])
+        writer.writerow(["Total Students", total_students])
+        writer.writerow(["Total Bookings", total_bookings])
+        writer.writerow(["Revenue Collected", f"NGN {total_collected:,.2f}"])
+        writer.writerow(["Platform Commission", f"NGN {total_commission:,.2f}"])
+        writer.writerow(["Tutor Payouts", f"NGN {total_payout:,.2f}"])
+        writer.writerow([])
+        writer.writerow(["REVENUE - LAST 7 DAYS"])
+        writer.writerow(["Day", "Revenue (NGN)"])
+        for day, rev in day_revenue:
+            writer.writerow([day, f"{rev:,.2f}"])
+        writer.writerow(["Total", f"{sum(r for _, r in day_revenue):,.2f}"])
+        writer.writerow([])
+        writer.writerow(["BOOKING STATUS"])
+        writer.writerow(["Status", "Count"])
+        for status in ["completed", "accepted", "pending", "cancelled"]:
+            writer.writerow([status.title(), booking_status_counts.get(status, 0)])
+        writer.writerow([])
+        writer.writerow(["TOP TUTORS BY PAYOUT"])
+        writer.writerow(["Tutor", "Sessions", "Payout (NGN)"])
+        if top_tutors:
+            for name, sessions, payout in top_tutors:
+                writer.writerow([name, sessions, f"{payout:,.2f}"])
+        else:
+            writer.writerow(["No payouts recorded yet", "0", "0.00"])
+        return response
 
-    styles = getSampleStyleSheet()
-    brand = colors.HexColor("#2563eb")
-    dark = colors.HexColor("#0f172a")
-    muted = colors.HexColor("#64748b")
-    line = colors.HexColor("#e2e8f0")
+    if request.GET.get("format", "").strip().lower() == "csv":
+        return generate_csv()
 
-    title_style = ParagraphStyle("TitleX", parent=styles["Title"], textColor=dark, fontSize=22, spaceAfter=2)
-    sub_style = ParagraphStyle("Sub", parent=styles["Normal"], textColor=muted, fontSize=10, alignment=TA_CENTER)
-    h_style = ParagraphStyle("H", parent=styles["Heading2"], textColor=brand, fontSize=13, spaceBefore=14, spaceAfter=6)
-    cell_style = ParagraphStyle("Cell", parent=styles["Normal"], fontSize=9.5, textColor=dark)
-    cell_muted = ParagraphStyle("CellM", parent=styles["Normal"], fontSize=9.5, textColor=muted)
-    cell_header = ParagraphStyle("CellH", parent=styles["Normal"], fontSize=9.5, textColor=colors.white, fontName="Helvetica-Bold")
-    label_style = ParagraphStyle("Label", parent=styles["Normal"], fontSize=9, textColor=muted, alignment=TA_CENTER)
-    value_style = ParagraphStyle("Value", parent=styles["Normal"], fontSize=15, textColor=dark, alignment=TA_CENTER, leading=18)
+    # Try generating PDF via ReportLab; gracefully fall back to CSV if missing or error occurs
+    try:
+        from reportlab.lib.pagesizes import A4
+        from reportlab.lib import colors
+        from reportlab.lib.units import mm
+        from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+        from reportlab.lib.enums import TA_CENTER, TA_LEFT
+        from reportlab.platypus import (
+            SimpleDocTemplate, Paragraph, Spacer, Table, TableStyle, HRFlowable,
+        )
 
-    response = HttpResponse(content_type="application/pdf")
-    response["Content-Disposition"] = 'attachment; filename="weekly_report_{}.pdf"'.format(today.strftime("%Y-%m-%d"))
+        naira = lambda v: "₦{:,.2f}".format(v)
 
-    doc = SimpleDocTemplate(
-        response, pagesize=A4,
-        leftMargin=18 * mm, rightMargin=18 * mm, topMargin=18 * mm, bottomMargin=18 * mm,
-        title="Myteacherconnect Weekly Report",
-    )
-    elems = []
+        styles = getSampleStyleSheet()
+        brand = colors.HexColor("#2563eb")
+        dark = colors.HexColor("#0f172a")
+        muted = colors.HexColor("#64748b")
+        line = colors.HexColor("#e2e8f0")
 
-    elems.append(Paragraph("Myteacherconnect", title_style))
-    elems.append(Paragraph("Weekly Platform Report &nbsp;|&nbsp; {} – {}".format(
-        week_start.strftime("%b %d, %Y"), today.strftime("%b %d, %Y")), sub_style))
-    elems.append(Spacer(1, 6))
-    elems.append(HRFlowable(width="100%", thickness=1.2, color=brand))
-    elems.append(Spacer(1, 12))
+        title_style = ParagraphStyle("TitleX", parent=styles["Title"], textColor=dark, fontSize=22, spaceAfter=2)
+        sub_style = ParagraphStyle("Sub", parent=styles["Normal"], textColor=muted, fontSize=10, alignment=TA_CENTER)
+        h_style = ParagraphStyle("H", parent=styles["Heading2"], textColor=brand, fontSize=13, spaceBefore=14, spaceAfter=6)
+        cell_style = ParagraphStyle("Cell", parent=styles["Normal"], fontSize=9.5, textColor=dark)
+        cell_muted = ParagraphStyle("CellM", parent=styles["Normal"], fontSize=9.5, textColor=muted)
+        cell_header = ParagraphStyle("CellH", parent=styles["Normal"], fontSize=9.5, textColor=colors.white, fontName="Helvetica-Bold")
+        label_style = ParagraphStyle("Label", parent=styles["Normal"], fontSize=9, textColor=muted, alignment=TA_CENTER)
+        value_style = ParagraphStyle("Value", parent=styles["Normal"], fontSize=15, textColor=dark, alignment=TA_CENTER, leading=18)
 
-    metrics = [
-        ("Total Tutors", str(total_tutors)),
-        ("Total Students", str(total_students)),
-        ("Total Bookings", str(total_bookings)),
-        ("Revenue Collected", naira(total_collected)),
-        ("Platform Commission", naira(total_commission)),
-        ("Tutor Payouts", naira(total_payout)),
-    ]
-    metric_cells = []
-    for label, value in metrics:
-        inner = [Paragraph(label, label_style), Paragraph(value, value_style)]
-        metric_cells.append(inner)
-    metric_rows = [metric_cells[i:i + 3] for i in range(0, len(metric_cells), 3)]
-    metric_table = Table(metric_rows, colWidths=[58 * mm] * 3)
-    metric_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
-        ("BOX", (0, 0), (-1, -1), 0.5, line),
-        ("INNERGRID", (0, 0), (-1, -1), 0.5, line),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 10),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
-    ]))
-    elems.append(metric_table)
+        buffer = io.BytesIO()
+        doc = SimpleDocTemplate(
+            buffer, pagesize=A4,
+            leftMargin=18 * mm, rightMargin=18 * mm, topMargin=18 * mm, bottomMargin=18 * mm,
+            title="Myteacherconnect Weekly Report",
+        )
+        elems = []
 
-    elems.append(Paragraph("Revenue — Last 7 Days", h_style))
-    rev_data = [[Paragraph("Day", cell_header), Paragraph("Revenue", cell_header)]]
-    for day, rev in day_revenue:
-        rev_data.append([Paragraph(day, cell_style), Paragraph(naira(rev), cell_style)])
-    rev_data.append([Paragraph("Total", cell_style), Paragraph(naira(sum(r for _, r in day_revenue)), cell_style)])
-    rev_table = Table(rev_data, colWidths=[120 * mm, 54 * mm])
-    rev_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), brand),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("GRID", (0, 0), (-1, -1), 0.5, line),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-        ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#eff6ff")),
-    ]))
-    elems.append(rev_table)
+        elems.append(Paragraph("Myteacherconnect", title_style))
+        elems.append(Paragraph("Weekly Platform Report &nbsp;|&nbsp; {} – {}".format(
+            week_start.strftime("%b %d, %Y"), today.strftime("%b %d, %Y")), sub_style))
+        elems.append(Spacer(1, 6))
+        elems.append(HRFlowable(width="100%", thickness=1.2, color=brand))
+        elems.append(Spacer(1, 12))
 
-    elems.append(Paragraph("Booking Status", h_style))
-    status_data = [[Paragraph("Status", cell_header), Paragraph("Count", cell_header)]]
-    for status in ["completed", "accepted", "pending", "cancelled"]:
-        status_data.append([Paragraph(status.title(), cell_style), Paragraph(str(booking_status_counts.get(status, 0)), cell_style)])
-    status_table = Table(status_data, colWidths=[120 * mm, 54 * mm])
-    status_table.setStyle(TableStyle([
-        ("BACKGROUND", (0, 0), (-1, 0), brand),
-        ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
-        ("GRID", (0, 0), (-1, -1), 0.5, line),
-        ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
-        ("TOPPADDING", (0, 0), (-1, -1), 5),
-        ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
-    ]))
-    elems.append(status_table)
+        metrics = [
+            ("Total Tutors", str(total_tutors)),
+            ("Total Students", str(total_students)),
+            ("Total Bookings", str(total_bookings)),
+            ("Revenue Collected", naira(total_collected)),
+            ("Platform Commission", naira(total_commission)),
+            ("Tutor Payouts", naira(total_payout)),
+        ]
+        metric_cells = []
+        for label, value in metrics:
+            inner = [Paragraph(label, label_style), Paragraph(value, value_style)]
+            metric_cells.append(inner)
+        metric_rows = [metric_cells[i:i + 3] for i in range(0, len(metric_cells), 3)]
+        metric_table = Table(metric_rows, colWidths=[58 * mm] * 3)
+        metric_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, -1), colors.HexColor("#f8fafc")),
+            ("BOX", (0, 0), (-1, -1), 0.5, line),
+            ("INNERGRID", (0, 0), (-1, -1), 0.5, line),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("TOPPADDING", (0, 0), (-1, -1), 10),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 10),
+        ]))
+        elems.append(metric_table)
 
-    elems.append(Paragraph("Top Tutors by Payout", h_style))
-    if top_tutors:
-        tutor_data = [[Paragraph("Tutor", cell_header), Paragraph("Sessions", cell_header), Paragraph("Payout", cell_header)]]
-        for name, sessions, payout in top_tutors:
-            tutor_data.append([Paragraph(name, cell_style), Paragraph(str(sessions), cell_style), Paragraph(naira(payout), cell_style)])
-        tutor_table = Table(tutor_data, colWidths=[108 * mm, 33 * mm, 33 * mm])
-        tutor_table.setStyle(TableStyle([
+        elems.append(Paragraph("Revenue — Last 7 Days", h_style))
+        rev_data = [[Paragraph("Day", cell_header), Paragraph("Revenue", cell_header)]]
+        for day, rev in day_revenue:
+            rev_data.append([Paragraph(day, cell_style), Paragraph(naira(rev), cell_style)])
+        rev_data.append([Paragraph("Total", cell_style), Paragraph(naira(sum(r for _, r in day_revenue)), cell_style)])
+        rev_table = Table(rev_data, colWidths=[120 * mm, 54 * mm])
+        rev_table.setStyle(TableStyle([
+            ("BACKGROUND", (0, 0), (-1, 0), brand),
+            ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+            ("GRID", (0, 0), (-1, -1), 0.5, line),
+            ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+            ("TOPPADDING", (0, 0), (-1, -1), 5),
+            ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ("BACKGROUND", (0, -1), (-1, -1), colors.HexColor("#eff6ff")),
+        ]))
+        elems.append(rev_table)
+
+        elems.append(Paragraph("Booking Status", h_style))
+        status_data = [[Paragraph("Status", cell_header), Paragraph("Count", cell_header)]]
+        for status in ["completed", "accepted", "pending", "cancelled"]:
+            status_data.append([Paragraph(status.title(), cell_style), Paragraph(str(booking_status_counts.get(status, 0)), cell_style)])
+        status_table = Table(status_data, colWidths=[120 * mm, 54 * mm])
+        status_table.setStyle(TableStyle([
             ("BACKGROUND", (0, 0), (-1, 0), brand),
             ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
             ("GRID", (0, 0), (-1, -1), 0.5, line),
@@ -716,18 +752,46 @@ def export_weekly_report(request):
             ("TOPPADDING", (0, 0), (-1, -1), 5),
             ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
         ]))
-        elems.append(tutor_table)
-    else:
-        elems.append(Paragraph("No payouts recorded yet.", cell_muted))
+        elems.append(status_table)
 
-    elems.append(Spacer(1, 16))
-    elems.append(HRFlowable(width="100%", thickness=0.6, color=line))
-    elems.append(Paragraph(
-        "Generated on {} by Myteacherconnect Admin Console.".format(timezone.now().strftime("%Y-%m-%d %H:%M")),
-        cell_muted))
+        elems.append(Paragraph("Top Tutors by Payout", h_style))
+        if top_tutors:
+            tutor_data = [[Paragraph("Tutor", cell_header), Paragraph("Sessions", cell_header), Paragraph("Payout", cell_header)]]
+            for name, sessions, payout in top_tutors:
+                tutor_data.append([Paragraph(name, cell_style), Paragraph(str(sessions), cell_style), Paragraph(naira(payout), cell_style)])
+            tutor_table = Table(tutor_data, colWidths=[108 * mm, 33 * mm, 33 * mm])
+            tutor_table.setStyle(TableStyle([
+                ("BACKGROUND", (0, 0), (-1, 0), brand),
+                ("TEXTCOLOR", (0, 0), (-1, 0), colors.white),
+                ("GRID", (0, 0), (-1, -1), 0.5, line),
+                ("VALIGN", (0, 0), (-1, -1), "MIDDLE"),
+                ("TOPPADDING", (0, 0), (-1, -1), 5),
+                ("BOTTOMPADDING", (0, 0), (-1, -1), 5),
+            ]))
+            elems.append(tutor_table)
+        else:
+            elems.append(Paragraph("No payouts recorded yet.", cell_muted))
 
-    doc.build(elems)
-    return response
+        elems.append(Spacer(1, 16))
+        elems.append(HRFlowable(width="100%", thickness=0.6, color=line))
+        elems.append(Paragraph(
+            "Generated on {} by Myteacherconnect Admin Console.".format(timezone.now().strftime("%Y-%m-%d %H:%M")),
+            cell_muted))
+
+        doc.build(elems)
+        pdf_content = buffer.getvalue()
+        buffer.close()
+
+        response = HttpResponse(pdf_content, content_type="application/pdf")
+        response["Content-Disposition"] = 'attachment; filename="weekly_report_{}.pdf"'.format(today.strftime("%Y-%m-%d"))
+        return response
+
+    except (ImportError, ModuleNotFoundError) as exc:
+        logger.warning("ReportLab package not found (%s). Returning CSV report fallback.", exc)
+        return generate_csv()
+    except Exception as exc:
+        logger.exception("Unexpected error building PDF report: %s. Returning CSV report fallback.", exc)
+        return generate_csv()
 
 
 @admin_required

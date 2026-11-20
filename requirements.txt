@@ -56,3 +56,4 @@ dj-database-url
 psycopg2-binary
 pillow
 cloudinary
+reportlab>=4.0.0
