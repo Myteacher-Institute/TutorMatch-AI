@@ -13486,15 +13486,117 @@ div.mtc-shell.admin-dashboard-light,
   max-width: 100% !important;
   margin: 12px 0 40px !important;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.04) !important;
+  overflow: visible !important;
 }
 
 .admin-dashboard-light .mtc-admin-sidebar {
   grid-column: 1 !important;
   align-self: start !important;
-  position: relative !important;
-  top: 0 !important;
-  height: auto !important;
+  position: sticky !important;
+  top: 90px !important;
+  max-height: calc(100vh - 105px) !important;
+  overflow-y: auto !important;
   margin: 0 !important;
+}
+
+/* Fixed viewport layout for Tutor Verifications: side panel & top banner stay pinned, cards scroll */
+@media (min-width: 992px) {
+  .mtc-shell.admin-dashboard-light:has(.mtc-verifications-layout) {
+    padding-top: 8px !important;
+    padding-bottom: 8px !important;
+  }
+
+  .admin-dashboard-light .mtc-admin-layout.mtc-verifications-layout {
+    height: calc(100vh - 94px) !important;
+    max-height: calc(100vh - 94px) !important;
+    overflow: hidden !important;
+    margin: 6px 0 0 !important;
+    display: grid !important;
+    grid-template-columns: 240px 1fr !important;
+    align-items: stretch !important;
+  }
+
+  .admin-dashboard-light .mtc-verifications-layout .mtc-admin-sidebar {
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow-y: auto !important;
+    position: relative !important;
+    top: 0 !important;
+    border-right: 1px solid #e2e8f0 !important;
+  }
+
+  .admin-dashboard-light .mtc-verifications-layout .mtc-admin-content {
+    height: 100% !important;
+    max-height: 100% !important;
+    display: flex !important;
+    flex-direction: column !important;
+    overflow: hidden !important;
+    padding: 18px 24px 14px !important;
+    box-sizing: border-box !important;
+    background: #ffffff !important;
+  }
+
+  .mtc-verifications-top-fixed {
+    flex-shrink: 0 !important;
+    margin-bottom: 12px !important;
+  }
+
+  .mtc-verifications-top-fixed .mtc-homepage-admin-hero {
+    margin-bottom: 12px !important;
+    padding: 16px 22px !important;
+    border-radius: 18px !important;
+  }
+
+  .mtc-verifications-top-fixed .mtc-homepage-admin-hero h1 {
+    font-size: 22px !important;
+    margin-bottom: 4px !important;
+  }
+
+  .mtc-verifications-top-fixed .mtc-homepage-admin-hero p {
+    font-size: 13px !important;
+    line-height: 1.4 !important;
+  }
+
+  .mtc-verifications-filter-tabs {
+    display: flex !important;
+    gap: 10px !important;
+    margin: 0 !important;
+    flex-wrap: wrap !important;
+  }
+
+  .mtc-verifications-cards-scroll {
+    flex: 1 !important;
+    min-height: 0 !important;
+    overflow-y: auto !important;
+    padding-right: 8px !important;
+    margin-right: -4px !important;
+  }
+}
+
+.mtc-verifications-cards-scroll::-webkit-scrollbar {
+  width: 7px;
+}
+.mtc-verifications-cards-scroll::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 999px;
+}
+.mtc-verifications-cards-scroll::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+.mtc-verifications-cards-scroll::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+.mtc-verifications-layout .mtc-admin-sidebar::-webkit-scrollbar {
+  width: 5px;
+}
+.mtc-verifications-layout .mtc-admin-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+.mtc-verifications-layout .mtc-admin-sidebar::-webkit-scrollbar-thumb {
+  background: #e2e8f0;
+  border-radius: 999px;
 }
 
 .admin-dashboard-light .mtc-admin-content-top {
