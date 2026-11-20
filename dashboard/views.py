@@ -924,18 +924,29 @@ def users(request):
             pass
 
     query = request.GET.get("q", "").strip()
-    user_qs = UserProfile.objects.all().order_by("-created_at")
+    role_filter = request.GET.get("role", "all").strip().lower()
+
+    all_users_qs = UserProfile.objects.select_related("user").all()
+    role_counts = {
+        "all": all_users_qs.count(),
+        "tutor": all_users_qs.filter(role=UserProfile.ROLE_TUTOR).count(),
+        "student": all_users_qs.filter(role=UserProfile.ROLE_STUDENT).count(),
+        "admin": all_users_qs.filter(role=UserProfile.ROLE_ADMIN).count(),
+    }
+
+    user_qs = all_users_qs.order_by("-created_at")
+    if role_filter in ["tutor", "student", "admin"]:
+        user_qs = user_qs.filter(role=role_filter)
+    else:
+        role_filter = "all"
+
     if query:
         user_qs = user_qs.filter(
-            user__username__icontains=query
-        ) | user_qs.filter(
-            user__email__icontains=query
-        ) | user_qs.filter(
-            user__first_name__icontains=query
-        ) | user_qs.filter(
-            user__last_name__icontains=query
-        ) | user_qs.filter(
-            phone_number__icontains=query
+            Q(user__username__icontains=query)
+            | Q(user__email__icontains=query)
+            | Q(user__first_name__icontains=query)
+            | Q(user__last_name__icontains=query)
+            | Q(phone_number__icontains=query)
         )
 
     paginator = Paginator(user_qs, 15)
@@ -950,6 +961,8 @@ def users(request):
             "page_obj": page_obj,
             "paginator": paginator,
             "query": query,
+            "role_filter": role_filter,
+            "role_counts": role_counts,
         },
     )
 

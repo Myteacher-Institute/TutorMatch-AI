@@ -3,6 +3,357 @@
 {% block title %}User Management | Myteacherconnect{% endblock %}
 
 {% block content %}
+<style>
+  /* ================= USER FILTER TABS ================= */
+  .mtc-user-filter-tabs {
+    display: flex;
+    gap: 10px;
+    margin: 20px 0 24px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
+  .mtc-role-tab {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    border-radius: 999px;
+    padding: 8px 18px;
+    font-size: 13px;
+    font-weight: 700;
+    text-decoration: none;
+    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    border: 1px solid #e2e8f0;
+    background: #f8fafc;
+    color: #475569;
+    cursor: pointer;
+  }
+
+  .mtc-role-tab:hover {
+    background: #f1f5f9;
+    color: #0f172a;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+  }
+
+  .mtc-role-tab .mtc-role-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2px 8px;
+    border-radius: 999px;
+    font-size: 11px;
+    font-weight: 800;
+    background: rgba(15, 23, 42, 0.08);
+    color: inherit;
+    line-height: 1.4;
+  }
+
+  /* Active states in light mode */
+  .mtc-role-tab.active {
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
+  }
+  .mtc-role-tab.active .mtc-role-badge {
+    background: rgba(255, 255, 255, 0.26);
+    color: #ffffff;
+  }
+
+  .mtc-role-tab.active.active-all {
+    background: #0f172a;
+    color: #ffffff;
+    border-color: #0f172a;
+  }
+  .mtc-role-tab.active.active-tutor {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #2563eb;
+    box-shadow: 0 4px 14px rgba(37, 99, 235, 0.28);
+  }
+  .mtc-role-tab.active.active-student {
+    background: #0d9488;
+    color: #ffffff;
+    border-color: #0d9488;
+    box-shadow: 0 4px 14px rgba(13, 148, 136, 0.28);
+  }
+  .mtc-role-tab.active.active-admin {
+    background: #7c3aed;
+    color: #ffffff;
+    border-color: #7c3aed;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.28);
+  }
+
+  /* ================= SEARCH FORM ================= */
+  .mtc-user-search-form {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex: 1 1 340px;
+    max-width: 440px;
+  }
+
+  .mtc-user-search-input-wrap {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .mtc-user-search-input-wrap i {
+    position: absolute;
+    left: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #94a3b8;
+    font-size: 13px;
+    pointer-events: none;
+  }
+
+  .mtc-user-search-input {
+    width: 100%;
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 8px;
+    padding: 10px 12px 10px 34px;
+    font: inherit;
+    font-size: 13px;
+    color: var(--ink, #0f172a);
+    background: #fbfdff;
+    outline: none;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .mtc-user-search-input:focus {
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.12);
+  }
+
+  /* ================= TABLE & ROW STYLES ================= */
+  .mtc-users-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 18px;
+    font-size: 13px;
+    text-align: left;
+  }
+
+  .mtc-users-table th {
+    padding: 12px 10px;
+    border-bottom: 2px solid var(--line, #e2e8f0);
+    color: var(--muted, #64748b);
+    font-weight: 700;
+  }
+
+  .mtc-users-table td {
+    padding: 14px 10px;
+    border-bottom: 1px solid var(--line, #e2e8f0);
+    color: var(--ink, #0f172a);
+    transition: background 0.15s ease;
+  }
+
+  .mtc-users-table tr.mtc-user-row:hover td {
+    background: #f8fafc;
+  }
+
+  /* Role Tags */
+  .mtc-role-pill {
+    font-weight: 700;
+    font-size: 12px;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    text-transform: capitalize;
+  }
+  .mtc-role-pill-tutor {
+    color: #2563eb;
+  }
+  .mtc-role-pill-student {
+    color: #0d9488;
+  }
+  .mtc-role-pill-admin {
+    color: #7c3aed;
+  }
+
+  /* Status Badges */
+  .mtc-badge-status {
+    border-radius: 999px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 700;
+    display: inline-block;
+  }
+  .mtc-badge-verified {
+    background: #dcfce7;
+    color: #166534;
+  }
+  .mtc-badge-unverified {
+    background: #f1f5f9;
+    color: #64748b;
+  }
+
+  /* Action buttons */
+  .mtc-btn-action-verify {
+    min-height: 28px;
+    padding: 0 10px;
+    font-size: 11px;
+    border: 1px solid var(--line, #e2e8f0);
+    border-radius: 6px;
+    background: #ffffff;
+    color: #475569;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .mtc-btn-action-verify:hover {
+    background: #f8fafc;
+    color: #0f172a;
+    border-color: #cbd5e1;
+  }
+
+  .mtc-btn-action-delete {
+    min-height: 28px;
+    padding: 0 10px;
+    font-size: 11px;
+    border: 1px solid #fecaca;
+    background: #fef2f2;
+    color: #dc2626;
+    border-radius: 6px;
+    cursor: pointer;
+    font-weight: 600;
+  }
+  .mtc-btn-action-delete:hover {
+    background: #fee2e2;
+  }
+
+  /* ================= DARK THEME OVERRIDES ================= */
+  html.dark .mtc-role-tab {
+    background: #16244a;
+    border-color: rgba(144, 169, 207, 0.2);
+    color: #90a9cf;
+  }
+
+  html.dark .mtc-role-tab:hover {
+    background: #1e3366;
+    border-color: rgba(144, 169, 207, 0.35);
+    color: #f8fafc;
+  }
+
+  html.dark .mtc-role-tab .mtc-role-badge {
+    background: rgba(255, 255, 255, 0.12);
+    color: inherit;
+  }
+
+  html.dark .mtc-role-tab.active {
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+  }
+
+  html.dark .mtc-role-tab.active.active-all {
+    background: #273b64;
+    color: #ffffff;
+    border-color: #3b82f6;
+  }
+
+  html.dark .mtc-role-tab.active.active-tutor {
+    background: #2563eb;
+    color: #ffffff;
+    border-color: #3b82f6;
+    box-shadow: 0 4px 16px rgba(37, 99, 235, 0.4);
+  }
+
+  html.dark .mtc-role-tab.active.active-student {
+    background: #0d9488;
+    color: #ffffff;
+    border-color: #14b8a6;
+    box-shadow: 0 4px 16px rgba(13, 148, 136, 0.4);
+  }
+
+  html.dark .mtc-role-tab.active.active-admin {
+    background: #8b5cf6;
+    color: #ffffff;
+    border-color: #a78bfa;
+    box-shadow: 0 4px 16px rgba(139, 92, 246, 0.4);
+  }
+
+  html.dark .mtc-user-search-input {
+    background: #0b0f19 !important;
+    border-color: rgba(144, 169, 207, 0.22) !important;
+    color: #f8fafc !important;
+  }
+  html.dark .mtc-user-search-input:focus {
+    border-color: #3b82f6 !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2) !important;
+  }
+
+  html.dark .mtc-user-search-input-wrap i {
+    color: #64748b !important;
+  }
+
+  html.dark .mtc-users-table th {
+    color: #90a9cf !important;
+    border-bottom-color: rgba(144, 169, 207, 0.2) !important;
+  }
+
+  html.dark .mtc-users-table td {
+    border-bottom-color: rgba(144, 169, 207, 0.12) !important;
+    color: #e2e8f0 !important;
+  }
+
+  html.dark .mtc-users-table tr.mtc-user-row:hover td {
+    background: rgba(37, 99, 235, 0.08) !important;
+  }
+
+  html.dark .mtc-role-pill-tutor {
+    color: #60a5fa !important;
+  }
+  html.dark .mtc-role-pill-student {
+    color: #2dd4bf !important;
+  }
+  html.dark .mtc-role-pill-admin {
+    color: #c084fc !important;
+  }
+
+  html.dark .mtc-badge-verified {
+    background: rgba(34, 197, 94, 0.2) !important;
+    color: #4ade80 !important;
+  }
+  html.dark .mtc-badge-unverified {
+    background: rgba(144, 169, 207, 0.15) !important;
+    color: #90a9cf !important;
+  }
+
+  html.dark .mtc-btn-action-verify {
+    background: #16244a !important;
+    border-color: rgba(144, 169, 207, 0.25) !important;
+    color: #90a9cf !important;
+  }
+  html.dark .mtc-btn-action-verify:hover {
+    background: #1e3366 !important;
+    color: #ffffff !important;
+    border-color: rgba(144, 169, 207, 0.4) !important;
+  }
+
+  html.dark .mtc-btn-action-delete {
+    background: rgba(239, 68, 68, 0.15) !important;
+    border-color: rgba(239, 68, 68, 0.3) !important;
+    color: #f87171 !important;
+  }
+  html.dark .mtc-btn-action-delete:hover {
+    background: rgba(239, 68, 68, 0.25) !important;
+  }
+
+  html.dark .mtc-admin-pagination a {
+    background: #16244a !important;
+    border-color: rgba(144, 169, 207, 0.2) !important;
+    color: #e2e8f0 !important;
+  }
+  html.dark .mtc-admin-pagination a:hover {
+    background: #1e3366 !important;
+    color: #ffffff !important;
+  }
+  html.dark .mtc-admin-pagination .is-disabled {
+    background: #0b0f19 !important;
+    border-color: rgba(144, 169, 207, 0.1) !important;
+    color: #475569 !important;
+  }
+</style>
+
 <div class="mtc-shell admin-dashboard-light">
   <section class="mtc-admin-layout">
     {% include "dashboard/_admin_nav.html" %}
@@ -12,85 +363,123 @@
           <h1 style="color: #fff;">User Management</h1>
           <p>View and manage registered accounts, roles, and authorization levels.</p>
         </div>
-        <span class="mtc-home-featured-count">{{ paginator.count }} accounts</span>
+        <span class="mtc-home-featured-count">{{ paginator.count }} account{{ paginator.count|pluralize }}</span>
+      </div>
+
+      <!-- Role Filter Tabs (Matches both Light & Dark Theme) -->
+      <div class="mtc-user-filter-tabs">
+        <a href="?role=all{% if query %}&amp;q={{ query }}{% endif %}" class="mtc-role-tab {% if role_filter == 'all' %}active active-all{% endif %}">
+          <i class="fa-solid fa-users"></i>
+          <span>All Accounts</span>
+          <span class="mtc-role-badge">{{ role_counts.all }}</span>
+        </a>
+        <a href="?role=tutor{% if query %}&amp;q={{ query }}{% endif %}" class="mtc-role-tab {% if role_filter == 'tutor' %}active active-tutor{% endif %}">
+          <i class="fa-solid fa-chalkboard-user"></i>
+          <span>All Tutors</span>
+          <span class="mtc-role-badge">{{ role_counts.tutor }}</span>
+        </a>
+        <a href="?role=student{% if query %}&amp;q={{ query }}{% endif %}" class="mtc-role-tab {% if role_filter == 'student' %}active active-student{% endif %}">
+          <i class="fa-solid fa-graduation-cap"></i>
+          <span>Just Students</span>
+          <span class="mtc-role-badge">{{ role_counts.student }}</span>
+        </a>
+        <a href="?role=admin{% if query %}&amp;q={{ query }}{% endif %}" class="mtc-role-tab {% if role_filter == 'admin' %}active active-admin{% endif %}">
+          <i class="fa-solid fa-shield-halved"></i>
+          <span>Admins</span>
+          <span class="mtc-role-badge">{{ role_counts.admin }}</span>
+        </a>
       </div>
       
       <div class="mtc-admin-card" style="overflow-x: auto;">
         <div style="display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap;">
-          <h2>Registered Accounts</h2>
-          <form method="get" style="display: flex; align-items: center; gap: 10px; flex: 1 1 320px; max-width: 420px;">
-            <input
-              type="text"
-              name="q"
-              value="{{ query }}"
-              placeholder="Search users by name, email, or phone..."
-              style="
-                flex: 1;
-                min-width: 0;
-                border: 1px solid var(--line);
-                border-radius: 6px;
-                padding: 10px 12px;
-                font: inherit;
-                font-size: 13px;
-                color: var(--ink);
-                background: #fbfdff;
-                outline: none;
-              "
-            />
+          <h2 style="margin: 0; font-size: 18px; font-weight: 700;">
+            {% if role_filter == 'tutor' %}
+              Registered Tutors
+            {% elif role_filter == 'student' %}
+              Registered Students
+            {% elif role_filter == 'admin' %}
+              Platform Administrators
+            {% else %}
+              Registered Accounts
+            {% endif %}
+            <span style="font-size: 14px; font-weight: 600; opacity: 0.7;">({{ paginator.count }})</span>
+          </h2>
+
+          <form method="get" class="mtc-user-search-form">
+            {% if role_filter and role_filter != 'all' %}
+              <input type="hidden" name="role" value="{{ role_filter }}">
+            {% endif %}
+            <div class="mtc-user-search-input-wrap">
+              <i class="fa-solid fa-magnifying-glass"></i>
+              <input
+                type="text"
+                name="q"
+                value="{{ query }}"
+                placeholder="Search {% if role_filter == 'tutor' %}tutors{% elif role_filter == 'student' %}students{% elif role_filter == 'admin' %}admins{% else %}users{% endif %} by name, email, phone..."
+                class="mtc-user-search-input"
+              />
+            </div>
             <button
               type="submit"
               class="btn btn-primary"
-              style="padding: 0 18px; font-size: 13px; font-weight: 800; white-space: nowrap;"
+              style="padding: 0 18px; font-size: 13px; font-weight: 800; white-space: nowrap; height: 38px;"
             >
               Search
             </button>
             {% if query %}
             <a
-              href="{% url 'admin_users' %}"
+              href="{% url 'admin_users' %}{% if role_filter and role_filter != 'all' %}?role={{ role_filter }}{% endif %}"
               class="btn btn-ghost"
-              style="padding: 0 12px; font-size: 13px; font-weight: 800; white-space: nowrap;"
+              style="padding: 0 12px; font-size: 13px; font-weight: 800; white-space: nowrap; height: 38px; display: inline-flex; align-items: center;"
             >Clear</a>
             {% endif %}
           </form>
         </div>
         
-        <table style="width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; text-align: left;">
+        <table class="mtc-users-table">
           <thead>
-            <tr style="border-bottom: 2px solid var(--line); color: var(--muted); font-weight: 700;">
-              <th style="padding: 12px 8px;">User</th>
-              <th style="padding: 12px 8px;">Email</th>
-              <th style="padding: 12px 8px;">Phone</th>
-              <th style="padding: 12px 8px;">Role</th>
-              <th style="padding: 12px 8px;">Verification</th>
-              <th style="padding: 12px 8px; text-align: right;">Actions</th>
+            <tr>
+              <th>User</th>
+              <th>Email</th>
+              <th>Phone</th>
+              <th>Role</th>
+              <th>Verification</th>
+              <th style="text-align: right;">Actions</th>
             </tr>
           </thead>
           <tbody>
             {% for profile in user_list %}
-              <tr style="border-bottom: 1px solid var(--line); transition: background 0.2s;" onmouseover="this.style.background='#f8fafc';" onmouseout="this.style.background='transparent';">
-                <td style="padding: 14px 8px; font-weight: 600;">
+              <tr class="mtc-user-row">
+                <td style="font-weight: 600;">
                   {{ profile.user.get_full_name|default:profile.user.username }}
                 </td>
-                <td style="padding: 14px 8px;">{{ profile.user.email }}</td>
-                <td style="padding: 14px 8px;">{{ profile.phone_number|default:"-" }}</td>
-                <td style="padding: 14px 8px; text-transform: capitalize;">
-                  <span style="font-weight: 700; color: {% if profile.role == 'admin' %}#8b5cf6{% elif profile.role == 'tutor' %}var(--blue){% else %}#475569{% endif %};">
+                <td>{{ profile.user.email }}</td>
+                <td>{{ profile.phone_number|default:"-" }}</td>
+                <td>
+                  <span class="mtc-role-pill mtc-role-pill-{{ profile.role }}">
+                    {% if profile.role == 'tutor' %}
+                      <i class="fa-solid fa-chalkboard-user"></i>
+                    {% elif profile.role == 'student' %}
+                      <i class="fa-solid fa-graduation-cap"></i>
+                    {% elif profile.role == 'admin' %}
+                      <i class="fa-solid fa-shield-halved"></i>
+                    {% endif %}
                     {{ profile.role }}
                   </span>
                 </td>
-                <td style="padding: 14px 8px;">
+                <td>
                   {% if profile.is_verified %}
-                    <span style="border-radius: 999px; background: #dcfce7; color: #166534; padding: 4px 10px; font-size: 11px; font-weight: 700;">Verified</span>
+                    <span class="mtc-badge-status mtc-badge-verified">Verified</span>
                   {% else %}
-                    <span style="border-radius: 999px; background: #f3f4f6; color: #4b5563; padding: 4px 10px; font-size: 11px; font-weight: 700;">Unverified</span>
+                    <span class="mtc-badge-status mtc-badge-unverified">Unverified</span>
                   {% endif %}
                 </td>
-                <td style="padding: 14px 8px; text-align: right; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
+                <td style="text-align: right; display: flex; justify-content: flex-end; gap: 8px; flex-wrap: wrap;">
                   <form method="post" style="display: inline-block;"{% if profile.is_verified %} data-confirm="Revoking verification will hide this tutor from students. Do you want to continue?" data-confirm-title="Revoke Verification" data-confirm-label="Revoke" data-confirm-danger{% endif %}>
                     {% csrf_token %}
                     <input type="hidden" name="user_id" value="{{ profile.pk }}">
                     <input type="hidden" name="action" value="toggle_verify">
-                    <button type="submit" class="btn btn-ghost" style="min-height: 28px; padding: 0 10px; font-size: 11px; border: 1px solid var(--line); border-radius: 6px;">
+                    <button type="submit" class="mtc-btn-action-verify">
                       {% if profile.is_verified %}Revoke{% else %}Verify{% endif %}
                     </button>
                   </form>
@@ -99,7 +488,7 @@
                     {% csrf_token %}
                     <input type="hidden" name="user_id" value="{{ profile.pk }}">
                     <input type="hidden" name="action" value="delete">
-                    <button type="submit" class="btn" style="min-height: 28px; padding: 0 10px; font-size: 11px; border: 1px solid #fecaca; background: #fef2f2; color: #dc2626; border-radius: 6px;">
+                    <button type="submit" class="mtc-btn-action-delete">
                       Delete
                     </button>
                   </form>
@@ -108,27 +497,35 @@
               </tr>
             {% empty %}
               <tr>
-                <td colspan="6" style="padding: 24px; text-align: center; color: var(--muted);">No users found.</td>
+                <td colspan="6" style="padding: 36px 20px; text-align: center; color: var(--muted, #64748b);">
+                  <div style="font-size: 24px; margin-bottom: 8px; opacity: 0.5;">
+                    <i class="fa-solid fa-user-slash"></i>
+                  </div>
+                  <strong>No accounts found</strong>
+                  {% if query or role_filter != 'all' %}
+                    <p style="margin: 6px 0 0; font-size: 13px;">Try clearing your search query or selecting another role filter above.</p>
+                  {% endif %}
+                </td>
               </tr>
             {% endfor %}
           </tbody>
         </table>
 
         {% if paginator.num_pages > 1 %}
-        <nav class="mtc-admin-pagination" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 20px; flex-wrap: wrap;">
+        <nav class="mtc-admin-pagination" style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-top: 24px; flex-wrap: wrap;">
           {% if page_obj.has_previous %}
             <a
-              href="?page={{ page_obj.previous_page_number }}{% if query %}&amp;q={{ query }}{% endif %}"
+              href="?page={{ page_obj.previous_page_number }}{% if role_filter and role_filter != 'all' %}&amp;role={{ role_filter }}{% endif %}{% if query %}&amp;q={{ query }}{% endif %}"
               style="
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 min-width: 36px;
                 height: 36px;
-                border: 1px solid var(--line);
+                border: 1px solid var(--line, #e2e8f0);
                 border-radius: 6px;
-                background: var(--white);
-                color: var(--ink);
+                background: var(--white, #ffffff);
+                color: var(--ink, #0f172a);
                 font-size: 13px;
                 font-weight: 800;
                 text-decoration: none;
@@ -144,7 +541,7 @@
                 justify-content: center;
                 min-width: 36px;
                 height: 36px;
-                border: 1px solid var(--line);
+                border: 1px solid var(--line, #e2e8f0);
                 border-radius: 6px;
                 background: #f1f5f9;
                 color: #94a3b8;
@@ -164,27 +561,27 @@
                   justify-content: center;
                   min-width: 36px;
                   height: 36px;
-                  border: 1px solid var(--blue);
+                  border: 1px solid #2563eb;
                   border-radius: 6px;
-                  background: var(--blue);
-                  color: var(--white);
+                  background: #2563eb;
+                  color: #ffffff;
                   font-size: 13px;
                   font-weight: 800;
                 "
               >{{ num }}</span>
             {% elif num > page_obj.number|add:'-3' and num < page_obj.number|add:'3' %}
               <a
-                href="?page={{ num }}{% if query %}&amp;q={{ query }}{% endif %}"
+                href="?page={{ num }}{% if role_filter and role_filter != 'all' %}&amp;role={{ role_filter }}{% endif %}{% if query %}&amp;q={{ query }}{% endif %}"
                 style="
                   display: inline-flex;
                   align-items: center;
                   justify-content: center;
                   min-width: 36px;
                   height: 36px;
-                  border: 1px solid var(--line);
+                  border: 1px solid var(--line, #e2e8f0);
                   border-radius: 6px;
-                  background: var(--white);
-                  color: var(--ink);
+                  background: var(--white, #ffffff);
+                  color: var(--ink, #0f172a);
                   font-size: 13px;
                   font-weight: 800;
                   text-decoration: none;
@@ -195,17 +592,17 @@
 
           {% if page_obj.has_next %}
             <a
-              href="?page={{ page_obj.next_page_number }}{% if query %}&amp;q={{ query }}{% endif %}"
+              href="?page={{ page_obj.next_page_number }}{% if role_filter and role_filter != 'all' %}&amp;role={{ role_filter }}{% endif %}{% if query %}&amp;q={{ query }}{% endif %}"
               style="
                 display: inline-flex;
                 align-items: center;
                 justify-content: center;
                 min-width: 36px;
                 height: 36px;
-                border: 1px solid var(--line);
+                border: 1px solid var(--line, #e2e8f0);
                 border-radius: 6px;
-                background: var(--white);
-                color: var(--ink);
+                background: var(--white, #ffffff);
+                color: var(--ink, #0f172a);
                 font-size: 13px;
                 font-weight: 800;
                 text-decoration: none;
@@ -221,7 +618,7 @@
                 justify-content: center;
                 min-width: 36px;
                 height: 36px;
-                border: 1px solid var(--line);
+                border: 1px solid var(--line, #e2e8f0);
                 border-radius: 6px;
                 background: #f1f5f9;
                 color: #94a3b8;
